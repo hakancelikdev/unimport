@@ -4,22 +4,25 @@
  </p>
  <p>
    <a href="https://github.com/hakancelik96/unimport/blob/master/LICENSE" target="_blank">
-   <img alt="MIT License" title="MIT License" src="https://img.shields.io/github/license/hakancelik96/unimport.svg?style=for-the-badge"/>
+   <img alt="MIT License" title="MIT License" src="https://img.shields.io/github/license/hakancelik96/unimport.svg"/>
    </a>
    <a href="https://github.com/hakancelik96/unimport/releases" target="_blank">
-     <img alt="releases" title="releases" src="https://img.shields.io/github/release/hakancelik96/unimport.svg?style=for-the-badge"/>
+     <img alt="releases" title="releases" src="https://img.shields.io/github/release/hakancelik96/unimport.svg"/>
    </a>
-   <img alt="last-commit" title="last-commit" src="https://img.shields.io/github/last-commit/hakancelik96/unimport.svg?style=for-the-badge"/>
+   <img alt="last-commit" title="last-commit" src="https://img.shields.io/github/last-commit/hakancelik96/unimport.svg"/>
    <a href="https://www.codacy.com/app/hakancelik96/coogger?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=hakancelik96/unimport&amp;utm_campaign=Badge_Grade" target="_blank">
-  <img alt="Codacy Badge" title="Codacy Badge" src="https://img.shields.io/codacy/grade/e8add9e8f86e433696cab7f2e4d9633c?style=for-the-badge"/>
+  <img alt="Codacy Badge" title="Codacy Badge" src="https://img.shields.io/codacy/grade/e8add9e8f86e433696cab7f2e4d9633c"/>
    </a>
    <a href="https://github.com/psf/black" target="_blank">
-  <img alt="Code style" title="Code style" src="https://img.shields.io/badge/Code%20style-black-black?style=for-the-badge"/>
+  <img alt="Code style" title="Code style" src="https://img.shields.io/badge/Code%20style-black-black"/>
    </a>
     <a href="https://github.com/timothycrosley/isort" target="_blank">
-  <img alt="Code style" title="Code style" src="https://img.shields.io/badge/code%20style-isort-lightgrey?style=for-the-badge"/>
+  <img alt="Code style" title="Code style" src="https://img.shields.io/badge/code%20style-isort-lightgrey"/>
    </a>
    <br>
+  <a href="https://pepy.tech/badge/unimport" target="_blank" title="Downloads">
+    <img alt="pepy" title="pepy" src="https://pepy.tech/badge/unimport"/>
+   </a>
  </p>
 
 ### 🚀 Installation and Usage 🚀
