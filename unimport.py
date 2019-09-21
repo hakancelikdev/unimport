@@ -90,8 +90,8 @@ def unimport():
             file = os.path.join(root, name)
             if file.endswith(".py"):
                 if _unimport_conf:
-                    diff = set(file.split("\\")) - set(_unimport_conf)
-                    if diff != set(file.split("\\")):
+                    diff = set(file.split(os.sep)) - set(_unimport_conf)
+                    if diff != set(file.split(os.sep)):
                         continue
                 unimport = UnImport(source=open(file, "r", encoding="utf-8").read())
                 for unused in unimport.get_diff():
