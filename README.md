@@ -19,10 +19,10 @@
     <a href="https://github.com/timothycrosley/isort" target="_blank">
   <img alt="Code style" title="Code style" src="https://img.shields.io/badge/code%20style-isort-lightgrey"/>
    </a>
-   <br>
   <a href="https://pepy.tech/badge/unimport" target="_blank" title="Downloads">
     <img alt="pepy" title="pepy" src="https://pepy.tech/badge/unimport"/>
    </a>
+  <br>
  </p>
 
 ### 🚀 Installation and Usage 🚀
@@ -32,6 +32,15 @@ Unimport can be installed by running `pip install unimport`. It requires Python 
 ## Usage
 
 unimport {source_file_or_directory}
+
+### Another alternative
+```python
+import inspect
+import os
+unused_import = UnImport(source=inspect.getsource(os))
+for unused in unused_import.get_diff():
+    print(unused)
+```
 
 ## Configuring Unimport
 To configure unimport for a single user create a ~/.unimport.cfg and type the names of files or folders that you do not want scanning.
