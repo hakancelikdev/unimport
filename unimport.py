@@ -1,6 +1,8 @@
 import ast
 import os
 import sys
+import tokenize
+
 
 def recursive(func):
     """ decorator to make visitor work recursive """
@@ -11,11 +13,10 @@ def recursive(func):
 
     return wrapper
 
-class UnImport(ast.NodeVisitor):
 
+class UnImport(ast.NodeVisitor):
     def __init__(self, source):
         self.names = list()
-        self.attrs = list()
         self.imports = list()
         self.visit(ast.parse(source=source))
 
@@ -42,53 +43,44 @@ class UnImport(ast.NodeVisitor):
     def visit_Attribute(self, node):
         local_attr = list()
         if hasattr(node, "attr"):
-            local_attr.append(
-                dict(lineno=node.lineno, name=node.__class__.__name__, attr=node.attr)
-            )
+            local_attr.append(node.attr)
         while True:
             if hasattr(node, "value"):
                 if isinstance(node.value, ast.Attribute):
                     node = node.value
                     if hasattr(node, "attr"):
-                        local_attr.append(
-                            dict(
-                                lineno=node.lineno,
-                                name=node.__class__.__name__,
-                                attr=node.attr,
-                            )
-                        )
+                        local_attr.append(node.attr)
                 elif isinstance(node.value, ast.Call):
                     node = node.value
                     if isinstance(node.func, ast.Name):
-                        local_attr.append(
-                            dict(
-                                lineno=node.lineno,
-                                name=node.__class__.__name__,
-                                attr=node.func.id,
-                            )
-                        )
+                        local_attr.append(node.func.id)
                 elif isinstance(node.value, ast.Name):
                     node = node.value
-                    local_attr.append(
-                        dict(
-                            lineno=node.lineno,
-                            name=node.__class__.__name__,
-                            attr=node.id,
-                        )
-                    )
+                    local_attr.append(node.id)
                 else:
                     break
-
             else:
                 break
         local_attr.reverse()
-        self.attrs.append(local_attr)
+        self.names.append(dict(lineno=node.lineno, name=".".join(local_attr)))
         self.generic_visit(node)
+
+    def get_diff(self):
+        name_names = set([name["name"] for name in self.names])
+        for imp in self.imports:
+            len_dot = len(imp["name"].split("."))
+            for name in name_names:
+                if ".".join(name.split(".")[:len_dot]) == imp["name"]:
+                    break
+            else:
+                yield imp
 
 
 def unimport():
     try:
-        _unimport_conf = open(f"{os.getcwd()}//{sys.argv[1]}//.unimport.cfg","r").readlines()
+        _unimport_conf = tokenize.open(
+            f"{os.getcwd()}//{sys.argv[1]}//.unimport.cfg"
+        ).readlines()
     except FileNotFoundError:
         _unimport_conf = None
     else:
@@ -98,24 +90,20 @@ def unimport():
             file = os.path.join(root, name)
             if file.endswith(".py"):
                 if _unimport_conf:
-                    diff = (set(file.split("\\")) - set(_unimport_conf))
+                    diff = set(file.split("\\")) - set(_unimport_conf)
                     if diff != set(file.split("\\")):
                         continue
                 unimport = UnImport(source=open(file, "r", encoding="utf-8").read())
-                names = unimport.names
-                imports = unimport.imports
-                attrs = unimport.attrs
-                for attr in attrs:
-                    names.append(
-                        dict(
-                            lineno=attr[0]["lineno"],
-                            name=".".join([atr["attr"] for atr in attr]),
-                        )
-                    )
-                name_names = set(
-                    [name["name"].split(".")[0] for name in names]
-                )
-                for imp in imports:
-                    if imp["name"] not in name_names:
-                        imp.update(path=file)
-                        print(imp)
+                for unused in unimport.get_diff():
+                    unused.update(path=file)
+                    print(unused)
+
+
+if __name__ == "__main__":
+    # test
+    import inspect
+    import os
+
+    unused_import = UnImport(source=inspect.getsource(os))
+    for unused in unused_import.get_diff():
+        print(unused)
