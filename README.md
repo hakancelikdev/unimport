@@ -33,6 +33,13 @@ Unimport can be installed by running `pip install unimport`. It requires Python 
 
 unimport {source_file_or_directory}
 
+
+**Please insert this badge into your project**
+
+`[![](https://img.shields.io/badge/Unnecessary%20library%20detection-unimport-green)](https://github.com/hakancelik96/unimport)`
+
+[![](https://img.shields.io/badge/Unnecessary%20library%20detection-unimport-green)](https://github.com/hakancelik96/unimport)
+
 ### Another alternative
 ```python
 import inspect
