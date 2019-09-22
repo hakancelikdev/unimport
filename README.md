@@ -74,3 +74,20 @@ manage.py
 
 Copyright © 2019 [Hakan Çelik](https://github.com/hakancelik96/unimport).<br/>
 This project is [MIT](https://github.com/hakancelik96/unimport/blob/master/LICENSE) licensed.
+
+
+## Version Notes
+
+### V0.0.3
+- Op system bug fix Linux and win
+- File and folders features fix
+- Add warning message if no enter any path No paths given 'Usage; unimport {source_file_or_directory}'"
+
+### V0.0.2
+- find module bug fix;
+For example; module: inspect, name; inspect.getsource; result unused import = inspect that is the wrong result
+
+### V0.0.1
+- unimport {source_file_or_directory}
+- .unimport.cfg 'type the names of files or folders that you do not want to scan.'
+- Does not replace files only shows results.
