@@ -124,7 +124,6 @@ def unimport():
 if __name__ == "__main__":
     # test
     import inspect
-    import os
 
     unused_import = UnImport(source=inspect.getsource(os))
     for unused in unused_import.get_diff():
