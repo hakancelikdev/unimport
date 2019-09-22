@@ -16,7 +16,7 @@ def get_long_description():
 
 setup(
     name="unimport",
-    version="0.0.2",
+    version="0.0.3",
     description="",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
@@ -41,7 +41,6 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3 :: Only",
         "Topic :: Software Development :: Libraries :: Python Modules",
-        "Programming Language :: Python :: Implementation :: PyPy",
     ],
     entry_points={"console_scripts": ["unimport=unimport:unimport"]},
 )
