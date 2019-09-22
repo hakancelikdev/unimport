@@ -14,6 +14,22 @@ def recursive(func):
     return wrapper
 
 
+def get_conf(directory):
+    "Checks if there is a configuration file under the entered path and returns as a list."
+    try:
+        _unimport_conf = tokenize.open(
+            os.path.join(
+                os.getcwd(),
+                directory,
+                ".unimport.cfg"
+            )
+        ).readlines()
+    except FileNotFoundError:
+        return False
+    else:
+        return [conf.replace("\n", "") for conf in _unimport_conf]
+
+
 class UnImport(ast.NodeVisitor):
     def __init__(self, source):
         self.names = list()
@@ -38,8 +54,9 @@ class UnImport(ast.NodeVisitor):
     @recursive
     def visit_Name(self, node):
         if not isinstance(node.ctx, ast.Store):
-            self.names.append(dict(lineno=node.lineno, name=node.id))
+            self.names.append(node.id)
 
+    @recursive
     def visit_Attribute(self, node):
         local_attr = list()
         if hasattr(node, "attr"):
@@ -62,14 +79,12 @@ class UnImport(ast.NodeVisitor):
             else:
                 break
         local_attr.reverse()
-        self.names.append(dict(lineno=node.lineno, name=".".join(local_attr)))
-        self.generic_visit(node)
+        self.names.append(".".join(local_attr))
 
     def get_diff(self):
-        name_names = set([name["name"] for name in self.names])
         for imp in self.imports:
             len_dot = len(imp["name"].split("."))
-            for name in name_names:
+            for name in self.names:
                 if ".".join(name.split(".")[:len_dot]) == imp["name"]:
                     break
             else:
@@ -78,26 +93,33 @@ class UnImport(ast.NodeVisitor):
 
 def unimport():
     try:
-        _unimport_conf = tokenize.open(
-            f"{os.getcwd()}//{sys.argv[1]}//.unimport.cfg"
-        ).readlines()
-    except FileNotFoundError:
-        _unimport_conf = None
+        source_file_or_directory = sys.argv[1]
+    except IndexError:
+        print("No paths given 'Usage; unimport {source_file_or_directory}'")
     else:
-        _unimport_conf = [conf.replace("\n", "") for conf in _unimport_conf]
-    for root, dirs, files in os.walk(sys.argv[1]):
-        for name in files:
-            file = os.path.join(root, name)
-            if file.endswith(".py"):
-                if _unimport_conf:
-                    diff = set(file.split(os.sep)) - set(_unimport_conf)
-                    if diff != set(file.split(os.sep)):
-                        continue
-                unimport = UnImport(source=open(file, "r", encoding="utf-8").read())
+        if os.path.isdir(source_file_or_directory):
+            # folder
+            conf = get_conf(directory=source_file_or_directory)
+            for root, dirs, files in os.walk(sys.argv[1]):
+                for name in files:
+                    file_path = os.path.join(root, name)
+                    if file_path.endswith(".py"):
+                        if conf:
+                            diff = set(file_path.split(os.sep)) - set(conf)
+                            if diff != set(file_path.split(os.sep)):
+                                continue
+                        unimport = UnImport(source=tokenize.open(file_path).read())
+                        for unused in unimport.get_diff():
+                            unused.update(path=file_path.replace(os.getcwd(), ""))
+                            print(unused)
+        else:
+            # file
+            file_path = os.path.join(os.getcwd(), source_file_or_directory)
+            if file_path.endswith(".py"):
+                unimport = UnImport(source=tokenize.open(file_path).read())
                 for unused in unimport.get_diff():
-                    unused.update(path=file)
+                    unused.update(path=file_path.replace(os.getcwd(), ""))
                     print(unused)
-
 
 if __name__ == "__main__":
     # test

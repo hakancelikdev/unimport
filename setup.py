@@ -41,7 +41,6 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3 :: Only",
         "Topic :: Software Development :: Libraries :: Python Modules",
-        "Programming Language :: Python :: Implementation :: PyPy",
     ],
     entry_points={"console_scripts": ["unimport=unimport:unimport"]},
 )
