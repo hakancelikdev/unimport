@@ -1,6 +1,6 @@
 <h1 align="center">UNIMPORT</h1>
 <p align="center">
-  The purpose of this library is to detect unused python libraries.
+  To detect unused python libraries.
  </p>
  <p>
      <a href="https://github.com/hakancelik96/unimport/blob/master/LICENSE" target="_blank">
@@ -44,8 +44,7 @@ unimport {source_file_or_directory}
 ```python
 import inspect
 import os
-unused_import = UnImport(source=inspect.getsource(os))
-for unused in unused_import.get_diff():
+for unused in get_unused(source=inspect.getsource(os)):
     print(unused)
 ```
 
@@ -77,6 +76,11 @@ This project is [MIT](https://github.com/hakancelik96/unimport/blob/master/LICEN
 
 
 ## Version Notes
+
+### V0.1.0
+- Some class and function name and position changed.
+- Future module added to the ignore list.
+- Blank python file error fix.
 
 ### V0.0.3
 - Op system bug fix Linux and win
