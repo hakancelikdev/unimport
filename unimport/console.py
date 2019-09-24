@@ -1,7 +1,9 @@
 import os
 import sys
 import tokenize
-from unimport import unused, files
+
+from unimport import files, unused
+
 
 def get_unused_imports(file_path):
     try:
@@ -13,6 +15,7 @@ def get_unused_imports(file_path):
         for imports in unused_imports:
             imports.update(path=file_path.replace(os.getcwd(), ""))
             yield imports
+
 
 def console_scripts():
     try:

@@ -1,6 +1,6 @@
 import configparser
-import pathlib
 import os
+import pathlib
 
 CONFIG = configparser.ConfigParser(allow_no_value=True)
 BUILTIN_CONFIG = pathlib.Path(__file__).parent / ".unimport.cfg"

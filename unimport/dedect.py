@@ -1,5 +1,6 @@
 import ast
 
+
 def recursive(func):
     """ decorator to make visitor work recursive """
 
