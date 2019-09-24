@@ -14,10 +14,10 @@
   <img alt="Codacy Badge" title="Codacy Badge" src="https://img.shields.io/codacy/grade/e8add9e8f86e433696cab7f2e4d9633c"/>
    </a>
    <a href="https://github.com/psf/black" target="_blank">
-  <img alt="Code style" title="Code style" src="https://img.shields.io/badge/Code%20style-black-black"/>
+  <img alt="Code style" title="Code style" src="https://img.shields.io/badge/style-black-black"/>
    </a>
     <a href="https://github.com/timothycrosley/isort" target="_blank">
-  <img alt="Code style" title="Code style" src="https://img.shields.io/badge/code%20style-isort-lightgrey"/>
+  <img alt="Code style" title="Code style" src="https://img.shields.io/badge/style-isort-lightgrey"/>
    </a>
   <a href="https://pepy.tech/badge/unimport" target="_blank" title="Downloads">
     <img alt="pepy" title="pepy" src="https://pepy.tech/badge/unimport"/>

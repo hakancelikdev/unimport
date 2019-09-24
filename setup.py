@@ -16,8 +16,8 @@ def get_long_description():
 
 setup(
     name="unimport",
-    version="0.0.3",
-    description="",
+    version="0.1.0",
+    description="To detect unused python libraries",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     keywords=["unused", "import"],
@@ -26,13 +26,9 @@ setup(
     url="https://github.com/hakancelik96/unimport",
     license="MIT",
     python_requires=">=3.5.0",
-    py_modules=["unimport"],
-    packages=[],
+    packages=["unimport"],
     zip_safe=False,
-    package_data={},
     include_package_data=True,
-    install_requires=[],
-    extras_require={},
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Environment :: Console",
@@ -42,5 +38,9 @@ setup(
         "Programming Language :: Python :: 3 :: Only",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    entry_points={"console_scripts": ["unimport=unimport:unimport_to_console"]},
+    entry_points={
+        "console_scripts": [
+            "unimport = unimport.console:console_scripts"
+        ],
+    },
 )
