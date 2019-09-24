@@ -31,7 +31,7 @@ Unimport can be installed by running `pip install unimport`. It requires Python 
 
 ## Usage
 
-unimport {source_file_or_directory}
+unimport {source_file_or_directory} or write direct unimport to current path scan
 
 
 **Please insert this badge into your project**
@@ -44,22 +44,20 @@ unimport {source_file_or_directory}
 ```python
 import inspect
 import os
+from unimport.unused from get_unused
+
 for unused in get_unused(source=inspect.getsource(os)):
     print(unused)
 ```
 
 ## Configuring Unimport
-To configure unimport for a single user create a ~/.unimport.cfg and type the names of files or folders that you do not want scanning.
+To configure unimport for a single user create a ~/.unimport.cfg and type the names of folders that you do not want scanning.
 
-for example;
-
-To django project
 **blablabla/.unimport.cfg**
+
 ```
-__init__.py
-apps.py
-migrations
-manage.py
+[extra_ignore]
+.*(some_folder_name)
 ```
 
 ## Author
@@ -81,6 +79,8 @@ This project is [MIT](https://github.com/hakancelik96/unimport/blob/master/LICEN
 - Some class and function name and position changed.
 - Future module added to the ignore list.
 - Blank python file error fix.
+- Default .unimport.cfg and extra_config add
+- The new usage style `unimport` to scan from current path 
 
 ### V0.0.3
 - Op system bug fix Linux and win

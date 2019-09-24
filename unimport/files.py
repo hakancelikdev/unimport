@@ -1,5 +1,6 @@
 import os
 import re
+
 from unimport import config
 
 IGNORE = [i for i in config.CONFIG["ignore"]]
@@ -8,10 +9,12 @@ try:
     IGNORE = set(IGNORE + EXTRA_IGNORE)
 except KeyError:
     pass
-IGNORE_FILES = re.compile('|'.join(IGNORE))
+IGNORE_FILES = re.compile("|".join(IGNORE))
+
 
 def in_blacklist(file):
     return IGNORE_FILES.match(file) != None
+
 
 def get_files(direction):
     for root, dirs, files in os.walk(direction):
