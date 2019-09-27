@@ -30,6 +30,16 @@ for unused in get_unused(source=inspect.getsource(os)):
     print(unused)
 ```
 
+```python
+import tokenize
+from unimport.files import get_files
+from unimport.unused import get_unused
+
+for path in get_files(direction="."):
+  for unused in get_unused(source=tokenize.open(path).read()):
+      print(unused, path)
+```
+
 ## Configuring Unimport
 To configure unimport for a single user create a ~/.unimport.cfg and type the names of folders that you do not want scanning.
 
@@ -44,17 +54,21 @@ To configure unimport for a single user create a ~/.unimport.cfg and type the na
 .*(some_file_name_to_ignore)
 ```
 
-## Author
+#### Example;
+**mydjango-project/.unimport.cfg**
+```
+[folders]
+.*(migrations)
+[files]
+.*(__init__.py)
+```
+
+## Author / Social
 
 👤 **Hakan Çelik** 👤
 
-- Twitter: [@hakancelik96](https://twitter.com/hakancelik96)
-- Github: [@hakancelik96](https://github.com/hakancelik96)
-
-## 📝 License 📝
-
-Copyright © 2019 [Hakan Çelik](https://github.com/hakancelik96/unimport).<br/>
-This project is [MIT](https://github.com/hakancelik96/unimport/blob/master/LICENSE) licensed.
+- [![](https://img.shields.io/twitter/follow/hakancelik96?style=social)](https://twitter.com/hakancelik96)
+- [![](https://img.shields.io/github/followers/hakancelik96?label=hakancelik96&style=social)](https://github.com/hakancelik96)
 
 
 ## Version Notes
