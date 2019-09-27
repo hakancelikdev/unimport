@@ -2,28 +2,8 @@
 <p align="center">
   To detect unused python libraries.
  </p>
- <p>
-     <a href="https://github.com/hakancelik96/unimport/blob/master/LICENSE" target="_blank">
-   <img alt="MIT License" title="MIT License" src="https://img.shields.io/github/license/hakancelik96/unimport.svg"/>
-   </a>
-   <a href="https://github.com/hakancelik96/unimport/releases" target="_blank">
-     <img alt="releases" title="releases" src="https://img.shields.io/github/release/hakancelik96/unimport.svg"/>
-   </a>
-   <img alt="last-commit" title="last-commit" src="https://img.shields.io/github/last-commit/hakancelik96/unimport.svg"/>
-   <a href="https://www.codacy.com/manual/hakancelik96/unimport?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=hakancelik96/unimport&amp;utm_campaign=Badge_Grade" target="_blank">
-  <img alt="Codacy Badge" title="Codacy Badge" src="https://img.shields.io/codacy/grade/e8add9e8f86e433696cab7f2e4d9633c"/>
-   </a>
-   <a href="https://github.com/psf/black" target="_blank">
-  <img alt="Code style" title="Code style" src="https://img.shields.io/badge/style-black-black"/>
-   </a>
-    <a href="https://github.com/timothycrosley/isort" target="_blank">
-  <img alt="Code style" title="Code style" src="https://img.shields.io/badge/style-isort-lightgrey"/>
-   </a>
-  <a href="https://pepy.tech/badge/unimport" target="_blank" title="Downloads">
-    <img alt="pepy" title="pepy" src="https://pepy.tech/badge/unimport"/>
-   </a>
-  <br>
- </p>
+
+[![MIT License](https://img.shields.io/github/license/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/blob/master/LICENSE) [![releases](https://img.shields.io/github/release/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/releases) [![last-commit](https://img.shields.io/github/last-commit/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/commits/master) [![Codacy Badge](https://img.shields.io/codacy/grade/e8add9e8f86e433696cab7f2e4d9633c)](https://www.codacy.com/app/hakancelik96/unimport) [![style](https://img.shields.io/badge/style-black-black)](https://github.com/psf/black) [![style](https://img.shields.io/badge/style-isort-lightgrey)](https://github.com/timothycrosley/isort) [![style](https://img.shields.io/badge/style-unimport-green)](https://github.com/hakancelik96/unimport) [![](https://img.shields.io/github/contributors/hakancelik96/unimport)](https://github.com/hakancelik96/unimport/graphs/contributors) [![](https://pepy.tech/badge/unimport)](https://pepy.tech/badge/unimport)
 
 ### 🚀 Installation and Usage 🚀
 ## Installation
@@ -36,9 +16,9 @@ unimport {source_file_or_directory} or write direct unimport to current path sca
 
 **Please insert this badge into your project**
 
-`[![](https://img.shields.io/badge/Unnecessary%20library%20detection-unimport-green)](https://github.com/hakancelik96/unimport)`
+`[![](https://img.shields.io/badge/style-unimport-green)](https://github.com/hakancelik96/unimport)`
 
-[![](https://img.shields.io/badge/Unnecessary%20library%20detection-unimport-green)](https://github.com/hakancelik96/unimport)
+[![](https://img.shields.io/badge/style-unimport-green)](https://github.com/hakancelik96/unimport)
 
 ### Another alternative
 ```python
@@ -54,10 +34,14 @@ for unused in get_unused(source=inspect.getsource(os)):
 To configure unimport for a single user create a ~/.unimport.cfg and type the names of folders that you do not want scanning.
 
 **blablabla/.unimport.cfg**
+> regex
 
 ```
-[extra_ignore]
-.*(some_folder_name)
+[folders]
+.*(some_folder_name_to_ignore)
+
+[files]
+.*(some_file_name_to_ignore)
 ```
 
 ## Author
@@ -80,7 +64,7 @@ This project is [MIT](https://github.com/hakancelik96/unimport/blob/master/LICEN
 - Future module added to the ignore list.
 - Blank python file error fix.
 - Default .unimport.cfg and extra_config add
-- The new usage style `unimport` to scan from current path 
+- The new usage style `unimport` to scan from current path
 
 ### V0.0.3
 - Op system bug fix Linux and win
