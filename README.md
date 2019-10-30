@@ -46,7 +46,7 @@ To configure unimport for a single user create a ~/.unimport.cfg and type the na
 **blablabla/.unimport.cfg**
 > regex
 
-```
+```ini
 [folders]
 .*(some_folder_name_to_ignore)
 
@@ -54,14 +54,45 @@ To configure unimport for a single user create a ~/.unimport.cfg and type the na
 .*(some_file_name_to_ignore)
 ```
 
-#### Example;
-**mydjango-project/.unimport.cfg**
-```
+**Example; mydjango-project/.unimport.cfg**
+
+```ini
 [folders]
 .*(migrations)
 [files]
 .*(__init__.py)
 ```
+
+Also, it's possible to configure **unimport** from `pyproject.toml` or `setup.cfg` files if you have. For example:
+
+**pyproject.toml**
+
+```ini
+[tool.unimport]
+folders = [
+    '.*(migrations)',
+]
+files = [
+    '.*(__init__.py)',
+    '.*(settings.py)',
+]
+```
+
+**setup.cfg**
+
+```ini
+[unimport]
+folders = .*(migrations)
+files = .*(__init__.py)
+        .*(settings.py)
+```
+
+If you have multiple configuration files on your project, it considers just the first file that found in order of priority:
+
+1.  .unimport.cfg
+2.  pyproject.toml (if `toml` is not installed, it ignores this rule.)
+3.  setup.cfg
+4.  Default settings
 
 ## Author / Social
 
