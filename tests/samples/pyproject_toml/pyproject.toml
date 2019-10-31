@@ -1,0 +1,22 @@
+[tool.black]
+line-length = 119
+target-version = ['py37']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+    | just a
+    | multiline
+  )/
+  | test.py
+)
+'''
+
+[tool.unimport]
+folders = [
+    '.*(migrations)',
+]
+files = [
+    '.*(__init__.py)',
+    '.*(settings.py)',
+]
