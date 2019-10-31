@@ -3,7 +3,7 @@ from pathlib import Path
 
 from setuptools import setup
 
-assert sys.version_info >= (3, 5, 0), "umimport requires Python 3.5+"
+assert sys.version_info >= (3, 5, 0), "unimport requires Python 3.5+"
 
 CURRENT_DIR = Path(__file__).parent
 
@@ -27,6 +27,9 @@ setup(
     license="MIT",
     python_requires=">=3.5.0",
     packages=["unimport"],
+    extras_require={
+        "pyproject": ["toml"],
+    },
     zip_safe=False,
     include_package_data=True,
     classifiers=[
