@@ -16,7 +16,7 @@ def get_long_description():
 
 setup(
     name="unimport",
-    version="0.1.0",
+    version="0.1.3",
     description="To detect unused python libraries",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
@@ -27,9 +27,7 @@ setup(
     license="MIT",
     python_requires=">=3.5.0",
     packages=["unimport"],
-    extras_require={
-        "pyproject": ["toml"],
-    },
+    extras_require={"pyproject": ["toml"]},
     zip_safe=False,
     include_package_data=True,
     classifiers=[
