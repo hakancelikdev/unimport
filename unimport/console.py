@@ -8,7 +8,8 @@ from unimport.unused import get_unused
 
 def get_unused_imports(file_path):
     try:
-        source = tokenize.open(file_path).read()
+        with tokenize.open(file_path) as f:
+            source = f.read()
     except OSError:
         pass
     else:
