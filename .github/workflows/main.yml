@@ -1,0 +1,30 @@
+name: CI
+
+on: [push]
+
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        python: [3.6, 3.7, 3.8]
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python }}
+
+    - name: Setup Dependencies
+      run: |
+        python${{ matrix.python-version }} -m venv .venv
+        source .venv/bin/activate
+        pip install -r requirements-dev.txt
+
+    - name: Test
+      run: |
+        source .venv/bin/activate
+        python -m pytest
