@@ -1,13 +1,25 @@
 import os
+import re
 
-from unimport.config import is_ignore_files, is_ignore_folder
 
+def get_files(src, config):
+    ignored_folders = re.compile("|".join(set(config.ignored_folders)))
+    ignored_files = re.compile("|".join(set(config.ignored_files)))
 
-def get_files(direction):
-    for root, dirs, files in os.walk(direction):
-        if is_ignore_folder(root):
+    def _is_ignored_folder(path):
+        return ignored_folders.match(path) is not None
+
+    def _is_ignored_file(path):
+        return not path.endswith(".py") or ignored_files.match(path) is not None
+
+    if not src.is_dir():
+        return str(src) if not _is_ignored_file(src.name) else None
+
+    for root, dirs, files in os.walk(str(src.absolute())):
+        if _is_ignored_folder(root):
             continue
+
         for name in files:
             file_path = os.path.join(root, name)
-            if file_path.endswith(".py") and not is_ignore_files(file_path):
+            if not _is_ignored_file(file_path):
                 yield file_path

@@ -1,7 +1,5 @@
 import configparser
 import pathlib
-import re
-import sys
 
 try:
     import toml
@@ -54,8 +52,8 @@ class Config(object):
     ignored_folders = set()
     ignored_files = set()
 
-    def __init__(self, config_dir=None):
-        self.config_dir = config_dir
+    def __init__(self, config_file=None):
+        self.config_file = config_file
         self.config_path, self.section = self.find_config()
         if self.config_path is not None:
             self.parse()
@@ -71,12 +69,11 @@ class Config(object):
 
     def find_config(self):
         for file_name, section in CONFIG_FILES:
+            if self.config_file is not None and file_name == self.config_file.name:
+                return self.config_file, section
+
             current_dir = pathlib.Path().cwd()
-            if self.config_dir is None:
-                search_depth = len(current_dir.parts)
-            else:
-                current_dir /= self.config_dir
-                search_depth = 1
+            search_depth = len(current_dir.parts)
 
             for _ in range(search_depth):
                 config_path = current_dir / file_name
@@ -111,16 +108,3 @@ class Config(object):
         config = parsed_toml.get("tool", {}).get("unimport", {})
         self.ignored_folders.update(set(config.get("folders", [])))
         self.ignored_files.update(set(config.get("files", [])))
-
-
-config = Config(config_dir=sys.argv[1] if len(sys.argv) >= 2 else None)
-
-
-def is_ignore_folder(path):
-    regex = re.compile("|".join(set(config.ignored_folders)))
-    return regex.match(path) is not None
-
-
-def is_ignore_files(path):
-    regex = re.compile("|".join(set(config.ignored_files)))
-    return regex.match(path) is not None

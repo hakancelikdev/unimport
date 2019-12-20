@@ -1,9 +1,55 @@
+import argparse
 import os
-import sys
+import pathlib
 import tokenize
 
+from unimport.config import Config
 from unimport.files import get_files
 from unimport.unused import get_unused
+
+
+class CLI:
+    def parse_args(self):
+        parser = argparse.ArgumentParser(
+            description="Detect or remove unused Python imports."
+        )
+        parser.add_argument(
+            "source",
+            default=".",
+            nargs="?",
+            help="include file or folder to find the unused imports",
+            type=pathlib.Path,
+        )
+        parser.add_argument(
+            "-c",
+            "--config",
+            help="read configuration from PATH",
+            metavar="PATH",
+            type=pathlib.Path,
+        )
+        parser.add_argument(
+            "-w",
+            "--write",
+            action="store_true",
+            help="remove unused imports automatically",
+        )
+        return parser.parse_args()
+
+    def run(self):
+        args = self.parse_args()
+        config = Config(config_file=args.config)
+        py_files = get_files(args.source, config=config)
+        if args.write:
+            # TODO: not ready yet.
+            for py_file in py_files:
+                self.overwrite(get_unused_imports(py_file))
+        else:
+            for py_file in py_files:
+                for unused_import in get_unused_imports(py_file):
+                    print(unused_import)
+
+    def overwrite(self, unused_import):
+        print("not ready")
 
 
 def get_unused_imports(file_path):
@@ -19,21 +65,8 @@ def get_unused_imports(file_path):
 
 
 def console_scripts():
-    try:
-        source_file_or_directory = sys.argv[1]
-    except IndexError:
-        source_file_or_directory = "."
-    if os.path.isdir(source_file_or_directory):
-        # folder
-        for file in get_files(source_file_or_directory):
-            for un_used in get_unused_imports(file):
-                print(un_used)
-    else:
-        # file
-        file_path = os.path.join(os.getcwd(), source_file_or_directory)
-        if file_path.endswith(".py"):
-            for un_used in get_unused_imports(file_path):
-                print(un_used)
+    cli = CLI()
+    cli.run()
 
 
 if __name__ == "__main__":
