@@ -68,10 +68,11 @@ class Config(object):
         return config_path.exists()
 
     def find_config(self):
-        for file_name, section in CONFIG_FILES:
-            if self.config_file is not None and file_name == self.config_file.name:
-                return self.config_file, section
+        config_files = dict(CONFIG_FILES)
+        if self.config_file.name in config_files:
+            return self.config_file, config_files[self.config_file.name]
 
+        for file_name, section in config_files.items():
             current_dir = pathlib.Path().cwd()
             search_depth = len(current_dir.parts)
 

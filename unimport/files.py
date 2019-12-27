@@ -12,14 +12,15 @@ def get_files(src, config):
     def _is_ignored_file(path):
         return not path.endswith(".py") or ignored_files.match(path) is not None
 
-    if not src.is_dir():
-        return str(src) if not _is_ignored_file(src.name) else None
+    if src.is_dir():
+        for root, dirs, files in os.walk(str(src.absolute())):
+            if _is_ignored_folder(root):
+                continue
 
-    for root, dirs, files in os.walk(str(src.absolute())):
-        if _is_ignored_folder(root):
-            continue
+            for name in files:
+                file_path = os.path.join(root, name)
+                if not _is_ignored_file(file_path):
+                    yield file_path
 
-        for name in files:
-            file_path = os.path.join(root, name)
-            if not _is_ignored_file(file_path):
-                yield file_path
+    elif not _is_ignored_file(src.name):
+        yield str(src)
