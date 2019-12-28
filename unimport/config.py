@@ -69,7 +69,10 @@ class Config(object):
 
     def find_config(self):
         config_files = dict(CONFIG_FILES)
-        if self.config_file.name in config_files:
+        if (
+            self.config_file is not None
+            and self.config_file.name in config_files
+        ):
             return self.config_file, config_files[self.config_file.name]
 
         for file_name, section in config_files.items():
@@ -85,7 +88,9 @@ class Config(object):
         return None, None
 
     def parse(self):
-        getattr(self, f"parse_{self.config_path.suffix.strip('.')}", "parse_cfg")()
+        getattr(
+            self, f"parse_{self.config_path.suffix.strip('.')}", "parse_cfg"
+        )()
 
     def parse_cfg(self):
         parser = configparser.ConfigParser(allow_no_value=True)
