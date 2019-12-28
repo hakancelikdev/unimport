@@ -8,9 +8,18 @@ dot_name = "(name( dot name)*)"
 newline_group = "(nl|newline)"
 
 
+class ParseResult:
+    def __init__(self, commas, modules, newlines):
+        self.commas = commas
+        self.modules = modules
+        self.newlines = newlines
+
+
 class ImportTokenTransformer(TokenTransformer):
-    def __init__(self, unused_imports):
-        self.unused_imports = unused_imports
+    # You can find the original example from:
+    # https://github.com/isidentical/BRM/blob/master/examples/remove_imports.py
+    def __init__(self, modules):
+        self.modules = modules
 
     @pattern(
         "name", f"({dot_name}( comma (nl )?{dot_name})*( nl)?)", newline_group,
@@ -57,7 +66,7 @@ class ImportTokenTransformer(TokenTransformer):
             module_tokens = module_tokens.copy()
             comma = commas.get(module)
 
-            if module in self.unused_imports:
+            if module in self.modules:
                 if module == first_import:
                     first_import_removed = True
                     first_import_offset = -self.directional_length(
@@ -124,11 +133,92 @@ class ImportTokenTransformer(TokenTransformer):
         )
         module.extend(module_parts)
 
-        if "".join(token.string for token in module) in self.unused_imports:
+        if "".join(token.string for token in module) in self.modules:
             raise NoLineTransposer
 
         new_imports = self.fix_import_statement(current, *stream_token)
         return [statement, *module, *new_imports]
+
+    @pattern(
+        "name",
+        dot_name,
+        "name",
+        "lpar",
+        f"((nl )?{dot_name}( comma (nl )?{dot_name})*( nl)?)",
+        "rpar",
+        newline_group,
+    )
+    def fix_multiline_import_statement(self, from_stmt, *tokens):
+        if from_stmt.string != "from":
+            return
+
+        stream_token = iter(tokens)
+        module = [next(stream_token)]
+        module_parts, import_stmt = self.find_module_for_from_import_statement(
+            stream_token
+        )
+        module.extend(module_parts)
+
+        if "".join(token.string for token in module) in self.modules:
+            raise NoLineTransposer
+
+        name_part = []
+        lpar = next(stream_token)
+        current = next(stream_token)
+        while self._get_type(current) != token.RPAR:
+            name_part.append(current)
+            current = next(stream_token)
+        rpar = current
+        newline = next(stream_token)
+
+        def reorder_newlines(modules, newlines):
+            lined_newlines = {}
+            ordered_newlines = {}
+            for newline in newlines:
+                if newline.start[0] == newline.end[0]:
+                    lined_newlines[newline.start[0]] = newline
+            for module, module_tokens in modules.items():
+                last = module_tokens[-1]
+                if lined_newlines.get(last.end[0]):
+                    ordered_newlines[module] = lined_newlines[last.end[0]]
+            return ordered_newlines
+
+        result = self.fix_import_statement(import_stmt, *name_part, newline)
+        if isinstance(result, ParseResult):
+            newlines = reorder_newlines(result.modules, result.newlines)
+            y_offset = 0
+            fixed_tokens = [from_stmt, *module, import_stmt, lpar]
+            last_known_newline = tuple(newlines.values())[0]
+            for_n = result.newlines[0]
+            if for_n.end[0] != last_known_newline.start[0]:
+                fixed_tokens.append(for_n)
+            for module, module_tokens in result.modules.items():
+                module_tokens = module_tokens.copy()
+                if result.commas.get(module):
+                    module_tokens.append(result.commas[module])
+                if newlines.get(module):
+                    module_tokens.append(newlines[module])
+                fixed_tokens.extend(
+                    self.shift_all(module_tokens, y_offset=y_offset)
+                )
+
+            fixed_tokens.extend(
+                self.shift_all([rpar, newline], y_offset=y_offset)
+            )
+            return fixed_tokens
+        else:
+            result = result[1:-1]
+            overflow = self.directional_length(
+                name_part
+            ) - self.directional_length(result)
+            return [
+                from_stmt,
+                *module,
+                import_stmt,
+                lpar,
+                *result,
+                *self.shift_all([rpar, newline], x_offset=-overflow),
+            ]
 
     def find_module_for_from_import_statement(self, token_iterator):
         module = []
