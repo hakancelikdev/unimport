@@ -16,6 +16,8 @@ class ParseResult:
 
 
 class ImportTokenTransformer(TokenTransformer):
+    __copyright__ = "Copyright 2019, Batuhan Taskaya"
+
     # You can find the original example from:
     # https://github.com/isidentical/BRM/blob/master/examples/remove_imports.py
     def __init__(self, modules):

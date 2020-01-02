@@ -13,7 +13,7 @@ def get_files(src, config):
         return not path.endswith(".py") or ignored_files.match(path) is not None
 
     if src.is_dir():
-        for root, dirs, files in os.walk(str(src.absolute())):
+        for root, dirs, files in os.walk(src):
             if _is_ignored_folder(root):
                 continue
 

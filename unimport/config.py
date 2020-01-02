@@ -104,7 +104,9 @@ class Config(object):
         else:
 
             def get_values(k):
-                return parser.get(self.section, k).split()
+                if parser.has_section(self.section):
+                    return parser.get(self.section, k).split()
+                return []
 
         self.ignored_folders.update(get_values("folders"))
         self.ignored_files.update(get_values("files"))

@@ -48,12 +48,16 @@ class CLI:
                     print(unused_import)
 
     def overwrite(self, file_path, unused_imports):
-        source = pathlib.Path(file_path).read_text()
-        unused_imports = [u["name"] for u in unused_imports]
+        with tokenize.open(file_path) as stream:
+            source = stream.read()
+            encoding = stream.encoding
+        unused_imports = [
+            unused_import["name"] for unused_import in unused_imports
+        ]
         destination = filter_unused_imports(
             source=source, unused_imports=unused_imports
         )
-        pathlib.Path(file_path).write_text(destination)
+        pathlib.Path(file_path).write_text(destination, encoding=encoding)
 
 
 def get_unused_imports(file_path):
