@@ -5,7 +5,7 @@ import tokenize
 
 from unimport.config import Config
 from unimport.files import get_files
-from unimport.unused import get_unused
+from unimport.unused import filter_unused_imports, get_unused
 
 
 class CLI:
@@ -40,16 +40,24 @@ class CLI:
         config = Config(config_file=args.config)
         py_files = get_files(args.source, config=config)
         if args.write:
-            # TODO: not ready yet.
             for py_file in py_files:
-                self.overwrite(get_unused_imports(py_file))
+                self.overwrite(py_file, get_unused_imports(py_file))
         else:
             for py_file in py_files:
                 for unused_import in get_unused_imports(py_file):
                     print(unused_import)
 
-    def overwrite(self, unused_import):
-        print("not ready")
+    def overwrite(self, file_path, unused_imports):
+        with tokenize.open(file_path) as stream:
+            source = stream.read()
+            encoding = stream.encoding
+        unused_imports = [
+            unused_import["name"] for unused_import in unused_imports
+        ]
+        destination = filter_unused_imports(
+            source=source, unused_imports=unused_imports
+        )
+        pathlib.Path(file_path).write_text(destination, encoding=encoding)
 
 
 def get_unused_imports(file_path):
