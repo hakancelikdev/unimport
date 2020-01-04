@@ -18,6 +18,7 @@ class DetectUnusedImport(ast.NodeVisitor):
     def __init__(self, source):
         self.names = list()
         self.imports = list()
+        self.import_names = set()
         self.visit(ast.parse(source=source))
 
     @recursive
@@ -30,6 +31,7 @@ class DetectUnusedImport(ast.NodeVisitor):
             if name in self.ignore:
                 continue
             self.imports.append(dict(lineno=node.lineno, name=name))
+            self.import_names.add(name)
 
     @recursive
     def visit_ImportFrom(self, node):
@@ -38,7 +40,10 @@ class DetectUnusedImport(ast.NodeVisitor):
 
     @recursive
     def visit_Name(self, node):
-        if not isinstance(node.ctx, ast.Store):
+        if isinstance(node.ctx, ast.Store):
+            if node.id in self.import_names:
+                self.names.append(node.id)
+        else:
             self.names.append(node.id)
 
     @recursive

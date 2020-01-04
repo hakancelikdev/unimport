@@ -1,14 +1,14 @@
-import pathlib
 from unittest import TestCase
 
-from unimport.config import DEFAULT_IGNORED_FILES, DEFAULT_IGNORED_FOLDERS, Config
+from .test_helper import TEST_DIR
+from unimport.config import (
+    DEFAULT_IGNORED_FILES,
+    DEFAULT_IGNORED_FOLDERS,
+    Config,
+)
 
-TEST_DIR = pathlib.Path(__file__).parent
 TEST_DATA = [
-    {
-        "config_file": TEST_DIR / "samples" / ".unimport.cfg",
-        "section": None,
-    },
+    {"config_file": TEST_DIR / "samples" / ".unimport.cfg", "section": None},
     {
         "config_file": TEST_DIR / "samples" / "pyproject.toml",
         "section": "tool.unimport",
@@ -36,7 +36,6 @@ class ConfigTest(TestCase):
         expected_files.update({".*(__init__.py)", ".*(settings.py)"})
 
         for datum in TEST_DATA:
-            print(datum["section"])
             config = Config(config_file=datum["config_file"])
             self.assertSetEqual(config.ignored_folders, expected_folders)
             self.assertSetEqual(config.ignored_files, expected_files)

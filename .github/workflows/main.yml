@@ -22,6 +22,7 @@ jobs:
       run: |
         python${{ matrix.python-version }} -m venv .venv
         source .venv/bin/activate
+        pip install -r requirements.txt
         pip install -r requirements-dev.txt
 
     - name: Test

@@ -68,10 +68,14 @@ class Config(object):
         return config_path.exists()
 
     def find_config(self):
-        for file_name, section in CONFIG_FILES:
-            if self.config_file is not None and file_name == self.config_file.name:
-                return self.config_file, section
+        config_files = dict(CONFIG_FILES)
+        if (
+            self.config_file is not None
+            and self.config_file.name in config_files
+        ):
+            return self.config_file, config_files[self.config_file.name]
 
+        for file_name, section in config_files.items():
             current_dir = pathlib.Path().cwd()
             search_depth = len(current_dir.parts)
 
@@ -84,7 +88,9 @@ class Config(object):
         return None, None
 
     def parse(self):
-        getattr(self, f"parse_{self.config_path.suffix.strip('.')}", "parse_cfg")()
+        getattr(
+            self, f"parse_{self.config_path.suffix.strip('.')}", "parse_cfg"
+        )()
 
     def parse_cfg(self):
         parser = configparser.ConfigParser(allow_no_value=True)
@@ -98,7 +104,9 @@ class Config(object):
         else:
 
             def get_values(k):
-                return parser.get(self.section, k).split()
+                if parser.has_section(self.section):
+                    return parser.get(self.section, k).split()
+                return []
 
         self.ignored_folders.update(get_values("folders"))
         self.ignored_files.update(get_values("files"))
