@@ -1,0 +1,9 @@
+[tool.unimport]
+folders = [
+  ".*(migrations)",
+]
+files = [
+  ".*(__init__.py)",
+  ".*(settings.py)",
+  ".*(apps.py)",
+]
