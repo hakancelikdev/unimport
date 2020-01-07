@@ -17,13 +17,13 @@ class CLI:
             "source",
             default=".",
             nargs="?",
-            help="include file or folder to find the unused imports",
+            help="include file or folder to find the unused imports.",
             type=pathlib.Path,
         )
         parser.add_argument(
             "-c",
             "--config",
-            help="read configuration from PATH",
+            help="read configuration from PATH.",
             metavar="PATH",
             type=pathlib.Path,
         )
@@ -31,7 +31,12 @@ class CLI:
             "-w",
             "--write",
             action="store_true",
-            help="remove unused imports automatically",
+            help="remove unused imports automatically.",
+        )
+        parser.add_argument(
+            "-d",
+            "--diff",
+            help="Prints a diff of all the changes unimport would make to a file.",
         )
         return parser.parse_args()
 
@@ -42,6 +47,10 @@ class CLI:
         if args.write:
             for py_file in py_files:
                 self.overwrite(py_file, get_unused_imports(py_file))
+        elif args.diff:
+            for py_file in py_files:
+                for diff in self.show_diff(py_file):
+                    print(diff)
         else:
             for py_file in py_files:
                 for unused_import in get_unused_imports(py_file):
