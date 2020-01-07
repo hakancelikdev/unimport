@@ -1,4 +1,5 @@
 import argparse
+import difflib
 import os
 import pathlib
 import tokenize
@@ -36,6 +37,7 @@ class CLI:
         parser.add_argument(
             "-d",
             "--diff",
+            action="store_true",
             help="Prints a diff of all the changes unimport would make to a file.",
         )
         return parser.parse_args()
@@ -49,8 +51,19 @@ class CLI:
                 self.overwrite(py_file, get_unused_imports(py_file))
         elif args.diff:
             for py_file in py_files:
-                for diff in self.show_diff(py_file):
+                unused_imports = get_unused_imports(py_file)
+                get_diff = self.context_diff(py_file, unused_imports)
+                is_has_diff = next(get_diff, None)
+                for diff in get_diff:
                     print(diff)
+                if is_has_diff:
+                    overwrite_permission = input(
+                        f"Apply suggested changes to '{py_file}' [y/n/q] ? > "
+                    )
+                    if overwrite_permission == "y":
+                        self.overwrite(py_file, unused_imports)
+                    elif overwrite_permission == "q":
+                        break
         else:
             for py_file in py_files:
                 for unused_import in get_unused_imports(py_file):
@@ -67,6 +80,19 @@ class CLI:
             source=source, unused_imports=unused_imports
         )
         pathlib.Path(file_path).write_text(destination, encoding=encoding)
+
+    def context_diff(self, file_path, unused_imports):
+        with tokenize.open(file_path) as stream:
+            old_sourcesource = stream.read()
+        unused_imports = [
+            unused_import["name"] for unused_import in unused_imports
+        ]
+        new_source = filter_unused_imports(
+            source=old_sourcesource, unused_imports=unused_imports
+        )
+        return difflib.context_diff(
+            old_sourcesource.splitlines(), new_source.splitlines()
+        )
 
 
 def get_unused_imports(file_path):
