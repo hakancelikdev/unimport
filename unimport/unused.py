@@ -1,7 +1,6 @@
 import token
 
 from brm import NoLineTransposer, TokenTransformer, pattern
-
 from unimport.dedect import DetectUnusedImport
 
 dot_name = "(name( dot name)*)"
@@ -24,7 +23,7 @@ class ImportTokenTransformer(TokenTransformer):
         self.modules = modules
 
     @pattern(
-        "name", f"({dot_name}( comma (nl )?{dot_name})*( nl)?)", newline_group,
+        "name", f"({dot_name}( comma (nl )?{dot_name})*( nl)?)", newline_group
     )
     def fix_import_statement(self, statement, *tokens):
         if statement.string != "import":
