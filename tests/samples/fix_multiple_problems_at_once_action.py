@@ -14,7 +14,3 @@ from q import (
     tango,
     oscar
 )
-from os import (
-    waitpid,
-    scandir,
-)
