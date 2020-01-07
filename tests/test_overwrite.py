@@ -20,7 +20,7 @@ class OverwriteTest(TestCase):
             )
             source_expected = (
                 py_file.parent
-                / f"{py_file.name.rstrip('_action.py')}_expected.py"
+                / f"{py_file.name.rstrip('action.py')}expected.py"
             ).read_text()
             self.assertNotEqual(source, source_expected)
             self.assertEqual(source_action, source_expected)
