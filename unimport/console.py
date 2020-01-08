@@ -46,7 +46,13 @@ class CLI:
         args = self.parse_args()
         config = Config(config_file=args.config)
         py_files = get_files(args.source, config=config)
-        if args.write:
+        if args.write and args.diff:
+            for py_file in py_files:
+                unused_imports = get_unused_imports(py_file)
+                for diff in self.context_diff(py_file, unused_imports):
+                    print(diff)
+                    self.overwrite(py_file, unused_imports)
+        elif args.write:
             for py_file in py_files:
                 self.overwrite(py_file, get_unused_imports(py_file))
         elif args.diff:
