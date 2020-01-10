@@ -1,12 +1,11 @@
 import argparse
 import difflib
-import os
 import pathlib
 import tokenize
 
 from unimport.config import Config
-from unimport.files import get_files
-from unimport.unused import filter_unused_imports, get_unused
+from unimport.files import get_files, overwrite
+from unimport.unused import filter_unused_imports, get_unused_from_file
 
 
 class CLI:
@@ -48,69 +47,48 @@ class CLI:
         py_files = get_files(args.source, config=config)
         if args.write and args.diff:
             for py_file in py_files:
-                unused_imports = get_unused_imports(py_file)
-                for diff in self.context_diff(py_file, unused_imports):
-                    print(diff)
-                    self.overwrite(py_file, unused_imports)
+                unused_imports = list(get_unused_from_file(py_file))
+                get_diff = list(context_diff(py_file, unused_imports))
+                if get_diff:
+                    for diff in get_diff:
+                        print(diff)
+                    overwrite(py_file, unused_imports)
+
         elif args.write:
             for py_file in py_files:
-                self.overwrite(py_file, get_unused_imports(py_file))
+                overwrite(py_file, get_unused_from_file(py_file))
         elif args.diff:
             for py_file in py_files:
-                unused_imports = get_unused_imports(py_file)
-                get_diff = self.context_diff(py_file, unused_imports)
-                is_has_diff = next(get_diff, None)
-                for diff in get_diff:
-                    print(diff)
-                if is_has_diff:
+                unused_imports = list(get_unused_from_file(py_file))
+                get_diff = list(context_diff(py_file, unused_imports))
+                if get_diff:
+                    for diff in get_diff:
+                        print(diff)
                     overwrite_permission = input(
                         f"Apply suggested changes to '{py_file}' [y/n/q] ? > "
                     )
                     if overwrite_permission == "y":
-                        self.overwrite(py_file, unused_imports)
+                        overwrite(py_file, unused_imports)
                     elif overwrite_permission == "q":
                         break
         else:
             for py_file in py_files:
-                for unused_import in get_unused_imports(py_file):
+                for unused_import in get_unused_from_file(py_file):
                     print(unused_import)
 
-    def overwrite(self, file_path, unused_imports):
-        with tokenize.open(file_path) as stream:
-            source = stream.read()
-            encoding = stream.encoding
-        unused_imports = [
+
+def context_diff(file_path, unused_imports):
+    with tokenize.open(file_path) as stream:
+        old_sourcesource = stream.read()
+    new_source = filter_unused_imports(
+        source=old_sourcesource,
+        unused_imports=[
             unused_import["name"] for unused_import in unused_imports
-        ]
-        destination = filter_unused_imports(
-            source=source, unused_imports=unused_imports
-        )
-        pathlib.Path(file_path).write_text(destination, encoding=encoding)
-
-    def context_diff(self, file_path, unused_imports):
-        with tokenize.open(file_path) as stream:
-            old_sourcesource = stream.read()
-        unused_imports = [
-            unused_import["name"] for unused_import in unused_imports
-        ]
-        new_source = filter_unused_imports(
-            source=old_sourcesource, unused_imports=unused_imports
-        )
-        return difflib.context_diff(
-            old_sourcesource.splitlines(), new_source.splitlines()
-        )
-
-
-def get_unused_imports(file_path):
-    try:
-        with tokenize.open(file_path) as f:
-            source = f.read()
-    except OSError:
-        pass
-    else:
-        for imports in get_unused(source=source):
-            imports.update(path=file_path.replace(os.getcwd(), ""))
-            yield imports
+        ],
+    )
+    return difflib.context_diff(
+        old_sourcesource.splitlines(), new_source.splitlines()
+    )
 
 
 def console_scripts():
