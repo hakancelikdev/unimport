@@ -1,4 +1,6 @@
+import os
 import token
+import tokenize
 
 from brm import NoLineTransposer, TokenTransformer, pattern
 from unimport.dedect import DetectUnusedImport
@@ -245,6 +247,18 @@ def get_unused(source):
                 break
         else:
             yield imp
+
+
+def get_unused_from_file(file_path):
+    try:
+        with tokenize.open(file_path) as f:
+            source = f.read()
+    except OSError:
+        pass
+    else:
+        for imports in get_unused(source=source):
+            imports.update(path=file_path.replace(os.getcwd(), ""))
+            yield imports
 
 
 def filter_unused_imports(source, unused_imports):
