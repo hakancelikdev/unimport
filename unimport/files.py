@@ -47,7 +47,5 @@ def overwrite(file_path, unused_imports, lib2to3=False):
     else:
         runner = filter_unused_imports
 
-    destination = runner(
-        source=source, unused_imports=unused_imports
-    )
+    destination = runner(source=source, unused_imports=unused_imports)
     pathlib.Path(file_path).write_text(destination, encoding=encoding)
