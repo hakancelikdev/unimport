@@ -39,6 +39,11 @@ class CLI:
             action="store_true",
             help="Prints a diff of all the changes unimport would make to a file.",
         )
+        parser.add_argument(
+            "--lib2to3",
+            action="store_true",
+            help="Use lib2to3 instead of BRM for refactoring tool",
+        )
         return parser.parse_args()
 
     def run(self):
@@ -56,7 +61,12 @@ class CLI:
 
         elif args.write:
             for py_file in py_files:
-                overwrite(py_file, get_unused_from_file(py_file))
+                overwrite(
+                    py_file,
+                    get_unused_from_file(py_file),
+                    lib2to3=args.lib2to3,
+                )
+
         elif args.diff:
             for py_file in py_files:
                 unused_imports = list(get_unused_from_file(py_file))
