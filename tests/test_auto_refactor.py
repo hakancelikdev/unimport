@@ -35,6 +35,9 @@ class RefactorTests(TestCase):
             refactor("import x.k, y.z, u.k\n", ["y.z"]), "import x.k, u.k\n"
         )
 
-    def test_remove_unused_froms_from(self):
+    def test_remove_unused_imports_from(self):
         self.assertEqual(refactor("from x import foo\n", ["x"]), "")
         self.assertEqual(refactor("from x.y.z import foo\n", ["x.y.z"]), "")
+
+        self.assertEqual(refactor("from x import foo\n", ["foo"]), "")
+        self.assertEqual(refactor("from x.y.z import foo\n", ["foo"]), "")
