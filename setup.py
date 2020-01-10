@@ -3,7 +3,7 @@ from pathlib import Path
 
 from setuptools import setup
 
-assert sys.version_info >= (3, 5, 0), "unimport requires Python 3.5+"
+assert sys.version_info >= (3, 6, 0), "unimport requires Python 3.6+"
 
 CURRENT_DIR = Path(__file__).parent
 
@@ -25,7 +25,7 @@ setup(
     author_email="hakancelik96@outlook.com",
     url="https://github.com/hakancelik96/unimport",
     license="MIT",
-    python_requires=">=3.5.0",
+    python_requires=">=3.6.0",
     packages=["unimport"],
     dependency_links=[
         "https://github.com/isidentical/BRM/tarball/master#egg=brm-0.1.0b0"
@@ -38,8 +38,9 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Environment :: Console",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3 :: Only",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
