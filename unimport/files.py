@@ -15,9 +15,13 @@ def get_files(src, config):
                 if str(path).startswith(str(i)):
                     return True
 
-    for file in p.glob(pattern_python_file):
-        if not _is_excluded(file):
-            yield file
+    if not p.is_dir():
+        if not _is_excluded(src):
+            yield src
+    else:
+        for file in p.glob(pattern_python_file):
+            if not _is_excluded(file):
+                yield file
 
 
 def overwrite(file_path, unused_imports):

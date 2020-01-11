@@ -57,7 +57,6 @@ class CLI:
         elif args.write:
             for py_file in py_files:
                 overwrite(py_file, get_unused_from_file(py_file))
-
         elif args.diff:
             for py_file in py_files:
                 unused_imports = list(get_unused_from_file(py_file))
