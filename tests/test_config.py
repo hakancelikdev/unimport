@@ -7,7 +7,6 @@ from unimport.config import (
 )
 
 TEST_DATA = [
-    {"config_file": TEST_DIR / "samples" / "configs" / ".unimport.cfg", "section": None},
     {
         "config_file": TEST_DIR / "samples" / "configs" / "pyproject.toml",
         "section": "tool.unimport",
