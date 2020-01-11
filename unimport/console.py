@@ -5,8 +5,8 @@ import tokenize
 
 from unimport.config import Config
 from unimport.files import get_files, overwrite
-from unimport.unused import filter_unused_imports, get_unused_from_file
-
+from unimport.unused import get_unused_from_file
+from unimport.auto_refactor import refactor
 
 class CLI:
     def parse_args(self):
@@ -39,11 +39,6 @@ class CLI:
             action="store_true",
             help="Prints a diff of all the changes unimport would make to a file.",
         )
-        parser.add_argument(
-            "--lib2to3",
-            action="store_true",
-            help="Use lib2to3 instead of BRM for refactoring tool",
-        )
         return parser.parse_args()
 
     def run(self):
@@ -64,7 +59,6 @@ class CLI:
                 overwrite(
                     py_file,
                     get_unused_from_file(py_file),
-                    lib2to3=args.lib2to3,
                 )
 
         elif args.diff:
@@ -90,8 +84,7 @@ class CLI:
 def context_diff(file_path, unused_imports):
     with tokenize.open(file_path) as stream:
         old_sourcesource = stream.read()
-    new_source = filter_unused_imports(
-        source=old_sourcesource,
+    new_source = refactor(old_sourcesource,
         unused_imports=[
             unused_import["name"] for unused_import in unused_imports
         ],

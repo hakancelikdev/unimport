@@ -4,7 +4,6 @@ import re
 import tokenize
 
 from unimport.auto_refactor import refactor
-from unimport.unused import filter_unused_imports
 
 
 def get_files(src, config):
@@ -33,7 +32,7 @@ def get_files(src, config):
         yield str(src)
 
 
-def overwrite(file_path, unused_imports, lib2to3=False):
+def overwrite(file_path, unused_imports):
     with tokenize.open(file_path) as stream:
         source = stream.read()
         encoding = stream.encoding
@@ -42,10 +41,5 @@ def overwrite(file_path, unused_imports, lib2to3=False):
         unused_import["name"] for unused_import in unused_imports
     ]
 
-    if lib2to3:
-        runner = refactor
-    else:
-        runner = filter_unused_imports
-
-    destination = runner(source=source, unused_imports=unused_imports)
+    destination = refactor(source=source, unused_imports=unused_imports)
     pathlib.Path(file_path).write_text(destination, encoding=encoding)
