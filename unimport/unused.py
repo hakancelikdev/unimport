@@ -1,4 +1,3 @@
-import os
 import token
 import tokenize
 

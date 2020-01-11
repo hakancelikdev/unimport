@@ -1,6 +1,4 @@
-import os
 import pathlib
-import re
 import tokenize
 
 from unimport.unused import filter_unused_imports
