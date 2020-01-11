@@ -14,43 +14,42 @@ CONFIG_FILES = [(DEFAULT_CONFIG_NAME, None), ("setup.cfg", "unimport")]
 if HAS_TOML is True:
     CONFIG_FILES.insert(1, ("pyproject.toml", "tool.unimport"))
 
-DEFAULT_IGNORED_FOLDERS = {
-    ".*(.git)",
-    ".*(.github)",
-    ".*(build)",
-    ".*(__pycache__)",
-    ".*(develop-eggs)",
-    ".*(dist)",
-    ".*(downloads)",
-    ".*(eggs)",
-    ".*(lib)",
-    ".*(lib64)",
-    ".*(parts)",
-    ".*(sdist)",
-    ".*(var)",
-    ".*(wheels)",
-    ".*(.egg-info)",
-    ".*(MANIFEST)",
-    ".*(htmlcov)",
-    ".*(.tox)",
-    ".*(.hypothesis)",
-    ".*(.pytest_cache)",
-    ".*(instance)",
-    ".*(docs)",
-    ".*(target)",
-    ".*(celerybeat-schedule)",
-    ".*(.venv)",
-    ".*(env)",
-    ".*(venv)",
-    ".*(site)",
-    ".*(.mypy_cache)",
+DEFAULT_IGNORED = {
+    ".git",
+    ".github",
+    "build",
+    "__pycache__",
+    "develop-eggs",
+    "dist",
+    "downloads",
+    "eggs",
+    "lib",
+    "lib64",
+    "parts",
+    "sdist",
+    "var",
+    "wheels",
+    ".egg-info",
+    "MANIFEST",
+    "htmlcov",
+    ".tox",
+    ".hypothesis",
+    ".pytest_cache",
+    "instance",
+    "docs",
+    "target",
+    "celerybeat-schedul",
+    ".venv",
+    "env",
+    "venv",
+    "site",
+    ".mypy_cache",
+    ".sage.py",
+    "local_settings.py",
 }
-DEFAULT_IGNORED_FILES = {".*(.sage.py)", ".*(local_settings.py)"}
-
 
 class Config(object):
-    ignored_folders = set()
-    ignored_files = set()
+    ignore = set()
 
     def __init__(self, config_file=None):
         self.config_file = config_file
@@ -58,8 +57,7 @@ class Config(object):
         if self.config_path is not None:
             self.parse()
 
-        self.ignored_folders.update(DEFAULT_IGNORED_FOLDERS)
-        self.ignored_files.update(DEFAULT_IGNORED_FILES)
+        self.ignore.update(DEFAULT_IGNORED)
 
     @staticmethod
     def is_available_to_parse(config_path):
@@ -108,11 +106,9 @@ class Config(object):
                     return parser.get(self.section, k).split()
                 return []
 
-        self.ignored_folders.update(get_values("folders"))
-        self.ignored_files.update(get_values("files"))
+        self.ignore.update(get_values("ignore"))
 
     def parse_toml(self):
         parsed_toml = toml.loads(self.config_path.read_text())
         config = parsed_toml.get("tool", {}).get("unimport", {})
-        self.ignored_folders.update(set(config.get("folders", [])))
-        self.ignored_files.update(set(config.get("files", [])))
+        self.ignore.update(set(config.get("ignore", [])))

@@ -28,10 +28,4 @@ force_grid_wrap=0
 line_length=79
 
 [tool.unimport]
-folders = [
-    '.*(tests)',
-    '.*(rare_cases)',
-]
-files = [
-    '.*(__init__.py)',
-]
+ignore = ["tests", "rare_cases", "__init__.py"]
