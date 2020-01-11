@@ -1,6 +1,7 @@
-import os
 import tokenize
+
 from unimport.dedect import DetectUnusedImport
+
 
 def get_unused(source):
     "Yield unused imports."
