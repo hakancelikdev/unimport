@@ -3,7 +3,7 @@ import pathlib
 import re
 import tokenize
 
-from unimport.unused import filter_unused_imports
+from unimport.auto_refactor import refactor
 
 
 def get_files(src, config):
@@ -36,10 +36,10 @@ def overwrite(file_path, unused_imports):
     with tokenize.open(file_path) as stream:
         source = stream.read()
         encoding = stream.encoding
+
     unused_imports = [
         unused_import["name"] for unused_import in unused_imports
     ]
-    destination = filter_unused_imports(
-        source=source, unused_imports=unused_imports
-    )
+
+    destination = refactor(source=source, unused_imports=unused_imports)
     pathlib.Path(file_path).write_text(destination, encoding=encoding)

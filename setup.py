@@ -27,10 +27,6 @@ setup(
     license="MIT",
     python_requires=">=3.6.0",
     packages=["unimport"],
-    dependency_links=[
-        "https://github.com/isidentical/BRM/tarball/master#egg=brm-0.1.0b0"
-    ],
-    install_requires=["brm"],
     extras_require={"pyproject": ["toml"]},
     zip_safe=False,
     include_package_data=True,
