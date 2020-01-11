@@ -1,5 +1,5 @@
 from lib2to3.fixer_base import BaseFix
-from lib2to3.fixer_util import syms, token
+from lib2to3.fixer_util import BlankLine, syms, token
 from lib2to3.refactor import RefactoringTool
 
 
@@ -20,10 +20,14 @@ def traverse_imports(names):
 
 
 class RefactorImports(BaseFix):
-    PATTERN = """
-    import_from< 'from' imp=any 'import' ['('] items=any [')'] >
-    |
-    import_name< 'import' imp=any >
+    PATTERN = r"""
+        simple_stmt<
+            (
+                import_name< 'import' imp=any >
+                |
+                import_from< 'from' imp=any 'import' ['('] items=any [')'] >
+            ) '\n'
+        >
     """
 
     def __init__(self, unused_modules):
@@ -32,16 +36,17 @@ class RefactorImports(BaseFix):
 
     def transform(self, node, results):
         imports = results["imp"]
-
-        if node.type == syms.import_from:
+        if node.children[0].type == syms.import_from:
             if str(imports).strip() in self.unused_modules:
-                node.parent.remove()
+                return BlankLine()
             else:
-                self.transform_inner_body(node, results["items"])
+                return self.transform_inner_body(
+                    node, results["items"], from_import=True
+                )
         else:
-            self.transform_inner_body(node, imports)
+            return self.transform_inner_body(node, imports)
 
-    def transform_inner_body(self, node, imports):
+    def transform_inner_body(self, node, imports, from_import=False):
         if imports.children:
             body = imports.children
         else:
@@ -76,7 +81,7 @@ class RefactorImports(BaseFix):
                 remove_counter += 1
 
         if remove_counter == len(modules):
-            node.parent.remove()
+            return BlankLine()
 
         if trailing_comma:
             body.append(trailing_comma)
