@@ -8,11 +8,10 @@ try:
 except ImportError:
     HAS_TOML = False
 
-DEFAULT_CONFIG_NAME = ".unimport.cfg"
-CONFIG_FILES = [(DEFAULT_CONFIG_NAME, None), ("setup.cfg", "unimport")]
+CONFIG_FILES = {"setup.cfg": "unimport"}
 
 if HAS_TOML is True:
-    CONFIG_FILES.insert(1, ("pyproject.toml", "tool.unimport"))
+    CONFIG_FILES.update({"pyproject.toml": "tool.unimport"})
 
 DEFAULT_EXCLUDES = {
     ".git",
@@ -49,7 +48,7 @@ DEFAULT_EXCLUDES = {
 }
 
 
-class Config(object):
+class Config:
     exclude = set()
 
     def __init__(self, config_file=None):
@@ -77,37 +76,23 @@ class Config(object):
         for file_name, section in config_files.items():
             current_dir = pathlib.Path().cwd()
             search_depth = len(current_dir.parts)
-
             for _ in range(search_depth):
                 config_path = current_dir / file_name
                 if self.is_available_to_parse(config_path):
                     return config_path, section
                 current_dir = current_dir.parent
-
         return None, None
 
     def parse(self):
         getattr(
-            self, f"parse_{self.config_path.suffix.strip('.')}", "parse_cfg"
+            self, f"parse_{self.config_path.suffix.strip('.')}"
         )()
 
     def parse_cfg(self):
         parser = configparser.ConfigParser(allow_no_value=True)
         parser.read(self.config_path)
-
-        if self.section is None:
-
-            def get_values(k):
-                return parser[k]
-
-        else:
-
-            def get_values(k):
-                if parser.has_section(self.section):
-                    return parser.get(self.section, k).split()
-                return []
-
-        self.exclude.update(get_values("exclude"))
+        self.exclude.update(parser.get(self.section, "exclude").split())
+    
 
     def parse_toml(self):
         parsed_toml = toml.loads(self.config_path.read_text())
