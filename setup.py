@@ -3,6 +3,8 @@ from pathlib import Path
 
 from setuptools import setup
 
+import unimport
+
 assert sys.version_info >= (3, 6, 0), "unimport requires Python 3.6+"
 
 CURRENT_DIR = Path(__file__).parent
@@ -16,12 +18,12 @@ def get_long_description():
 
 setup(
     name="unimport",
-    version="0.1.3",
-    description="To detect unused python libraries",
+    version=unimport.__version__,
+    description=unimport.__description__,
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     keywords=["unused", "import"],
-    author="Hakan Çelik",
+    author=unimport.__author__,
     author_email="hakancelik96@outlook.com",
     url="https://github.com/hakancelik96/unimport",
     license="MIT",
