@@ -48,6 +48,7 @@ DEFAULT_IGNORED = {
     "local_settings.py",
 }
 
+
 class Config(object):
     ignore = set()
 
