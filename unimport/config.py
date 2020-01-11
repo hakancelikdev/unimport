@@ -14,7 +14,7 @@ CONFIG_FILES = [(DEFAULT_CONFIG_NAME, None), ("setup.cfg", "unimport")]
 if HAS_TOML is True:
     CONFIG_FILES.insert(1, ("pyproject.toml", "tool.unimport"))
 
-DEFAULT_IGNORED = {
+DEFAULT_EXCLUDES  = {
     ".git",
     ".github",
     "build",
@@ -50,7 +50,7 @@ DEFAULT_IGNORED = {
 
 
 class Config(object):
-    ignore = set()
+    exclude = set()
 
     def __init__(self, config_file=None):
         self.config_file = config_file
@@ -58,7 +58,7 @@ class Config(object):
         if self.config_path is not None:
             self.parse()
 
-        self.ignore.update(DEFAULT_IGNORED)
+        self.exclude.update(DEFAULT_EXCLUDES )
 
     @staticmethod
     def is_available_to_parse(config_path):
@@ -107,9 +107,9 @@ class Config(object):
                     return parser.get(self.section, k).split()
                 return []
 
-        self.ignore.update(get_values("ignore"))
+        self.exclude.update(get_values("exclude"))
 
     def parse_toml(self):
         parsed_toml = toml.loads(self.config_path.read_text())
         config = parsed_toml.get("tool", {}).get("unimport", {})
-        self.ignore.update(set(config.get("ignore", [])))
+        self.exclude.update(set(config.get("exclude", [])))

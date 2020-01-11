@@ -3,7 +3,7 @@ from unittest import TestCase
 from .test_helper import TEST_DIR
 from unimport.config import (
     Config,
-    DEFAULT_IGNORED
+    DEFAULT_EXCLUDES
 )
 
 TEST_DATA = [
@@ -28,8 +28,8 @@ class ConfigTest(TestCase):
             self.assertEqual(actual_section, datum["section"])
 
     def test_parse_config(self):
-        expected_ignores = DEFAULT_IGNORED.copy()
-        expected_ignores.update({"./[0-9].*", "tests"})
+        expected_exclude = DEFAULT_EXCLUDES.copy()
+        expected_exclude.update({"./[0-9].*", "tests"})
         for datum in TEST_DATA:
             config = Config(config_file=datum["config_file"])
-            self.assertSetEqual(config.ignore, expected_ignores)
+            self.assertSetEqual(config.exclude, expected_exclude)

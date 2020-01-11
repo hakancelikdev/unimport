@@ -3,18 +3,20 @@ import tokenize
 
 from unimport.unused import filter_unused_imports
 
+pattern_python_file = "**/*.py"
+
 
 def get_files(src, config):
     p = pathlib.Path(src)
 
-    def _is_ignored(path):
-        for ignore_rule in config.ignore:
-            for i in p.glob(ignore_rule):
+    def _is_excluded(path):
+        for pattern_exclude in config.exclude:
+            for i in p.glob(pattern_exclude):
                 if str(path).startswith(str(i)):
                     return True
 
-    for file in p.glob("**/*.py"):
-        if not _is_ignored(file):
+    for file in p.glob(pattern_python_file):
+        if not _is_excluded(file):
             yield file
 
 

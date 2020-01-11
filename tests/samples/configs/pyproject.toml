@@ -13,7 +13,7 @@ exclude = '''
 '''
 
 [tool.unimport]
-ignore = [
+exclude = [
   './[0-9].*',
   'tests'
 ]
