@@ -89,7 +89,8 @@ class Config:
     def parse_cfg(self):
         parser = configparser.ConfigParser(allow_no_value=True)
         parser.read(self.config_path)
-        self.exclude.update(parser.get(self.section, "exclude").split())
+        if parser.has_section(self.section):
+            self.exclude.update(parser.get(self.section, "exclude").split())
 
     def parse_toml(self):
         parsed_toml = toml.loads(self.config_path.read_text())

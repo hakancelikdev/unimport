@@ -19,7 +19,10 @@ class DetectUnusedImport(ast.NodeVisitor):
         self.names = list()
         self.imports = list()
         self.import_names = set()
-        self.visit(ast.parse(source=source))
+        try:
+            self.visit(ast.parse(source=source))
+        except Exception as e:
+            print(e)
 
     @recursive
     def visit_Import(self, node):
