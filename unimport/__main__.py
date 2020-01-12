@@ -36,7 +36,7 @@ parser.add_argument(
 
 
 def print_if_exists(sequence):
-    if tuple(sequence):
+    if sequence:
         print(*sequence, sep="\n")
         return True
 
@@ -50,11 +50,12 @@ def main(argv=None):
 
     if namespace.diff and namespace.write:
         for source in sources:
-            print_if_exists(session.diff_file(source))
+            print_if_exists(tuple(session.diff_file(source)))
             session.refactor_file(source, apply=True)
     elif namespace.diff:
         for source in sources:
-            if print_if_exists(session.diff_file(source)):
+            diff = tuple(session.diff_file(source))
+            if print_if_exists(diff):
                 action = input(
                     f"Apply suggested changes to '{source}' [y/n/q] ? > "
                 )
@@ -67,7 +68,7 @@ def main(argv=None):
             session.refactor_file(source, apply=True)
     else:
         for source in sources:
-            print_if_exists(session.scan_file(source))
+            print_if_exists(tuple(session.scan_file(source)))
 
     print("All done!")
 
