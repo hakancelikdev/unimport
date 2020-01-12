@@ -1,2 +1,2 @@
 [tool.unimport]
-exclude = ["migrations", "__init__.py", "settings.py", "apps.py"]
+exclude = ["**/apps.py", "**/tests.py", "**/__init__.py", "**/migrations"]

@@ -14,7 +14,7 @@ def get_files(src, config):
             for i in p.glob(pattern_exclude):
                 if str(path).startswith(str(i)):
                     return True
-
+                    
     if not p.is_dir():
         if not _is_excluded(src):
             yield src
