@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 from lib2to3.fixer_base import BaseFix
 from lib2to3.fixer_util import BlankLine, syms, token
+from lib2to3.pygram import python_grammar_no_print_and_exec_statement
 from lib2to3.refactor import RefactoringTool
 
 
@@ -102,6 +103,8 @@ class RefactorTool(RefactoringTool):
         self._fixer = RefactorImports()
         self._fixers = [self._fixer]
         super().__init__(None)
+        self.grammer = python_grammar_no_print_and_exec_statement
+        self.driver.grammer = python_grammar_no_print_and_exec_statement
 
     def get_fixers(self):
         return self._fixers, []

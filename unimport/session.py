@@ -1,5 +1,6 @@
 import difflib
 import tokenize
+from lib2to3.pgen2.parse import ParseError
 from pathlib import Path
 
 from unimport.config import Config
@@ -65,7 +66,11 @@ class Session:
     def refactor_file(self, path, apply=False):
         path = Path(path)
         source, encoding = self._read(path)
-        result = self.refactor(source)
+        try:
+            result = self.refactor(source)
+        except ParseError as exc:
+            raise ValueError(f"Invalid python file {path}.") from exc
+
         if apply:
             path.write_text(result, encoding=encoding)
         else:
@@ -73,11 +78,15 @@ class Session:
 
     def diff(self, source):
         result = self.refactor(source)
-        return difflib.unified_diff(source.splitlines(), result.splitlines())
+        return tuple(
+            difflib.unified_diff(source.splitlines(), result.splitlines())
+        )
 
     def diff_file(self, path):
         source, _ = self._read(path)
         result = self.refactor_file(path, apply=False)
-        return difflib.unified_diff(
-            source.splitlines(), result.splitlines(), fromfile=str(path)
+        return tuple(
+            difflib.unified_diff(
+                source.splitlines(), result.splitlines(), fromfile=str(path)
+            )
         )
