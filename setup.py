@@ -43,6 +43,6 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     entry_points={
-        "console_scripts": ["unimport = unimport.console:console_scripts"]
+        "console_scripts": ["unimport = unimport.__main__:main"]
     },
 )
