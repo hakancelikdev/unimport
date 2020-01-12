@@ -1,7 +1,6 @@
 from contextlib import contextmanager
 from lib2to3.fixer_base import BaseFix
 from lib2to3.fixer_util import BlankLine, syms, token
-from lib2to3.pygram import python_grammar_no_print_and_exec_statement
 from lib2to3.refactor import RefactoringTool
 
 
