@@ -22,26 +22,6 @@ unimport {source_file_or_directory} or write direct unimport to current path sca
 
 [![](https://img.shields.io/badge/style-unimport-green)](https://github.com/hakancelik96/unimport)
 
-### Another alternative
-```python
-import inspect
-import os
-from unimport.unused from get_unused
-
-for unused in get_unused(source=inspect.getsource(os)):
-    print(unused)
-```
-
-```python
-import tokenize
-from unimport.files import get_files
-from unimport.unused import get_unused
-
-for path in get_files(direction="."):
-  for unused in get_unused(source=tokenize.open(path).read()):
-      print(unused, path)
-```
-
 ## Configuring Unimport
 To configure unimport for a single user create a ~/.unimport.cfg and type the names of folders that you do not want scanning.
 
