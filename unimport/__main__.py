@@ -35,6 +35,12 @@ parser.add_argument(
 )
 
 
+def print_if_exists(sequence):
+    if tuple(sequence):
+        print(*sequence, sep="\n")
+        return True
+
+
 def main(argv=None):
     namespace = parser.parse_args(argv)
     session = Session(config_file=namespace.config)
@@ -44,25 +50,27 @@ def main(argv=None):
 
     if namespace.diff and namespace.write:
         for source in sources:
-            print(*session.diff_file(source), sep="\n")
+            print_if_exists(session.diff_file(source))
             session.refactor_file(source, apply=True)
     elif namespace.diff:
         for source in sources:
-            print(*session.diff_file(source), sep="\n")
-            action = input(
-                f"Apply suggested changes to '{source}' [y/n/q] ? > "
-            )
-            if action == "q":
-                break
-            elif action == "y":
-                session.refactor_file(source, apply=True)
+            if print_if_exists(session.diff_file(source)):
+                action = input(
+                    f"Apply suggested changes to '{source}' [y/n/q] ? > "
+                )
+                if action == "q":
+                    break
+                elif action == "y":
+                    session.refactor_file(source, apply=True)
     elif namespace.write:
         for source in sources:
             session.refactor_file(source, apply=True)
     else:
         for source in sources:
-            print(*session.scan_file(source), sep="\n")
+            print_if_exists(session.scan_file(source))
+
     print("All done!")
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
