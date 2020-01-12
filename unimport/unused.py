@@ -1,6 +1,7 @@
-import os
 import tokenize
+
 from unimport.dedect import DetectUnusedImport
+
 
 def get_unused(source):
     "Yield unused imports."
@@ -22,5 +23,5 @@ def get_unused_from_file(file_path):
         pass
     else:
         for imports in get_unused(source=source):
-            imports.update(path=file_path.replace(os.getcwd(), ""))
+            imports.update(path=file_path)
             yield imports

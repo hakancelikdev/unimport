@@ -3,10 +3,11 @@ import difflib
 import pathlib
 import tokenize
 
+from unimport.auto_refactor import refactor
 from unimport.config import Config
 from unimport.files import get_files, overwrite
 from unimport.unused import get_unused_from_file
-from unimport.auto_refactor import refactor
+
 
 class CLI:
     def parse_args(self):
@@ -53,14 +54,9 @@ class CLI:
                     for diff in get_diff:
                         print(diff)
                     overwrite(py_file, unused_imports)
-
         elif args.write:
             for py_file in py_files:
-                overwrite(
-                    py_file,
-                    get_unused_from_file(py_file),
-                )
-
+                overwrite(py_file, get_unused_from_file(py_file))
         elif args.diff:
             for py_file in py_files:
                 unused_imports = list(get_unused_from_file(py_file))
@@ -79,12 +75,14 @@ class CLI:
             for py_file in py_files:
                 for unused_import in get_unused_from_file(py_file):
                     print(unused_import)
+        print("All done!")
 
 
 def context_diff(file_path, unused_imports):
     with tokenize.open(file_path) as stream:
         old_sourcesource = stream.read()
-    new_source = refactor(old_sourcesource,
+    new_source = refactor(
+        old_sourcesource,
         unused_imports=[
             unused_import["name"] for unused_import in unused_imports
         ],
