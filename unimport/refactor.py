@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from lib2to3.fixer_base import BaseFix
 from lib2to3.fixer_util import BlankLine, syms, token
 from lib2to3.refactor import RefactoringTool
@@ -30,9 +31,18 @@ class RefactorImports(BaseFix):
         >
     """
 
-    def __init__(self, unused_modules):
-        self.unused_modules = unused_modules
+    def __init__(self):
+        self.unused_modules = []
         super().__init__(None, None)  # options and logger
+
+    @contextmanager
+    def clean(self, unused_modules):
+        try:
+            self.unused_modules.clear()
+            self.unused_modules.extend(unused_modules)
+            yield
+        finally:
+            self.unused_modules.clear()
 
     def transform(self, node, results):
         imports = results["imp"]
@@ -87,16 +97,17 @@ class RefactorImports(BaseFix):
             body.append(trailing_comma)
 
 
-class SingleRefactorer(RefactoringTool):
-    def __init__(self, fixer):
-        self._fixers = [fixer]
-        super().__init__(None)
+class RefactorTool(RefactoringTool):
+    def __init__(self):
+        self._fixer = RefactorImports()
+        self._fixers = [self._fixer]
+        super().__init__(None, options = {"print_function": True})
+        del self.grammar.keywords["exec"]
 
     def get_fixers(self):
         return self._fixers, []
 
-
-def refactor(source, unused_imports):
-    fixer = RefactorImports(unused_imports)
-    refactorer = SingleRefactorer(fixer)
-    return str(refactorer.refactor_string(source, "unimport"))
+    def refactor_string(self, source, unused_imports):
+        with self._fixer.clean(unused_imports):
+            source = super().refactor_string(source, "unimport")
+        return str(source)

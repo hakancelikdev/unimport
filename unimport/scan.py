@@ -11,18 +11,33 @@ def recursive(func):
     return wrapper
 
 
-class DetectUnusedImport(ast.NodeVisitor):
+class Scanner(ast.NodeVisitor):
     "To detect unused import using ast"
     ignore = ["*", "__future__"]
 
-    def __init__(self, source):
+    def __init__(self, source=None):
         self.names = list()
         self.imports = list()
         self.import_names = set()
-        try:
-            self.visit(ast.parse(source=source))
-        except Exception as e:
-            print(e)
+        if source:
+            self.visit(ast.parse(source))
+
+    def iter_imports(self, source):
+        self.visit(ast.parse(source))
+        for imp in self.imports:
+            len_dot = len(imp["name"].split("."))
+            for name in self.names:
+                if ".".join(name.split(".")[:len_dot]) == imp["name"]:
+                    break
+            else:
+                yield imp
+
+        self.clear()
+
+    def clear(self):
+        self.names.clear()
+        self.imports.clear()
+        self.import_names.clear()
 
     @recursive
     def visit_Import(self, node):
