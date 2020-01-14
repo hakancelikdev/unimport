@@ -3,6 +3,7 @@ import pathlib
 import sys
 
 from unimport.session import Session
+from unimport import __version__
 
 parser = argparse.ArgumentParser(
     description="Detect or remove unused Python imports."
@@ -32,6 +33,12 @@ parser.add_argument(
     "--diff",
     action="store_true",
     help="Prints a diff of all the changes unimport would make to a file.",
+)
+parser.add_argument(
+    "-v",
+    "--version",
+    action="store_true",
+    help="Prints version of unimport",
 )
 
 
@@ -66,12 +73,11 @@ def main(argv=None):
     elif namespace.write:
         for source in sources:
             session.refactor_file(source, apply=True)
+    elif namespace.version:
+        print(f"Unimport {__version__}")
     else:
         for source in sources:
             print_if_exists(tuple(session.scan_file(source)))
-
-    print("All done!")
-
 
 if __name__ == "__main__":
     main(sys.argv[1:])
