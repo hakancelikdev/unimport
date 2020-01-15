@@ -49,7 +49,7 @@ DEFAULT_EXCLUDES = {
 
 
 class Config:
-    exclude = set()
+    exclude = DEFAULT_EXCLUDES
 
     def __init__(self, config_file=None):
         self.config_file = config_file
@@ -57,7 +57,7 @@ class Config:
         if self.config_path is not None:
             self.parse()
 
-        self.exclude.update(DEFAULT_EXCLUDES)
+        # self.exclude.update(DEFAULT_EXCLUDES)
 
     @staticmethod
     def is_available_to_parse(config_path):
