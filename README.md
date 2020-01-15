@@ -84,29 +84,6 @@ If you have multiple configuration files on your project, it considers just the 
 - [![](https://img.shields.io/github/followers/hakancelik96?label=hakancelik96&style=social)](https://github.com/hakancelik96)
 
 
-## Version Notes
-
-### V0.1.0
-- Some class and function name and position changed.
-- Future module added to the ignore list.
-- Blank python file error fix.
-- Default .unimport.cfg and extra_config add
-- The new usage style `unimport` to scan from current path
-
-### V0.0.3
-- Op system bug fix Linux and win
-- File and folders features fix
-- Add warning message if no enter any path No paths given 'Usage; unimport {source_file_or_directory}'"
-
-### V0.0.2
-- find module bug fix;
-For example; module: inspect, name; inspect.getsource; result unused import = inspect that is the wrong result
-
-### V0.0.1
-- unimport {source_file_or_directory}
-- .unimport.cfg 'type the names of files or folders that you do not want to scan.'
-- Does not replace files only shows results.
-
 ## Who's using Unimport?
 <table>
   <tr>
