@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/hakancelik96/unimport/master/images/logo/Unimport.png" width="300" height="200">
+  <img src="https://raw.githubusercontent.com/hakancelik96/unimport/master/images/logo/Unimport.png">
   </p>
 <p align="center">
   Detect or remove unused Python imports.
