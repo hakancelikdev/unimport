@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/hakancelik96/unimport/master/logo/Unimport.png" width="300" height="200">
+  <img src="https://raw.githubusercontent.com/hakancelik96/unimport/master/images/logo/Unimport.png" width="300" height="200">
   </p>
 <p align="center">
   Detect or remove unused Python imports.
@@ -106,3 +106,19 @@ For example; module: inspect, name; inspect.getsource; result unused import = in
 - unimport {source_file_or_directory}
 - .unimport.cfg 'type the names of files or folders that you do not want to scan.'
 - Does not replace files only shows results.
+
+## Who's using Unimport?
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://radity.com/?ref=unimport">
+        <img src="https://raw.githubusercontent.com/hakancelik96/unimport/master/images/clients/radity.jpg" width="75px;" alt="radity.com"/>
+        <br/>
+        <sub>
+          <b>Radity</b>
+        </sub>
+      </a>
+      <br/>
+    </td>
+  </tr>
+</table>
