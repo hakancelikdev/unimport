@@ -25,20 +25,20 @@ class Session:
         else:
             return source, encoding
 
-    def _list_paths(self, path, pattern):
-        path = Path(path)
+    def _list_paths(self, start, pattern):
+        start = Path(start)
 
         def _is_excluded(path):
             for pattern_exclude in self.config.exclude:
-                for inner in path.glob(pattern_exclude):
+                for inner in start.glob(pattern_exclude):
                     if str(path).startswith(str(inner)):
                         return True
 
-        if not path.is_dir():
-            if not _is_excluded(path):
-                yield path
+        if not start.is_dir():
+            if not _is_excluded(start):
+                yield start
         else:
-            for path in path.glob(pattern):
+            for path in start.glob(pattern):
                 if not _is_excluded(path):
                     yield path
 

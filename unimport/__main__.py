@@ -63,6 +63,9 @@ def print_if_exists(sequence):
 
 def main(argv=None):
     namespace = parser.parse_args(argv)
+    if not any([value for key, value in vars(namespace).items()][1: ]):
+        print("You can list many options by running unimport --help")
+        return
     if namespace.permission and not namespace.diff:
         namespace.diff = True
     session = Session(config_file=namespace.config)
