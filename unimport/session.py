@@ -42,12 +42,17 @@ class Session:
                 if not _is_excluded(path):
                     yield path
 
-    def scan(self, source):
-        yield from self.scanner.iter_imports(source)
+    def scan(self, source, filename=None):
+        try:
+            yield from self.scanner.iter_imports(source)
+        except SyntaxError as exc:
+            exc.filename = filename
+            print("Failed to scan", exc)
+            yield from []
 
     def scan_file(self, path):
         source, _ = self._read(path)
-        for imports in self.scan(source=source):
+        for imports in self.scan(source, path):
             imports.update(path=path)
             yield imports
 
