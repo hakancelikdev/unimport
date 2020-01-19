@@ -21,12 +21,13 @@ def traverse_imports(names):
 
 
 class RefactorImports(BaseFix):
+
     PATTERN = r"""
         simple_stmt<
             (
                 import_name< 'import' imp=any >
                 |
-                import_from< 'from' imp=any 'import' ['('] items=any [')'] >
+                import_from< 'from' imp=['.'*] any 'import' ['('] items=any [')'] >
             ) '\n'
         >
     """
