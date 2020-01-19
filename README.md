@@ -4,7 +4,7 @@
 <p align="center">
   Detect or remove unused Python imports.
  </p>
- 
+
 [![MIT License](https://img.shields.io/github/license/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/blob/master/LICENSE) [![releases](https://img.shields.io/github/release/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/releases) [![last-commit](https://img.shields.io/github/last-commit/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/commits/master) [![style](https://img.shields.io/badge/style-black-black)](https://github.com/psf/black) [![style](https://img.shields.io/badge/style-isort-lightgrey)](https://github.com/timothycrosley/isort) [![style](https://img.shields.io/badge/style-unimport-green)](https://github.com/hakancelik96/unimport) [![](https://img.shields.io/github/contributors/hakancelik96/unimport)](https://github.com/hakancelik96/unimport/graphs/contributors) [![](https://pepy.tech/badge/unimport)](https://pepy.tech/badge/unimport) [![codecov](https://codecov.io/gh/hakancelik96/unimport/branch/master/graph/badge.svg)](https://codecov.io/gh/hakancelik96/unimport) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/unimport)
 
 ### Installation and Usage
@@ -19,8 +19,7 @@ unimport {source_file_or_directory} or write direct unimport to current path sca
 You can list many options by running unimport --help
 
 ```
-usage: __main__.py [-h] [-c PATH] [-r | -p] [-d] [--check] [-v]
-                   [sources [sources ...]]
+usage: unimport [-h] [-c PATH] [-r | -p] [-d] [--check] [-v] [sources [sources ...]]
 
 Detect or remove unused Python imports.
 
@@ -33,8 +32,7 @@ optional arguments:
                         read configuration from PATH.
   -r, --remove          remove unused imports automatically.
   -p, --permission      Refactor permission after see diff.
-  -d, --diff            Prints a diff of all the changes unimport would make
-                        to a file.
+  -d, --diff            Prints a diff of all the changes unimport would make to a file.
   --check               Prints which file the unused imports are in.
   -v, --version         Prints version of unimport
 ```
