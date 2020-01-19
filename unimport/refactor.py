@@ -8,7 +8,7 @@ def traverse_imports(names):
     pending = [names]
     while pending:
         node = pending.pop()
-        if node.type == token.NAME:
+        if node.type in {token.NAME, token.STAR}:
             yield node.value
         elif node.type == syms.dotted_name:
             yield "".join([ch.value for ch in node.children])
@@ -102,7 +102,7 @@ class RefactorTool(RefactoringTool):
     def __init__(self):
         self._fixer = RefactorImports()
         self._fixers = [self._fixer]
-        super().__init__(None, options = {"print_function": True})
+        super().__init__(None, options={"print_function": True})
         del self.grammar.keywords["exec"]
 
     def get_fixers(self):

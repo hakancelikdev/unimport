@@ -19,8 +19,8 @@ class Session:
             with tokenize.open(path) as stream:
                 source = stream.read()
                 encoding = stream.encoding
-        except OSError:
-            print(f"Can't read {file_path}")
+        except OSError as exc:
+            print(f"{exc} Can't read")
             return "", "utf-8"
         else:
             return source, encoding
@@ -42,12 +42,17 @@ class Session:
                 if not _is_excluded(path):
                     yield path
 
-    def scan(self, source):
-        yield from self.scanner.iter_imports(source)
+    def scan(self, source, filename=None):
+        try:
+            yield from self.scanner.iter_imports(source)
+        except SyntaxError as exc:
+            exc.filename = filename
+            print("Failed to scan", exc)
+            yield from []
 
     def scan_file(self, path):
         source, _ = self._read(path)
-        for imports in self.scan(source=source):
+        for imports in self.scan(source, path):
             imports.update(path=path)
             yield imports
 
@@ -55,7 +60,6 @@ class Session:
         pattern = "*.py"
         if recursive:
             pattern = f"**/{pattern}"
-
         for path in self._list_paths(path, pattern):
             yield from self.scan_file(path)
 
@@ -70,7 +74,6 @@ class Session:
             result = self.refactor(source)
         except ParseError as exc:
             raise ValueError(f"Invalid python file {path}.") from exc
-
         if apply:
             path.write_text(result, encoding=encoding)
         else:
