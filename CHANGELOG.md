@@ -32,9 +32,6 @@ All notable changes to this project will be documented in this file.
     - [add support for name binding by @isidentical](https://github.com/hakancelik96/unimport/commit/4a3df83b5b89d00472bed292c23b20693bdf5dd2)
     - [adapt testing suite by @isidentical](https://github.com/hakancelik96/unimport/commit/c81036fe5b0d845c3220cfda1e4c30250e1107a1)
 
-- Brm remove
-    - [remove brm, fully lib2to3 by @isidentical](https://github.com/hakancelik96/unimport/commit/768746347a700703f942798a4db2b932dc505240)
-
 - Bug Fix
     - [setup.cfg bug fix & catch error in dedect by @hakancelik96](https://github.com/hakancelik96/unimport/commit/a99b3846d55b723a701d6fdbbc7e634772b8c5ba)
     - [get_files bug fix by @hakancelik96](https://github.com/hakancelik96/unimport/commit/3d3299f1c82161a8e95d909864ad00dd9fda23f9)
@@ -44,7 +41,7 @@ All notable changes to this project will be documented in this file.
     - [balamir by @hakancelik96 and @isidentical](https://github.com/hakancelik96/unimport/commit/d4c1594371e7d3a3646cf2d886e931b50ca104f6)
 
 - API Support
-    - [General API Cleanup by @hakancelik96](https://github.com/hakancelik96/unimport/commit/f3efe4720eaa4eef5d991f838a0bd0872661dfa3)
+    - [General API Cleanup by @isidentical](https://github.com/hakancelik96/unimport/commit/f3efe4720eaa4eef5d991f838a0bd0872661dfa3)
 
 
 ## [0.1.3] - 31/Oct/2019
