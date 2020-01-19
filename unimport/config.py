@@ -49,15 +49,13 @@ DEFAULT_EXCLUDES = {
 
 
 class Config:
-    exclude = set()
 
     def __init__(self, config_file=None):
+        self.exclude = DEFAULT_EXCLUDES.copy()
         self.config_file = config_file
         self.config_path, self.section = self.find_config()
         if self.config_path is not None:
             self.parse()
-
-        self.exclude.update(DEFAULT_EXCLUDES)
 
     @staticmethod
     def is_available_to_parse(config_path):
