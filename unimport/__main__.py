@@ -63,9 +63,7 @@ def print_if_exists(sequence):
 
 def main(argv=None):
     namespace = parser.parse_args(argv)
-    if not any([value for key, value in vars(namespace).items()][1: ]):
-        print("You can list many options by running unimport --help")
-        return
+    any_namespace = any([value for key, value in vars(namespace).items()][1: ])
     if namespace.permission and not namespace.diff:
         namespace.diff = True
     session = Session(config_file=namespace.config)
@@ -73,18 +71,18 @@ def main(argv=None):
     for source_path in namespace.sources:
         sources.extend(session._list_paths(source_path, "**/*.py"))
     for source_path in sources:
-        if namespace.check:
+        if not any_namespace or namespace.check:
             print_if_exists(tuple(session.scan_file(source_path)))
         if namespace.diff:
-            print_if_exists(tuple(session.diff_file(source_path)))
-        if namespace.permission:
-            action = input(
-                f"Apply suggested changes to '{source_path}' [y/n/q] ? > "
-            )
-            if action == "q":
-                break
-            elif action == "y":
-                namespace.remove = True
+            exists_diff = print_if_exists(tuple(session.diff_file(source_path)))
+            if namespace.permission and exists_diff:
+                action = input(
+                    f"Apply suggested changes to '{source_path}' [y/n/q] ? > "
+                )
+                if action == "q":
+                    break
+                elif action == "y":
+                    namespace.remove = True
         if namespace.remove:
             session.refactor_file(source_path, apply=True)
 

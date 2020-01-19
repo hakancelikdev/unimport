@@ -60,7 +60,6 @@ class Session:
         pattern = "*.py"
         if recursive:
             pattern = f"**/{pattern}"
-
         for path in self._list_paths(path, pattern):
             yield from self.scan_file(path)
 
@@ -75,7 +74,6 @@ class Session:
             result = self.refactor(source)
         except ParseError as exc:
             raise ValueError(f"Invalid python file {path}.") from exc
-
         if apply:
             path.write_text(result, encoding=encoding)
         else:
