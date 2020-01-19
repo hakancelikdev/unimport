@@ -19,8 +19,8 @@ class Session:
             with tokenize.open(path) as stream:
                 source = stream.read()
                 encoding = stream.encoding
-        except OSError:
-            print(f"Can't read {file_path}")
+        except OSError as exc:
+            print(f"{exc} Can't read")
             return "", "utf-8"
         else:
             return source, encoding
