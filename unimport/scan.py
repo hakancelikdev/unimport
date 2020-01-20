@@ -67,10 +67,10 @@ class Scanner(ast.NodeVisitor):
     @recursive
     def visit_Attribute(self, node):
         local_attr = list()
-        for node in ast.walk(node): 
-            if isinstance(node, ast.Name): 
-                local_attr.append(node.id) 
-            elif isinstance(node, ast.Attribute): 
-                local_attr.append(node.attr) 
+        for node in ast.walk(node):
+            if isinstance(node, ast.Name):
+                local_attr.append(node.id)
+            elif isinstance(node, ast.Attribute):
+                local_attr.append(node.attr)
         local_attr.reverse()
         self.names.append(".".join(local_attr))
