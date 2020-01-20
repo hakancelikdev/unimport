@@ -1,5 +1,4 @@
 import configparser
-import pathlib
 
 try:
     import toml
@@ -70,15 +69,11 @@ class Config:
             and self.config_file.name in config_files
         ):
             return self.config_file, config_files[self.config_file.name]
-
-        for file_name, section in config_files.items():
-            current_dir = pathlib.Path().cwd()
-            search_depth = len(current_dir.parts)
-            for _ in range(search_depth):
-                config_path = current_dir / file_name
+        if self.config_file:
+            for file_name, section in config_files.items():
+                config_path = self.config_file / file_name
                 if self.is_available_to_parse(config_path):
                     return config_path, section
-                current_dir = current_dir.parent
         return None, None
 
     def parse(self):

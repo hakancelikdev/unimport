@@ -19,6 +19,7 @@ parser.add_argument(
 parser.add_argument(
     "-c",
     "--config",
+    default=".",
     help="read configuration from PATH.",
     metavar="PATH",
     type=pathlib.Path,
@@ -63,7 +64,7 @@ def print_if_exists(sequence):
 
 def main(argv=None):
     namespace = parser.parse_args(argv)
-    any_namespace = any([value for key, value in vars(namespace).items()][1: ])
+    any_namespace = any([value for key, value in vars(namespace).items()][2: ])
     if namespace.permission and not namespace.diff:
         namespace.diff = True
     session = Session(config_file=namespace.config)
