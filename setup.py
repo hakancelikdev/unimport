@@ -42,7 +42,5 @@ setup(
         "Programming Language :: Python :: 3 :: Only",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    entry_points={
-        "console_scripts": ["unimport = unimport.__main__:main"]
-    },
+    entry_points={"console_scripts": ["unimport = unimport.__main__:main"]},
 )

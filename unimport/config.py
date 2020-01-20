@@ -48,7 +48,6 @@ DEFAULT_EXCLUDES = {
 
 
 class Config:
-
     def __init__(self, config_file=None):
         self.exclude = DEFAULT_EXCLUDES.copy()
         self.config_file = config_file
