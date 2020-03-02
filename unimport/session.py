@@ -53,7 +53,7 @@ class Session:
     def scan_file(self, path):
         source, _ = self._read(path)
         for imports in self.scan(source, path):
-            imports.update(path=path)
+            imports.update(path=str(path))
             yield imports
 
     def scan_directory(self, path, recursive=False):
