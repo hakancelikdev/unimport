@@ -73,7 +73,9 @@ def main(argv=None):
         sources.extend(session._list_paths(source_path, "**/*.py"))
     for source_path in sources:
         if not any_namespace or namespace.check:
-            print_if_exists(tuple(session.scan_file(source_path)))
+            for imports in session.get_unused_imports(source=session._read(source_path)[0]):
+                imports["path"] = str(source_path)
+                print(imports)
         if namespace.diff:
             exists_diff = print_if_exists(
                 tuple(session.diff_file(source_path))

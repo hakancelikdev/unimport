@@ -23,19 +23,19 @@ class Scanner(ast.NodeVisitor):
         self.method_names = list()
         self.functions = list()
         if source:
-            self.visit(ast.parse(source))
+            self.run_visit(source)
 
     @recursive
     def visit_ClassDef(self, node):
         for function_node in [body for body in node.body]:
             if isinstance(function_node, ast.FunctionDef):
                 self.method_names.append(function_node.name)
-        self.classes.append(dict(lineno=node.lineno, name=node.name, type="class"))
+        self.classes.append(dict(lineno=node.lineno, name=node.name, node_name="class"))
 
     @recursive
     def visit_FunctionDef(self, node):
         if node.name not in self.method_names:
-            self.functions.append(dict(lineno=node.lineno, name=node.name, type="function"))
+            self.functions.append(dict(lineno=node.lineno, name=node.name, node_name="function"))
 
     @recursive
     def visit_Import(self, node):
@@ -46,7 +46,7 @@ class Scanner(ast.NodeVisitor):
                 name = alias.name
             if name in self.ignore_imports:
                 continue
-            self.imports.append(dict(lineno=node.lineno, name=name, type="import"))
+            self.imports.append(dict(lineno=node.lineno, name=name, node_name="import"))
             self.import_names.add(name)
 
     @recursive
@@ -56,11 +56,11 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_Name(self, node):
-        if isinstance(node.ctx, ast.Store):
-            if node.id in self.import_names:
-                self.names.append(dict(lineno=node.lineno, name=node.id, type="name"))
-        else:
-            self.names.append(dict(lineno=node.lineno, name=node.id, type="name"))
+        # if isinstance(node.ctx, ast.Store):
+        #     if node.id in self.import_names:
+        #         self.names.append(dict(lineno=node.lineno, name=node.id, node_name="name"))
+        # else:
+            self.names.append(dict(lineno=node.lineno, name=node.id, node_name="name"))
 
     def visit_Attribute(self, node):
         lineno = node.lineno
@@ -71,21 +71,15 @@ class Scanner(ast.NodeVisitor):
             elif isinstance(node, ast.Attribute):
                 local_attr.append(node.attr)
         local_attr.reverse()
-        self.names.append(dict(lineno=lineno, name=".".join(local_attr), type="name"))
+        self.names.append(dict(lineno=lineno, name=".".join(local_attr), node_name="name"))
 
-    def iter_imports(self, source):
+    def run_visit(self, source):
         self.visit(ast.parse(source))
-        for imp in self.imports:
-            len_dot = len(imp["name"].split("."))
-            for name in self.names:
-                if ".".join(name["name"].split(".")[:len_dot]) == imp["name"]:
-                    break
-            else:
-                yield imp
-
-        self.clear()
 
     def clear(self):
         self.names.clear()
         self.imports.clear()
         self.import_names.clear()
+        self.classes.clear()
+        self.method_names.clear()
+        self.functions.clear()

@@ -42,19 +42,6 @@ class Session:
                 if not _is_excluded(path):
                     yield path
 
-    def scan(self, source, filename=None):
-        try:
-            yield from self.scanner.iter_imports(source)
-        except SyntaxError as exc:
-            exc.filename = filename
-            print("Failed to scan", exc)
-            yield from []
-
-    def scan_file(self, path):
-        source, _ = self._read(path)
-        for imports in self.scan(source, path):
-            imports.update(path=str(path))
-            yield imports
 
     def scan_directory(self, path, recursive=False):
         pattern = "*.py"
@@ -64,7 +51,7 @@ class Session:
             yield from self.scan_file(path)
 
     def refactor(self, source):
-        modules = [module["name"] for module in self.scan(source)]
+        modules = [module["name"] for module in self.get_unused_imports(source)]
         return self.refactor_tool.refactor_string(source, modules)
 
     def refactor_file(self, path, apply=False):
@@ -93,3 +80,14 @@ class Session:
                 source.splitlines(), result.splitlines(), fromfile=str(path)
             )
         )
+
+    def get_unused_imports(self, source):
+        self.scanner.run_visit(source)
+        for imp in self.scanner.imports:
+            len_dot = len(imp["name"].split("."))
+            for name in self.scanner.names:
+                if ".".join(name["name"].split(".")[:len_dot]) == imp["name"]:
+                    break
+            else:
+                yield imp
+        self.scanner.clear()
