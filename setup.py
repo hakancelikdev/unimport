@@ -3,6 +3,7 @@ import sys
 from setuptools import setup
 
 import unimport
+
 assert sys.version_info >= (3, 6, 0), "unimport requires Python 3.6+"
 
 CURRENT_DIR = Path(__file__).parent
