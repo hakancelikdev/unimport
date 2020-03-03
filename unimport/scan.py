@@ -46,11 +46,10 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_Import(self, node):
-        # BUG
         star = False
         module_name = None
         if hasattr(node, "module"):
-            module_name = node.module.split(".")[0]
+            module_name = node.module
         for alias in node.names:
             if alias.asname is not None:
                 name = alias.asname
@@ -63,6 +62,8 @@ class Scanner(ast.NodeVisitor):
                     module = importlib.import_module(module_name or name)
                 except ModuleNotFoundError:
                     module = None
+                    if star:
+                        continue
             self.imports.append(
                 dict(
                     lineno=node.lineno,
@@ -101,13 +102,13 @@ class Scanner(ast.NodeVisitor):
     def get_unused_imports(self):
         # TODO removed to session
         for imp in self.imports:
-            # if not imp["star"]:
-            len_dot = len(imp["name"].split("."))
-            for name in self.names:
-                if ".".join(name["name"].split(".")[:len_dot]) == imp["name"]:
-                    break
-            else:
-                yield imp
+            if not imp["star"]:
+                len_dot = len(imp["name"].split("."))
+                for name in self.names:
+                    if ".".join(name["name"].split(".")[:len_dot]) == imp["name"]:
+                        break
+                else:
+                    yield imp
 
     def from_import_star(self):
         # TODO removed to session
@@ -116,7 +117,7 @@ class Scanner(ast.NodeVisitor):
                 if imp["module"].__name__ not in sys.builtin_module_names:
                     to_ = {to_cfv["name"] for to_cfv in self.names}
                     s = self.__class__(source=inspect.getsource(imp["module"]))
-                    yield "from " + imp["module"].__name__ + " import", [
+                    modules = [
                         from_cfv
                         for from_cfv in {
                             from_cfv["name"]
@@ -124,6 +125,7 @@ class Scanner(ast.NodeVisitor):
                         }
                         if from_cfv in to_
                     ]
+                    yield dict(imp=imp, modules=modules)
 
     def run_visit(self, source):
         self.visit(ast.parse(source))

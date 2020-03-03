@@ -1,9 +1,6 @@
 import unittest
-import importlib
-import sys
-from unimport.scan import Scanner
-import inspect
 from unimport.session import Session
+import os
 
 
 class TestFromImportStar(unittest.TestCase):
@@ -21,4 +18,17 @@ class TestFromImportStar(unittest.TestCase):
             "execlp"
         )
         self.session.scanner.run_visit(source)
-        self.assertEqual([('from os import', ['execlp', 'walk'])], list(self.session.scanner.from_import_star()))
+        self.assertEqual(
+            [
+                {
+                    'imp': {
+                        'lineno': 1,
+                        'name': '*',
+                        'node_name': 'import',
+                        'star': True,
+                        'module': os
+                        },
+                        'modules': ['walk', 'execlp']
+                }
+            ],
+            list(self.session.scanner.from_import_star()))
