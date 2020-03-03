@@ -103,12 +103,12 @@ class RefactorTool(RefactoringTool):
         self._fixer = RefactorImports()
         self._fixers = [self._fixer]
         super().__init__(None, options={"print_function": True})
-        del self.grammar.keywords["exec"]
+        # del self.grammar.keywords["exec"]
 
     def get_fixers(self):
         return self._fixers, []
 
-    def refactor_string(self, source, unused_imports):
+    def refactor_string(self, data, unused_imports, name="unimport"):
         with self._fixer.clean(unused_imports):
-            source = super().refactor_string(source, "unimport")
+            source = super().refactor_string(data, name)
         return str(source)

@@ -54,11 +54,14 @@ class Session:
         modules = [
             module["name"] for module in self.scanner.get_unused_imports()
         ]
+        print(modules)
+        self.scanner.clear()
         return self.refactor_tool.refactor_string(source, modules)
 
     def refactor_file(self, path, apply=False):
         path = Path(path)
         source, encoding = self._read(path)
+        print(path)
         try:
             result = self.refactor(source)
         except ParseError as exc:

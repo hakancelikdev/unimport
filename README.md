@@ -19,7 +19,7 @@ Unimport can be installed by running `pip install unimport`. It requires Python 
 You can list many options by running unimport --help
 
 ```
-usage: unimport [-h] [-c PATH] [-r | -p] [-d] [--check] [-s] [-v] [sources [sources ...]]
+usage: unimport [-h] [-c PATH] [-r | -p] [-d] [--check] [-v] [sources [sources ...]]
 
 Detect or remove unused Python imports.
 

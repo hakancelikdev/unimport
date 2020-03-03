@@ -15,7 +15,6 @@ class TestFromImportStar(unittest.TestCase):
             "#import re\n"
             "variable=1\n"
             "print(walk)\n"
-            "execlp"
         )
         self.session.scanner.run_visit(source)
         self.assertEqual(
@@ -27,8 +26,8 @@ class TestFromImportStar(unittest.TestCase):
                         'node_name': 'import',
                         'star': True,
                         'module': os
-                        },
-                        'modules': ['walk', 'execlp']
+                    },
+                    'modules': ['walk']
                 }
             ],
             list(self.session.scanner.from_import_star()))

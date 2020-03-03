@@ -57,23 +57,23 @@ class Scanner(ast.NodeVisitor):
                 name = alias.name
             if name == "*":
                 star = True
-            if name not in self.ignore_imports:
+            if (module_name or name) not in self.ignore_imports:
                 try:
                     module = importlib.import_module(module_name or name)
                 except ModuleNotFoundError:
                     module = None
                     if star:
                         continue
-            self.imports.append(
-                dict(
-                    lineno=node.lineno,
-                    name=name,
-                    node_name="import",
-                    star=star,
-                    module=module,
+                self.imports.append(
+                    dict(
+                        lineno=node.lineno,
+                        name=name,
+                        node_name="import",
+                        star=star,
+                        module=module,
+                    )
                 )
-            )
-            self.import_names.add(name)
+                self.import_names.add(name)
 
     @recursive
     def visit_ImportFrom(self, node):

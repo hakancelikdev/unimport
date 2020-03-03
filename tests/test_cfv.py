@@ -1,6 +1,7 @@
 import unittest
 from unimport.scan import Scanner
 
+import os
 
 class TestNames(unittest.TestCase):
 
@@ -54,7 +55,9 @@ class TestNames(unittest.TestCase):
                 {
                     'lineno': 2,
                     'name': 'os',
-                    'node_name': 'import'
+                    'node_name': 'import',
+                    'star': False,
+                    'module': os
                 },
             ],
             self.scanner.imports
