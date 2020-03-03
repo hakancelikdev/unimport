@@ -103,7 +103,6 @@ class RefactorTool(RefactoringTool):
         self._fixer = RefactorImports()
         self._fixers = [self._fixer]
         super().__init__(None, options={"print_function": True})
-        # del self.grammar.keywords["exec"]
 
     def get_fixers(self):
         return self._fixers, []
