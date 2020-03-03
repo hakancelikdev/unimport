@@ -41,21 +41,23 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_Import(self, node):
+        # BUG
+        star = False
+        module_name = None
         if hasattr(node, "module"):
-            star = True
-            name = node.module
-        else:
-            star = False
-            for alias in node.names:
-                if alias.asname is not None:
-                    name = alias.asname
-                else:
-                    name = alias.name
-        if name not in self.ignore_imports:
-            try:
-                module = importlib.import_module(name)
-            except ModuleNotFoundError:
-                module = None
+            module_name = node.module.split(".")[0]
+        for alias in node.names:
+            if alias.asname is not None:
+                name = alias.asname
+            else:
+                name = alias.name
+            if name == "*":
+                star = True
+            if name not in self.ignore_imports:
+                try:
+                    module = importlib.import_module(module_name or name)
+                except ModuleNotFoundError:
+                    module = None
             self.imports.append(dict(lineno=node.lineno, name=name, node_name="import", star=star, module=module))
             self.import_names.add(name)
 
@@ -82,13 +84,13 @@ class Scanner(ast.NodeVisitor):
     def get_unused_imports(self):
         # TODO removed to session
         for imp in self.imports:
-            len_dot = len(imp["name"].split("."))
-            for name in self.names:
-                if ".".join(name["name"].split(".")[:len_dot]) == imp["name"]:
-                    break
-            else:
-                yield imp
-        # self.scanner.clear()
+            # if not imp["star"]:
+                len_dot = len(imp["name"].split("."))
+                for name in self.names:
+                    if ".".join(name["name"].split(".")[:len_dot]) == imp["name"]:
+                        break
+                else:
+                    yield imp
 
     def from_import_star(self):
         # TODO removed to session
@@ -97,7 +99,7 @@ class Scanner(ast.NodeVisitor):
                 if imp["module"].__name__ not in sys.builtin_module_names:
                     to_ = {to_cfv["name"] for to_cfv in self.names}
                     s = self.__class__(source=inspect.getsource(imp["module"]))
-                    yield "from " + imp["module"].__name__ + " import " , *[from_cfv for from_cfv in {from_cfv["name"] for from_cfv in s.names + s.classes + s.functions} if from_cfv in to_]
+                    yield "from " + imp["module"].__name__ + " import" , [from_cfv for from_cfv in {from_cfv["name"] for from_cfv in s.names + s.classes + s.functions} if from_cfv in to_]
 
     def run_visit(self, source):
         self.visit(ast.parse(source))

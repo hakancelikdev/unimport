@@ -78,6 +78,8 @@ def main(argv=None):
             for imports in scanner.get_unused_imports():
                 imports["path"] = str(source_path)
                 print(imports)
+                # print(f"lineno; {imports['lineno']}, name; {imports['name']}, path; {imports['path']}")
+            scanner.clear()
         if namespace.diff:
             exists_diff = print_if_exists(
                 tuple(session.diff_file(source_path))
