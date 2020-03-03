@@ -42,7 +42,6 @@ class Session:
                 if not _is_excluded(path):
                     yield path
 
-
     def scan_directory(self, path, recursive=False):
         pattern = "*.py"
         if recursive:
@@ -51,7 +50,8 @@ class Session:
             yield from self.scan_file(path)
 
     def refactor(self, source):
-        modules = [module["name"] for module in self.get_unused_imports(source)]
+        self.scanner.run_visit(source)
+        modules = [module["name"] for module in self.scanner.get_unused_imports()]
         return self.refactor_tool.refactor_string(source, modules)
 
     def refactor_file(self, path, apply=False):
@@ -80,14 +80,3 @@ class Session:
                 source.splitlines(), result.splitlines(), fromfile=str(path)
             )
         )
-
-    def get_unused_imports(self, source):
-        self.scanner.run_visit(source)
-        for imp in self.scanner.imports:
-            len_dot = len(imp["name"].split("."))
-            for name in self.scanner.names:
-                if ".".join(name["name"].split(".")[:len_dot]) == imp["name"]:
-                    break
-            else:
-                yield imp
-        self.scanner.clear()
