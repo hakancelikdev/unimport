@@ -1,7 +1,8 @@
 import ast
-import sys
 import importlib
 import inspect
+import sys
+
 
 def recursive(func):
     """ decorator to make visitor work recursive """
@@ -32,12 +33,16 @@ class Scanner(ast.NodeVisitor):
         for function_node in [body for body in node.body]:
             if isinstance(function_node, ast.FunctionDef):
                 self.method_names.append(function_node.name)
-        self.classes.append(dict(lineno=node.lineno, name=node.name, node_name="class"))
+        self.classes.append(
+            dict(lineno=node.lineno, name=node.name, node_name="class")
+        )
 
     @recursive
     def visit_FunctionDef(self, node):
         if node.name not in self.method_names:
-            self.functions.append(dict(lineno=node.lineno, name=node.name, node_name="function"))
+            self.functions.append(
+                dict(lineno=node.lineno, name=node.name, node_name="function")
+            )
 
     @recursive
     def visit_Import(self, node):
@@ -58,7 +63,15 @@ class Scanner(ast.NodeVisitor):
                     module = importlib.import_module(module_name or name)
                 except ModuleNotFoundError:
                     module = None
-            self.imports.append(dict(lineno=node.lineno, name=name, node_name="import", star=star, module=module))
+            self.imports.append(
+                dict(
+                    lineno=node.lineno,
+                    name=name,
+                    node_name="import",
+                    star=star,
+                    module=module,
+                )
+            )
             self.import_names.add(name)
 
     @recursive
@@ -68,7 +81,9 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_Name(self, node):
-        self.names.append(dict(lineno=node.lineno, name=node.id, node_name="name"))
+        self.names.append(
+            dict(lineno=node.lineno, name=node.id, node_name="name")
+        )
 
     def visit_Attribute(self, node):
         lineno = node.lineno
@@ -79,18 +94,20 @@ class Scanner(ast.NodeVisitor):
             elif isinstance(node, ast.Attribute):
                 local_attr.append(node.attr)
         local_attr.reverse()
-        self.names.append(dict(lineno=lineno, name=".".join(local_attr), node_name="name"))
+        self.names.append(
+            dict(lineno=lineno, name=".".join(local_attr), node_name="name")
+        )
 
     def get_unused_imports(self):
         # TODO removed to session
         for imp in self.imports:
             # if not imp["star"]:
-                len_dot = len(imp["name"].split("."))
-                for name in self.names:
-                    if ".".join(name["name"].split(".")[:len_dot]) == imp["name"]:
-                        break
-                else:
-                    yield imp
+            len_dot = len(imp["name"].split("."))
+            for name in self.names:
+                if ".".join(name["name"].split(".")[:len_dot]) == imp["name"]:
+                    break
+            else:
+                yield imp
 
     def from_import_star(self):
         # TODO removed to session
@@ -99,7 +116,14 @@ class Scanner(ast.NodeVisitor):
                 if imp["module"].__name__ not in sys.builtin_module_names:
                     to_ = {to_cfv["name"] for to_cfv in self.names}
                     s = self.__class__(source=inspect.getsource(imp["module"]))
-                    yield "from " + imp["module"].__name__ + " import" , [from_cfv for from_cfv in {from_cfv["name"] for from_cfv in s.names + s.classes + s.functions} if from_cfv in to_]
+                    yield "from " + imp["module"].__name__ + " import", [
+                        from_cfv
+                        for from_cfv in {
+                            from_cfv["name"]
+                            for from_cfv in s.names + s.classes + s.functions
+                        }
+                        if from_cfv in to_
+                    ]
 
     def run_visit(self, source):
         self.visit(ast.parse(source))

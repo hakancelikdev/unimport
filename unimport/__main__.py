@@ -70,7 +70,9 @@ def print_if_exists(sequence):
 
 def main(argv=None):
     namespace = parser.parse_args(argv)
-    any_namespace = any([value for key, value in vars(namespace).items()][2: -2])
+    any_namespace = any(
+        [value for key, value in vars(namespace).items()][2:-2]
+    )
     if namespace.permission and not namespace.diff:
         namespace.diff = True
     session = Session(config_file=namespace.config)
