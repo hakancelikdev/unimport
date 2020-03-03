@@ -51,7 +51,9 @@ class Session:
 
     def refactor(self, source):
         self.scanner.run_visit(source)
-        modules = [module["name"] for module in self.scanner.get_unused_imports()]
+        modules = [
+            module["name"] for module in self.scanner.get_unused_imports()
+        ]
         return self.refactor_tool.refactor_string(source, modules)
 
     def refactor_file(self, path, apply=False):
