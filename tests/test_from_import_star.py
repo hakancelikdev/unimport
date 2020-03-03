@@ -21,4 +21,4 @@ class TestFromImportStar(unittest.TestCase):
             "execlp"
         )
         self.session.scanner.run_visit(source)
-        print(list(self.session.scanner.from_import_star()))
+        self.assertEqual([('from os import ', 'walk', 'execlp')], list(self.session.scanner.from_import_star()))
