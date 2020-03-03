@@ -48,6 +48,12 @@ parser.add_argument(
     help="Prints which file the unused imports are in.",
 )
 parser.add_argument(
+    "-s",
+    "--star",
+    action="store_true",
+    help="Scan from x import * and offer suggestions.",
+)
+parser.add_argument(
     "-v",
     "--version",
     action="version",
@@ -64,7 +70,7 @@ def print_if_exists(sequence):
 
 def main(argv=None):
     namespace = parser.parse_args(argv)
-    any_namespace = any([value for key, value in vars(namespace).items()][2:])
+    any_namespace = any([value for key, value in vars(namespace).items()][2: -2])
     if namespace.permission and not namespace.diff:
         namespace.diff = True
     session = Session(config_file=namespace.config)
@@ -79,6 +85,9 @@ def main(argv=None):
                 imports["path"] = str(source_path)
                 print(imports)
                 # print(f"lineno; {imports['lineno']}, name; {imports['name']}, path; {imports['path']}")
+            if namespace.star:
+                for star_import in scanner.from_import_star():
+                    print(star_import)
             scanner.clear()
         if namespace.diff:
             exists_diff = print_if_exists(
