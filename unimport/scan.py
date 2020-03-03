@@ -105,7 +105,10 @@ class Scanner(ast.NodeVisitor):
             if not imp["star"]:
                 len_dot = len(imp["name"].split("."))
                 for name in self.names:
-                    if ".".join(name["name"].split(".")[:len_dot]) == imp["name"]:
+                    if (
+                        ".".join(name["name"].split(".")[:len_dot])
+                        == imp["name"]
+                    ):
                         break
                 else:
                     yield imp

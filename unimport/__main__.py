@@ -48,12 +48,6 @@ parser.add_argument(
     help="Prints which file the unused imports are in.",
 )
 parser.add_argument(
-    "-s",
-    "--star",
-    action="store_true",
-    help="Scan from x import * and offer suggestions.",
-)
-parser.add_argument(
     "-v",
     "--version",
     action="version",
@@ -84,10 +78,19 @@ def main(argv=None):
             scanner = session.scanner
             scanner.run_visit(source=session._read(source_path)[0])
             for imports in scanner.get_unused_imports():
-                print(f"lineno; {imports['lineno']}, name; {imports['name']}, path; {str(source_path)}")
-            if namespace.star:
-                for imports in scanner.from_import_star():
-                    print(f"lineno; {imports['imp']['lineno']}, name; {imports['imp']['name']}, module_name; {imports['imp']['module'].__name__}, modules; {imports['modules']}, path; {str(source_path)}")
+                print(
+                    f"lineno; {imports['lineno']}, "
+                    f"name; {imports['name']}, "
+                    f"path; {str(source_path)}"
+                )
+            for imports in scanner.from_import_star():
+                print(
+                    f"lineno; {imports['imp']['lineno']}, "
+                    f"name; {imports['imp']['name']}, "
+                    f"module_name; {imports['imp']['module'].__name__}, "
+                    f"modules; {imports['modules']}, "
+                    f"path; {str(source_path)}"
+                )
             scanner.clear()
         if namespace.diff:
             exists_diff = print_if_exists(

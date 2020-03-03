@@ -34,7 +34,6 @@ optional arguments:
   -p, --permission      Refactor permission after see diff.
   -d, --diff            Prints a diff of all the changes unimport would make to a file.
   --check               Prints which file the unused imports are in.
-  -s, --star            Scan from x import * and offer suggestions.
   -v, --version         Prints version of unimport
 ```
 
