@@ -84,12 +84,10 @@ def main(argv=None):
             scanner = session.scanner
             scanner.run_visit(source=session._read(source_path)[0])
             for imports in scanner.get_unused_imports():
-                imports["path"] = str(source_path)
-                print(imports)
-                # print(f"lineno; {imports['lineno']}, name; {imports['name']}, path; {imports['path']}")
+                print(f"lineno; {imports['lineno']}, name; {imports['name']}, path; {str(source_path)}")
             if namespace.star:
-                for star_import in scanner.from_import_star():
-                    print(star_import)
+                for imports in scanner.from_import_star():
+                    print(f"lineno; {imports['imp']['lineno']}, name; {imports['imp']['name']}, module_name; {imports['imp']['module'].__name__}, modules; {imports['modules']}, path; {str(source_path)}")
             scanner.clear()
         if namespace.diff:
             exists_diff = print_if_exists(
