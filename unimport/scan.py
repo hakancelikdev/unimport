@@ -19,11 +19,11 @@ class Scanner(ast.NodeVisitor):
     ignore_imports = ["__future__"]
 
     def __init__(self, source=None):
-        self.names = list()
-        self.imports = list()
-        self.classes = list()
-        self.method_names = list()
-        self.functions = list()
+        self.names = []
+        self.imports = []
+        self.classes = []
+        self.method_names = []
+        self.functions = []
         if source:
             self.run_visit(source)
 
@@ -113,37 +113,49 @@ class Scanner(ast.NodeVisitor):
             )
         )
 
+    def _imp_is_star(self, imp):
+        if imp["module"].__name__ not in sys.builtin_module_names:
+            to_ = {to_cfv["name"] for to_cfv in self.names}
+            try:
+                s = self.__class__(inspect.getsource(imp["module"]))
+            except OSError:
+                return {"imp": imp, "modules": []}
+            modules = [
+                from_cfv
+                for from_cfv in {
+                    from_cfv["name"]
+                    for from_cfv in s.names + s.classes + s.functions
+                }
+                if from_cfv in to_
+            ]
+            imp["modules"] = modules
+            return imp
+
+    def _imp_is_not_star(self, imp):
+        for name in self.names:
+            if (
+                ".".join(name["name"].split(".")[:len(imp["name"].split("."))])
+                == imp["name"]
+            ):
+                break
+        else:
+            return imp
+
     def get_unused_imports(self):
         for imp in self.imports:
-            if not imp["star"]:
-                len_dot = len(imp["name"].split("."))
-                for name in self.names:
-                    if (
-                        ".".join(name["name"].split(".")[:len_dot])
-                        == imp["name"]
-                    ):
-                        break
-                else:
-                    yield imp
+            if imp["star"]:
+                res = self._imp_is_star(imp)
+                if not res["modules"]:
+                    yield res
+            else:
+                res = self._imp_is_not_star(imp)
+                if res:
+                    yield res
 
-    def from_import_star(self):
+    def get_star_imports(self):
         for imp in self.imports:
             if imp["star"]:
-                if imp["module"].__name__ not in sys.builtin_module_names:
-                    to_ = {to_cfv["name"] for to_cfv in self.names}
-                    try:
-                        s = self.__class__(inspect.getsource(imp["module"]))
-                    except OSError:
-                        break
-                    modules = [
-                        from_cfv
-                        for from_cfv in {
-                            from_cfv["name"]
-                            for from_cfv in s.names + s.classes + s.functions
-                        }
-                        if from_cfv in to_
-                    ]
-                    yield dict(imp=imp, modules=modules)
+                yield self._imp_is_star(imp)
 
     def run_visit(self, source):
         self.visit(ast.parse(source))
