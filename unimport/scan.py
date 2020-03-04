@@ -21,7 +21,6 @@ class Scanner(ast.NodeVisitor):
     def __init__(self, source=None):
         self.names = list()
         self.imports = list()
-        self.import_names = set()
         self.classes = list()
         self.method_names = list()
         self.functions = list()
@@ -73,7 +72,6 @@ class Scanner(ast.NodeVisitor):
                         module=module,
                     )
                 )
-                self.import_names.add(name)
 
     @recursive
     def visit_ImportFrom(self, node):
@@ -86,17 +84,33 @@ class Scanner(ast.NodeVisitor):
             dict(lineno=node.lineno, name=node.id, node_name="name")
         )
 
+    @recursive
     def visit_Attribute(self, node):
-        lineno = node.lineno
         local_attr = list()
-        for node in ast.walk(node):
-            if isinstance(node, ast.Name):
-                local_attr.append(node.id)
-            elif isinstance(node, ast.Attribute):
-                local_attr.append(node.attr)
+        if hasattr(node, "attr"):
+            local_attr.append(node.attr)
+        while True:
+            if hasattr(node, "value"):
+                if isinstance(node.value, ast.Attribute):
+                    node = node.value
+                    if hasattr(node, "attr"):
+                        local_attr.append(node.attr)
+                elif isinstance(node.value, ast.Call):
+                    node = node.value
+                    if isinstance(node.func, ast.Name):
+                        local_attr.append(node.func.id)
+                elif isinstance(node.value, ast.Name):
+                    node = node.value
+                    local_attr.append(node.id)
+                else:
+                    break
+            else:
+                break
         local_attr.reverse()
         self.names.append(
-            dict(lineno=lineno, name=".".join(local_attr), node_name="name")
+            dict(
+                lineno=node.lineno, name=".".join(local_attr), node_name="name"
+            )
         )
 
     def get_unused_imports(self):
@@ -136,7 +150,6 @@ class Scanner(ast.NodeVisitor):
     def clear(self):
         self.names.clear()
         self.imports.clear()
-        self.import_names.clear()
         self.classes.clear()
         self.method_names.clear()
         self.functions.clear()
