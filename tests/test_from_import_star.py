@@ -31,3 +31,10 @@ class TestFromImportStar(unittest.TestCase):
                 }
             ],
             list(self.session.scanner.from_import_star()))
+
+    def test_from_import_star_2(self):
+        source = (
+            "from urllib import *\n"
+        )
+        self.session.scanner.run_visit(source)
+        self.assertEqual([], list(self.session.scanner.from_import_star()))

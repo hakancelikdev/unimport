@@ -1,5 +1,6 @@
 import difflib
 import tokenize
+import fnmatch
 from lib2to3.pgen2.parse import ParseError
 from pathlib import Path
 
@@ -30,9 +31,10 @@ class Session:
 
         def _is_excluded(path):
             for pattern_exclude in self.config.exclude:
-                for inner in start.glob(pattern_exclude):
-                    if str(path).startswith(str(inner)):
-                        return True
+                if fnmatch.fnmatch(path, pattern_exclude):
+                    return True
+            else:
+                return False
 
         if not start.is_dir():
             if not _is_excluded(start):
