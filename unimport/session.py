@@ -25,7 +25,7 @@ class Session:
         else:
             return source, encoding
 
-    def _list_paths(self, start, pattern):
+    def _list_paths(self, start, pattern="**/*.py"):
         start = Path(start)
 
         def _is_excluded(path):
@@ -41,13 +41,6 @@ class Session:
             for path in start.glob(pattern):
                 if not _is_excluded(path):
                     yield path
-
-    def scan_directory(self, path, recursive=False):
-        pattern = "*.py"
-        if recursive:
-            pattern = f"**/{pattern}"
-        for path in self._list_paths(path, pattern):
-            yield from self.scan_file(path)
 
     def refactor(self, source):
         self.scanner.run_visit(source)
@@ -70,9 +63,8 @@ class Session:
             return result
 
     def diff(self, source):
-        result = self.refactor(source)
         return tuple(
-            difflib.unified_diff(source.splitlines(), result.splitlines())
+            difflib.unified_diff(source.splitlines(), self.refactor(source).splitlines())
         )
 
     def diff_file(self, path):
