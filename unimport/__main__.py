@@ -70,39 +70,37 @@ def main(argv=None):
     if namespace.permission and not namespace.diff:
         namespace.diff = True
     session = Session(config_file=namespace.config)
-    sources = list([session._list_paths(source_path) for source_path in namespace.sources][0])
-    for source_path in sources:
-        if not any_namespace or namespace.check:
-            session.scanner.run_visit(source=session._read(source_path)[0])
-            for imports in session.scanner.get_unused_imports():
-                print(
-                    f"lineno; {imports['lineno']}, "
-                    f"name; {imports['name']}, "
-                    f"path; {str(source_path)}"
+    for source_path in namespace.sources:
+        for py_path in session._list_paths(source_path, "**/*.py"):
+            if not any_namespace or namespace.check:
+                session.scanner.run_visit(source=session._read(py_path)[0])
+                for imports in session.scanner.get_unused_imports():
+                    print(
+                        f"lineno; {imports['lineno']}, "
+                        f"name; {imports['name']}, "
+                        f"path; {str(py_path)} ,line {imports['lineno']})"
+                    )
+                for imports in session.scanner.from_import_star():
+                    print(
+                        f"module_name; {imports['imp']['module'].__name__}, "
+                        f"used imports; {imports['modules']}, "
+                        f"path; {str(py_path)} ,line {imports['imp']['lineno']})"
+                    )
+                session.scanner.clear()
+            if namespace.diff:
+                exists_diff = print_if_exists(
+                    tuple(session.diff_file(py_path))
                 )
-            for imports in session.scanner.from_import_star():
-                print(
-                    f"lineno; {imports['imp']['lineno']}, "
-                    f"name; {imports['imp']['name']}, "
-                    f"module_name; {imports['imp']['module'].__name__}, "
-                    f"modules; {imports['modules']}, "
-                    f"path; {str(source_path)}"
-                )
-            session.scanner.clear()
-        if namespace.diff:
-            exists_diff = print_if_exists(
-                tuple(session.diff_file(source_path))
-            )
-            if namespace.permission and exists_diff:
-                action = input(
-                    f"Apply suggested changes to '{source_path}' [y/n/q] ? > "
-                )
-                if action == "q":
-                    break
-                elif action == "y":
-                    namespace.remove = True
-        if namespace.remove:
-            session.refactor_file(source_path, apply=True)
+                if namespace.permission and exists_diff:
+                    action = input(
+                        f"Apply suggested changes to '{py_path}' [y/n/q] ? > "
+                    )
+                    if action == "q":
+                        break
+                    elif action == "y":
+                        namespace.remove = True
+            if namespace.remove:
+                session.refactor_file(py_path, apply=True)
 
 
 if __name__ == "__main__":

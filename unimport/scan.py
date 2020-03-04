@@ -59,7 +59,7 @@ class Scanner(ast.NodeVisitor):
             if (module_name or name) not in self.ignore_imports:
                 try:
                     module = importlib.import_module(module_name or name)
-                except ModuleNotFoundError:
+                except (ModuleNotFoundError, ValueError):
                     module = None
                     if star:
                         continue
@@ -114,7 +114,6 @@ class Scanner(ast.NodeVisitor):
         )
 
     def get_unused_imports(self):
-        # TODO removed to session
         for imp in self.imports:
             if not imp["star"]:
                 len_dot = len(imp["name"].split("."))
@@ -128,12 +127,14 @@ class Scanner(ast.NodeVisitor):
                     yield imp
 
     def from_import_star(self):
-        # TODO removed to session
         for imp in self.imports:
             if imp["star"]:
                 if imp["module"].__name__ not in sys.builtin_module_names:
                     to_ = {to_cfv["name"] for to_cfv in self.names}
-                    s = self.__class__(source=inspect.getsource(imp["module"]))
+                    try:
+                        s = self.__class__(inspect.getsource(imp["module"]))
+                    except OSError:
+                        break
                     modules = [
                         from_cfv
                         for from_cfv in {

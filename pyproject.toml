@@ -28,4 +28,4 @@ force_grid_wrap=0
 line_length=79
 
 [tool.unimport]
-exclude = ["tests", "rare_cases", "**/__init__.py"]
+exclude = ["tests*", "rare_cases*", "**/__init__.py"]

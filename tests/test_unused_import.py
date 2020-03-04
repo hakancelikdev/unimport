@@ -8,7 +8,7 @@ class TestUnusedImport(unittest.TestCase):
     def setUp(self):
         self.session = Session()
 
-    def test_attribute_1(self):
+    def test_unused_import_1(self):
         from pathlib import Path
         source = (
             "from pathlib import Path\n"
@@ -17,7 +17,7 @@ class TestUnusedImport(unittest.TestCase):
         self.session.scanner.run_visit(source)
         self.assertEqual([], list(self.session.scanner.get_unused_imports()))
 
-    def test_attribute_2(self):
+    def test_unused_import_2(self):
         import pathlib
         source = ("from pathlib import Path")
         self.session.scanner.run_visit(source)
@@ -34,7 +34,7 @@ class TestUnusedImport(unittest.TestCase):
             list(self.session.scanner.get_unused_imports())
         )
 
-    def test_attribute_3(self):
+    def test_unused_import_3(self):
         source = (
             "import x.y\n"
             "import d.f.a.s\n"
@@ -53,4 +53,3 @@ class TestUnusedImport(unittest.TestCase):
             ],
             list(self.session.scanner.get_unused_imports())
         )
-
