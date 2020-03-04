@@ -80,11 +80,11 @@ def main(argv=None):
                         f"name; {imports['name']}, "
                         f"path; {str(py_path)} ,line {imports['lineno']})"
                     )
-                for imports in session.scanner.from_import_star():
+                for imports in session.scanner.get_star_imports():
                     print(
-                        f"module_name; {imports['imp']['module'].__name__}, "
+                        f"module_name; {imports['module'].__name__}, "
                         f"used imports; {imports['modules']}, "
-                        f"path; {str(py_path)} ,line {imports['imp']['lineno']})"
+                        f"path; {str(py_path)} ,line {imports['lineno']})"
                     )
                 session.scanner.clear()
             if namespace.diff:

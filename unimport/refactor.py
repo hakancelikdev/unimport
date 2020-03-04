@@ -27,7 +27,7 @@ class RefactorImports(BaseFix):
             (
                 import_name< 'import' imp=any >
                 |
-                import_from< 'from' imp=['.'*] any 'import' ['('] items=any [')'] >
+                import_from< 'from' imp=(['.'*] any) 'import' ['('] items=any [')'] >
             ) '\n'
         >
     """

@@ -8,7 +8,7 @@ class TestFromImportStar(unittest.TestCase):
     def setUp(self):
         self.session = Session()
 
-    def test_from_import_star(self):
+    def test_get_star_imports(self):
         source = (
             "from os import *\n"
             "#from sys import *\n"
@@ -20,21 +20,32 @@ class TestFromImportStar(unittest.TestCase):
         self.assertEqual(
             [
                 {
-                    'imp': {
-                        'lineno': 1,
-                        'name': '*',
-                        'node_name': 'import',
-                        'star': True,
-                        'module': os
-                    },
-                    'modules': ['walk']
+                    'lineno': 1,
+                    'name': '*',
+                    'node_name': 'import',
+                    'star': True,
+                    'module': os,
+                    'modules': ['walk'],
                 }
             ],
-            list(self.session.scanner.from_import_star()))
+            list(self.session.scanner.get_star_imports())
+        )
 
-    def test_from_import_star_2(self):
+    def test_get_star_imports_2(self):
         source = (
-            "from urllib import *\n"
+            "from os import *\n"
         )
         self.session.scanner.run_visit(source)
-        self.assertEqual([], list(self.session.scanner.from_import_star()))
+        self.assertEqual(
+            [
+                {
+                    'lineno': 1,
+                    'module': os,
+                    'name': '*',
+                    'node_name': 'import',
+                    'star': True,
+                    'modules': []
+                }
+            ],
+            list(self.session.scanner.get_star_imports())
+        )
