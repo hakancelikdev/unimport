@@ -1,10 +1,16 @@
 from contextlib import contextmanager
 from lib2to3.fixer_base import BaseFix
-from lib2to3.fixer_util import BlankLine, syms, token
+from lib2to3.fixer_util import BlankLine, Newline
+from lib2to3.pgen2 import token
+from lib2to3.pygram import python_symbols as syms
+from lib2to3.pytree import Leaf, Node
 from lib2to3.refactor import RefactoringTool
 
 
 def traverse_imports(names):
+    """
+    Walks over all the names imported in a dotted_as_names node.
+    """
     pending = [names]
     while pending:
         node = pending.pop()
@@ -51,6 +57,35 @@ class RefactorImports(BaseFix):
             if str(imports).strip() in self.unused_modules:
                 return BlankLine()
             else:
+                try:
+                    unused_imp = [
+                        imp
+                        for imp in self.unused_modules
+                        if imp["lineno"] == node.get_lineno()
+                    ][0]
+                except IndexError:
+                    pass
+                else:
+                    if unused_imp["star"]:
+                        if not unused_imp["modules"]:
+                            return BlankLine()
+                        else:
+                            children = [
+                                Leaf(token.NAME, "from"),
+                                Leaf(
+                                    token.NAME,
+                                    unused_imp["module"].__name__,
+                                    prefix=" ",
+                                ),
+                                Leaf(token.NAME, "import", prefix=" "),
+                                Leaf(
+                                    token.NAME,
+                                    ", ".join(sorted(unused_imp["modules"])),
+                                    prefix=" ",
+                                ),
+                                Newline(),
+                            ]
+                            return Node(syms.import_from, children)
                 return self.transform_inner_body(
                     node, results["items"], from_import=True
                 )
@@ -84,7 +119,7 @@ class RefactorImports(BaseFix):
         remove_counter = 0
 
         for index, module in enumerate(modules):
-            if module in self.unused_modules:
+            if module in [imp["name"] for imp in self.unused_modules]:
                 if commas:
                     remove_comma()
 

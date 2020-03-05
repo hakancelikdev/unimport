@@ -32,16 +32,12 @@ class Scanner(ast.NodeVisitor):
         for function_node in [body for body in node.body]:
             if isinstance(function_node, ast.FunctionDef):
                 self.method_names.append(function_node.name)
-        self.classes.append(
-            dict(lineno=node.lineno, name=node.name, node_name="class")
-        )
+        self.classes.append(dict(lineno=node.lineno, name=node.name))
 
     @recursive
     def visit_FunctionDef(self, node):
         if node.name not in self.method_names:
-            self.functions.append(
-                dict(lineno=node.lineno, name=node.name, node_name="function")
-            )
+            self.functions.append(dict(lineno=node.lineno, name=node.name))
 
     @recursive
     def visit_Import(self, node):
@@ -67,7 +63,6 @@ class Scanner(ast.NodeVisitor):
                     dict(
                         lineno=node.lineno,
                         name=name,
-                        node_name="import",
                         star=star,
                         module=module,
                     )
@@ -75,14 +70,12 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_ImportFrom(self, node):
-        if node.module not in self.ignore_imports[1:]:
+        if node.module not in self.ignore_imports:
             self.visit_Import(node)
 
     @recursive
     def visit_Name(self, node):
-        self.names.append(
-            dict(lineno=node.lineno, name=node.id, node_name="name")
-        )
+        self.names.append(dict(lineno=node.lineno, name=node.id))
 
     @recursive
     def visit_Attribute(self, node):
@@ -107,11 +100,7 @@ class Scanner(ast.NodeVisitor):
             else:
                 break
         local_attr.reverse()
-        self.names.append(
-            dict(
-                lineno=node.lineno, name=".".join(local_attr), node_name="name"
-            )
-        )
+        self.names.append(dict(lineno=node.lineno, name=".".join(local_attr)))
 
     def _imp_is_star(self, imp):
         if imp["module"].__name__ not in sys.builtin_module_names:
@@ -120,21 +109,24 @@ class Scanner(ast.NodeVisitor):
                 s = self.__class__(inspect.getsource(imp["module"]))
             except OSError:
                 return {"imp": imp, "modules": []}
-            modules = [
-                from_cfv
-                for from_cfv in {
-                    from_cfv["name"]
-                    for from_cfv in s.names + s.classes + s.functions
+            imp["modules"] = sorted(
+                {
+                    cfv
+                    for cfv in {
+                        from_cfv["name"]
+                        for from_cfv in s.names + s.classes + s.functions
+                    }
+                    if cfv in to_
                 }
-                if from_cfv in to_
-            ]
-            imp["modules"] = modules
+            )
             return imp
 
     def _imp_is_not_star(self, imp):
         for name in self.names:
             if (
-                ".".join(name["name"].split(".")[:len(imp["name"].split("."))])
+                ".".join(
+                    name["name"].split(".")[: len(imp["name"].split("."))]
+                )
                 == imp["name"]
             ):
                 break
@@ -144,18 +136,11 @@ class Scanner(ast.NodeVisitor):
     def get_unused_imports(self):
         for imp in self.imports:
             if imp["star"]:
-                res = self._imp_is_star(imp)
-                if not res["modules"]:
-                    yield res
+                yield self._imp_is_star(imp)
             else:
                 res = self._imp_is_not_star(imp)
                 if res:
                     yield res
-
-    def get_star_imports(self):
-        for imp in self.imports:
-            if imp["star"]:
-                yield self._imp_is_star(imp)
 
     def run_visit(self, source):
         self.visit(ast.parse(source))

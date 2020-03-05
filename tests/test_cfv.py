@@ -19,12 +19,10 @@ class TestNames(unittest.TestCase):
                 {
                     'lineno': 1,
                     'name': 'variable',
-                    'node_name': 'name'
                 },
                 {
                     'lineno': 2,
                     'name': 'variable1',
-                    'node_name': 'name'
                 }
             ],
 
@@ -45,7 +43,6 @@ class TestNames(unittest.TestCase):
                 {
                     'lineno': 1,
                     'name': 'variable',
-                    'node_name': 'name'
                 },
             ],
             self.scanner.names
@@ -55,7 +52,6 @@ class TestNames(unittest.TestCase):
                 {
                     'lineno': 2,
                     'name': 'os',
-                    'node_name': 'import',
                     'star': False,
                     'module': os
                 },
@@ -77,7 +73,6 @@ class TestNames(unittest.TestCase):
                 {
                     'lineno': 1,
                     'name': 'variable',
-                    'node_name': 'name'
                 },
             ],
             Scanner(source).names
@@ -90,7 +85,6 @@ class TestNames(unittest.TestCase):
                 {
                     'lineno': 2,
                     'name': 'test',
-                    'node_name': 'function'
                 },
             ],
             self.scanner.functions)
@@ -107,7 +101,6 @@ class TestNames(unittest.TestCase):
                 {
                     'lineno': 1,
                     'name': 'variable',
-                    'node_name': 'name'
                 },
             ],
             self.scanner.names
@@ -118,7 +111,6 @@ class TestNames(unittest.TestCase):
                 {
                     'lineno': 2,
                     'name': 'test',
-                    'node_name': 'class'
                 },
             ],
             self.scanner.classes)

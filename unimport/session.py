@@ -1,6 +1,6 @@
 import difflib
-import tokenize
 import fnmatch
+import tokenize
 from lib2to3.pgen2.parse import ParseError
 from pathlib import Path
 
@@ -46,9 +46,7 @@ class Session:
 
     def refactor(self, source):
         self.scanner.run_visit(source)
-        modules = [
-            module["name"] for module in self.scanner.get_unused_imports()
-        ]
+        modules = [module for module in self.scanner.get_unused_imports()]
         self.scanner.clear()
         return self.refactor_tool.refactor_string(source, modules)
 
@@ -66,7 +64,9 @@ class Session:
 
     def diff(self, source):
         return tuple(
-            difflib.unified_diff(source.splitlines(), self.refactor(source).splitlines())
+            difflib.unified_diff(
+                source.splitlines(), self.refactor(source).splitlines()
+            )
         )
 
     def diff_file(self, path):
