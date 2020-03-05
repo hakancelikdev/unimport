@@ -24,6 +24,12 @@ parser.add_argument(
     metavar="PATH",
     type=pathlib.Path,
 )
+parser.add_argument(
+    "-d",
+    "--diff",
+    action="store_true",
+    help="Prints a diff of all the changes unimport would make to a file.",
+)
 exclusive_group.add_argument(
     "-r",
     "--remove",
@@ -35,12 +41,6 @@ exclusive_group.add_argument(
     "--permission",
     action="store_true",
     help="Refactor permission after see diff.",
-)
-parser.add_argument(
-    "-d",
-    "--diff",
-    action="store_true",
-    help="Prints a diff of all the changes unimport would make to a file.",
 )
 parser.add_argument(
     "--check",
@@ -64,9 +64,7 @@ def print_if_exists(sequence):
 
 def main(argv=None):
     namespace = parser.parse_args(argv)
-    any_namespace = any(
-        [value for key, value in vars(namespace).items()][2:-2]
-    )
+    any_namespace = any([value for key, value in vars(namespace).items()][2:])
     if namespace.permission and not namespace.diff:
         namespace.diff = True
     session = Session(config_file=namespace.config)
@@ -75,17 +73,17 @@ def main(argv=None):
             if not any_namespace or namespace.check:
                 session.scanner.run_visit(source=session._read(py_path)[0])
                 for imports in session.scanner.get_unused_imports():
+                    if imports["star"]:
+                        modules = f"used imports; {imports['modules']}, "
+                    else:
+                        modules = ""
                     print(
                         f"lineno; {imports['lineno']}, "
                         f"name; {imports['name']}, "
+                        f"{modules}"
                         f"path; {str(py_path)} ,line {imports['lineno']})"
                     )
-                for imports in session.scanner.get_star_imports():
-                    print(
-                        f"module_name; {imports['module'].__name__}, "
-                        f"used imports; {imports['modules']}, "
-                        f"path; {str(py_path)} ,line {imports['lineno']})"
-                    )
+
                 session.scanner.clear()
             if namespace.diff:
                 exists_diff = print_if_exists(
