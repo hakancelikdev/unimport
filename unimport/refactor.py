@@ -1,9 +1,6 @@
 from contextlib import contextmanager
 from lib2to3.fixer_base import BaseFix
-from lib2to3.fixer_util import BlankLine, Newline
-from lib2to3.pgen2 import token
-from lib2to3.pygram import python_symbols as syms
-from lib2to3.pytree import Leaf, Node
+from lib2to3.fixer_util import BlankLine, Leaf, Newline, Node, syms, token
 from lib2to3.refactor import RefactoringTool
 
 
@@ -70,29 +67,29 @@ class RefactorImports(BaseFix):
                         if not unused_imp["modules"]:
                             return BlankLine()
                         else:
-                            children = [
-                                Leaf(token.NAME, "from"),
-                                Leaf(
-                                    token.NAME,
-                                    unused_imp["module"].__name__,
-                                    prefix=" ",
-                                ),
-                                Leaf(token.NAME, "import", prefix=" "),
-                                Leaf(
-                                    token.NAME,
-                                    ", ".join(sorted(unused_imp["modules"])),
-                                    prefix=" ",
-                                ),
-                                Newline(),
-                            ]
-                            return Node(syms.import_from, children)
+                            return self.suggestion_to_star_import(unused_imp)
                 return self.transform_inner_body(
                     node, results["items"], from_import=True
                 )
         else:
             return self.transform_inner_body(node, imports)
 
+    def suggestion_to_star_import(self, unused_imp):
+        children = [
+            Leaf(token.NAME, "from"),
+            Leaf(token.NAME, unused_imp["module"].__name__, prefix=" ",),
+            Leaf(token.NAME, "import", prefix=" "),
+            Leaf(
+                token.NAME,
+                ", ".join(sorted(unused_imp["modules"])),
+                prefix=" ",
+            ),
+            Newline(),
+        ]
+        return Node(syms.import_from, children)
+
     def transform_inner_body(self, node, imports, from_import=False):
+        module_names = [imp["name"] for imp in self.unused_modules]
         if imports.children:
             body = imports.children
         else:
@@ -119,7 +116,7 @@ class RefactorImports(BaseFix):
         remove_counter = 0
 
         for index, module in enumerate(modules):
-            if module in [imp["name"] for imp in self.unused_modules]:
+            if module in module_names:
                 if commas:
                     remove_comma()
 
