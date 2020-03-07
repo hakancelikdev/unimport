@@ -3,7 +3,7 @@ from unimport.session import Session
 
 import os
 
-# this imports to write modules in below tests
+# These imports to write in modules below.
 from pathlib import Path
 import pathlib
 import lib2to3.fixer_util
