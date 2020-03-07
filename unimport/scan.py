@@ -32,12 +32,12 @@ class Scanner(ast.NodeVisitor):
         for function_node in [body for body in node.body]:
             if isinstance(function_node, ast.FunctionDef):
                 self.method_names.append(function_node.name)
-        self.classes.append(dict(lineno=node.lineno, name=node.name))
+        self.classes.append({"lineno": node.lineno, "name": node.name})
 
     @recursive
     def visit_FunctionDef(self, node):
         if node.name not in self.method_names:
-            self.functions.append(dict(lineno=node.lineno, name=node.name))
+            self.functions.append({"lineno": node.lineno, "name": node.name})
 
     @recursive
     def visit_Import(self, node):
@@ -60,12 +60,12 @@ class Scanner(ast.NodeVisitor):
                     if star:
                         continue
                 self.imports.append(
-                    dict(
-                        lineno=node.lineno,
-                        name=name,
-                        star=star,
-                        module=module,
-                    )
+                    {
+                        "lineno": node.lineno,
+                        "name": name,
+                        "star": star,
+                        "module": module,
+                    }
                 )
 
     @recursive
@@ -75,11 +75,11 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_Name(self, node):
-        self.names.append(dict(lineno=node.lineno, name=node.id))
+        self.names.append({"lineno": node.lineno, "name": node.id})
 
     @recursive
     def visit_Attribute(self, node):
-        local_attr = list()
+        local_attr = []
         if hasattr(node, "attr"):
             local_attr.append(node.attr)
         while True:
@@ -100,7 +100,7 @@ class Scanner(ast.NodeVisitor):
             else:
                 break
         local_attr.reverse()
-        self.names.append(dict(lineno=node.lineno, name=".".join(local_attr)))
+        self.names.append({"lineno": node.lineno, "name": ".".join(local_attr)})
 
     def _imp_is_star(self, imp):
         if imp["module"].__name__ not in sys.builtin_module_names:
