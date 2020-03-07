@@ -22,7 +22,6 @@ class Scanner(ast.NodeVisitor):
         self.names = []
         self.imports = []
         self.classes = []
-        self.method_names = []
         self.functions = []
         if source:
             self.run_visit(source)
@@ -31,12 +30,12 @@ class Scanner(ast.NodeVisitor):
     def visit_ClassDef(self, node):
         for function_node in [body for body in node.body]:
             if isinstance(function_node, ast.FunctionDef):
-                self.method_names.append(function_node.name)
+                function_node.class_def = True
         self.classes.append({"lineno": node.lineno, "name": node.name})
 
     @recursive
     def visit_FunctionDef(self, node):
-        if node.name not in self.method_names:
+        if not hasattr(node, "class_def"):
             self.functions.append({"lineno": node.lineno, "name": node.name})
 
     @recursive
@@ -149,5 +148,4 @@ class Scanner(ast.NodeVisitor):
         self.names.clear()
         self.imports.clear()
         self.classes.clear()
-        self.method_names.clear()
         self.functions.clear()
