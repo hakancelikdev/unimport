@@ -1,9 +1,6 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/hakancelik96/unimport/master/images/logo/Unimport.png">
-  </p>
-<p align="center">
-  A python CLI library to detect or auto remove unused Python imports.
- </p>
+![unimport](https://raw.githubusercontent.com/hakancelik96/unimport/master/images/logo/Unimport.png)
+
+**A python CLI library to detect or auto remove unused Python imports.**
 
 [![MIT License](https://img.shields.io/github/license/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/blob/master/LICENSE) [![releases](https://img.shields.io/github/release/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/releases) [![last-commit](https://img.shields.io/github/last-commit/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/commits/master) [![style](https://img.shields.io/badge/style-black-black)](https://github.com/psf/black) [![style](https://img.shields.io/badge/style-isort-lightgrey)](https://github.com/timothycrosley/isort) [![style](https://img.shields.io/badge/style-unimport-green)](https://github.com/hakancelik96/unimport) [![](https://img.shields.io/github/contributors/hakancelik96/unimport)](https://github.com/hakancelik96/unimport/graphs/contributors) [![](https://pepy.tech/badge/unimport)](https://pepy.tech/badge/unimport) [![codecov](https://codecov.io/gh/hakancelik96/unimport/branch/master/graph/badge.svg)](https://codecov.io/gh/hakancelik96/unimport) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/unimport)
 
@@ -80,19 +77,6 @@ exclude =  ./[0-9].*
 - [![](https://img.shields.io/twitter/follow/hakancelik96?style=social)](https://twitter.com/hakancelik96)
 - [![](https://img.shields.io/github/followers/hakancelik96?label=hakancelik96&style=social)](https://github.com/hakancelik96)
 
-
 ## Who's using Unimport?
-<table>
-  <tr>
-    <td align="center">
-      <a href="https://radity.com/?ref=unimport">
-        <img src="https://raw.githubusercontent.com/hakancelik96/unimport/master/images/clients/radity.jpg" width="160px;" alt="radity.com"/>
-        <br/>
-        <sub>
-          <b>Radity</b>
-        </sub>
-      </a>
-      <br/>
-    </td>
-  </tr>
-</table>
+
+[![radity.com](https://raw.githubusercontent.com/hakancelik96/unimport/master/images/clients/radity.jpg)](https://radity.com/?ref=unimport)
