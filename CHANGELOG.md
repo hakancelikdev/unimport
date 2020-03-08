@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.2.1] - 8/March/2020
+- from x import * support [issue; #19](https://github.com/hakancelik96/unimport/issues/19), [PR; #21](https://github.com/hakancelik96/unimport/pull/21) by @hakancelik96
+
 
 ## [0.2.0] - 19/Jan/2020
 

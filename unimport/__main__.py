@@ -24,6 +24,12 @@ parser.add_argument(
     metavar="PATH",
     type=pathlib.Path,
 )
+parser.add_argument(
+    "-d",
+    "--diff",
+    action="store_true",
+    help="Prints a diff of all the changes unimport would make to a file.",
+)
 exclusive_group.add_argument(
     "-r",
     "--remove",
@@ -35,12 +41,6 @@ exclusive_group.add_argument(
     "--permission",
     action="store_true",
     help="Refactor permission after see diff.",
-)
-parser.add_argument(
-    "-d",
-    "--diff",
-    action="store_true",
-    help="Prints a diff of all the changes unimport would make to a file.",
 )
 parser.add_argument(
     "--check",
@@ -68,26 +68,37 @@ def main(argv=None):
     if namespace.permission and not namespace.diff:
         namespace.diff = True
     session = Session(config_file=namespace.config)
-    sources = []
     for source_path in namespace.sources:
-        sources.extend(session._list_paths(source_path, "**/*.py"))
-    for source_path in sources:
-        if not any_namespace or namespace.check:
-            print_if_exists(tuple(session.scan_file(source_path)))
-        if namespace.diff:
-            exists_diff = print_if_exists(
-                tuple(session.diff_file(source_path))
-            )
-            if namespace.permission and exists_diff:
-                action = input(
-                    f"Apply suggested changes to '{source_path}' [y/n/q] ? > "
+        for py_path in session._list_paths(source_path, "**/*.py"):
+            if not any_namespace or namespace.check:
+                session.scanner.run_visit(source=session._read(py_path)[0])
+                for imports in session.scanner.get_unused_imports():
+                    if imports["star"]:
+                        modules = f"used imports; {imports['modules']}, "
+                    else:
+                        modules = ""
+                    print(
+                        f"lineno; {imports['lineno']}, "
+                        f"name; \033[93m{imports['name']}\033[00m, "
+                        f"{modules}"
+                        f"path; \033[92m{str(py_path)}\033[00m ,line {imports['lineno']})"
+                    )
+
+                session.scanner.clear()
+            if namespace.diff:
+                exists_diff = print_if_exists(
+                    tuple(session.diff_file(py_path))
                 )
-                if action == "q":
-                    break
-                elif action == "y":
-                    namespace.remove = True
-        if namespace.remove:
-            session.refactor_file(source_path, apply=True)
+                if namespace.permission and exists_diff:
+                    action = input(
+                        f"Apply suggested changes to \033[92m'{py_path}'\033[00m [y/n/q] ? >"
+                    )
+                    if action == "q":
+                        break
+                    elif action == "y":
+                        namespace.remove = True
+            if namespace.remove:
+                session.refactor_file(py_path, apply=True)
 
 
 if __name__ == "__main__":

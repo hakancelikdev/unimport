@@ -1,4 +1,5 @@
 import difflib
+import fnmatch
 import tokenize
 from lib2to3.pgen2.parse import ParseError
 from pathlib import Path
@@ -25,14 +26,15 @@ class Session:
         else:
             return source, encoding
 
-    def _list_paths(self, start, pattern):
+    def _list_paths(self, start, pattern="**/*.py"):
         start = Path(start)
 
         def _is_excluded(path):
             for pattern_exclude in self.config.exclude:
-                for inner in start.glob(pattern_exclude):
-                    if str(path).startswith(str(inner)):
-                        return True
+                if fnmatch.fnmatch(path, pattern_exclude):
+                    return True
+            else:
+                return False
 
         if not start.is_dir():
             if not _is_excluded(start):
@@ -42,52 +44,35 @@ class Session:
                 if not _is_excluded(path):
                     yield path
 
-    def scan(self, source, filename=None):
-        try:
-            yield from self.scanner.iter_imports(source)
-        except SyntaxError as exc:
-            exc.filename = filename
-            print("Failed to scan", exc)
-            yield from []
-
-    def scan_file(self, path):
-        source, _ = self._read(path)
-        for imports in self.scan(source, path):
-            imports.update(path=path)
-            yield imports
-
-    def scan_directory(self, path, recursive=False):
-        pattern = "*.py"
-        if recursive:
-            pattern = f"**/{pattern}"
-        for path in self._list_paths(path, pattern):
-            yield from self.scan_file(path)
-
     def refactor(self, source):
-        modules = [module["name"] for module in self.scan(source)]
+        self.scanner.run_visit(source)
+        modules = [module for module in self.scanner.get_unused_imports()]
+        self.scanner.clear()
         return self.refactor_tool.refactor_string(source, modules)
 
     def refactor_file(self, path, apply=False):
         path = Path(path)
         source, encoding = self._read(path)
-        try:
-            result = self.refactor(source)
-        except ParseError as exc:
-            raise ValueError(f"Invalid python file {path}.") from exc
+        result = self.refactor(source)
         if apply:
             path.write_text(result, encoding=encoding)
         else:
             return result
 
     def diff(self, source):
-        result = self.refactor(source)
         return tuple(
-            difflib.unified_diff(source.splitlines(), result.splitlines())
+            difflib.unified_diff(
+                source.splitlines(), self.refactor(source).splitlines()
+            )
         )
 
     def diff_file(self, path):
         source, _ = self._read(path)
-        result = self.refactor_file(path, apply=False)
+        try:
+            result = self.refactor_file(path, apply=False)
+        except ParseError:
+            print(f"\033[91m Invalid python file '{path}'\033[00m")
+            return tuple()
         return tuple(
             difflib.unified_diff(
                 source.splitlines(), result.splitlines(), fromfile=str(path)
