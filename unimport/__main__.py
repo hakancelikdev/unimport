@@ -79,9 +79,9 @@ def main(argv=None):
                         modules = ""
                     print(
                         f"lineno; {imports['lineno']}, "
-                        f"name; {imports['name']}, "
+                        f"name; \033[93m{imports['name']}\033[00m, "
                         f"{modules}"
-                        f"path; {str(py_path)} ,line {imports['lineno']})"
+                        f"path; \033[92m{str(py_path)}\033[00m ,line {imports['lineno']})"
                     )
 
                 session.scanner.clear()
@@ -91,7 +91,7 @@ def main(argv=None):
                 )
                 if namespace.permission and exists_diff:
                     action = input(
-                        f"Apply suggested changes to '{py_path}' [y/n/q] ? > "
+                        f"Apply suggested changes to \033[92m'{py_path}'\033[00m [y/n/q] ? >"
                     )
                     if action == "q":
                         break
