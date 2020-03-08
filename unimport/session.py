@@ -53,10 +53,7 @@ class Session:
     def refactor_file(self, path, apply=False):
         path = Path(path)
         source, encoding = self._read(path)
-        try:
-            result = self.refactor(source)
-        except ParseError as exc:
-            raise ValueError(f"Invalid python file {path}.") from exc
+        result = self.refactor(source)
         if apply:
             path.write_text(result, encoding=encoding)
         else:
@@ -71,7 +68,11 @@ class Session:
 
     def diff_file(self, path):
         source, _ = self._read(path)
-        result = self.refactor_file(path, apply=False)
+        try:
+            result = self.refactor_file(path, apply=False)
+        except ParseError:
+            print(f"\033[91m Invalid python file '{path}'\033[00m")
+            return tuple()
         return tuple(
             difflib.unified_diff(
                 source.splitlines(), result.splitlines(), fromfile=str(path)
