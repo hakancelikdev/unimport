@@ -71,7 +71,7 @@ class TestUnusedImport(unittest.TestCase):
             [
                 {
                     'lineno': 1,
-                    'name': '*',
+                    'name': 'os',
                     'star': True,
                     'module': os,
                     'modules': ['walk'],
@@ -90,7 +90,7 @@ class TestUnusedImport(unittest.TestCase):
                 {
                     'lineno': 1,
                     'module': os,
-                    'name': '*',
+                    'name': 'os',
                     'star': True,
                     'modules': []
                 }
@@ -112,14 +112,14 @@ class TestUnusedImport(unittest.TestCase):
                 {
                     'lineno': 1,
                     'module': lib2to3.fixer_util,
-                    'name': '*',
+                    'name': 'lib2to3.fixer_util',
                     'star': True,
                     'modules': ["BlankLine", "FromImport", "Leaf", "Newline", "Node", "token", "token.NAME", "token.STAR"]
                 },
                 {
                     'lineno': 2,
                     'module': lib2to3.pytree,
-                    'name': '*',
+                    'name': 'lib2to3.pytree',
                     'star': True,
                     'modules': ["Leaf", "Node"]
                 },
@@ -140,21 +140,21 @@ class TestUnusedImport(unittest.TestCase):
             [
                 {
                     'lineno': 1,
-                    'name': '*',
+                    'name': 'lib2to3.fixer_util',
                     'module': lib2to3.fixer_util,
                     'star': True,
                     'modules': ["BlankLine", "FromImport", "Leaf", "Newline", "Node"]
                 },
                 {
                     'lineno': 2,
-                    'name': '*',
+                    'name': 'lib2to3.pytree',
                     'module': lib2to3.pytree,
                     'star': True,
                     'modules': ["Leaf", "Node"]
                 },
                 {
                     'lineno': 3,
-                    'name': '*',
+                    'name': 'lib2to3.pgen2.token',
                     'star': True,
                     'module': lib2to3.pgen2.token,
                     'modules': ['NAME', 'STAR']

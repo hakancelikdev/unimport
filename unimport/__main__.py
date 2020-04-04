@@ -72,16 +72,15 @@ def main(argv=None):
         for py_path in session._list_paths(source_path, "**/*.py"):
             if not any_namespace or namespace.check:
                 session.scanner.run_visit(source=session._read(py_path)[0])
-                for imports in session.scanner.get_unused_imports():
-                    if imports["star"]:
-                        modules = f"used imports; {imports['modules']}, "
+                for imp in session.scanner.get_unused_imports():
+                    if imp["star"]:
+                        modules = f"Used imports; {imp['modules']}, "
                     else:
                         modules = ""
                     print(
-                        f"lineno; {imports['lineno']}, "
-                        f"name; \033[93m{imports['name']}\033[00m, "
-                        f"{modules}"
-                        f"path; \033[92m{str(py_path)}\033[00m ,line {imports['lineno']})"
+                        f"Name; \033[93m{imp['name']}\033[00m, "
+                        f"Path; \033[92m{str(py_path)}\033[00m ,line {imp['lineno']})"
+                        f" {modules}"
                     )
 
                 session.scanner.clear()
