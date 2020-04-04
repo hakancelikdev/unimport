@@ -16,7 +16,7 @@ def recursive(func):
 
 class Scanner(ast.NodeVisitor):
     "To detect unused import using ast"
-    ignore_imports = ["__future__"]
+    ignore_imports = ["__future__", "__doc__"]
     ignore_names = ["print"]
 
     def __init__(self, source=None):
@@ -51,15 +51,15 @@ class Scanner(ast.NodeVisitor):
                 name = alias.asname
             else:
                 name = alias.name
-            if name == "*":
-                star = True
             package = module_name or alias.name
             if package not in self.ignore_imports:
+                if name == "*":
+                    star = True
+                    name = package
                 try:
                     module = importlib.import_module(package)
                 except (ModuleNotFoundError, ImportError, ValueError):
-                    if star:
-                        continue
+                    pass
                 self.imports.append(
                     {
                         "lineno": node.lineno,
@@ -106,27 +106,30 @@ class Scanner(ast.NodeVisitor):
             {"lineno": node.lineno, "name": ".".join(local_attr)}
         )
 
-    def _imp_is_star(self, imp):
-        if imp["module"].__name__ not in sys.builtin_module_names:
-            to_ = {to_cfv["name"] for to_cfv in self.names}
-            try:
-                s = self.__class__(inspect.getsource(imp["module"]))
-            except OSError:
-                imp["modules"] = []
-            else:
-                imp["modules"] = sorted(
-                    {
-                        cfv
-                        for cfv in {
-                            from_cfv["name"]
-                            for from_cfv in s.names + s.classes + s.functions
+    def imp_star_True(self, imp):
+        if imp["module"]:
+            if imp["module"].__name__ not in sys.builtin_module_names:
+                to_ = {to_cfv["name"] for to_cfv in self.names}
+                try:
+                    s = self.__class__(inspect.getsource(imp["module"]))
+                except OSError:
+                    imp["modules"] = []
+                else:
+                    imp["modules"] = sorted(
+                        {
+                            cfv
+                            for cfv in {
+                                from_cfv["name"]
+                                for from_cfv in s.names + s.classes + s.functions
+                            }
+                            if cfv in to_
                         }
-                        if cfv in to_
-                    }
-                )
-            return imp
+                    )
+        else:
+            imp["modules"] = []
+        return imp
 
-    def _imp_is_not_star(self, imp):
+    def imp_star_False(self, imp):
         for name in self.names:
             if (
                 ".".join(
@@ -140,14 +143,9 @@ class Scanner(ast.NodeVisitor):
 
     def get_unused_imports(self):
         for imp in self.imports:
-            if imp["star"]:
-                res = self._imp_is_star(imp)
-                if res:
-                    yield res
-            else:
-                res = self._imp_is_not_star(imp)
-                if res:
-                    yield res
+            res = getattr(self, f"imp_star_{imp['star']}")(imp)
+            if res:
+                yield res
 
     def run_visit(self, source):
         self.visit(ast.parse(source))
