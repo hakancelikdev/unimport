@@ -17,6 +17,7 @@ def recursive(func):
 class Scanner(ast.NodeVisitor):
     "To detect unused import using ast"
     ignore_imports = ["__future__"]
+    ignore_names = ["print"]
 
     def __init__(self, source=None):
         self.names = []
@@ -42,20 +43,21 @@ class Scanner(ast.NodeVisitor):
     def visit_Import(self, node):
         star = False
         module_name = None
+        module = None
         if hasattr(node, "module"):
             module_name = node.module
         for alias in node.names:
-            if alias.asname is not None:
+            if alias.asname:
                 name = alias.asname
             else:
                 name = alias.name
             if name == "*":
                 star = True
-            if (module_name or name) not in self.ignore_imports:
+            package = module_name or alias.name
+            if package not in self.ignore_imports:
                 try:
-                    module = importlib.import_module(module_name or name)
-                except (ModuleNotFoundError, ValueError):
-                    module = None
+                    module = importlib.import_module(package)
+                except (ModuleNotFoundError, ImportError, ValueError):
                     if star:
                         continue
                 self.imports.append(
@@ -74,7 +76,8 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_Name(self, node):
-        self.names.append({"lineno": node.lineno, "name": node.id})
+        if node.id not in self.ignore_names:
+            self.names.append({"lineno": node.lineno, "name": node.id})
 
     @recursive
     def visit_Attribute(self, node):
@@ -99,7 +102,9 @@ class Scanner(ast.NodeVisitor):
             else:
                 break
         local_attr.reverse()
-        self.names.append({"lineno": node.lineno, "name": ".".join(local_attr)})
+        self.names.append(
+            {"lineno": node.lineno, "name": ".".join(local_attr)}
+        )
 
     def _imp_is_star(self, imp):
         if imp["module"].__name__ not in sys.builtin_module_names:
@@ -107,17 +112,18 @@ class Scanner(ast.NodeVisitor):
             try:
                 s = self.__class__(inspect.getsource(imp["module"]))
             except OSError:
-                return {"imp": imp, "modules": []}
-            imp["modules"] = sorted(
-                {
-                    cfv
-                    for cfv in {
-                        from_cfv["name"]
-                        for from_cfv in s.names + s.classes + s.functions
+                imp["modules"] = []
+            else:
+                imp["modules"] = sorted(
+                    {
+                        cfv
+                        for cfv in {
+                            from_cfv["name"]
+                            for from_cfv in s.names + s.classes + s.functions
+                        }
+                        if cfv in to_
                     }
-                    if cfv in to_
-                }
-            )
+                )
             return imp
 
     def _imp_is_not_star(self, imp):
@@ -135,7 +141,9 @@ class Scanner(ast.NodeVisitor):
     def get_unused_imports(self):
         for imp in self.imports:
             if imp["star"]:
-                yield self._imp_is_star(imp)
+                res = self._imp_is_star(imp)
+                if res:
+                    yield res
             else:
                 res = self._imp_is_not_star(imp)
                 if res:

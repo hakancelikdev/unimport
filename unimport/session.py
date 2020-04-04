@@ -33,16 +33,17 @@ class Session:
             for pattern_exclude in self.config.exclude:
                 if fnmatch.fnmatch(path, pattern_exclude):
                     return True
-            else:
-                return False
+            return False
 
         if not start.is_dir():
             if not _is_excluded(start):
                 yield start
         else:
-            for path in start.glob(pattern):
-                if not _is_excluded(path):
-                    yield path
+            for dir_ in start.iterdir():
+                if not _is_excluded(dir_):
+                    for path in dir_.glob(pattern):
+                        if not _is_excluded(path):
+                            yield path
 
     def refactor(self, source):
         self.scanner.run_visit(source)

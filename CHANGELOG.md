@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [] -
+- [Fix: Scan & Config - Add test to default exlude by @hakancelik96](https://github.com/hakancelik96/unimport/commit/7e789872917c51e5ffa167d26581e5397fd34998)
+
 ## [0.2.1] - 8/March/2020
 - from x import * support [issue; #19](https://github.com/hakancelik96/unimport/issues/19), [PR; #21](https://github.com/hakancelik96/unimport/pull/21) by @hakancelik96
 
