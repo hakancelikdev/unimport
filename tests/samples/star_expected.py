@@ -1,2 +1,3 @@
+from lib2to3.pgen2.grammar import Grammar
 
-from blib2to3.pgen2.token import *
+print(Grammar)

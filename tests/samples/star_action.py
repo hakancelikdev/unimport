@@ -11,5 +11,7 @@ from typing import (
     cast,
 )
 
-from blib2to3.pgen2.token import *
-from blib2to3.pgen2.grammar import Grammar
+from lib2to3.pgen2.token import *
+from lib2to3.pgen2.grammar import *
+
+print(Grammar)
