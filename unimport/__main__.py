@@ -74,12 +74,12 @@ def main(argv=None):
                 session.scanner.run_visit(source=session._read(py_path)[0])
                 for imp in session.scanner.get_unused_imports():
                     if imp["star"]:
-                        modules = f"Used imports; {imp['modules']}, "
+                        modules = f"Used object; {imp['modules']}, "
                     else:
                         modules = ""
                     print(
-                        f"Name; \033[93m{imp['name']}\033[00m, "
-                        f"Path; \033[92m{str(py_path)}\033[00m ,line {imp['lineno']})"
+                        f"\033[93m{imp['name']}\033[00m at "
+                        f"\033[92m{str(py_path)}:{imp['lineno']}\033[00m"
                         f" {modules}"
                     )
 
