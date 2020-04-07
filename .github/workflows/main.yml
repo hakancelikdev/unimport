@@ -24,3 +24,7 @@ jobs:
       run: |
         source .venv/bin/activate
         python -m pytest
+    - name: Upload
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
