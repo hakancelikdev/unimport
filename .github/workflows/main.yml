@@ -27,11 +27,11 @@ jobs:
     
     - name: Generate coverage report
       run: |
-        pip install pytest
-        pip install pytest-cov
-        pytest --cov=./ --cov-report=xml
+        pip${{ matrix.python }} install pytest
+        pip${{ matrix.python }} install pytest-cov
+        python${{ matrix.python }} -m pytest --cov --cov-report=xml
     - name: Upload coverage to Codecov  
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v1.0.2
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
