@@ -1,3 +1,2 @@
+toml==0.10.0
 pytest
-toml
-pytest-cov
