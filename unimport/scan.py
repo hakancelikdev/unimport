@@ -71,8 +71,7 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_ImportFrom(self, node):
-        if node.module not in self.ignore_imports:
-            self.visit_Import(node)
+        self.visit_Import(node)
 
     @recursive
     def visit_Name(self, node):
@@ -120,7 +119,9 @@ class Scanner(ast.NodeVisitor):
                             cfv
                             for cfv in {
                                 from_cfv["name"]
-                                for from_cfv in s.names + s.classes + s.functions
+                                for from_cfv in s.names
+                                + s.classes
+                                + s.functions
                             }
                             if cfv in to_
                         }
@@ -142,10 +143,21 @@ class Scanner(ast.NodeVisitor):
             return imp
 
     def get_unused_imports(self):
+        _imports = self.imports.copy()
+
         for imp in self.imports:
             res = getattr(self, f"imp_star_{imp['star']}")(imp)
             if res:
                 yield res
+                _imports.remove(imp)
+
+        for imp in _imports:
+            for dub_imp in self.get_dublicate_imports(imp["name"])[:-1]:
+                yield dub_imp
+                _imports.remove(dub_imp)
+
+    def get_dublicate_imports(self, name):
+        return [imp for imp in self.imports if name == imp["name"]]
 
     def run_visit(self, source):
         self.visit(ast.parse(source))
