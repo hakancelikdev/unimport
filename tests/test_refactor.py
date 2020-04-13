@@ -1,5 +1,7 @@
 from unittest import TestCase
+
 from unimport.session import Session
+
 
 class TestRefactor(TestCase):
     maxDiff = None
