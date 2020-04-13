@@ -1,17 +1,9 @@
-from unittest import TestCase
-
-from .test_helper import TEST_DIR
-from unimport.config import (
-    Config,
-    DEFAULT_EXCLUDES
-)
-
 import fnmatch
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
 
-from unimport.config import DEFAULT_EXCLUDES
+from unimport.config import DEFAULT_EXCLUDES, Config
 
 from .test_helper import TEST_DIR
 
@@ -83,7 +75,7 @@ class TestDefaultExclude(TestCase):
     def test_exlude_folder(self):
         with TemporaryDirectory() as directory:
             for exclude_name in self.DEFAULT_EXCLUDE_NAMES:
-                folder_path = (Path(directory) / exclude_name)
+                folder_path = Path(directory) / exclude_name
                 folder_path.mkdir()
                 for pattern_exclude in DEFAULT_EXCLUDES:
                     match = fnmatch.fnmatch(folder_path, pattern_exclude)
@@ -98,7 +90,7 @@ class TestDefaultExclude(TestCase):
                 folder_path.mkdir()
                 if not str(folder_path).endswith(".py"):
                     file_path = folder_path / "test.py"
-                    with file_path.open("a", encoding ="utf-8") as f:
+                    with file_path.open("a", encoding="utf-8") as f:
                         f.write("import os")
                     for pattern_exclude in DEFAULT_EXCLUDES:
                         match = fnmatch.fnmatch(file_path, pattern_exclude)

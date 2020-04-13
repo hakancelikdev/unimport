@@ -14,7 +14,7 @@ exclude = '''
     | buck-out
     | build
     | dist
-    | tests\samples
+    | samples
     | rare_cases
   )/
   | foo.py           # also separately exclude a file named foo.py in

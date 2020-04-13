@@ -1,13 +1,12 @@
-import unittest
-from unimport.session import Session
-
-# These imports to write in modules below.
-import pathlib
 import lib2to3.fixer_util
-import lib2to3.pytree
 import lib2to3.pgen2.token
-import re
+import lib2to3.pytree
 import os
+import pathlib
+import re
+import unittest
+
+from unimport.session import Session
 
 
 class TestUnusedImport(unittest.TestCase):
