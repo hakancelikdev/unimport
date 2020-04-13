@@ -6,6 +6,8 @@ from .test_helper import TEST_DIR
 
 
 class OverwriteTest(TestCase):
+    maxDiff = None
+
     def setUp(self):
         self.session = Session()
 
