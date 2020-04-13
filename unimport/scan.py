@@ -5,7 +5,7 @@ import sys
 
 
 def recursive(func):
-    """ decorator to make visitor work recursive """
+    """decorator to make visitor work recursive"""
 
     def wrapper(self, node):
         func(self, node)
@@ -15,7 +15,8 @@ def recursive(func):
 
 
 class Scanner(ast.NodeVisitor):
-    "To detect unused import using ast"
+    """To detect unused import using ast"""
+
     ignore_imports = ["__future__", "__doc__"]
     ignore_names = ["print"]
 
@@ -105,6 +106,15 @@ class Scanner(ast.NodeVisitor):
             {"lineno": node.lineno, "name": ".".join(local_attr)}
         )
 
+    def run_visit(self, source):
+        self.visit(ast.parse(source))
+
+    def clear(self):
+        self.names.clear()
+        self.imports.clear()
+        self.classes.clear()
+        self.functions.clear()
+
     def imp_star_True(self, imp):
         if imp["module"]:
             if imp["module"].__name__ not in sys.builtin_module_names:
@@ -159,11 +169,4 @@ class Scanner(ast.NodeVisitor):
     def get_duplicate_imports(self, name):
         return [imp for imp in self.imports if name == imp["name"]]
 
-    def run_visit(self, source):
-        self.visit(ast.parse(source))
 
-    def clear(self):
-        self.names.clear()
-        self.imports.clear()
-        self.classes.clear()
-        self.functions.clear()
