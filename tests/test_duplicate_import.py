@@ -3,7 +3,7 @@ from unimport.session import Session
 
 # These imports to write in modules below.
 from pathlib import Path
-class TestDublicate(unittest.TestCase):
+class TestDuplicate(unittest.TestCase):
 
 	def setUp(self):
 		self.session = Session()
@@ -44,7 +44,7 @@ class TestDublicate(unittest.TestCase):
 			], list(self.session.scanner.get_unused_imports())
 		)
 
-	def test_full_dublicate_unused(self):
+	def test_full_duplicate_unused(self):
 		source = (
 			"from patlib import Path\n"
 			"from patlib import Path\n"
@@ -66,7 +66,7 @@ class TestDublicate(unittest.TestCase):
 		)
 
 
-	def test_different_dublicate_unused(self):
+	def test_different_duplicate_unused(self):
 		source = (
 			"from x import z\n"
 			"from y import z\n"
@@ -83,7 +83,7 @@ class TestDublicate(unittest.TestCase):
 			], list(self.session.scanner.get_unused_imports())
 		)
 
-	def test_different_dublicate_used(self):
+	def test_different_duplicate_used(self):
 		source = (
 			"from x import z\n"
 			"from y import z\n"
