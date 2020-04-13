@@ -9,7 +9,7 @@ class TestRefactor(TestCase):
     def setUp(self):
         self.session = Session()
 
-    def test_do_not_remove_augmented_imports_action(self):
+    def test_do_not_remove_augmented_imports(self):
         action = (
             "from django.conf.global_settings import AUTHENTICATION_BACKENDS, TEMPLATE_CONTEXT_PROCESSORS\n"
             "AUTHENTICATION_BACKENDS += ('foo.bar.baz.EmailBackend',)\n"
@@ -22,7 +22,7 @@ class TestRefactor(TestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_fix_multiple_problems_at_once_action(self):
+    def test_fix_multiple_problems_at_once(self):
         action = (
             "import x\n"
             "import x.y\n"
@@ -75,7 +75,7 @@ class TestRefactor(TestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_from_x_import_star_action(self):
+    def test_from_x_import_star(self):
         action = (
             "from os import *\n"
             "from x import y\n"
@@ -98,7 +98,7 @@ class TestRefactor(TestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_future_action(self):
+    def test_future(self):
         action = (
             "from __future__ import (\n"
             "    absolute_import, division, print_function, unicode_literals\n"
@@ -108,7 +108,7 @@ class TestRefactor(TestCase):
             action, self.session.refactor(action),
         )
 
-    def test_local_import_action(self):
+    def test_local_import(self):
         action = (
             "from .x import y\n"
             "from ..z import t\n"
@@ -132,7 +132,7 @@ class TestRefactor(TestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_remove_unused_from_imports_action(self):
+    def test_remove_unused_from_imports(self):
         action = (
             "import datetime\n"
             "from dateutil.relativedelta import relativedelta\n\n"
@@ -146,7 +146,7 @@ class TestRefactor(TestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_star_action(self):
+    def test_star(self):
         action = (
             "from typing import (\n"
             "    Callable,\n"
