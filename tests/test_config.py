@@ -9,11 +9,11 @@ from .test_helper import TEST_DIR
 
 TEST_DATA = [
     {
-        "config_file": TEST_DIR / "samples" / "configs" / "pyproject.toml",
+        "config_file": TEST_DIR / "configs" / "pyproject.toml",
         "section": "tool.unimport",
     },
     {
-        "config_file": TEST_DIR / "samples" / "configs" / "setup.cfg",
+        "config_file": TEST_DIR / "configs" / "setup.cfg",
         "section": "unimport",
     },
 ]
