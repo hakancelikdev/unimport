@@ -168,5 +168,3 @@ class Scanner(ast.NodeVisitor):
 
     def get_duplicate_imports(self, name):
         return [imp for imp in self.imports if name == imp["name"]]
-
-
