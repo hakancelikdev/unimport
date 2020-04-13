@@ -152,11 +152,11 @@ class Scanner(ast.NodeVisitor):
                 _imports.remove(imp)
 
         for imp in _imports:
-            for dub_imp in self.get_dublicate_imports(imp["name"])[:-1]:
+            for dub_imp in self.get_duplicate_imports(imp["name"])[:-1]:
                 yield dub_imp
                 _imports.remove(dub_imp)
 
-    def get_dublicate_imports(self, name):
+    def get_duplicate_imports(self, name):
         return [imp for imp in self.imports if name == imp["name"]]
 
     def run_visit(self, source):
