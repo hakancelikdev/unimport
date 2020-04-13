@@ -11,9 +11,11 @@ from x.y import z, q
 from x.y.z import z, q, zq
 some()
 calls()
+
 # and comments
 def maybe_functions(): # type: ignore
     after()
+
 from x import (
     y
 )
