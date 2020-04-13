@@ -5,7 +5,8 @@ from unittest import TestCase
 
 from unimport.config import DEFAULT_EXCLUDES, Config
 
-from .test_helper import TEST_DIR
+TEST_DIR = Path(__file__).parent
+
 
 TEST_DATA = [
     {
