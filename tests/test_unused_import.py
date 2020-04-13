@@ -193,17 +193,17 @@ class TestDuplicate(unittest.TestCase):
 
     def test_one_used(self):
         source = (
-            "from x import y\n"  # 1 - unused
-            "from x import y\n"  # 2 - unused
-            "from t import x\n"  # 3 - unused
-            "import re\n"  # 4 - unused
-            "import ll\n"  # 5 - unused
-            "import ll\n"  # 6 - unused
-            "from c import e\n"  # 7 - unused
-            "import e\n"  # 8 - unused
-            "from pathlib import Path\n"  # 9 - unused
-            "from pathlib import Path\n"  # 10 -
-            "p = Path()"  # 11 -
+            "from x import y\n"
+            "from x import y\n"
+            "from t import x\n"
+            "import re\n"
+            "import ll\n"
+            "import ll\n"
+            "from c import e\n"
+            "import e\n"
+            "from pathlib import Path\n"
+            "from pathlib import Path\n"
+            "p = Path()"
         )
         self.session.scanner.run_visit(source)
         self.assertEqual(
@@ -228,18 +228,18 @@ class TestDuplicate(unittest.TestCase):
 
     def test_two_used(self):
         source = (
-            "from x import y\n"  # 1 - unused
-            "from x import y\n"  # 2 - unused
-            "from t import x\n"  # 3 - unused
-            "import re\n"  # 4 - unused
-            "import ll\n"  # 5 - unused
-            "import ll\n"  # 6
-            "from c import e\n"  # 7 - unused
-            "import e\n"  # 8 - unused
-            "from pathlib import Path\n"  # 9 - unused
-            "from pathlib import Path\n"  # 10
-            "p = Path()\n"  # 11
-            "print(ll)\n"  # 12
+            "from x import y\n"
+            "from x import y\n"
+            "from t import x\n"
+            "import re\n"
+            "import ll\n"
+            "import ll\n"
+            "from c import e\n"
+            "import e\n"
+            "from pathlib import Path\n"
+            "from pathlib import Path\n"
+            "p = Path()\n"
+            "print(ll)\n"
         )
         self.session.scanner.run_visit(source)
         self.assertEqual(
@@ -263,18 +263,18 @@ class TestDuplicate(unittest.TestCase):
 
     def test_three_used(self):
         source = (
-            "from x import y\n"  # 1 - unused
-            "from x import y\n"  # 2 - unused
-            "from t import x\n"  # 3 - unused
-            "import re\n"  # 4 - unused
-            "import ll\n"  # 5 - unused
-            "import ll\n"  # 6
-            "from c import e\n"  # 7 - unused
-            "import e\n"  # 8 -
-            "from pathlib import Path\n"  # 9 - unused
-            "from pathlib import Path\n"  # 10
-            "p = Path()\n"  # 11
-            "print(ll)\n"  # 12
+            "from x import y\n"
+            "from x import y\n"
+            "from t import x\n"
+            "import re\n"
+            "import ll\n"
+            "import ll\n"
+            "from c import e\n"
+            "import e\n"
+            "from pathlib import Path\n"
+            "from pathlib import Path\n"
+            "p = Path()\n"
+            "print(ll)\n"
             "def function(e=e):pass\n"
         )
         self.session.scanner.run_visit(source)
