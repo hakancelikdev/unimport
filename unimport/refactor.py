@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 from lib2to3.fixer_base import BaseFix
 from lib2to3.fixer_util import (
-    BlankLine, FromImport, Leaf, Newline, Node, syms, token)
+    BlankLine, FromImport, Leaf, Newline, syms, token)
 from lib2to3.refactor import RefactoringTool
 
 

@@ -14,7 +14,6 @@ exclude = '''
     | buck-out
     | build
     | dist
-    | samples
     | rare_cases
   )/
   | foo.py           # also separately exclude a file named foo.py in
@@ -28,4 +27,4 @@ force_grid_wrap=0
 line_length=79
 
 [tool.unimport]
-exclude = ["tests/samples*", "rare_cases*", "**/__init__.py"]
+exclude = ["rare_cases*", "**/__init__.py"]
