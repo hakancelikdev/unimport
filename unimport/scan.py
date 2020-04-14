@@ -59,7 +59,7 @@ class Scanner(ast.NodeVisitor):
                     name = package
                 try:
                     module = importlib.import_module(package)
-                except (ModuleNotFoundError, ImportError, ValueError):
+                except (ModuleNotFoundError, ValueError):
                     pass
                 self.imports.append(
                     {
@@ -142,29 +142,54 @@ class Scanner(ast.NodeVisitor):
 
     def imp_star_False(self, imp):
         for name in self.names:
-            if (
-                ".".join(
-                    name["name"].split(".")[: len(imp["name"].split("."))]
-                )
-                == imp["name"]
-            ):
+            if self.is_import_name_match_name(name, imp):
                 break
         else:
             return imp
 
+    def is_import_name_match_name(self, name, imp):
+        return (
+            ".".join(name["name"].split(".")[: len(imp["name"].split("."))])
+            == imp["name"]
+            and imp["lineno"] < name["lineno"]
+        )
+
     def get_unused_imports(self):
-        _imports = self.imports.copy()
-
         for imp in self.imports:
-            res = getattr(self, f"imp_star_{imp['star']}")(imp)
-            if res:
-                yield res
-                _imports.remove(imp)
+            if self.is_duplicate(imp["name"]):
+                for name in self.names:
+                    if self.is_import_name_match_name(
+                        name, imp
+                    ) and not self.is_duplicate_used(name, imp):
+                        # This import: used
+                        break
+                else:
+                    # This import: unused
+                    yield imp
+            else:
+                res = getattr(self, f"imp_star_{imp['star']}")(imp)
+                if res:
+                    yield res
 
-        for imp in _imports:
-            for dub_imp in self.get_duplicate_imports(imp["name"])[:-1]:
-                yield dub_imp
-                _imports.remove(dub_imp)
+    def is_duplicate(self, name):
+        return [imp["name"] for imp in self.imports].count(name) > 1
 
-    def get_duplicate_imports(self, name):
-        return [imp for imp in self.imports if name == imp["name"]]
+    def get_duplicate_imports(self):
+        for imp in self.imports:
+            if self.is_duplicate(imp["name"]):
+                yield imp
+
+    def is_duplicate_used(self, name, imp):
+        def find_imp_from_line(name):
+            nearest = ""
+            for dup_imp in self.get_duplicate_imports():
+                if (
+                    dup_imp["lineno"] < name["lineno"]
+                    and dup_imp["name"] == name["name"]
+                ):
+                    nearest = dup_imp
+            return nearest
+
+        if imp == find_imp_from_line(name):
+            return False
+        return True

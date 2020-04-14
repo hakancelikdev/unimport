@@ -22,7 +22,7 @@ class TestRefactor(TestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_fix_multiple_problems_at_once(self):
+    def test_multiple_imports(self):
         action = (
             "import x\n"
             "import x.y\n"
@@ -75,7 +75,7 @@ class TestRefactor(TestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_from_x_import_star(self):
+    def test_star_imports(self):
         action = (
             "from os import *\n"
             "from x import y\n"
@@ -93,6 +93,31 @@ class TestRefactor(TestCase):
             "print(match)\n"
             "print(search)\n"
             "print(NAME)\n\n"
+        )
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+    def test_star_import_2(self):
+        action = (
+            "from typing import (\n"
+            "    Callable,\n"
+            "    Iterable,\n"
+            "    Iterator,\n"
+            "    List,\n"
+            "    Optional,\n"
+            "    Text,\n"
+            "    Tuple,\n"
+            "    Pattern,\n"
+            "    Union,\n"
+            "    cast,\n"
+            ")\n"
+            "from lib2to3.pgen2.token import *\n"
+            "from lib2to3.pgen2.grammar import *\n"
+            "print(Grammar)\n"
+        )
+        expected = (
+            "from lib2to3.pgen2.grammar import Grammar\n" "print(Grammar)\n"
         )
         self.assertEqual(
             expected, self.session.refactor(action),
@@ -141,31 +166,6 @@ class TestRefactor(TestCase):
         expected = (
             "import datetime\n\n"
             "print(f'The date is {datetime.datetime.now()}.')\n"
-        )
-        self.assertEqual(
-            expected, self.session.refactor(action),
-        )
-
-    def test_star(self):
-        action = (
-            "from typing import (\n"
-            "    Callable,\n"
-            "    Iterable,\n"
-            "    Iterator,\n"
-            "    List,\n"
-            "    Optional,\n"
-            "    Text,\n"
-            "    Tuple,\n"
-            "    Pattern,\n"
-            "    Union,\n"
-            "    cast,\n"
-            ")\n"
-            "from lib2to3.pgen2.token import *\n"
-            "from lib2to3.pgen2.grammar import *\n"
-            "print(Grammar)\n"
-        )
-        expected = (
-            "from lib2to3.pgen2.grammar import Grammar\n" "print(Grammar)\n"
         )
         self.assertEqual(
             expected, self.session.refactor(action),
