@@ -3,7 +3,7 @@ from unittest import TestCase
 from unimport.session import Session
 
 
-class TestRefactor(TestCase):
+class TestUnusedRefactor(TestCase):
     maxDiff = None
 
     def setUp(self):
@@ -166,6 +166,209 @@ class TestRefactor(TestCase):
         expected = (
             "import datetime\n\n"
             "print(f'The date is {datetime.datetime.now()}.')\n"
+        )
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+
+class TestDuplicateUnusedRefactor(TestCase):
+    maxDiff = None
+
+    def setUp(self):
+        self.session = Session()
+
+    def test_full_unused(self):
+        action = (
+            "from x import y\n"
+            "from x import y\n"
+            "from t import x\n"
+            "import re\n"
+            "import ll\n"
+            "import ll\n"
+            "from c import e\n"
+            "import e\n"
+        )
+        expected = ""
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+    def test_one_used(self):
+        action = (
+            "from x import y\n"
+            "from x import y\n"
+            "from t import x\n"
+            "import re\n"
+            "import ll\n"
+            "import ll\n"
+            "from c import e\n"
+            "import e\n"
+            "from pathlib import Path\n"
+            "from pathlib import Path\n"
+            "p = Path()\n"
+        )
+        expected = "from pathlib import Path\n" "p = Path()\n"
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+    def test_two_used(self):
+        action = (
+            "from x import y\n"
+            "from x import y\n"
+            "from t import x\n"
+            "import re\n"
+            "import ll\n"
+            "import ll\n"
+            "from c import e\n"
+            "import e\n"
+            "from pathlib import Path\n"
+            "from pathlib import Path\n"
+            "p = Path()\n"
+            "print(ll)\n"
+        )
+
+        expected = (
+            "import ll\n"
+            "from pathlib import Path\n"
+            "p = Path()\n"
+            "print(ll)\n"
+        )
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+    def test_three_used(self):
+        action = (
+            "from x import y\n"
+            "from x import y\n"
+            "from t import x\n"
+            "import re\n"
+            "import ll\n"
+            "import ll\n"
+            "from c import e\n"
+            "import e\n"
+            "from pathlib import Path\n"
+            "from pathlib import Path\n"
+            "p = Path()\n"
+            "print(ll)\n"
+            "def function(e=e):pass\n"
+        )
+        expected = (
+            "import ll\n"
+            "import e\n"
+            "from pathlib import Path\n"
+            "p = Path()\n"
+            "print(ll)\n"
+            "def function(e=e):pass\n"
+        )
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+    def test_different_duplicate_unused(self):
+        action = "from x import z\n" "from y import z\n"
+        expected = ""
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+    def test_different_duplicate_used(self):
+        action = "from x import z\n" "from y import z\n" "print(z)\n"
+        expected = "from y import z\n" "print(z)\n"
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+    def test_multi_duplicate(self):
+        action = "from x import y, z, t\n" "import t\n" "from l import t\n"
+        expected = ""
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+    def test_multi_duplicate_one_used(self):
+        action = (
+            "from x import y, z, t\n"
+            "import t\n"
+            "from l import t\n"
+            "print(t)\n"
+        )
+        expected = "from l import t\n" "print(t)\n"
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+    def test_one_used_bottom_multi_duplicate(self):
+        action = (
+            "import t\n"
+            "from l import t\n"
+            "from x import y, z, t\n"
+            "print(t)\n"
+        )
+        expected = "from x import t\n" "print(t)\n"
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+    def test_two_multi_duplicate_one_used(self):
+        action = (
+            "import t\n"
+            "from l import t\n"
+            "from x import y, z, t\n"
+            "from i import t, ii\n"
+            "print(t)\n"
+        )
+        expected = "from i import t\n" "print(t)\n"
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+    def test_import_in_function(self):
+        # BUG the expected situation is not entirely correct.
+        action = (
+            "import t\n"
+            "from l import t\n"
+            "from x import y, z, t\n\n"
+            "def function(f=t):\n"
+            "   import x\n"
+            "   return f\n"
+            "from i import t, ii\n"
+            "print(t)\n"
+        )
+        expected = (
+            "from x import t\n\n"
+            "def function(f=t):\n"
+            "      return f\n"
+            "from i import t\n"
+            "print(t)\n"
+        )
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+    def test_import_in_function_used_two_different(self):
+        # BUG the expected situation is not entirely correct.
+        action = (
+            "import t\n"
+            "print(t)\n\n"
+            "from l import t\n"
+            "from x import y, z, t\n\n"
+            "def function(f=t):\n"
+            "    import x\n"
+            "    return f\n"
+            "from i import t, ii\n"
+            "print(t)\n"
+        )
+        expected = (
+            "import t\n"
+            "print(t)\n"
+            "from x import t\n\n"
+            "def function(f=t):\n"
+            "        return f\n"
+            "from i import t\n"
+            "print(t)\n"
         )
         self.assertEqual(
             expected, self.session.refactor(action),
