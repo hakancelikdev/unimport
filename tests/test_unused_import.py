@@ -158,6 +158,27 @@ class TestUnusedImport(unittest.TestCase):
             list(self.session.scanner.get_unused_imports()),
         )
 
+    def test_import_in_function(self):
+        source = (
+            "import t\n"
+            "from x import y, z\n\n"
+            "def function(f=t):\n"
+            "    import x\n"
+            "    return f\n"
+            "from i import t, ii\n"
+            "print(t)\n"
+        )
+        self.session.scanner.run_visit(source)
+        self.assertEqual(
+            [
+                {"lineno": 2, "name": "y", "star": False, "module": None},
+                {"lineno": 2, "name": "z", "star": False, "module": None},
+                {"lineno": 5, "name": "x", "star": False, "module": None},
+                {"lineno": 7, "name": "ii", "star": False, "module": None},
+            ],
+            list(self.session.scanner.get_unused_imports()),
+        )
+
 
 class TestDuplicate(unittest.TestCase):
     maxDiff = None
@@ -248,9 +269,9 @@ class TestDuplicate(unittest.TestCase):
                 {"lineno": 2, "name": "y", "star": False, "module": None},
                 {"lineno": 3, "name": "x", "star": False, "module": None},
                 {"lineno": 4, "name": "re", "star": False, "module": re},
+                {"lineno": 5, "name": "ll", "star": False, "module": None},
                 {"lineno": 7, "name": "e", "star": False, "module": None},
                 {"lineno": 8, "name": "e", "star": False, "module": None},
-                {"lineno": 5, "name": "ll", "star": False, "module": None},
                 {
                     "lineno": 9,
                     "name": "Path",
@@ -357,10 +378,10 @@ class TestDuplicate(unittest.TestCase):
         self.session.scanner.run_visit(source)
         self.assertEqual(
             [
-                {"lineno": 3, "name": "y", "star": False, "module": None},
-                {"lineno": 3, "name": "z", "star": False, "module": None},
                 {"lineno": 1, "name": "t", "star": False, "module": None},
                 {"lineno": 2, "name": "t", "star": False, "module": None},
+                {"lineno": 3, "name": "y", "star": False, "module": None},
+                {"lineno": 3, "name": "z", "star": False, "module": None},
             ],
             list(self.session.scanner.get_unused_imports()),
         )
@@ -376,12 +397,60 @@ class TestDuplicate(unittest.TestCase):
         self.session.scanner.run_visit(source)
         self.assertEqual(
             [
-                {"lineno": 3, "name": "y", "star": False, "module": None},
-                {"lineno": 3, "name": "z", "star": False, "module": None},
-                {"lineno": 4, "name": "ii", "star": False, "module": None},
                 {"lineno": 1, "name": "t", "star": False, "module": None},
                 {"lineno": 2, "name": "t", "star": False, "module": None},
+                {"lineno": 3, "name": "y", "star": False, "module": None},
+                {"lineno": 3, "name": "z", "star": False, "module": None},
                 {"lineno": 3, "name": "t", "star": False, "module": None},
+                {"lineno": 4, "name": "ii", "star": False, "module": None},
+            ],
+            list(self.session.scanner.get_unused_imports()),
+        )
+
+    def test_import_in_function(self):
+        source = (
+            "import t\n"
+            "from l import t\n"
+            "from x import y, z, t\n\n"
+            "def function(f=t):\n"
+            "    import x\n"
+            "    return f\n"
+            "from i import t, ii\n"
+            "print(t)\n"
+        )
+        self.session.scanner.run_visit(source)
+        self.assertEqual(
+            [
+                {"lineno": 1, "name": "t", "star": False, "module": None},
+                {"lineno": 2, "name": "t", "star": False, "module": None},
+                {"lineno": 3, "name": "y", "star": False, "module": None},
+                {"lineno": 3, "name": "z", "star": False, "module": None},
+                {"lineno": 6, "name": "x", "star": False, "module": None},
+                {"lineno": 8, "name": "ii", "star": False, "module": None},
+            ],
+            list(self.session.scanner.get_unused_imports()),
+        )
+
+    def test_import_in_function_used_two_different(self):
+        source = (
+            "import t\n"
+            "print(t)\n\n"
+            "from l import t\n"
+            "from x import y, z, t\n\n"
+            "def function(f=t):\n"
+            "    import x\n"
+            "    return f\n"
+            "from i import t, ii\n"
+            "print(t)\n"
+        )
+        self.session.scanner.run_visit(source)
+        self.assertEqual(
+            [
+                {"lineno": 4, "name": "t", "star": False, "module": None},
+                {"lineno": 5, "name": "y", "star": False, "module": None},
+                {"lineno": 5, "name": "z", "star": False, "module": None},
+                {"lineno": 8, "name": "x", "star": False, "module": None},
+                {"lineno": 10, "name": "ii", "star": False, "module": None},
             ],
             list(self.session.scanner.get_unused_imports()),
         )
