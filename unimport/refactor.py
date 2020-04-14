@@ -38,22 +38,16 @@ class RefactorImports(BaseFix):
 
     def __init__(self):
         self.unused_modules = []
-        self.module_names = []
         super().__init__(None, None)  # options and logger
 
     @contextmanager
     def clean(self, unused_modules):
         try:
             self.unused_modules.clear()
-            self.module_names.clear()
             self.unused_modules.extend(unused_modules)
-            self.module_names.extend(
-                [imp["name"] for imp in self.unused_modules]
-            )
             yield
         finally:
             self.unused_modules.clear()
-            self.module_names.clear()
 
     def transform(self, node, results):
         if node.children[0].type == syms.import_from:
@@ -98,7 +92,7 @@ class RefactorImports(BaseFix):
         modules = tuple(traverse_imports(imports))
         remove_counter = 0
         for index, module in enumerate(modules):
-            if module in self.module_names:
+            if self.is_module_unused(module, node):
                 if commas:
                     if index + 1 == len(modules):
                         comma = commas.pop(index - remove_counter - 1)
@@ -114,6 +108,14 @@ class RefactorImports(BaseFix):
             return BlankLine()
         if trailing_comma:
             children.append(trailing_comma)
+
+    def is_module_unused(self, import_name, node):
+        for imp in self.unused_modules:
+            if (
+                imp["name"] == import_name
+                and imp["lineno"] == node.get_lineno()
+            ):
+                return imp
 
 
 class RefactorTool(RefactoringTool):
