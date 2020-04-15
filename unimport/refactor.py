@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 from lib2to3.fixer_base import BaseFix
-from lib2to3.fixer_util import BlankLine, Leaf, Newline, Node, syms, token
+from lib2to3.fixer_util import (
+    BlankLine, FromImport, Leaf, Newline, syms, token)
 from lib2to3.refactor import RefactoringTool
 
 
@@ -49,85 +50,72 @@ class RefactorImports(BaseFix):
             self.unused_modules.clear()
 
     def transform(self, node, results):
-        imports = results["imp"]
         if node.children[0].type == syms.import_from:
-            if str(imports).strip() in self.unused_modules:
-                return BlankLine()
-            else:
-                try:
-                    unused_imp = [
-                        imp
-                        for imp in self.unused_modules
-                        if imp["lineno"] == node.get_lineno()
-                    ][0]
-                except IndexError:
-                    pass
-                else:
-                    if unused_imp["star"]:
-                        if not unused_imp["modules"]:
-                            return BlankLine()
-                        else:
-                            return self.suggestion_to_star_import(unused_imp)
-                return self.transform_inner_body(
-                    node, results["items"], from_import=True
-                )
+            imp = self.get_imp_if_equal_to_lineno(node.get_lineno())
+            if imp:
+                if imp["star"]:
+                    if not imp["modules"]:
+                        return BlankLine()
+                    else:
+                        package_name = imp["module"].__name__
+                        name_leafs = [
+                            Leaf(
+                                token.NAME,
+                                ", ".join(sorted(imp["modules"])),
+                                prefix=" ",
+                            ),
+                            Newline(),
+                        ]
+                        return FromImport(package_name, name_leafs)
+            return self.transform_inner_children(node, results["items"])
+        elif node.children[0].type == syms.import_name:
+            return self.transform_inner_children(node, results["imp"])
+
+    def get_imp_if_equal_to_lineno(self, lineno):
+        for imp in self.unused_modules:
+            if imp["lineno"] == lineno:
+                return imp
+
+    def transform_inner_children(self, node, imports):
+        if not self.get_imp_if_equal_to_lineno(node.get_lineno()):
+            return None
+        if imports.type == syms.import_as_name or not imports.children:
+            children = [imports]
         else:
-            return self.transform_inner_body(node, imports)
-
-    def suggestion_to_star_import(self, unused_imp):
-        children = [
-            Leaf(token.NAME, "from"),
-            Leaf(token.NAME, unused_imp["module"].__name__, prefix=" ",),
-            Leaf(token.NAME, "import", prefix=" "),
-            Leaf(
-                token.NAME,
-                ", ".join(sorted(unused_imp["modules"])),
-                prefix=" ",
-            ),
-            Newline(),
-        ]
-        return Node(syms.import_from, children)
-
-    def transform_inner_body(self, node, imports, from_import=False):
-        module_names = [imp["name"] for imp in self.unused_modules]
-        if imports.children:
-            body = imports.children
-        else:
-            body = [imports]
-
-        def remove_comma():
-            nonlocal trailing_comma
-            if index + 1 == len(modules):
-                comma = commas.pop(index - remove_counter - 1)
-                if trailing_comma:
-                    trailing_comma.remove()
-                    trailing_comma = None
-            else:
-                comma = commas.pop(index - remove_counter)
-            comma.remove()
-
+            children = imports.children
         trailing_comma = None
-        if body[-1].type == token.COMMA:
-            trailing_comma = body.pop()
-
-        commas = body[1:-1:2]
-        module_nodes = body[::2]
+        if children[-1].type == token.COMMA:
+            # if end of children's char is equal to ',' then remove it
+            trailing_comma = children.pop()
+        commas = children[1:-1:2]
+        module_nodes = children[::2]
         modules = tuple(traverse_imports(imports))
         remove_counter = 0
-
         for index, module in enumerate(modules):
-            if module in module_names:
+            if self.is_module_unused(module, node):
                 if commas:
-                    remove_comma()
-
+                    if index + 1 == len(modules):
+                        comma = commas.pop(index - remove_counter - 1)
+                        if trailing_comma:
+                            trailing_comma.remove()
+                            trailing_comma = None
+                    else:
+                        comma = commas.pop(index - remove_counter)
+                    comma.remove()
                 module_nodes.pop(index - remove_counter).remove()
                 remove_counter += 1
-
         if remove_counter == len(modules):
             return BlankLine()
-
         if trailing_comma:
-            body.append(trailing_comma)
+            children.append(trailing_comma)
+
+    def is_module_unused(self, import_name, node):
+        for imp in self.unused_modules:
+            if (
+                imp["name"] == import_name
+                and imp["lineno"] == node.get_lineno()
+            ):
+                return imp
 
 
 class RefactorTool(RefactoringTool):
