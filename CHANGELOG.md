@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.2.3] -
+- [Duplicate dedect and refactor support by @hakancelik96](https://github.com/hakancelik96/unimport/pull/23)
+
 ## [0.2.2] - 4/April/2020
 - [Fix: Scan & Config - Add test to default exlude by @hakancelik96](https://github.com/hakancelik96/unimport/commit/7e789872917c51e5ffa167d26581e5397fd34998)
 
