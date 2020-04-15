@@ -124,17 +124,10 @@ class Scanner(ast.NodeVisitor):
                 except OSError:
                     imp["modules"] = []
                 else:
+                    all_object = s.classes + s.functions + s.names
+                    all_name = {from_cfv["name"] for from_cfv in all_object}
                     imp["modules"] = sorted(
-                        {
-                            cfv
-                            for cfv in {
-                                from_cfv["name"]
-                                for from_cfv in s.names
-                                + s.classes
-                                + s.functions
-                            }
-                            if cfv in to_
-                        }
+                        {cfv for cfv in all_name if cfv in to_}
                     )
         else:
             imp["modules"] = []
@@ -149,8 +142,7 @@ class Scanner(ast.NodeVisitor):
 
     def is_import_name_match_name(self, name, imp):
         return (
-            ".".join(name["name"].split(".")[: len(imp["name"].split("."))])
-            == imp["name"]
+            name["name"].startswith(imp["name"])
             and imp["lineno"] < name["lineno"]
         )
 
@@ -180,7 +172,7 @@ class Scanner(ast.NodeVisitor):
                 yield imp
 
     def is_duplicate_used(self, name, imp):
-        def find_imp_from_line(name):
+        def find_nearest_imp(name):
             nearest = ""
             for dup_imp in self.get_duplicate_imports():
                 if (
@@ -190,6 +182,4 @@ class Scanner(ast.NodeVisitor):
                     nearest = dup_imp
             return nearest
 
-        if imp == find_imp_from_line(name):
-            return False
-        return True
+        return imp != find_nearest_imp(name)
