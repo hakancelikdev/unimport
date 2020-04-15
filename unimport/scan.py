@@ -5,7 +5,7 @@ import sys
 
 
 def recursive(func):
-    """ decorator to make visitor work recursive """
+    """decorator to make visitor work recursive"""
 
     def wrapper(self, node):
         func(self, node)
@@ -15,7 +15,8 @@ def recursive(func):
 
 
 class Scanner(ast.NodeVisitor):
-    "To detect unused import using ast"
+    """To detect unused import using ast"""
+
     ignore_imports = ["__future__", "__doc__"]
     ignore_names = ["print"]
 
@@ -58,7 +59,7 @@ class Scanner(ast.NodeVisitor):
                     name = package
                 try:
                     module = importlib.import_module(package)
-                except (ModuleNotFoundError, ImportError, ValueError):
+                except (ModuleNotFoundError, ValueError):
                     pass
                 self.imports.append(
                     {
@@ -71,8 +72,7 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_ImportFrom(self, node):
-        if node.module not in self.ignore_imports:
-            self.visit_Import(node)
+        self.visit_Import(node)
 
     @recursive
     def visit_Name(self, node):
@@ -106,6 +106,15 @@ class Scanner(ast.NodeVisitor):
             {"lineno": node.lineno, "name": ".".join(local_attr)}
         )
 
+    def run_visit(self, source):
+        self.visit(ast.parse(source))
+
+    def clear(self):
+        self.names.clear()
+        self.imports.clear()
+        self.classes.clear()
+        self.functions.clear()
+
     def imp_star_True(self, imp):
         if imp["module"]:
             if imp["module"].__name__ not in sys.builtin_module_names:
@@ -115,15 +124,10 @@ class Scanner(ast.NodeVisitor):
                 except OSError:
                     imp["modules"] = []
                 else:
+                    all_object = s.classes + s.functions + s.names
+                    all_name = {from_cfv["name"] for from_cfv in all_object}
                     imp["modules"] = sorted(
-                        {
-                            cfv
-                            for cfv in {
-                                from_cfv["name"]
-                                for from_cfv in s.names + s.classes + s.functions
-                            }
-                            if cfv in to_
-                        }
+                        {cfv for cfv in all_name if cfv in to_}
                     )
         else:
             imp["modules"] = []
@@ -131,27 +135,51 @@ class Scanner(ast.NodeVisitor):
 
     def imp_star_False(self, imp):
         for name in self.names:
-            if (
-                ".".join(
-                    name["name"].split(".")[: len(imp["name"].split("."))]
-                )
-                == imp["name"]
-            ):
+            if self.is_import_name_match_name(name, imp):
                 break
         else:
             return imp
 
+    def is_import_name_match_name(self, name, imp):
+        return (
+            name["name"].startswith(imp["name"])
+            and imp["lineno"] < name["lineno"]
+        )
+
     def get_unused_imports(self):
         for imp in self.imports:
-            res = getattr(self, f"imp_star_{imp['star']}")(imp)
-            if res:
-                yield res
+            if self.is_duplicate(imp["name"]):
+                for name in self.names:
+                    if self.is_import_name_match_name(
+                        name, imp
+                    ) and not self.is_duplicate_used(name, imp):
+                        # This import: used
+                        break
+                else:
+                    # This import: unused
+                    yield imp
+            else:
+                res = getattr(self, f"imp_star_{imp['star']}")(imp)
+                if res:
+                    yield res
 
-    def run_visit(self, source):
-        self.visit(ast.parse(source))
+    def is_duplicate(self, name):
+        return [imp["name"] for imp in self.imports].count(name) > 1
 
-    def clear(self):
-        self.names.clear()
-        self.imports.clear()
-        self.classes.clear()
-        self.functions.clear()
+    def get_duplicate_imports(self):
+        for imp in self.imports:
+            if self.is_duplicate(imp["name"]):
+                yield imp
+
+    def is_duplicate_used(self, name, imp):
+        def find_nearest_imp(name):
+            nearest = ""
+            for dup_imp in self.get_duplicate_imports():
+                if (
+                    dup_imp["lineno"] < name["lineno"]
+                    and dup_imp["name"] == name["name"]
+                ):
+                    nearest = dup_imp
+            return nearest
+
+        return imp != find_nearest_imp(name)
