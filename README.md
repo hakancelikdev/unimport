@@ -55,18 +55,15 @@ For example:
 
 ```ini
 [tool.unimport]
-exclude = [
-  './[0-9].*',
-  'tests'
-]
+exclude = ["tests*", "**/__init__.py"]
 ```
 
 **setup.cfg**
 
 ```ini
 [unimport]
-exclude =  ./[0-9].*
-           tests
+exclude =  **/__init__.py
+           tests*
 ```
 
 ## 🤝 [CONTRIBUTING.md](https://github.com/hakancelik96/unimport/blob/master/CONTRIBUTING.md) 🤝
