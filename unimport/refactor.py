@@ -17,7 +17,7 @@ def traverse_imports(names):
         elif node.type == syms.dotted_name:
             yield "".join([ch.value for ch in node.children])
         elif node.type in {syms.dotted_as_name, syms.import_as_name}:
-            pending.append(node.children[0])
+            yield node.children[2].value
         elif node.type in {syms.dotted_as_names, syms.import_as_names}:
             pending.extend(node.children[::-2])
         else:
@@ -50,26 +50,32 @@ class RefactorImports(BaseFix):
             self.unused_modules.clear()
 
     def transform(self, node, results):
-        if node.children[0].type == syms.import_from:
-            imp = self.get_imp_if_equal_to_lineno(node.get_lineno())
-            if imp:
-                if imp["star"]:
-                    if not imp["modules"]:
-                        return BlankLine()
-                    else:
-                        package_name = imp["module"].__name__
-                        name_leafs = [
-                            Leaf(
-                                token.NAME,
-                                ", ".join(sorted(imp["modules"])),
-                                prefix=" ",
-                            ),
-                            Newline(),
-                        ]
-                        return FromImport(package_name, name_leafs)
-            return self.transform_inner_children(node, results["items"])
-        elif node.children[0].type == syms.import_name:
-            return self.transform_inner_children(node, results["imp"])
+        imp = self.get_imp_if_equal_to_lineno(node.get_lineno())
+        if imp:
+            if node.children[0].type == syms.import_from:
+                return self.import_from(node, results, imp)
+            elif node.children[0].type == syms.import_name:
+                return self.import_name(node, results)
+
+    def import_from(self, node, results, imp):
+        if imp["star"]:
+            if not imp["modules"]:
+                return BlankLine()
+            else:
+                package_name = imp["module"].__name__
+                name_leafs = [
+                    Leaf(
+                        token.NAME,
+                        ", ".join(sorted(imp["modules"])),
+                        prefix=" ",
+                    ),
+                    Newline(),
+                ]
+                return FromImport(package_name, name_leafs)
+        return self.transform_inner_children(node, results["items"])
+
+    def import_name(self, node, results):
+        return self.transform_inner_children(node, results["imp"])
 
     def get_imp_if_equal_to_lineno(self, lineno):
         for imp in self.unused_modules:
@@ -77,8 +83,6 @@ class RefactorImports(BaseFix):
                 return imp
 
     def transform_inner_children(self, node, imports):
-        if not self.get_imp_if_equal_to_lineno(node.get_lineno()):
-            return None
         if imports.type == syms.import_as_name or not imports.children:
             children = [imports]
         else:
