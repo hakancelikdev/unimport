@@ -1,9 +1,9 @@
-from unittest import TestCase
+import unittest
 
 from unimport.session import Session
 
 
-class TestUnusedRefactor(TestCase):
+class TestUnusedRefactor(unittest.TestCase):
     maxDiff = None
 
     def setUp(self):
@@ -172,7 +172,7 @@ class TestUnusedRefactor(TestCase):
         )
 
 
-class TestDuplicateUnusedRefactor(TestCase):
+class TestDuplicateUnusedRefactor(unittest.TestCase):
     maxDiff = None
 
     def setUp(self):
@@ -370,6 +370,68 @@ class TestDuplicateUnusedRefactor(TestCase):
             "from i import t\n"
             "print(t)\n"
         )
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+
+class TesAsImport(unittest.TestCase):
+    maxDiff = None
+
+    def setUp(self):
+        self.session = Session()
+
+    def test_as_import_all_unused_all_cases(self):
+        action = (
+            "from x import y as z\n"
+            "import x\n"
+            "from t import s as ss\n"
+            "import le as x\n"
+        )
+        expected = ""
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+    def test_multiple_from_as_import(self):
+        action = (
+            "from f import a as c, l as k, i as ii\n"
+            "from fo import (bar, i, x as z)\n"
+        )
+        expected = ""
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+    def test_multiple_import_name_as_import(self):
+        action = "import a as c, l as k, i as ii\n" "import bar, i, x as z\n"
+        expected = ""
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+    def test_multiple_import_name_as_import_duplicate(self):
+        action = (
+            "import a as c, l as k, i as ii\n"
+            "import bar, i, x as z\n"
+            "import bar, i, x as z\n"
+            "print(bar)\n"
+        )
+        expected = "import bar\n" "print(bar)\n"
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+    def test_as_import_used_all_cases(self):
+        action = (
+            "from x import y as z\n"
+            "import x\n"
+            "from t import s as ss\n"
+            "import bar, i, x as z\n"
+            "import le as x\n"
+            "print(x)\n"
+        )
+        expected = "import le as x\n" "print(x)\n"
         self.assertEqual(
             expected, self.session.refactor(action),
         )
