@@ -454,3 +454,62 @@ class TestDuplicate(unittest.TestCase):
             ],
             list(self.session.scanner.get_unused_imports()),
         )
+
+
+class TesAsImport(unittest.TestCase):
+    maxDiff = None
+
+    def setUp(self):
+        self.session = Session()
+
+    def test_as_import_all_unused_all_cases(self):
+        source = (
+            "from x import y as z\n"
+            "import x\n"
+            "from t import s as ss\n"
+            "from f import a as c, l as k, i as ii\n"
+            "from fo import (bar, i, x as z)\n"
+            "import le as x\n"
+        )
+        self.session.scanner.run_visit(source)
+        self.assertEqual(
+            [
+                {"lineno": 1, "name": "z", "star": False, "module": None},
+                {"lineno": 2, "name": "x", "star": False, "module": None},
+                {"lineno": 3, "name": "ss", "star": False, "module": None},
+                {"lineno": 4, "name": "c", "star": False, "module": None},
+                {"lineno": 4, "name": "k", "star": False, "module": None},
+                {"lineno": 4, "name": "ii", "star": False, "module": None},
+                {"lineno": 5, "name": "bar", "star": False, "module": None},
+                {"lineno": 5, "name": "i", "star": False, "module": None},
+                {"lineno": 5, "name": "z", "star": False, "module": None},
+                {"lineno": 6, "name": "x", "star": False, "module": None},
+            ],
+            list(self.session.scanner.get_unused_imports()),
+        )
+
+    def test_as_import_one_used_in_function_all_cases(self):
+        source = (
+            "from x import y as z\n"
+            "import x\n"
+            "from t import s as ss\n"
+            "from f import a as c, l as k, i as ii\n"
+            "from fo import (bar, i, x as z)\n"
+            "import le as x\n"
+            "def x(t=x):pass\n"
+        )
+        self.session.scanner.run_visit(source)
+        self.assertEqual(
+            [
+                {"lineno": 1, "name": "z", "star": False, "module": None},
+                {"lineno": 2, "name": "x", "star": False, "module": None},
+                {"lineno": 3, "name": "ss", "star": False, "module": None},
+                {"lineno": 4, "name": "c", "star": False, "module": None},
+                {"lineno": 4, "name": "k", "star": False, "module": None},
+                {"lineno": 4, "name": "ii", "star": False, "module": None},
+                {"lineno": 5, "name": "bar", "star": False, "module": None},
+                {"lineno": 5, "name": "i", "star": False, "module": None},
+                {"lineno": 5, "name": "z", "star": False, "module": None},
+            ],
+            list(self.session.scanner.get_unused_imports()),
+        )
