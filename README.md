@@ -16,9 +16,9 @@ Unimport can be installed by running `pip install unimport`. It requires Python 
 You can list many options by running unimport --help
 
 ```
-usage: unimport [-h] [-c PATH] [-r | -p] [-d] [--check] [-v] [sources [sources ...]]
+usage: unimport [-h] [-c PATH] [-d] [-r | -p] [--check] [-v] [sources [sources ...]]
 
-Detect or remove unused Python imports.
+A python CLI library to detect or auto remove unused Python imports.
 
 positional arguments:
   sources               files and folders to find the unused imports.
@@ -27,9 +27,9 @@ optional arguments:
   -h, --help            show this help message and exit
   -c PATH, --config PATH
                         read configuration from PATH.
+  -d, --diff            Prints a diff of all the changes unimport would make to a file.
   -r, --remove          remove unused imports automatically.
   -p, --permission      Refactor permission after see diff.
-  -d, --diff            Prints a diff of all the changes unimport would make to a file.
   --check               Prints which file the unused imports are in.
   -v, --version         Prints version of unimport
 ```

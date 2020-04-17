@@ -1,7 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [0.2.3] -
+## [0.2.4] - 17/April/2020
+- [As import refactor support by @hakancelik96](https://github.com/hakancelik96/unimport/commit/147ed5e836d6a4589a92db4157bfd299ca935b02)
 - [Duplicate dedect and refactor support by @hakancelik96](https://github.com/hakancelik96/unimport/pull/23)
 
 ## [0.2.2] - 4/April/2020

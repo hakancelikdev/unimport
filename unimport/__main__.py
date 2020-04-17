@@ -2,11 +2,11 @@ import argparse
 import pathlib
 import sys
 
-from unimport import __version__
+from unimport import __version__, __description__
 from unimport.session import Session
 
 parser = argparse.ArgumentParser(
-    description="Detect or remove unused Python imports."
+    description=__description__
 )
 exclusive_group = parser.add_mutually_exclusive_group(required=False)
 parser.add_argument(
