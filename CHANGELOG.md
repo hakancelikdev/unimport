@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.2.4] - 17/April/2020
 - [As import refactor support by @hakancelik96](https://github.com/hakancelik96/unimport/commit/147ed5e836d6a4589a92db4157bfd299ca935b02)
-- [Duplicate dedect and refactor support by @hakancelik96](https://github.com/hakancelik96/unimport/pull/23)
+- [Duplicate detect and refactor support by @hakancelik96](https://github.com/hakancelik96/unimport/pull/23)
 
 ## [0.2.2] - 4/April/2020
 - [Fix: Scan & Config - Add test to default exlude by @hakancelik96](https://github.com/hakancelik96/unimport/commit/7e789872917c51e5ffa167d26581e5397fd34998)
@@ -45,7 +45,7 @@ All notable changes to this project will be documented in this file.
     - [adapt testing suite by @isidentical](https://github.com/hakancelik96/unimport/commit/c81036fe5b0d845c3220cfda1e4c30250e1107a1)
 
 - Bug Fix
-    - [setup.cfg bug fix & catch error in dedect by @hakancelik96](https://github.com/hakancelik96/unimport/commit/a99b3846d55b723a701d6fdbbc7e634772b8c5ba)
+    - [setup.cfg bug fix & catch error in detect by @hakancelik96](https://github.com/hakancelik96/unimport/commit/a99b3846d55b723a701d6fdbbc7e634772b8c5ba)
     - [get_files bug fix by @hakancelik96](https://github.com/hakancelik96/unimport/commit/3d3299f1c82161a8e95d909864ad00dd9fda23f9)
     - [support local imports by @hakancelik96 and @isidentical](https://github.com/hakancelik96/unimport/commit/8c9b12295cf7c87670a685e59f95f1d83da130f7)
 
