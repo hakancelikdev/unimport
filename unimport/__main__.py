@@ -1,13 +1,12 @@
 import argparse
 import pathlib
 import sys
+from typing import List, Optional, Tuple
 
-from unimport import __version__, __description__
+from unimport import __description__, __version__
 from unimport.session import Session
 
-parser = argparse.ArgumentParser(
-    description=__description__
-)
+parser = argparse.ArgumentParser(description=__description__)
 exclusive_group = parser.add_mutually_exclusive_group(required=False)
 parser.add_argument(
     "sources",
@@ -56,13 +55,13 @@ parser.add_argument(
 )
 
 
-def print_if_exists(sequence):
+def print_if_exists(sequence: Tuple[str, ...]) -> bool:
     if sequence:
         print(*sequence, sep="\n")
-        return True
+    return len(sequence) > 0
 
 
-def main(argv=None):
+def main(argv: Optional[List[str]] = None) -> None:
     namespace = parser.parse_args(argv)
     any_namespace = any([value for key, value in vars(namespace).items()][2:])
     if namespace.permission and not namespace.diff:

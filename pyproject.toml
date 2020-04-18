@@ -25,6 +25,7 @@ exclude = '''
 multi_line_output=4
 force_grid_wrap=0
 line_length=79
+known_third_party=["setuptools"]
 
 [tool.unimport]
 exclude = ["rare_cases*", "**/__init__.py"]
