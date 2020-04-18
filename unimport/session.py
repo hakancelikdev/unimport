@@ -3,6 +3,7 @@ import fnmatch
 import tokenize
 from lib2to3.pgen2.parse import ParseError
 from pathlib import Path
+from typing import Iterator, Optional, Tuple
 
 from unimport.config import Config
 from unimport.refactor import RefactorTool
@@ -10,12 +11,12 @@ from unimport.scan import Scanner
 
 
 class Session:
-    def __init__(self, config_file=None):
+    def __init__(self, config_file: Optional[Path] = None) -> None:
         self.config = Config(config_file)
         self.scanner = Scanner()
         self.refactor_tool = RefactorTool()
 
-    def _read(self, path):
+    def _read(self, path: Path) -> Tuple[str, str]:
         try:
             with tokenize.open(path) as stream:
                 source = stream.read()
@@ -26,7 +27,9 @@ class Session:
         else:
             return source, encoding
 
-    def _list_paths(self, start, pattern="**/*.py"):
+    def _list_paths(
+        self, start: Path, pattern: str = "**/*.py"
+    ) -> Iterator[Path]:
         start = Path(start)
 
         def _is_excluded(path):
@@ -45,20 +48,19 @@ class Session:
                         if not _is_excluded(path):
                             yield path
 
-    def refactor(self, source):
+    def refactor(self, source: str) -> str:
         self.scanner.run_visit(source)
         modules = [module for module in self.scanner.get_unused_imports()]
         self.scanner.clear()
         return self.refactor_tool.refactor_string(source, modules)
 
-    def refactor_file(self, path, apply=False):
+    def refactor_file(self, path: Path, apply: bool = False) -> str:
         path = Path(path)
         source, encoding = self._read(path)
         result = self.refactor(source)
         if apply:
             path.write_text(result, encoding=encoding)
-        else:
-            return result
+        return result
 
     def diff(self, source):
         return tuple(
@@ -67,7 +69,7 @@ class Session:
             )
         )
 
-    def diff_file(self, path):
+    def diff_file(self, path: Path) -> Tuple[str, ...]:
         source, _ = self._read(path)
         try:
             result = self.refactor_file(path, apply=False)

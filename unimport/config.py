@@ -1,4 +1,6 @@
 import configparser
+from pathlib import Path
+from typing import Optional, Tuple
 
 try:
     import toml
@@ -49,20 +51,19 @@ DEFAULT_EXCLUDES = {
 
 
 class Config:
-    def __init__(self, config_file=None):
+    def __init__(self, config_file: Optional[Path] = None) -> None:
         self.exclude = DEFAULT_EXCLUDES.copy()
         self.config_file = config_file
         self.config_path, self.section = self.find_config()
-        if self.config_path is not None:
-            self.parse()
+        self.parse()
 
     @staticmethod
-    def is_available_to_parse(config_path):
+    def is_available_to_parse(config_path: Path) -> bool:
         if config_path.suffix == ".toml" and HAS_TOML is False:
             return False
         return config_path.exists()
 
-    def find_config(self):
+    def find_config(self) -> Tuple[Optional[Path], Optional[str]]:
         config_files = dict(CONFIG_FILES)
         if (
             self.config_file is not None
@@ -76,16 +77,26 @@ class Config:
                     return config_path, section
         return None, None
 
-    def parse(self):
-        getattr(self, f"parse_{self.config_path.suffix.strip('.')}")()
+    def parse(self) -> None:
+        if self.config_path is None:
+            return
 
-    def parse_cfg(self):
+        config_type = self.config_path.suffix.strip(".")
+        getattr(self, f"parse_{config_type}")()
+
+    def parse_cfg(self) -> None:
+        if self.config_path is None or self.section is None:
+            return
+
         parser = configparser.ConfigParser(allow_no_value=True)
         parser.read(self.config_path)
         if parser.has_section(self.section):
             self.exclude.update(parser.get(self.section, "exclude").split())
 
-    def parse_toml(self):
+    def parse_toml(self) -> None:
+        if self.config_path is None:
+            return
+
         parsed_toml = toml.loads(self.config_path.read_text())
         config = parsed_toml.get("tool", {}).get("unimport", {})
         self.exclude.update(set(config.get("exclude", [])))
