@@ -135,24 +135,16 @@ class Scanner(ast.NodeVisitor):
 
     def imp_star_False(self, imp):
         for name in self.names:
-            if self.is_import_name_match_name(name, imp):
+            if name["name"].startswith(imp["name"]):
                 break
         else:
             return imp
-
-    def is_import_name_match_name(self, name, imp):
-        return (
-            name["name"].startswith(imp["name"])
-            and imp["lineno"] < name["lineno"]
-        )
 
     def get_unused_imports(self):
         for imp in self.imports:
             if self.is_duplicate(imp["name"]):
                 for name in self.names:
-                    if self.is_import_name_match_name(
-                        name, imp
-                    ) and not self.is_duplicate_used(name, imp):
+                    if name["name"].startswith(imp["name"]) and not self.is_duplicate_used(name, imp):
                         # This import: used
                         break
                 else:
