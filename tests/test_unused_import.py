@@ -179,6 +179,17 @@ class TestUnusedImport(unittest.TestCase):
             list(self.session.scanner.get_unused_imports()),
         )
 
+    def test_import_after_usage(self):
+        source = (
+            "def function():\n"
+            "    print(os)\n"
+            "import os\n"
+        )
+        self.session.scanner.run_visit(source)
+        self.assertEqual(
+            [], list(self.session.scanner.get_unused_imports()),
+        )
+
 
 class TestDuplicate(unittest.TestCase):
     maxDiff = None
