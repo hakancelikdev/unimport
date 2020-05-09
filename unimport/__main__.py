@@ -2,12 +2,10 @@ import argparse
 import pathlib
 import sys
 
-from unimport import __version__, __description__
+from unimport import __description__, __version__
 from unimport.session import Session
 
-parser = argparse.ArgumentParser(
-    description=__description__
-)
+parser = argparse.ArgumentParser(description=__description__)
 exclusive_group = parser.add_mutually_exclusive_group(required=False)
 parser.add_argument(
     "sources",
