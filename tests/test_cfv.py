@@ -48,7 +48,7 @@ class TestNames(unittest.TestCase):
             [{"lineno": 1, "name": "variable",},], self.scanner.names
         )
         self.assertEqual(
-            [{"lineno": 2, "name": "os", "star": False, "module": os},],
+            [{"lineno": 2, "name": "os", "star": False, "module": os, "modules": []},],
             self.scanner.imports,
         )
         self.assertEqual(
