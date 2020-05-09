@@ -26,7 +26,7 @@ class TestUnusedImport(unittest.TestCase):
         source = "from pathlib import Path"
         self.session.scanner.run_visit(source)
         self.assertEqual(
-            [{"lineno": 1, "module": pathlib, "name": "Path", "star": False}],
+            [{"lineno": 1, "module": pathlib, "modules": [], "name": "Path", "star": False}],
             list(self.session.scanner.get_unused_imports()),
         )
 
@@ -36,7 +36,7 @@ class TestUnusedImport(unittest.TestCase):
         )
         self.session.scanner.run_visit(source)
         self.assertEqual(
-            [{"lineno": 2, "module": None, "name": "d.f.a.s", "star": False}],
+            [{"lineno": 2, "module": None, "modules": [], "name": "d.f.a.s", "star": False}],
             list(self.session.scanner.get_unused_imports()),
         )
 
@@ -171,10 +171,10 @@ class TestUnusedImport(unittest.TestCase):
         self.session.scanner.run_visit(source)
         self.assertEqual(
             [
-                {"lineno": 2, "name": "y", "star": False, "module": None},
-                {"lineno": 2, "name": "z", "star": False, "module": None},
-                {"lineno": 5, "name": "x", "star": False, "module": None},
-                {"lineno": 7, "name": "ii", "star": False, "module": None},
+                {"lineno": 2, "name": "y", "star": False, "module": None, "modules": []},
+                {"lineno": 2, "name": "z", "star": False, "module": None, "modules": []},
+                {"lineno": 5, "name": "x", "star": False, "module": None, "modules": []},
+                {"lineno": 7, "name": "ii", "star": False, "module": None, "modules": []},
             ],
             list(self.session.scanner.get_unused_imports()),
         )
@@ -211,14 +211,14 @@ class TestDuplicate(unittest.TestCase):
         self.session.scanner.run_visit(source)
         self.assertEqual(
             [
-                {"lineno": 1, "module": None, "name": "y", "star": False},
-                {"lineno": 2, "module": None, "name": "y", "star": False},
-                {"lineno": 3, "module": None, "name": "x", "star": False},
-                {"lineno": 4, "module": re, "name": "re", "star": False},
-                {"lineno": 5, "module": None, "name": "ll", "star": False},
-                {"lineno": 6, "module": None, "name": "ll", "star": False},
-                {"lineno": 7, "module": None, "name": "e", "star": False},
-                {"lineno": 8, "module": None, "name": "e", "star": False},
+                {"lineno": 1, "module": None, "modules": [], "name": "y", "star": False},
+                {"lineno": 2, "module": None, "modules": [], "name": "y", "star": False},
+                {"lineno": 3, "module": None, "modules": [], "name": "x", "star": False},
+                {"lineno": 4, "module": re, "modules": [], "name": "re", "star": False},
+                {"lineno": 5, "module": None, "modules": [], "name": "ll", "star": False},
+                {"lineno": 6, "module": None, "modules": [], "name": "ll", "star": False},
+                {"lineno": 7, "module": None, "modules": [], "name": "e", "star": False},
+                {"lineno": 8, "module": None, "modules": [], "name": "e", "star": False},
             ],
             list(self.session.scanner.get_unused_imports()),
         )
@@ -240,19 +240,20 @@ class TestDuplicate(unittest.TestCase):
         self.session.scanner.run_visit(source)
         self.assertEqual(
             [
-                {"lineno": 1, "name": "y", "star": False, "module": None},
-                {"lineno": 2, "name": "y", "star": False, "module": None},
-                {"lineno": 3, "name": "x", "star": False, "module": None},
-                {"lineno": 4, "name": "re", "star": False, "module": re},
-                {"lineno": 5, "name": "ll", "star": False, "module": None},
-                {"lineno": 6, "name": "ll", "star": False, "module": None},
-                {"lineno": 7, "name": "e", "star": False, "module": None},
-                {"lineno": 8, "name": "e", "star": False, "module": None},
+                {"lineno": 1, "name": "y", "star": False, "module": None, "modules": []},
+                {"lineno": 2, "name": "y", "star": False, "module": None, "modules": []},
+                {"lineno": 3, "name": "x", "star": False, "module": None, "modules": []},
+                {"lineno": 4, "name": "re", "star": False, "module": re, "modules": []},
+                {"lineno": 5, "name": "ll", "star": False, "module": None, "modules": []},
+                {"lineno": 6, "name": "ll", "star": False, "module": None, "modules": []},
+                {"lineno": 7, "name": "e", "star": False, "module": None, "modules": []},
+                {"lineno": 8, "name": "e", "star": False, "module": None, "modules": []},
                 {
                     "lineno": 9,
                     "name": "Path",
                     "star": False,
                     "module": pathlib,
+                    "modules": []
                 },
             ],
             list(self.session.scanner.get_unused_imports()),
@@ -276,18 +277,19 @@ class TestDuplicate(unittest.TestCase):
         self.session.scanner.run_visit(source)
         self.assertEqual(
             [
-                {"lineno": 1, "name": "y", "star": False, "module": None},
-                {"lineno": 2, "name": "y", "star": False, "module": None},
-                {"lineno": 3, "name": "x", "star": False, "module": None},
-                {"lineno": 4, "name": "re", "star": False, "module": re},
-                {"lineno": 5, "name": "ll", "star": False, "module": None},
-                {"lineno": 7, "name": "e", "star": False, "module": None},
-                {"lineno": 8, "name": "e", "star": False, "module": None},
+                {"lineno": 1, "name": "y", "star": False, "module": None, "modules": []},
+                {"lineno": 2, "name": "y", "star": False, "module": None, "modules": []},
+                {"lineno": 3, "name": "x", "star": False, "module": None, "modules": []},
+                {"lineno": 4, "name": "re", "star": False, "module": re, "modules": []},
+                {"lineno": 5, "name": "ll", "star": False, "module": None, "modules": []},
+                {"lineno": 7, "name": "e", "star": False, "module": None, "modules": []},
+                {"lineno": 8, "name": "e", "star": False, "module": None, "modules": []},
                 {
                     "lineno": 9,
                     "name": "Path",
                     "star": False,
                     "module": pathlib,
+                    "modules": []
                 },
             ],
             list(self.session.scanner.get_unused_imports()),
@@ -312,17 +314,18 @@ class TestDuplicate(unittest.TestCase):
         self.session.scanner.run_visit(source)
         self.assertEqual(
             [
-                {"lineno": 1, "name": "y", "star": False, "module": None},
-                {"lineno": 2, "name": "y", "star": False, "module": None},
-                {"lineno": 3, "name": "x", "star": False, "module": None},
-                {"lineno": 4, "name": "re", "star": False, "module": re},
-                {"lineno": 5, "name": "ll", "star": False, "module": None},
-                {"lineno": 7, "name": "e", "star": False, "module": None},
+                {"lineno": 1, "name": "y", "star": False, "module": None, "modules": []},
+                {"lineno": 2, "name": "y", "star": False, "module": None, "modules": []},
+                {"lineno": 3, "name": "x", "star": False, "module": None, "modules": []},
+                {"lineno": 4, "name": "re", "star": False, "module": re, "modules": []},
+                {"lineno": 5, "name": "ll", "star": False, "module": None, "modules": []},
+                {"lineno": 7, "name": "e", "star": False, "module": None, "modules": []},
                 {
                     "lineno": 9,
                     "name": "Path",
                     "star": False,
                     "module": pathlib,
+                    "modules": []
                 },
             ],
             list(self.session.scanner.get_unused_imports()),
@@ -333,8 +336,8 @@ class TestDuplicate(unittest.TestCase):
         self.session.scanner.run_visit(source)
         self.assertEqual(
             [
-                {"lineno": 1, "module": None, "name": "z", "star": False},
-                {"lineno": 2, "module": None, "name": "z", "star": False},
+                {"lineno": 1, "module": None, "modules": [], "name": "z", "star": False},
+                {"lineno": 2, "module": None, "modules": [], "name": "z", "star": False},
             ],
             list(self.session.scanner.get_unused_imports()),
         )
@@ -343,7 +346,7 @@ class TestDuplicate(unittest.TestCase):
         source = "from x import z\n" "from y import z\n" "print(z)\n"
         self.session.scanner.run_visit(source)
         self.assertEqual(
-            [{"lineno": 1, "module": None, "name": "z", "star": False},],
+            [{"lineno": 1, "module": None, "modules": [], "name": "z", "star": False},],
             list(self.session.scanner.get_unused_imports()),
         )
 
@@ -352,11 +355,11 @@ class TestDuplicate(unittest.TestCase):
         self.session.scanner.run_visit(source)
         self.assertEqual(
             [
-                {"lineno": 1, "name": "y", "star": False, "module": None},
-                {"lineno": 1, "name": "z", "star": False, "module": None},
-                {"lineno": 1, "name": "t", "star": False, "module": None},
-                {"lineno": 2, "name": "t", "star": False, "module": None},
-                {"lineno": 3, "name": "t", "star": False, "module": None},
+                {"lineno": 1, "name": "y", "star": False, "module": None, "modules": []},
+                {"lineno": 1, "name": "z", "star": False, "module": None, "modules": []},
+                {"lineno": 1, "name": "t", "star": False, "module": None, "modules": []},
+                {"lineno": 2, "name": "t", "star": False, "module": None, "modules": []},
+                {"lineno": 3, "name": "t", "star": False, "module": None, "modules": []},
             ],
             list(self.session.scanner.get_unused_imports()),
         )
@@ -371,10 +374,10 @@ class TestDuplicate(unittest.TestCase):
         self.session.scanner.run_visit(source)
         self.assertEqual(
             [
-                {"lineno": 1, "name": "y", "star": False, "module": None},
-                {"lineno": 1, "name": "z", "star": False, "module": None},
-                {"lineno": 1, "name": "t", "star": False, "module": None},
-                {"lineno": 2, "name": "t", "star": False, "module": None},
+                {"lineno": 1, "name": "y", "star": False, "module": None, "modules": []},
+                {"lineno": 1, "name": "z", "star": False, "module": None, "modules": []},
+                {"lineno": 1, "name": "t", "star": False, "module": None, "modules": []},
+                {"lineno": 2, "name": "t", "star": False, "module": None, "modules": []},
             ],
             list(self.session.scanner.get_unused_imports()),
         )
@@ -389,10 +392,10 @@ class TestDuplicate(unittest.TestCase):
         self.session.scanner.run_visit(source)
         self.assertEqual(
             [
-                {"lineno": 1, "name": "t", "star": False, "module": None},
-                {"lineno": 2, "name": "t", "star": False, "module": None},
-                {"lineno": 3, "name": "y", "star": False, "module": None},
-                {"lineno": 3, "name": "z", "star": False, "module": None},
+                {"lineno": 1, "name": "t", "star": False, "module": None, "modules": []},
+                {"lineno": 2, "name": "t", "star": False, "module": None, "modules": []},
+                {"lineno": 3, "name": "y", "star": False, "module": None, "modules": []},
+                {"lineno": 3, "name": "z", "star": False, "module": None, "modules": []},
             ],
             list(self.session.scanner.get_unused_imports()),
         )
@@ -408,12 +411,12 @@ class TestDuplicate(unittest.TestCase):
         self.session.scanner.run_visit(source)
         self.assertEqual(
             [
-                {"lineno": 1, "name": "t", "star": False, "module": None},
-                {"lineno": 2, "name": "t", "star": False, "module": None},
-                {"lineno": 3, "name": "y", "star": False, "module": None},
-                {"lineno": 3, "name": "z", "star": False, "module": None},
-                {"lineno": 3, "name": "t", "star": False, "module": None},
-                {"lineno": 4, "name": "ii", "star": False, "module": None},
+                {"lineno": 1, "name": "t", "star": False, "module": None, "modules": []},
+                {"lineno": 2, "name": "t", "star": False, "module": None, "modules": []},
+                {"lineno": 3, "name": "y", "star": False, "module": None, "modules": []},
+                {"lineno": 3, "name": "z", "star": False, "module": None, "modules": []},
+                {"lineno": 3, "name": "t", "star": False, "module": None, "modules": []},
+                {"lineno": 4, "name": "ii", "star": False, "module": None, "modules": []},
             ],
             list(self.session.scanner.get_unused_imports()),
         )
@@ -432,12 +435,12 @@ class TestDuplicate(unittest.TestCase):
         self.session.scanner.run_visit(source)
         self.assertEqual(
             [
-                {"lineno": 1, "name": "t", "star": False, "module": None},
-                {"lineno": 2, "name": "t", "star": False, "module": None},
-                {"lineno": 3, "name": "y", "star": False, "module": None},
-                {"lineno": 3, "name": "z", "star": False, "module": None},
-                {"lineno": 6, "name": "x", "star": False, "module": None},
-                {"lineno": 8, "name": "ii", "star": False, "module": None},
+                {"lineno": 1, "name": "t", "star": False, "module": None, "modules": []},
+                {"lineno": 2, "name": "t", "star": False, "module": None, "modules": []},
+                {"lineno": 3, "name": "y", "star": False, "module": None, "modules": []},
+                {"lineno": 3, "name": "z", "star": False, "module": None, "modules": []},
+                {"lineno": 6, "name": "x", "star": False, "module": None, "modules": []},
+                {"lineno": 8, "name": "ii", "star": False, "module": None, "modules": []},
             ],
             list(self.session.scanner.get_unused_imports()),
         )
@@ -457,11 +460,11 @@ class TestDuplicate(unittest.TestCase):
         self.session.scanner.run_visit(source)
         self.assertEqual(
             [
-                {"lineno": 4, "name": "t", "star": False, "module": None},
-                {"lineno": 5, "name": "y", "star": False, "module": None},
-                {"lineno": 5, "name": "z", "star": False, "module": None},
-                {"lineno": 8, "name": "x", "star": False, "module": None},
-                {"lineno": 10, "name": "ii", "star": False, "module": None},
+                {"lineno": 4, "name": "t", "star": False, "module": None, "modules": []},
+                {"lineno": 5, "name": "y", "star": False, "module": None, "modules": []},
+                {"lineno": 5, "name": "z", "star": False, "module": None, "modules": []},
+                {"lineno": 8, "name": "x", "star": False, "module": None, "modules": []},
+                {"lineno": 10, "name": "ii", "star": False, "module": None, "modules": []},
             ],
             list(self.session.scanner.get_unused_imports()),
         )
@@ -485,16 +488,16 @@ class TesAsImport(unittest.TestCase):
         self.session.scanner.run_visit(source)
         self.assertEqual(
             [
-                {"lineno": 1, "name": "z", "star": False, "module": None},
-                {"lineno": 2, "name": "x", "star": False, "module": None},
-                {"lineno": 3, "name": "ss", "star": False, "module": None},
-                {"lineno": 4, "name": "c", "star": False, "module": None},
-                {"lineno": 4, "name": "k", "star": False, "module": None},
-                {"lineno": 4, "name": "ii", "star": False, "module": None},
-                {"lineno": 5, "name": "bar", "star": False, "module": None},
-                {"lineno": 5, "name": "i", "star": False, "module": None},
-                {"lineno": 5, "name": "z", "star": False, "module": None},
-                {"lineno": 6, "name": "x", "star": False, "module": None},
+                {"lineno": 1, "name": "z", "star": False, "module": None, "modules": []},
+                {"lineno": 2, "name": "x", "star": False, "module": None, "modules": []},
+                {"lineno": 3, "name": "ss", "star": False, "module": None, "modules": []},
+                {"lineno": 4, "name": "c", "star": False, "module": None, "modules": []},
+                {"lineno": 4, "name": "k", "star": False, "module": None, "modules": []},
+                {"lineno": 4, "name": "ii", "star": False, "module": None, "modules": []},
+                {"lineno": 5, "name": "bar", "star": False, "module": None, "modules": []},
+                {"lineno": 5, "name": "i", "star": False, "module": None, "modules": []},
+                {"lineno": 5, "name": "z", "star": False, "module": None, "modules": []},
+                {"lineno": 6, "name": "x", "star": False, "module": None, "modules": []},
             ],
             list(self.session.scanner.get_unused_imports()),
         )
@@ -512,15 +515,15 @@ class TesAsImport(unittest.TestCase):
         self.session.scanner.run_visit(source)
         self.assertEqual(
             [
-                {"lineno": 1, "name": "z", "star": False, "module": None},
-                {"lineno": 2, "name": "x", "star": False, "module": None},
-                {"lineno": 3, "name": "ss", "star": False, "module": None},
-                {"lineno": 4, "name": "c", "star": False, "module": None},
-                {"lineno": 4, "name": "k", "star": False, "module": None},
-                {"lineno": 4, "name": "ii", "star": False, "module": None},
-                {"lineno": 5, "name": "bar", "star": False, "module": None},
-                {"lineno": 5, "name": "i", "star": False, "module": None},
-                {"lineno": 5, "name": "z", "star": False, "module": None},
+                {"lineno": 1, "name": "z", "star": False, "module": None, "modules": []},
+                {"lineno": 2, "name": "x", "star": False, "module": None, "modules": []},
+                {"lineno": 3, "name": "ss", "star": False, "module": None, "modules": []},
+                {"lineno": 4, "name": "c", "star": False, "module": None, "modules": []},
+                {"lineno": 4, "name": "k", "star": False, "module": None, "modules": []},
+                {"lineno": 4, "name": "ii", "star": False, "module": None, "modules": []},
+                {"lineno": 5, "name": "bar", "star": False, "module": None, "modules": []},
+                {"lineno": 5, "name": "i", "star": False, "module": None, "modules": []},
+                {"lineno": 5, "name": "z", "star": False, "module": None, "modules": []},
             ],
             list(self.session.scanner.get_unused_imports()),
         )
