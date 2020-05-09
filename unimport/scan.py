@@ -143,7 +143,9 @@ class Scanner(ast.NodeVisitor):
         for imp in self.imports:
             if self.is_duplicate(imp["name"]):
                 for name in self.names:
-                    if name["name"].startswith(imp["name"]) and not self.is_duplicate_used(name, imp):
+                    if name["name"].startswith(
+                        imp["name"]
+                    ) and not self.is_duplicate_used(name, imp):
                         # This import: used
                         break
                 else:
