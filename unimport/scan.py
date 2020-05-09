@@ -67,6 +67,7 @@ class Scanner(ast.NodeVisitor):
                         "name": name,
                         "star": star,
                         "module": module,
+                        "modules": [],
                     }
                 )
 
@@ -122,15 +123,13 @@ class Scanner(ast.NodeVisitor):
                 try:
                     s = self.__class__(inspect.getsource(imp["module"]))
                 except OSError:
-                    imp["modules"] = []
+                    pass
                 else:
                     all_object = s.classes + s.functions + s.names
                     all_name = {from_cfv["name"] for from_cfv in all_object}
                     imp["modules"] = sorted(
                         {cfv for cfv in all_name if cfv in to_}
                     )
-        else:
-            imp["modules"] = []
         return imp
 
     def imp_star_False(self, imp):
@@ -144,7 +143,9 @@ class Scanner(ast.NodeVisitor):
         for imp in self.imports:
             if self.is_duplicate(imp["name"]):
                 for name in self.names:
-                    if name["name"].startswith(imp["name"]) and not self.is_duplicate_used(name, imp):
+                    if name["name"].startswith(
+                        imp["name"]
+                    ) and not self.is_duplicate_used(name, imp):
                         # This import: used
                         break
                 else:

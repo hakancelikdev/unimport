@@ -58,7 +58,7 @@ class RefactorImports(BaseFix):
                 return self.import_name(node, results)
 
     def import_from(self, node, results, imp):
-        if imp["star"]:
+        if imp["star"] and imp["module"]:
             if not imp["modules"]:
                 return BlankLine()
             else:
