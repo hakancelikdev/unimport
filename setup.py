@@ -29,18 +29,20 @@ setup(
     license="MIT",
     python_requires=">=3.6.0",
     packages=["unimport"],
-    extras_require={"pyproject": ["toml"]},
+    python_requires=">=3.6",
+    install_requires=[
+        "libcst==0.3.4"
+    ],
+    extras_require={"dev": ["toml"]},
     zip_safe=False,
     include_package_data=True,
     classifiers=[
         "License :: OSI Approved :: MIT License",
+        "Topic :: Software Development :: Libraries :: Python Modules",
         "Environment :: Console",
-        "Programming Language :: Python",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3 :: Only",
-        "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     entry_points={"console_scripts": ["unimport = unimport.__main__:main"]},
 )
