@@ -172,6 +172,31 @@ class TestUnusedRefactor(unittest.TestCase):
             expected, self.session.refactor(action),
         )
 
+    # def test_inside_function_unused(self):
+    #     action = (
+    #         "def foo():\n"
+    #         "    from x import y, z\n"
+    #         "    try:\n"
+    #         "        import t\n"
+    #         "        print(t)\n"
+    #         "    except ImportError as exception:\n"
+    #         "        pass\n"
+    #         "    return math.pi\n"
+
+    #     )
+    #     expected = (
+    #         "def foo():\n"
+    #         "    try:\n"
+    #         "        import t\n"
+    #         "        print(t)\n"
+    #         "    except ImportError as exception:\n"
+    #         "        pass\n"
+    #         "    return math.pi\n"
+    #     )
+    #     self.assertEqual(
+    #         expected, self.session.refactor(action),
+    #     )
+
 
 class TestDuplicateUnusedRefactor(unittest.TestCase):
     maxDiff = None
@@ -436,3 +461,29 @@ class TesAsImport(unittest.TestCase):
         self.assertEqual(
             expected, self.session.refactor(action),
         )
+
+    # def test_inside_function_unused(self):
+    #     action = (
+    #         "def foo():\n"
+    #         "    from abc import *"
+    #         "    try:\n"
+    #         "        import t\n"
+    #         "        print(ABCMeta)\n"
+    #         "    except ImportError as exception:\n"
+    #         "        pass\n"
+    #         "    return math.pi\n"
+
+    #     )
+    #     expected = (
+    #         "def foo():\n"
+    #         "    from abc import ABCMeta\n"
+    #         "    try:\n"
+    #         "        import t\n"
+    #         "        print(ABCMeta)\n"
+    #         "    except ImportError as exception:\n"
+    #         "        pass\n"
+    #         "    return math.pi\n"
+    #     )
+    #     self.assertEqual(
+    #         expected, self.session.refactor(action),
+    #     )
