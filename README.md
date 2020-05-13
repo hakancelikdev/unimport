@@ -16,6 +16,12 @@ pip install unimport
 
 ### Usage
 
+```
+$ unimport [sources [sources ...]]
+```
+
+*If you do not get any output, congratulations means there is no unused import in your project.*
+
 #### Let's with example with simple a Python code.
 **example.py**
 ```python
