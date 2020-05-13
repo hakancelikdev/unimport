@@ -477,6 +477,7 @@ class TesAsImport(unittest.TestCase):
         )
 
     def test_inside_function_unused(self):
+        import sys
         action = (
             "def foo():\n"
             "    from abc import *\n"
@@ -487,15 +488,27 @@ class TesAsImport(unittest.TestCase):
             "        pass\n"
             "    return math.pi\n"
         )
-        expected = (
-            "def foo():\n"
-            "    from abc import ABCMeta\n"
-            "    try:\n"
-            "        print(ABCMeta)\n"
-            "    except ImportError as exception:\n"
-            "        pass\n"
-            "    return math.pi\n"
-        )
+        if sys.version_info.major == 3 and sys.version_info.minor == 6:
+            expected = (
+                "def foo():\n"
+                "    from abc import ABCMeta\n"
+                "    try:\n"
+                "        print(ABCMeta)\n"
+                "    except ImportError as exception:\n"
+                "        pass\n"
+                "    return math.pi\n"
+            )
+        elif sys.version_info.major == 3 and sys.version_info.minor > 6:
+            # NOTE Should we suggest ImportError instead of star from abc module? If no, how do we know this?
+            expected = (
+                "def foo():\n"
+                "    from abc import ABCMeta, ImportError\n"
+                "    try:\n"
+                "        print(ABCMeta)\n"
+                "    except ImportError as exception:\n"
+                "        pass\n"
+                "    return math.pi\n"
+            )
         self.assertEqual(
             expected, self.session.refactor(action),
         )
