@@ -78,7 +78,11 @@ class Scanner(ast.NodeVisitor):
     @recursive
     def visit_Name(self, node):
         if node.id not in self.ignore_names:
-            self.names.append({"lineno": node.lineno, "name": node.id})
+            try:
+                # These code to dont add built-in names, for example TypeError
+                eval(node.id)
+            except NameError:
+                self.names.append({"lineno": node.lineno, "name": node.id})
 
     @recursive
     def visit_Attribute(self, node):

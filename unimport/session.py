@@ -5,7 +5,7 @@ from lib2to3.pgen2.parse import ParseError
 from pathlib import Path
 
 from unimport.config import Config
-from unimport.refactor import RefactorTool
+from unimport.refactor import refactor_string
 from unimport.scan import Scanner
 
 
@@ -13,7 +13,6 @@ class Session:
     def __init__(self, config_file=None):
         self.config = Config(config_file)
         self.scanner = Scanner()
-        self.refactor_tool = RefactorTool()
 
     def _read(self, path):
         try:
@@ -46,10 +45,7 @@ class Session:
                             yield path
 
     def refactor(self, source):
-        self.scanner.run_visit(source)
-        modules = [module for module in self.scanner.get_unused_imports()]
-        self.scanner.clear()
-        return self.refactor_tool.refactor_string(source, modules)
+        return refactor_string(source)
 
     def refactor_file(self, path, apply=False):
         path = Path(path)
