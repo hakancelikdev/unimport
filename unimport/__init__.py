@@ -1,5 +1,5 @@
 __description__ = (
-    "A python CLI library to detect or auto remove unused Python imports."
+    "A python CLI library to detect and auto remove unused Python imports by doing static code analysis."
 )
 __version__ = "0.2.5"
 __author__ = (
