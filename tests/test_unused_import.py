@@ -24,7 +24,6 @@ class UnimportTestCase(unittest.TestCase):
 
 
 class TestUnusedImport(UnimportTestCase):
-
     def test_comma(self):
         source = "from os import (\n" "    waitpid,\n" "    scandir,\n" ")\n"
         expected_nused_imports = [

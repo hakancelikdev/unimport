@@ -1,7 +1,7 @@
 import libcst as cst
 from libcst.metadata import MetadataWrapper, PositionProvider
 
-from .scan import Scanner
+from unimport.scan import Scanner
 
 
 class RemoveUnusedImportTransformer(cst.CSTTransformer):
