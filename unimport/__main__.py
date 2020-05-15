@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser(description=__description__)
 exclusive_group = parser.add_mutually_exclusive_group(required=False)
 parser.add_argument(
     "sources",
-    default=".",
+    default=[pathlib.Path(".")],
     nargs="*",
     help="files and folders to find the unused imports.",
     type=pathlib.Path,

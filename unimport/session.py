@@ -1,8 +1,8 @@
 import difflib
 import fnmatch
+import pathlib
 import tokenize
 from lib2to3.pgen2.parse import ParseError
-from pathlib import Path
 
 from unimport.config import Config
 from unimport.refactor import refactor_string
@@ -14,7 +14,7 @@ class Session:
         self.config = Config(config_file)
         self.scanner = Scanner()
 
-    def _read(self, path):
+    def _read(self, path: pathlib.Path):
         try:
             with tokenize.open(path) as stream:
                 source = stream.read()
@@ -25,9 +25,7 @@ class Session:
         else:
             return source, encoding
 
-    def _list_paths(self, start, pattern="**/*.py"):
-        start = Path(start)
-
+    def _list_paths(self, start: pathlib.Path, pattern: str = "**/*.py"):
         def _is_excluded(path):
             for pattern_exclude in self.config.exclude:
                 if fnmatch.fnmatch(path, pattern_exclude):
@@ -44,14 +42,14 @@ class Session:
                         if not _is_excluded(path):
                             yield path
 
-    def refactor(self, source):
+    def refactor(self, source: str):
         self.scanner.run_visit(source)
         refactor = refactor_string(self.scanner)
         self.scanner.clear()
         return refactor
 
-    def refactor_file(self, path, apply=False):
-        path = Path(path)
+    def refactor_file(self, path: str, apply: bool = False):
+        path = pathlib.Path(path)
         source, encoding = self._read(path)
         result = self.refactor(source)
         if apply:
@@ -59,7 +57,7 @@ class Session:
         else:
             return result
 
-    def diff(self, source):
+    def diff(self, source: str) -> tuple:
         return tuple(
             difflib.unified_diff(
                 source.splitlines(), self.refactor(source).splitlines()
