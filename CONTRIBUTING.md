@@ -19,10 +19,7 @@ git checkout -b i{your issue number}
 ## Formatting
 We use isort, black and of course unimport to format code. To format changes to be conformant, run the following in the root:
 ```
-black unimport/
-black tests/
-isort -rc unimport/
-isort -rc tests/
+pre-commit run --all-files
 unimport unimport/ tests/ -r
 ```
 

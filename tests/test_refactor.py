@@ -478,6 +478,7 @@ class TesAsImport(unittest.TestCase):
 
     def test_inside_function_unused(self):
         import sys
+
         action = (
             "def foo():\n"
             "    from abc import *\n"
