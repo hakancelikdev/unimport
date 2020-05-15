@@ -8,24 +8,19 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
     def __init__(self, unused_imports):
         self.unused_imports = unused_imports
 
-    def get_import_name_from_attr(self, attr_node):
-        module_attr = []
-        children = attr_node.children
-        module_attr.append(children[2].value)  # last value
-        node_value = children[0]
-        while True:
-            if hasattr(node_value, "attr"):
-                module_attr.append(node_value.attr.value)
-                if hasattr(node_value, "value"):  # get parent
-                    node_value = node_value.value
-                else:
-                    module_attr.append(node_value.value.value)
-                    break
+    @staticmethod
+    def get_import_name_from_attr(attr_node):
+        name = [attr_node.children[2].value]  # last value
+        node = attr_node.children[0]
+        while hasattr(node, "value"):
+            if hasattr(node, "attr"):
+                name.append(node.attr.value)
+                node = node.value
             else:
-                module_attr.append(node_value.value)
+                name.append(node.value)
                 break
-        module_attr.reverse()
-        return ".".join(module_attr)
+        name.reverse()
+        return ".".join(name)
 
     def is_import_used(self, import_name, location):
         for imp in self.unused_imports:
