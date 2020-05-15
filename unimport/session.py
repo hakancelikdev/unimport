@@ -1,7 +1,7 @@
-import difflib
-import fnmatch
-import pathlib
-import tokenize
+from difflib import unified_diff
+from fnmatch import fnmatch
+from pathlib import Path
+from tokenize import open as tokenize_open
 
 from unimport.config import Config
 from unimport.refactor import refactor_string
@@ -13,9 +13,9 @@ class Session:
         self.config = Config(config_file)
         self.scanner = Scanner()
 
-    def _read(self, path: pathlib.Path):
+    def _read(self, path: Path):
         try:
-            with tokenize.open(path) as stream:
+            with tokenize_open(path) as stream:
                 source = stream.read()
                 encoding = stream.encoding
         except OSError as exc:
@@ -24,10 +24,10 @@ class Session:
         else:
             return source, encoding
 
-    def _list_paths(self, start: pathlib.Path, pattern: str = "**/*.py"):
+    def _list_paths(self, start: Path, pattern: str = "**/*.py"):
         def _is_excluded(path):
             for pattern_exclude in self.config.exclude:
-                if fnmatch.fnmatch(path, pattern_exclude):
+                if fnmatch(path, pattern_exclude):
                     return True
             return False
 
@@ -43,11 +43,14 @@ class Session:
 
     def refactor(self, source: str):
         self.scanner.run_visit(source)
-        refactor = refactor_string(self.scanner)
+        refactor = refactor_string(
+            source=source,
+            unused_imports=list(self.scanner.get_unused_imports()),
+        )
         self.scanner.clear()
         return refactor
 
-    def refactor_file(self, path: pathlib.Path, apply: bool = False):
+    def refactor_file(self, path: Path, apply: bool = False):
         source, encoding = self._read(path)
         result = self.refactor(source)
         if apply:
@@ -57,16 +60,16 @@ class Session:
 
     def diff(self, source: str) -> tuple:
         return tuple(
-            difflib.unified_diff(
+            unified_diff(
                 source.splitlines(), self.refactor(source).splitlines()
             )
         )
 
-    def diff_file(self, path: pathlib.Path):
+    def diff_file(self, path: Path):
         source, _ = self._read(path)
         result = self.refactor_file(path, apply=False)
         return tuple(
-            difflib.unified_diff(
+            unified_diff(
                 source.splitlines(), result.splitlines(), fromfile=str(path)
             )
         )

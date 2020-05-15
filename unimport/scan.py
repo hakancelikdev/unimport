@@ -25,7 +25,6 @@ class Scanner(ast.NodeVisitor):
         self.imports = []
         self.classes = []
         self.functions = []
-        self.source = source
         if source:
             self.run_visit(source)
 
@@ -109,7 +108,6 @@ class Scanner(ast.NodeVisitor):
         )
 
     def run_visit(self, source):
-        self.source = source
         try:
             self.visit(ast.parse(source))
         except SyntaxError as err:

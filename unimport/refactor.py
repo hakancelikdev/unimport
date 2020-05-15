@@ -5,10 +5,8 @@ from libcst.metadata import MetadataWrapper, PositionProvider
 class RemoveUnusedImportTransformer(cst.CSTTransformer):
     METADATA_DEPENDENCIES = (PositionProvider,)
 
-    def __init__(self, scanner):
-        self.scanner = scanner
-        self.unused_imports = list(self.scanner.get_unused_imports())
-        self.imports = self.scanner.imports
+    def __init__(self, unused_imports):
+        self.unused_imports = unused_imports
 
     def get_import_name_from_attr(self, attr_node):
         module_attr = []
@@ -40,7 +38,7 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
         return True
 
     def get_imp(self, import_name, location):
-        for imp in self.imports:
+        for imp in self.unused_imports:
             if (
                 imp["name"] == import_name
                 and imp["lineno"] == location.start.line
@@ -105,11 +103,11 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
         return self.leave_import_alike(original_node, updated_node)
 
 
-def refactor_string(scanner):
+def refactor_string(source, unused_imports):
     try:
-        wrapper = MetadataWrapper(cst.parse_module(scanner.source))
+        wrapper = MetadataWrapper(cst.parse_module(source))
     except cst.ParserSyntaxError as err:
         print(f"\n\033[91m '{err}' \033[00m")
-        return scanner.source
-    fixed_module = wrapper.visit(RemoveUnusedImportTransformer(scanner))
+        return source
+    fixed_module = wrapper.visit(RemoveUnusedImportTransformer(unused_imports))
     return fixed_module.code
