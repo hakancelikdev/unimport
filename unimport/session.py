@@ -2,7 +2,6 @@ import difflib
 import fnmatch
 import pathlib
 import tokenize
-from lib2to3.pgen2.parse import ParseError
 
 from unimport.config import Config
 from unimport.refactor import refactor_string
@@ -48,8 +47,7 @@ class Session:
         self.scanner.clear()
         return refactor
 
-    def refactor_file(self, path: str, apply: bool = False):
-        path = pathlib.Path(path)
+    def refactor_file(self, path: pathlib.Path, apply: bool = False):
         source, encoding = self._read(path)
         result = self.refactor(source)
         if apply:
@@ -64,13 +62,9 @@ class Session:
             )
         )
 
-    def diff_file(self, path):
+    def diff_file(self, path: pathlib.Path):
         source, _ = self._read(path)
-        try:
-            result = self.refactor_file(path, apply=False)
-        except ParseError:
-            print(f"\033[91m Invalid python file '{path}'\033[00m")
-            return tuple()
+        result = self.refactor_file(path, apply=False)
         return tuple(
             difflib.unified_diff(
                 source.splitlines(), result.splitlines(), fromfile=str(path)

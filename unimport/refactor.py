@@ -106,6 +106,10 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
 
 
 def refactor_string(scanner):
-    wrapper = MetadataWrapper(cst.parse_module(scanner.source))
+    try:
+        wrapper = MetadataWrapper(cst.parse_module(scanner.source))
+    except cst.ParserSyntaxError as err:
+        print(f"\n\033[91m '{err}' \033[00m")
+        return scanner.source
     fixed_module = wrapper.visit(RemoveUnusedImportTransformer(scanner))
     return fixed_module.code

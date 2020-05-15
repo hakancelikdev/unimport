@@ -9,6 +9,12 @@ class TestUnusedRefactor(unittest.TestCase):
     def setUp(self):
         self.session = Session()
 
+    def test_syntax_error(self):
+        action = "a :? = 0\n"
+        self.assertEqual(
+            action, self.session.refactor(action),
+        )
+
     def test_do_not_remove_augmented_imports(self):
         action = (
             "from django.conf.global_settings import AUTHENTICATION_BACKENDS, TEMPLATE_CONTEXT_PROCESSORS\n"
