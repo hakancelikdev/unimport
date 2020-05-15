@@ -3,7 +3,7 @@ from libcst.metadata import MetadataWrapper, PositionProvider
 
 
 class RemoveUnusedImportTransformer(cst.CSTTransformer):
-    METADATA_DEPENDENCIES = (PositionProvider,)
+    METADATA_DEPENDENCIES = [PositionProvider]
 
     def __init__(self, unused_imports):
         self.unused_imports = unused_imports
@@ -44,48 +44,45 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
         return self.get_metadata(PositionProvider, node)
 
     def leave_import_alike(self, original_node, updated_node):
-        location = self.get_location(original_node)
-        if isinstance(updated_node.names, cst.ImportStar):
-            if isinstance(updated_node.module, cst.Attribute):
+        names_to_keep = []
+        for import_alias in updated_node.names:
+            if isinstance(import_alias.name, cst.Attribute):
                 import_name = self.get_import_name_from_attr(
-                    attr_node=updated_node.module
+                    attr_node=import_alias.name
                 )
             else:
-                import_name = updated_node.module.value
-            imp = self.get_imp(import_name=import_name, location=location)
-            if imp["modules"]:
-                modules = ",".join(imp["modules"])
-                names_to_suggestion = []
-                for module in modules.split(","):
-                    names_to_suggestion.append(
-                        cst.ImportAlias(cst.Name(module))
-                    )
-                return updated_node.with_changes(names=names_to_suggestion)
-            else:
-                if imp["module"]:
-                    return cst.RemoveFromParent()
+                import_name = (import_alias.asname or import_alias).name.value
+            if self.is_import_used(
+                import_name, self.get_location(original_node)
+            ):
+                names_to_keep.append(
+                    import_alias.with_changes(comma=cst.MaybeSentinel.DEFAULT)
+                )
+        if len(names_to_keep) == 0:
+            return cst.RemoveFromParent()
         else:
-            names_to_keep = []
-            for import_alias in updated_node.names:
-                if isinstance(import_alias.name, cst.Attribute):
-                    import_name = self.get_import_name_from_attr(
-                        attr_node=import_alias.name
-                    )
-                else:
-                    import_name = (
-                        import_alias.asname or import_alias
-                    ).name.value
-                if self.is_import_used(import_name, location):
-                    names_to_keep.append(
-                        import_alias.with_changes(
-                            comma=cst.MaybeSentinel.DEFAULT
-                        )
-                    )
-            if len(names_to_keep) == 0:
+            return updated_node.with_changes(names=names_to_keep)
+
+    def leave_StarImport(self, original_node, updated_node):
+        if isinstance(updated_node.module, cst.Attribute):
+            import_name = self.get_import_name_from_attr(
+                attr_node=updated_node.module
+            )
+        else:
+            import_name = updated_node.module.value
+        imp = self.get_imp(
+            import_name=import_name, location=self.get_location(original_node)
+        )
+        if imp["modules"]:
+            modules = ",".join(imp["modules"])
+            names_to_suggestion = []
+            for module in modules.split(","):
+                names_to_suggestion.append(cst.ImportAlias(cst.Name(module)))
+            return updated_node.with_changes(names=names_to_suggestion)
+        else:
+            if imp["module"]:
                 return cst.RemoveFromParent()
-            else:
-                return updated_node.with_changes(names=names_to_keep)
-        return updated_node
+        return original_node
 
     def leave_Import(
         self, original_node: cst.Import, updated_node: cst.Import
@@ -95,6 +92,8 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
     def leave_ImportFrom(
         self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom
     ) -> cst.ImportFrom:
+        if isinstance(updated_node.names, cst.ImportStar):
+            return self.leave_StarImport(original_node, updated_node)
         return self.leave_import_alike(original_node, updated_node)
 
 
