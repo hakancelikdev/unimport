@@ -29,8 +29,8 @@ setup(
     license="MIT",
     python_requires=">=3.6.0",
     packages=["unimport"],
-    install_requires=["libcst==0.3.4"],
-    extras_require={"dev": ["toml"]},
+    install_requires=["libcst==0.3.5"],
+    extras_require={"pyproject": ["toml"]},
     zip_safe=False,
     include_package_data=True,
     classifiers=[

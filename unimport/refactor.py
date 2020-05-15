@@ -1,14 +1,12 @@
 import libcst as cst
 from libcst.metadata import MetadataWrapper, PositionProvider
 
-from unimport.scan import Scanner
-
 
 class RemoveUnusedImportTransformer(cst.CSTTransformer):
     METADATA_DEPENDENCIES = (PositionProvider,)
 
-    def __init__(self, source):
-        self.scanner = Scanner(source)
+    def __init__(self, scanner):
+        self.scanner = scanner
         self.unused_imports = list(self.scanner.get_unused_imports())
         self.imports = self.scanner.imports
 
@@ -107,7 +105,7 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
         return self.leave_import_alike(original_node, updated_node)
 
 
-def refactor_string(source):
-    wrapper = MetadataWrapper(cst.parse_module(source))
-    fixed_module = wrapper.visit(RemoveUnusedImportTransformer(source))
+def refactor_string(scanner):
+    wrapper = MetadataWrapper(cst.parse_module(scanner.source))
+    fixed_module = wrapper.visit(RemoveUnusedImportTransformer(scanner))
     return fixed_module.code

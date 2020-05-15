@@ -45,7 +45,10 @@ class Session:
                             yield path
 
     def refactor(self, source):
-        return refactor_string(source)
+        self.scanner.run_visit(source)
+        refactor = refactor_string(self.scanner)
+        self.scanner.clear()
+        return refactor
 
     def refactor_file(self, path, apply=False):
         path = Path(path)
