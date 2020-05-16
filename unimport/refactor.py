@@ -23,14 +23,13 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
         return ".".join(name)
 
     def is_import_used(self, import_name, location):
-        for imp in self.unused_imports:
-            if (
+        return not any(
+            [
                 imp["name"] == import_name
                 and imp["lineno"] == location.start.line
-            ):
-                # unused
-                return False
-        return True
+                for imp in self.unused_imports
+            ]
+        )
 
     def get_imp(self, import_name, location):
         for imp in self.unused_imports:
