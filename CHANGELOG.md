@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 - 💪 Refactor code rewrite using libcst.
 - 🐞 Refactor bugs fix.
 - 🧪 [Comma rare case support & test.](https://github.com/hakancelik96/unimport/blob/b8800ec19441bbc452900e1c8b558bea2e43d065/rare_cases/case_comma.py)
-- 💪 pre-commit add
+- 💪 pre-commit add & support
 - 🐞 Add Sytranx Error Catcher
 
 ## [0.2.4] - 17/April/2020
