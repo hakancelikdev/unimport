@@ -24,6 +24,26 @@ class UnimportTestCase(unittest.TestCase):
 
 
 class TestUnusedImport(UnimportTestCase):
+    def test_comma(self):
+        source = "from os import (\n" "    waitpid,\n" "    scandir,\n" ")\n"
+        expected_nused_imports = [
+            {
+                "lineno": 1,
+                "module": os,
+                "modules": [],
+                "name": "waitpid",
+                "star": False,
+            },
+            {
+                "lineno": 1,
+                "module": os,
+                "modules": [],
+                "name": "scandir",
+                "star": False,
+            },
+        ]
+        self.assertUnimportEqual(source, expected_nused_imports)
+
     def test_module_used(self):
         source = (
             "from pathlib import Path\n" "CURRENT_DIR = Path('.').parent\n"

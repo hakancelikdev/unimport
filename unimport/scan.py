@@ -108,7 +108,10 @@ class Scanner(ast.NodeVisitor):
         )
 
     def run_visit(self, source):
-        self.visit(ast.parse(source))
+        try:
+            self.visit(ast.parse(source))
+        except SyntaxError as err:
+            return
 
     def clear(self):
         self.names.clear()

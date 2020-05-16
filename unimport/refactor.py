@@ -1,137 +1,106 @@
-from contextlib import contextmanager
-from lib2to3.fixer_base import BaseFix
-from lib2to3.fixer_util import (
-    BlankLine, FromImport, Leaf, Newline, syms, token)
-from lib2to3.refactor import RefactoringTool
+import libcst as cst
+from libcst.metadata import MetadataWrapper, PositionProvider
 
 
-def traverse_imports(names):
-    """
-    Walks over all the names imported in a dotted_as_names node.
-    """
-    pending = [names]
-    while pending:
-        node = pending.pop()
-        if node.type in {token.NAME, token.STAR}:
-            yield node.value
-        elif node.type == syms.dotted_name:
-            yield "".join([ch.value for ch in node.children])
-        elif node.type in {syms.dotted_as_name, syms.import_as_name}:
-            yield node.children[2].value
-        elif node.type in {syms.dotted_as_names, syms.import_as_names}:
-            pending.extend(node.children[::-2])
-        else:
-            raise ValueError("unknown node type", node.type)
+class RemoveUnusedImportTransformer(cst.CSTTransformer):
+    METADATA_DEPENDENCIES = [PositionProvider]
 
+    def __init__(self, unused_imports):
+        self.unused_imports = unused_imports
 
-class RefactorImports(BaseFix):
-
-    PATTERN = r"""
-        simple_stmt<
-            (
-                import_name< 'import' imp=any >
-                |
-                import_from< 'from' imp=(['.'*] any) 'import' ['('] items=any [')'] >
-            ) '\n'
-        >
-    """
-
-    def __init__(self):
-        self.unused_modules = []
-        super().__init__(None, None)  # options and logger
-
-    @contextmanager
-    def clean(self, unused_modules):
-        try:
-            self.unused_modules.clear()
-            self.unused_modules.extend(unused_modules)
-            yield
-        finally:
-            self.unused_modules.clear()
-
-    def transform(self, node, results):
-        imp = self.get_imp_if_equal_to_lineno(node.get_lineno())
-        if imp:
-            if node.children[0].type == syms.import_from:
-                return self.import_from(node, results, imp)
-            elif node.children[0].type == syms.import_name:
-                return self.import_name(node, results)
-
-    def import_from(self, node, results, imp):
-        if imp["star"] and imp["module"]:
-            if not imp["modules"]:
-                return BlankLine()
+    @staticmethod
+    def get_import_name_from_attr(attr_node):
+        name = [attr_node.children[2].value]  # last value
+        node = attr_node.children[0]
+        while hasattr(node, "value"):
+            if hasattr(node, "attr"):
+                name.append(node.attr.value)
+                node = node.value
             else:
-                package_name = imp["module"].__name__
-                name_leafs = [
-                    Leaf(
-                        token.NAME,
-                        ", ".join(sorted(imp["modules"])),
-                        prefix=" ",
-                    ),
-                    Newline(),
-                ]
-                return FromImport(package_name, name_leafs)
-        return self.transform_inner_children(node, results["items"])
+                name.append(node.value)
+                break
+        name.reverse()
+        return ".".join(name)
 
-    def import_name(self, node, results):
-        return self.transform_inner_children(node, results["imp"])
+    def is_import_used(self, import_name, location):
+        return not any(
+            [
+                imp["name"] == import_name
+                and imp["lineno"] == location.start.line
+                for imp in self.unused_imports
+            ]
+        )
 
-    def get_imp_if_equal_to_lineno(self, lineno):
-        for imp in self.unused_modules:
-            if imp["lineno"] == lineno:
-                return imp
-
-    def transform_inner_children(self, node, imports):
-        if imports.type == syms.import_as_name or not imports.children:
-            children = [imports]
-        else:
-            children = imports.children
-        trailing_comma = None
-        if children[-1].type == token.COMMA:
-            # if end of children's char is equal to ',' then remove it
-            trailing_comma = children.pop()
-        commas = children[1:-1:2]
-        module_nodes = children[::2]
-        modules = tuple(traverse_imports(imports))
-        remove_counter = 0
-        for index, module in enumerate(modules):
-            if self.is_module_unused(module, node):
-                if commas:
-                    if index + 1 == len(modules):
-                        comma = commas.pop(index - remove_counter - 1)
-                        if trailing_comma:
-                            trailing_comma.remove()
-                            trailing_comma = None
-                    else:
-                        comma = commas.pop(index - remove_counter)
-                    comma.remove()
-                module_nodes.pop(index - remove_counter).remove()
-                remove_counter += 1
-        if remove_counter == len(modules):
-            return BlankLine()
-        if trailing_comma:
-            children.append(trailing_comma)
-
-    def is_module_unused(self, import_name, node):
-        for imp in self.unused_modules:
+    def get_imp(self, import_name, location):
+        for imp in self.unused_imports:
             if (
                 imp["name"] == import_name
-                and imp["lineno"] == node.get_lineno()
+                and imp["lineno"] == location.start.line
             ):
                 return imp
 
+    def get_location(self, node):
+        return self.get_metadata(PositionProvider, node)
 
-class RefactorTool(RefactoringTool):
-    def __init__(self):
-        self._fixer = RefactorImports()
-        self._fixers = [self._fixer]
-        super().__init__(None, options={"print_function": True})
+    def leave_import_alike(self, original_node, updated_node):
+        names_to_keep = []
+        for import_alias in updated_node.names:
+            if isinstance(import_alias.name, cst.Attribute):
+                import_name = self.get_import_name_from_attr(
+                    attr_node=import_alias.name
+                )
+            else:
+                import_name = (import_alias.asname or import_alias).name.value
+            if self.is_import_used(
+                import_name, self.get_location(original_node)
+            ):
+                names_to_keep.append(
+                    import_alias.with_changes(comma=cst.MaybeSentinel.DEFAULT)
+                )
+        if len(names_to_keep) == 0:
+            return cst.RemoveFromParent()
+        else:
+            return updated_node.with_changes(names=names_to_keep)
 
-    def get_fixers(self):
-        return self._fixers, []
+    def leave_StarImport(self, original_node, updated_node):
+        if isinstance(updated_node.module, cst.Attribute):
+            import_name = self.get_import_name_from_attr(
+                attr_node=updated_node.module
+            )
+        else:
+            import_name = updated_node.module.value
+        imp = self.get_imp(
+            import_name=import_name, location=self.get_location(original_node)
+        )
+        if imp["modules"]:
+            modules = ",".join(imp["modules"])
+            names_to_suggestion = []
+            for module in modules.split(","):
+                names_to_suggestion.append(cst.ImportAlias(cst.Name(module)))
+            return updated_node.with_changes(names=names_to_suggestion)
+        else:
+            if imp["module"]:
+                return cst.RemoveFromParent()
+        return original_node
 
-    def refactor_string(self, data, unused_imports, name="unimport"):
-        with self._fixer.clean(unused_imports):
-            source = super().refactor_string(data, name)
-        return str(source)
+    def leave_Import(
+        self, original_node: cst.Import, updated_node: cst.Import
+    ) -> cst.Import:
+        return self.leave_import_alike(original_node, updated_node)
+
+    def leave_ImportFrom(
+        self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom
+    ) -> cst.ImportFrom:
+        if isinstance(updated_node.names, cst.ImportStar):
+            return self.leave_StarImport(original_node, updated_node)
+        return self.leave_import_alike(original_node, updated_node)
+
+
+def refactor_string(source, unused_imports):
+    try:
+        wrapper = MetadataWrapper(cst.parse_module(source))
+    except cst.ParserSyntaxError as err:
+        print(f"\n\033[91m '{err}' \033[00m")
+        return source
+    fixed_module = wrapper.visit(RemoveUnusedImportTransformer(unused_imports))
+    return fixed_module.code
