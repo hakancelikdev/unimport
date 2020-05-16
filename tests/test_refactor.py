@@ -9,6 +9,12 @@ class TestUnusedRefactor(unittest.TestCase):
     def setUp(self):
         self.session = Session()
 
+    def test_syntax_error(self):
+        action = "a :? = 0\n"
+        self.assertEqual(
+            action, self.session.refactor(action),
+        )
+
     def test_do_not_remove_augmented_imports(self):
         action = (
             "from django.conf.global_settings import AUTHENTICATION_BACKENDS, TEMPLATE_CONTEXT_PROCESSORS\n"
@@ -172,30 +178,46 @@ class TestUnusedRefactor(unittest.TestCase):
             expected, self.session.refactor(action),
         )
 
-    # def test_inside_function_unused(self):
-    #     action = (
-    #         "def foo():\n"
-    #         "    from x import y, z\n"
-    #         "    try:\n"
-    #         "        import t\n"
-    #         "        print(t)\n"
-    #         "    except ImportError as exception:\n"
-    #         "        pass\n"
-    #         "    return math.pi\n"
+    def test_inside_function_unused(self):
+        action = (
+            "def foo():\n"
+            "    from x import y, z\n"
+            "    try:\n"
+            "        import t\n"
+            "        print(t)\n"
+            "    except ImportError as exception:\n"
+            "        pass\n"
+            "    return math.pi\n"
+        )
+        expected = (
+            "def foo():\n"
+            "    try:\n"
+            "        import t\n"
+            "        print(t)\n"
+            "    except ImportError as exception:\n"
+            "        pass\n"
+            "    return math.pi\n"
+        )
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
 
-    #     )
-    #     expected = (
-    #         "def foo():\n"
-    #         "    try:\n"
-    #         "        import t\n"
-    #         "        print(t)\n"
-    #         "    except ImportError as exception:\n"
-    #         "        pass\n"
-    #         "    return math.pi\n"
-    #     )
-    #     self.assertEqual(
-    #         expected, self.session.refactor(action),
-    #     )
+    def test_comment(self):
+        action = (
+            "# This is not unused import, but it is unused import according to unimport.\n"
+            "# CASE 1\n"
+            "from codeop import compile_command\n\n"
+            "compile_command\n"
+        )
+        expected = (
+            "# This is not unused import, but it is unused import according to unimport.\n"
+            "# CASE 1\n"
+            "from codeop import compile_command\n\n"
+            "compile_command\n"
+        )
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
 
 
 class TestDuplicateUnusedRefactor(unittest.TestCase):
@@ -215,7 +237,7 @@ class TestDuplicateUnusedRefactor(unittest.TestCase):
             "from c import e\n"
             "import e\n"
         )
-        expected = ""
+        expected = "\n"
         self.assertEqual(
             expected, self.session.refactor(action),
         )
@@ -295,7 +317,7 @@ class TestDuplicateUnusedRefactor(unittest.TestCase):
 
     def test_different_duplicate_unused(self):
         action = "from x import z\n" "from y import z\n"
-        expected = ""
+        expected = "\n"
         self.assertEqual(
             expected, self.session.refactor(action),
         )
@@ -309,7 +331,7 @@ class TestDuplicateUnusedRefactor(unittest.TestCase):
 
     def test_multi_duplicate(self):
         action = "from x import y, z, t\n" "import t\n" "from l import t\n"
-        expected = ""
+        expected = "\n"
         self.assertEqual(
             expected, self.session.refactor(action),
         )
@@ -352,21 +374,20 @@ class TestDuplicateUnusedRefactor(unittest.TestCase):
         )
 
     def test_import_in_function(self):
-        # BUG the expected situation is not entirely correct.
         action = (
             "import t\n"
             "from l import t\n"
             "from x import y, z, t\n\n"
             "def function(f=t):\n"
-            "   import x\n"
-            "   return f\n"
+            "    import x\n"
+            "    return f\n"
             "from i import t, ii\n"
             "print(t)\n"
         )
         expected = (
             "from x import t\n\n"
             "def function(f=t):\n"
-            "      return f\n"
+            "    return f\n"
             "from i import t\n"
             "print(t)\n"
         )
@@ -375,7 +396,6 @@ class TestDuplicateUnusedRefactor(unittest.TestCase):
         )
 
     def test_import_in_function_used_two_different(self):
-        # BUG the expected situation is not entirely correct.
         action = (
             "import t\n"
             "print(t)\n\n"
@@ -392,7 +412,7 @@ class TestDuplicateUnusedRefactor(unittest.TestCase):
             "print(t)\n"
             "from x import t\n\n"
             "def function(f=t):\n"
-            "        return f\n"
+            "    return f\n"
             "from i import t\n"
             "print(t)\n"
         )
@@ -414,7 +434,7 @@ class TesAsImport(unittest.TestCase):
             "from t import s as ss\n"
             "import le as x\n"
         )
-        expected = ""
+        expected = "\n"
         self.assertEqual(
             expected, self.session.refactor(action),
         )
@@ -424,14 +444,14 @@ class TesAsImport(unittest.TestCase):
             "from f import a as c, l as k, i as ii\n"
             "from fo import (bar, i, x as z)\n"
         )
-        expected = ""
+        expected = "\n"
         self.assertEqual(
             expected, self.session.refactor(action),
         )
 
     def test_multiple_import_name_as_import(self):
         action = "import a as c, l as k, i as ii\n" "import bar, i, x as z\n"
-        expected = ""
+        expected = "\n"
         self.assertEqual(
             expected, self.session.refactor(action),
         )
@@ -462,28 +482,40 @@ class TesAsImport(unittest.TestCase):
             expected, self.session.refactor(action),
         )
 
-    # def test_inside_function_unused(self):
-    #     action = (
-    #         "def foo():\n"
-    #         "    from abc import *"
-    #         "    try:\n"
-    #         "        import t\n"
-    #         "        print(ABCMeta)\n"
-    #         "    except ImportError as exception:\n"
-    #         "        pass\n"
-    #         "    return math.pi\n"
+    def test_inside_function_unused(self):
+        import sys
 
-    #     )
-    #     expected = (
-    #         "def foo():\n"
-    #         "    from abc import ABCMeta\n"
-    #         "    try:\n"
-    #         "        import t\n"
-    #         "        print(ABCMeta)\n"
-    #         "    except ImportError as exception:\n"
-    #         "        pass\n"
-    #         "    return math.pi\n"
-    #     )
-    #     self.assertEqual(
-    #         expected, self.session.refactor(action),
-    #     )
+        action = (
+            "def foo():\n"
+            "    from abc import *\n"
+            "    try:\n"
+            "        import t\n"
+            "        print(ABCMeta)\n"
+            "    except ImportError as exception:\n"
+            "        pass\n"
+            "    return math.pi\n"
+        )
+        if sys.version_info.major == 3 and sys.version_info.minor == 6:
+            expected = (
+                "def foo():\n"
+                "    from abc import ABCMeta\n"
+                "    try:\n"
+                "        print(ABCMeta)\n"
+                "    except ImportError as exception:\n"
+                "        pass\n"
+                "    return math.pi\n"
+            )
+        elif sys.version_info.major == 3 and sys.version_info.minor > 6:
+            # NOTE Should we suggest ImportError instead of star from abc module? If no, how do we know this?
+            expected = (
+                "def foo():\n"
+                "    from abc import ABCMeta, ImportError\n"
+                "    try:\n"
+                "        print(ABCMeta)\n"
+                "    except ImportError as exception:\n"
+                "        pass\n"
+                "    return math.pi\n"
+            )
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )

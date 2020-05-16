@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser(description=__description__)
 exclusive_group = parser.add_mutually_exclusive_group(required=False)
 parser.add_argument(
     "sources",
-    default=".",
+    default=[pathlib.Path(".")],
     nargs="*",
     help="files and folders to find the unused imports.",
     type=pathlib.Path,
@@ -83,9 +83,7 @@ def main(argv=None):
 
                 session.scanner.clear()
             if namespace.diff:
-                exists_diff = print_if_exists(
-                    tuple(session.diff_file(py_path))
-                )
+                exists_diff = print_if_exists(session.diff_file(py_path))
                 if namespace.permission and exists_diff:
                     action = input(
                         f"Apply suggested changes to \033[92m'{py_path}'\033[00m [y/n/q] ? >"
