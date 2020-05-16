@@ -1,12 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [0.2.5] -
+## [0.2.5] - 16/May/2020
 [0.2.5 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/31)
 - 💪 Refactor code rewrite using libcst.
 - 🐞 Refactor bugs fix.
 - 🧪 [Comma rare case support & test.](https://github.com/hakancelik96/unimport/blob/b8800ec19441bbc452900e1c8b558bea2e43d065/rare_cases/case_comma.py)
 - 💪 pre-commit add
+- 🐞 Add Sytranx Error Catcher
 
 ## [0.2.4] - 17/April/2020
 - 💪 [As import refactor support by @hakancelik96](https://github.com/hakancelik96/unimport/commit/147ed5e836d6a4589a92db4157bfd299ca935b02)
