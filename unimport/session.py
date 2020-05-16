@@ -1,7 +1,7 @@
-from difflib import unified_diff
-from fnmatch import fnmatch
+import difflib
+import fnmatch
+import tokenize
 from pathlib import Path
-from tokenize import open as tokenize_open
 
 from unimport.config import Config
 from unimport.refactor import refactor_string
@@ -15,7 +15,7 @@ class Session:
 
     def _read(self, path: Path):
         try:
-            with tokenize_open(path) as stream:
+            with tokenize.open(path) as stream:
                 source = stream.read()
                 encoding = stream.encoding
         except OSError as exc:
@@ -27,7 +27,7 @@ class Session:
     def _list_paths(self, start: Path, pattern: str = "**/*.py"):
         def _is_excluded(path):
             for pattern_exclude in self.config.exclude:
-                if fnmatch(path, pattern_exclude):
+                if fnmatch.fnmatch(path, pattern_exclude):
                     return True
             return False
 
@@ -60,7 +60,7 @@ class Session:
 
     def diff(self, source: str) -> tuple:
         return tuple(
-            unified_diff(
+            difflib.unified_diff(
                 source.splitlines(), self.refactor(source).splitlines()
             )
         )
@@ -69,7 +69,7 @@ class Session:
         source, _ = self._read(path)
         result = self.refactor_file(path, apply=False)
         return tuple(
-            unified_diff(
+            difflib.unified_diff(
                 source.splitlines(), result.splitlines(), fromfile=str(path)
             )
         )
