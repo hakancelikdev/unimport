@@ -25,10 +25,9 @@ If you want, you can use the emoji about the commit message you will throw, this
 - When you make any optimizasiyon commit; 💊
 
 ## Formatting
-We use isort, black and of course unimport to format code. To format changes to be conformant, run the following in the root:
+We use isort, black and of course unimport to format code. To all format changes to be conformant, run the following in the root:
 ```
 pre-commit run --all-files
-unimport unimport/ tests/ -r
 ```
 
 ## Testing
