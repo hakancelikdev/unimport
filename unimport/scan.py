@@ -1,4 +1,5 @@
 import ast
+import builtins
 import importlib
 import inspect
 import sys
@@ -18,9 +19,9 @@ class Scanner(ast.NodeVisitor):
     """To detect unused import using ast"""
 
     ignore_imports = ["__future__", "__doc__"]
-    ignore_names = ["print"]
 
-    def __init__(self, source=None):
+    def __init__(self, source=None, include_star_import=False):
+        self.include_star_import = include_star_import
         self.names = []
         self.imports = []
         self.classes = []
@@ -59,7 +60,7 @@ class Scanner(ast.NodeVisitor):
                     name = package
                 try:
                     module = importlib.import_module(package)
-                except (ModuleNotFoundError, ValueError):
+                except:
                     pass
                 self.imports.append(
                     {
@@ -77,7 +78,7 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_Name(self, node):
-        if node.id not in self.ignore_names:
+        if not hasattr(builtins, node.id):
             self.names.append({"lineno": node.lineno, "name": node.id})
 
     @recursive
@@ -155,7 +156,13 @@ class Scanner(ast.NodeVisitor):
                     # This import: unused
                     yield imp
             else:
-                res = getattr(self, f"imp_star_{imp['star']}")(imp)
+                res = False
+                is_star_import = imp["star"]
+                if self.include_star_import:
+                    res = getattr(self, f"imp_star_{is_star_import}")(imp)
+                else:
+                    if not is_star_import:
+                        res = self.imp_star_False(imp)
                 if res:
                     yield res
 

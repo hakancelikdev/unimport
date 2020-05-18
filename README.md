@@ -1,15 +1,27 @@
 ![unimport](https://raw.githubusercontent.com/hakancelik96/unimport/master/images/logo/Unimport.png)
 
-**A python CLI library to detect and auto remove unused Python imports by doing static code analysis.**
+**A python CLI library to detect and auto remove unused Python imports by doing static
+code analysis.**
 
-[![MIT License](https://img.shields.io/github/license/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/blob/master/LICENSE) [![releases](https://img.shields.io/github/release/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/releases) [![last-commit](https://img.shields.io/github/last-commit/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/commits/master) [![style](https://img.shields.io/badge/style-black-black)](https://github.com/psf/black) [![style](https://img.shields.io/badge/style-isort-lightgrey)](https://github.com/timothycrosley/isort) [![style](https://img.shields.io/badge/style-unimport-red)](https://github.com/hakancelik96/unimport) [![](https://img.shields.io/github/contributors/hakancelik96/unimport)](https://github.com/hakancelik96/unimport/graphs/contributors) [![](https://pepy.tech/badge/unimport)](https://pepy.tech/badge/unimport) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/unimport)
-
+[![MIT License](https://img.shields.io/github/license/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/blob/master/LICENSE)
+[![releases](https://img.shields.io/github/release/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/releases)
+[![last-commit](https://img.shields.io/github/last-commit/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/commits/master)
+[![style](https://img.shields.io/badge/style-black-black)](https://github.com/psf/black)
+[![style](https://img.shields.io/badge/style-isort-lightgrey)](https://github.com/timothycrosley/isort)
+[![style](https://img.shields.io/badge/style-unimport-red)](https://github.com/hakancelik96/unimport)
+[![](https://img.shields.io/github/contributors/hakancelik96/unimport)](https://github.com/hakancelik96/unimport/graphs/contributors)
+[![](https://pepy.tech/badge/unimport)](https://pepy.tech/badge/unimport)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/unimport)
 
 ## Getting Started
 
 ## Installation and Usage
+
 ### Installation
-Unimport requires Python 3.6+ and can be easily installed using most common Python packaging tools. We recommend installing the latest stable release from PyPI with pip:
+
+Unimport requires Python 3.6+ and can be easily installed using most common Python
+packaging tools. We recommend installing the latest stable release from PyPI with pip:
+
 ```
 pip install unimport
 ```
@@ -20,10 +32,13 @@ pip install unimport
 $ unimport [sources [sources ...]]
 ```
 
-*If you do not get any output, congratulations means there is no unused import in your project.*
+_If you do not get any output, congratulations means there is no unused import in your
+project._
 
 #### Let's with example with simple a Python code.
+
 **example.py**
+
 ```python
 import t
 from l import t
@@ -75,6 +90,7 @@ print(t)
 ```
 
 **-p ( permission ) command**
+
 ```python
 $ unimport example.py -p
 --- example.py
@@ -115,10 +131,11 @@ print(t)
 ```
 
 ## Command line options
+
 You can list many options by running unimport --help
 
 ```
-usage: unimport [-h] [-c PATH] [-d] [-r | -p] [--check] [-v] [sources [sources ...]]
+usage: unimport [-h] [-c PATH] [--include-star-import] [-d] [-r | -p] [--check] [-v] [sources [sources ...]]
 
 A python CLI library to detect and auto remove unused Python imports by doing static code analysis.
 
@@ -129,6 +146,8 @@ optional arguments:
   -h, --help            show this help message and exit
   -c PATH, --config PATH
                         read configuration from PATH.
+  --include-star-import
+                        Include star imports during scanning and refactor.
   -d, --diff            Prints a diff of all the changes unimport would make to a file.
   -r, --remove          remove unused imports automatically.
   -p, --permission      Refactor permission after see diff.
@@ -137,10 +156,12 @@ optional arguments:
 ```
 
 ## Configuring Unimport
-It's possible to configure **unimport** from `pyproject.toml` or `setup.cfg` files if you have.
 
-If you want to use `pyproject.toml` to configure, you must to install it.
-Try this; `pip install toml==0.10.0`
+It's possible to configure **unimport** from `pyproject.toml` or `setup.cfg` files if
+you have.
+
+If you want to use `pyproject.toml` to configure, you must to install it. Try this;
+`pip install toml==0.10.0`
 
 Use `exclude` config name to configure glob patterns for exluding files and folders.
 
@@ -166,7 +187,6 @@ exclude =  **/__init__.py
 **Please insert this badge into your project**
 
 `[![](https://img.shields.io/badge/style-unimport-red)](https://github.com/hakancelik96/unimport)`
-
 
 ## 🤝 [CONTRIBUTING.md](/CONTRIBUTING.md) 🤝
 

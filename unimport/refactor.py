@@ -102,5 +102,10 @@ def refactor_string(source, unused_imports):
     except cst.ParserSyntaxError as err:
         print(f"\n\033[91m '{err}' \033[00m")
         return source
-    fixed_module = wrapper.visit(RemoveUnusedImportTransformer(unused_imports))
-    return fixed_module.code
+    if unused_imports:
+        fixed_module = wrapper.visit(
+            RemoveUnusedImportTransformer(unused_imports)
+        )
+        return fixed_module.code
+    else:
+        return source
