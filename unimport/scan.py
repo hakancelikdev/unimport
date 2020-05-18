@@ -1,4 +1,5 @@
 import ast
+import builtins
 import importlib
 import inspect
 import sys
@@ -18,9 +19,9 @@ class Scanner(ast.NodeVisitor):
     """To detect unused import using ast"""
 
     ignore_imports = ["__future__", "__doc__"]
-    ignore_names = ["print"]
 
-    def __init__(self, source=None):
+    def __init__(self, source=None, include_star_import=False):
+        self.include_star_import = include_star_import
         self.names = []
         self.imports = []
         self.classes = []
@@ -42,6 +43,8 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_Import(self, node):
+        if self.skip_import(node.lineno):
+            return
         star = False
         module_name = None
         module = None
@@ -59,7 +62,7 @@ class Scanner(ast.NodeVisitor):
                     name = package
                 try:
                     module = importlib.import_module(package)
-                except (ModuleNotFoundError, ValueError):
+                except:
                     pass
                 self.imports.append(
                     {
@@ -77,7 +80,7 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_Name(self, node):
-        if node.id not in self.ignore_names:
+        if not hasattr(builtins, node.id):
             self.names.append({"lineno": node.lineno, "name": node.id})
 
     @recursive
@@ -107,9 +110,27 @@ class Scanner(ast.NodeVisitor):
             {"lineno": node.lineno, "name": ".".join(local_attr)}
         )
 
-    def run_visit(self, source):
+    @recursive
+    def visit_Assign(self, node):
         try:
-            self.visit(ast.parse(source))
+            is_all = node.targets[0].id
+        except AttributeError:
+            pass
+        else:
+            if is_all == "__all__":
+                for item in node.value.elts:
+                    if sys.version_info.minor == 8:
+                        get_value = item.value
+                    else:
+                        get_value = item.s
+                    self.names.append(
+                        {"lineno": node.lineno, "name": get_value}
+                    )
+
+    def run_visit(self, source):
+        self.source = source
+        try:
+            self.visit(ast.parse(self.source))
         except SyntaxError as err:
             return
 
@@ -118,6 +139,18 @@ class Scanner(ast.NodeVisitor):
         self.imports.clear()
         self.classes.clear()
         self.functions.clear()
+
+    def skip_import(self, lineno):
+        line = self.source.split("\n")[lineno - 1]
+        start_comment = line.find("#")
+        report_comment = "#unimport:skip"
+        if (
+            report_comment
+            == line[
+                start_comment : start_comment + len(report_comment)
+            ].lower()
+        ):
+            return True
 
     def imp_star_True(self, imp):
         if imp["module"]:
@@ -138,8 +171,10 @@ class Scanner(ast.NodeVisitor):
     def imp_star_False(self, imp):
         for name in self.names:
             if name["name"].startswith(imp["name"]):
+                # used
                 break
         else:
+            # unused
             return imp
 
     def get_unused_imports(self):
@@ -155,7 +190,13 @@ class Scanner(ast.NodeVisitor):
                     # This import: unused
                     yield imp
             else:
-                res = getattr(self, f"imp_star_{imp['star']}")(imp)
+                res = False
+                is_star_import = imp["star"]
+                if self.include_star_import:
+                    res = getattr(self, f"imp_star_{is_star_import}")(imp)
+                else:
+                    if not is_star_import:
+                        res = self.imp_star_False(imp)
                 if res:
                     yield res
 
@@ -171,10 +212,9 @@ class Scanner(ast.NodeVisitor):
         def find_nearest_imp(name):
             nearest = ""
             for dup_imp in self.get_duplicate_imports():
-                if (
-                    dup_imp["lineno"] < name["lineno"]
-                    and dup_imp["name"] == name["name"]
-                ):
+                if dup_imp["lineno"] < name["lineno"] and name[
+                    "name"
+                ].startswith(dup_imp["name"]):
                     nearest = dup_imp
             return nearest
 

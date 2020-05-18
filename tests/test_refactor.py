@@ -3,18 +3,29 @@ import unittest
 from unimport.session import Session
 
 
-class TestUnusedRefactor(unittest.TestCase):
+class RefactorTestCase(unittest.TestCase):
     maxDiff = None
+    include_star_import = False
 
     def setUp(self):
-        self.session = Session()
+        self.session = Session(include_star_import=self.include_star_import)
 
+
+class TestSyntaxErrorRefactor(RefactorTestCase):
     def test_syntax_error(self):
         action = "a :? = 0\n"
         self.assertEqual(
             action, self.session.refactor(action),
         )
 
+    def test_bad_syntax(self):
+        action = "# -*- coding: utf-8 -*-\n€ = 2\n"
+        self.assertEqual(
+            action, self.session.refactor(action),
+        )
+
+
+class TestUnusedRefactor(RefactorTestCase):
     def test_do_not_remove_augmented_imports(self):
         action = (
             "from django.conf.global_settings import AUTHENTICATION_BACKENDS, TEMPLATE_CONTEXT_PROCESSORS\n"
@@ -76,55 +87,6 @@ class TestUnusedRefactor(unittest.TestCase):
             "# and comments\n"
             "def maybe_functions(): # type: ignore\n"
             "    after()\n"
-        )
-        self.assertEqual(
-            expected, self.session.refactor(action),
-        )
-
-    def test_star_imports(self):
-        action = (
-            "from os import *\n"
-            "from x import y\n"
-            "from re import *\n"
-            "from t.s.d import *\n"
-            "from lib2to3.pgen2.token import *\n"
-            "from lib2to3.fixer_util import *\n\n"
-            "print(match)\n"
-            "print(search)\n"
-            "print(NAME)\n\n"
-        )
-        expected = (
-            "from re import match, search\n"
-            "from t.s.d import *\n"
-            "from lib2to3.pgen2.token import NAME\n\n"
-            "print(match)\n"
-            "print(search)\n"
-            "print(NAME)\n\n"
-        )
-        self.assertEqual(
-            expected, self.session.refactor(action),
-        )
-
-    def test_star_import_2(self):
-        action = (
-            "from typing import (\n"
-            "    Callable,\n"
-            "    Iterable,\n"
-            "    Iterator,\n"
-            "    List,\n"
-            "    Optional,\n"
-            "    Text,\n"
-            "    Tuple,\n"
-            "    Pattern,\n"
-            "    Union,\n"
-            "    cast,\n"
-            ")\n"
-            "from lib2to3.pgen2.token import *\n"
-            "from lib2to3.pgen2.grammar import *\n"
-            "print(Grammar)\n"
-        )
-        expected = (
-            "from lib2to3.pgen2.grammar import Grammar\n" "print(Grammar)\n"
         )
         self.assertEqual(
             expected, self.session.refactor(action),
@@ -220,12 +182,7 @@ class TestUnusedRefactor(unittest.TestCase):
         )
 
 
-class TestDuplicateUnusedRefactor(unittest.TestCase):
-    maxDiff = None
-
-    def setUp(self):
-        self.session = Session()
-
+class TestDuplicateUnusedRefactor(RefactorTestCase):
     def test_full_unused(self):
         action = (
             "from x import y\n"
@@ -421,12 +378,7 @@ class TestDuplicateUnusedRefactor(unittest.TestCase):
         )
 
 
-class TesAsImport(unittest.TestCase):
-    maxDiff = None
-
-    def setUp(self):
-        self.session = Session()
-
+class TesAsImport(RefactorTestCase):
     def test_as_import_all_unused_all_cases(self):
         action = (
             "from x import y as z\n"
@@ -482,9 +434,11 @@ class TesAsImport(unittest.TestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_inside_function_unused(self):
-        import sys
 
+class TestStarImport(RefactorTestCase):
+    include_star_import = True
+
+    def test_inside_function_unused(self):
         action = (
             "def foo():\n"
             "    from abc import *\n"
@@ -495,27 +449,64 @@ class TesAsImport(unittest.TestCase):
             "        pass\n"
             "    return math.pi\n"
         )
-        if sys.version_info.major == 3 and sys.version_info.minor == 6:
-            expected = (
-                "def foo():\n"
-                "    from abc import ABCMeta\n"
-                "    try:\n"
-                "        print(ABCMeta)\n"
-                "    except ImportError as exception:\n"
-                "        pass\n"
-                "    return math.pi\n"
-            )
-        elif sys.version_info.major == 3 and sys.version_info.minor > 6:
-            # NOTE Should we suggest ImportError instead of star from abc module? If no, how do we know this?
-            expected = (
-                "def foo():\n"
-                "    from abc import ABCMeta, ImportError\n"
-                "    try:\n"
-                "        print(ABCMeta)\n"
-                "    except ImportError as exception:\n"
-                "        pass\n"
-                "    return math.pi\n"
-            )
+        expected = (
+            "def foo():\n"
+            "    from abc import ABCMeta\n"
+            "    try:\n"
+            "        print(ABCMeta)\n"
+            "    except ImportError as exception:\n"
+            "        pass\n"
+            "    return math.pi\n"
+        )
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+    def test_star_imports(self):
+        action = (
+            "from os import *\n"
+            "from x import y\n"
+            "from re import *\n"
+            "from t.s.d import *\n"
+            "from lib2to3.pgen2.token import *\n"
+            "from lib2to3.fixer_util import *\n\n"
+            "print(match)\n"
+            "print(search)\n"
+            "print(NAME)\n\n"
+        )
+        expected = (
+            "from re import match, search\n"
+            "from t.s.d import *\n"
+            "from lib2to3.pgen2.token import NAME\n\n"
+            "print(match)\n"
+            "print(search)\n"
+            "print(NAME)\n\n"
+        )
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+    def test_star_import_2(self):
+        action = (
+            "from typing import (\n"
+            "    Callable,\n"
+            "    Iterable,\n"
+            "    Iterator,\n"
+            "    List,\n"
+            "    Optional,\n"
+            "    Text,\n"
+            "    Tuple,\n"
+            "    Pattern,\n"
+            "    Union,\n"
+            "    cast,\n"
+            ")\n"
+            "from lib2to3.pgen2.token import *\n"
+            "from lib2to3.pgen2.grammar import *\n"
+            "print(Grammar)\n"
+        )
+        expected = (
+            "from lib2to3.pgen2.grammar import Grammar\n" "print(Grammar)\n"
+        )
         self.assertEqual(
             expected, self.session.refactor(action),
         )

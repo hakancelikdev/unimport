@@ -1,6 +1,8 @@
 import libcst as cst
 from libcst.metadata import MetadataWrapper, PositionProvider
 
+from unimport.color import Color
+
 
 class RemoveUnusedImportTransformer(cst.CSTTransformer):
     METADATA_DEPENDENCIES = [PositionProvider]
@@ -100,7 +102,11 @@ def refactor_string(source, unused_imports):
     try:
         wrapper = MetadataWrapper(cst.parse_module(source))
     except cst.ParserSyntaxError as err:
-        print(f"\n\033[91m '{err}' \033[00m")
-        return source
-    fixed_module = wrapper.visit(RemoveUnusedImportTransformer(unused_imports))
-    return fixed_module.code
+        print(Color(str(err)).red)
+    else:
+        if unused_imports:
+            fixed_module = wrapper.visit(
+                RemoveUnusedImportTransformer(unused_imports)
+            )
+            return fixed_module.code
+    return source
