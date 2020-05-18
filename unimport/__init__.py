@@ -1,5 +1,7 @@
-__description__ = "A python CLI library to detect and auto remove unused Python imports by doing static code analysis."
-__version__ = "0.2.5"
+__description__ = (
+    "A linter & formatter for finding & removing unused import statements."
+)
+__version__ = "0.2.6"
 __author__ = (
     "Hakan Çelik <hakancelik96@outlook.com>, "
     "Batuhan Taşkaya <isidentical@gmail.com>, "

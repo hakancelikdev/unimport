@@ -1,3 +1,4 @@
+import codeop
 import lib2to3.fixer_util
 import lib2to3.pgen2.token
 import lib2to3.pytree
@@ -9,11 +10,12 @@ import unittest
 from unimport.session import Session
 
 
-class UnimportTestCase(unittest.TestCase):
+class UnusedTestCase(unittest.TestCase):
     maxDiff = None
+    include_star_import = False
 
     def setUp(self):
-        self.session = Session()
+        self.session = Session(include_star_import=self.include_star_import)
 
     def assertUnimportEqual(self, source, expected_nused_imports):
         self.session.scanner.run_visit(source)
@@ -23,7 +25,20 @@ class UnimportTestCase(unittest.TestCase):
         )
 
 
-class TestUnusedImport(UnimportTestCase):
+class TestUnusedImport(UnusedTestCase):
+    def test__all__from_import(self):
+        source = (
+            "from codeop import compile_command\n"
+            "__all__ = ['compile_command']"
+        )
+        expected_nused_imports = []
+        self.assertUnimportEqual(source, expected_nused_imports)
+
+    def test__all__star(self):
+        source = "from os import *\n" "__all__ = ['walk']"
+        expected_nused_imports = []
+        self.assertUnimportEqual(source, expected_nused_imports)
+
     def test_comma(self):
         source = "from os import (\n" "    waitpid,\n" "    scandir,\n" ")\n"
         expected_nused_imports = [
@@ -132,7 +147,9 @@ class TestUnusedImport(UnimportTestCase):
         self.assertUnimportEqual(source, expected_nused_imports)
 
 
-class TestStarImport(UnimportTestCase):
+class TestStarImport(UnusedTestCase):
+    include_star_import = True
+
     def test_unused(self):
         source = "from os import *\n"
         expected_nused_imports = [
@@ -160,7 +177,6 @@ class TestStarImport(UnimportTestCase):
         self.assertUnimportEqual(source, expected_nused_imports)
 
     def test_used_and_unused(self):
-        # BUG the expected situation is not entirely correct.
         source = (
             "from lib2to3.fixer_util import *\n"
             "from lib2to3.pytree import *\n"
@@ -196,7 +212,6 @@ class TestStarImport(UnimportTestCase):
         self.assertUnimportEqual(source, expected_nused_imports)
 
     def test_used_and_unused_2(self):
-        # BUG the expected situation is not entirely correct.
         source = (
             "from lib2to3.fixer_util import *\n"
             "from lib2to3.pytree import *\n"
@@ -236,7 +251,24 @@ class TestStarImport(UnimportTestCase):
         self.assertUnimportEqual(source, expected_nused_imports)
 
 
-class TestDuplicate(UnimportTestCase):
+class TestDuplicate(UnusedTestCase):
+    def test__all__(self):
+        source = (
+            "from codeop import compile_command\n"
+            "import compile_command\n"
+            "__all__ = ['compile_command']"
+        )
+        expected_nused_imports = [
+            {
+                "lineno": 1,
+                "module": codeop,
+                "modules": [],
+                "name": "compile_command",
+                "star": False,
+            }
+        ]
+        self.assertUnimportEqual(source, expected_nused_imports)
+
     def test_full_unused(self):
         source = (
             "from x import y\n"
@@ -848,7 +880,7 @@ class TestDuplicate(UnimportTestCase):
         self.assertUnimportEqual(source, expected_nused_imports)
 
 
-class TesAsImport(UnimportTestCase):
+class TesAsImport(UnusedTestCase):
     def test_as_import_all_unused_all_cases(self):
         source = (
             "from x import y as z\n"

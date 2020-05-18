@@ -9,9 +9,9 @@ from unimport.scan import Scanner
 
 
 class Session:
-    def __init__(self, config_file=None):
+    def __init__(self, config_file=None, include_star_import=False):
         self.config = Config(config_file)
-        self.scanner = Scanner()
+        self.scanner = Scanner(include_star_import=include_star_import)
 
     def _read(self, path: Path):
         try:
@@ -21,15 +21,17 @@ class Session:
         except OSError as exc:
             print(f"{exc} Can't read")
             return "", "utf-8"
-        else:
-            return source, encoding
+        except SyntaxError as exc:
+            print(f"{exc} Can't read")
+            return "", "utf-8"
+        return source, encoding
 
     def _list_paths(self, start: Path, pattern: str = "**/*.py"):
         def _is_excluded(path):
-            for pattern_exclude in self.config.exclude:
-                if fnmatch.fnmatch(path, pattern_exclude):
-                    return True
-            return False
+            return any(
+                fnmatch.fnmatch(path, pattern_exclude)
+                for pattern_exclude in self.config.exclude
+            )
 
         if not start.is_dir():
             if not _is_excluded(start):
@@ -41,7 +43,7 @@ class Session:
                         if not _is_excluded(path):
                             yield path
 
-    def refactor(self, source: str):
+    def refactor(self, source: str) -> str:
         self.scanner.run_visit(source)
         refactor = refactor_string(
             source=source,
@@ -55,8 +57,7 @@ class Session:
         result = self.refactor(source)
         if apply:
             path.write_text(result, encoding=encoding)
-        else:
-            return result
+        return result
 
     def diff(self, source: str) -> tuple:
         return tuple(
@@ -65,7 +66,7 @@ class Session:
             )
         )
 
-    def diff_file(self, path: Path):
+    def diff_file(self, path: Path) -> tuple:
         source, _ = self._read(path)
         result = self.refactor_file(path, apply=False)
         return tuple(
