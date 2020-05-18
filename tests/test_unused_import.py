@@ -26,6 +26,8 @@ class UnusedTestCase(unittest.TestCase):
 
 
 class TestUnusedImport(UnusedTestCase):
+    include_star_import = True
+
     def test__all__from_import(self):
         source = (
             "from codeop import compile_command\n"
@@ -36,6 +38,37 @@ class TestUnusedImport(UnusedTestCase):
 
     def test__all__star(self):
         source = "from os import *\n" "__all__ = ['walk']"
+        expected_nused_imports = [
+            {
+                "lineno": 1,
+                "module": os,
+                "modules": ["__all__", "walk"],
+                "name": "os",
+                "star": True,
+            }
+        ]
+        self.assertUnimportEqual(source, expected_nused_imports)
+
+    def test__all__in_function(self):
+        source = "from os import *\n" "__all__ = [walk', 'b', c()]"
+        expected_nused_imports = []
+        self.assertUnimportEqual(source, expected_nused_imports)
+
+    def test__all__is_function(self):
+        source = "from os import *\n" "__all__ = a()"
+        expected_nused_imports = [
+            {
+                "lineno": 1,
+                "module": os,
+                "modules": ["__all__"],
+                "name": "os",
+                "star": True,
+            }
+        ]
+        self.assertUnimportEqual(source, expected_nused_imports)
+
+    def test__all__in_int(self):
+        source = "from os import walk\n" "__all__ = ['walk', 'b', 2]"
         expected_nused_imports = []
         self.assertUnimportEqual(source, expected_nused_imports)
 

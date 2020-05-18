@@ -4,6 +4,8 @@ import importlib
 import inspect
 import sys
 
+PY38_PLUS = sys.version_info >= (3, 8)
+
 
 def recursive(func):
     """decorator to make visitor work recursive"""
@@ -112,20 +114,24 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_Assign(self, node):
-        try:
-            is_all = node.targets[0].id
-        except AttributeError:
-            pass
-        else:
-            if is_all == "__all__":
+        if isinstance(node.targets[0], ast.Name):
+            if node.targets[0].id == "__all__" and isinstance(
+                node.value, (ast.List, ast.Tuple)
+            ):
                 for item in node.value.elts:
-                    if sys.version_info.minor == 8:
+                    get_value = False
+                    if (
+                        PY38_PLUS
+                        and isinstance(item, ast.Constant)
+                        and isinstance(item.value, ast.Str)
+                    ):
                         get_value = item.value
-                    else:
+                    elif isinstance(item, ast.Str):
                         get_value = item.s
-                    self.names.append(
-                        {"lineno": node.lineno, "name": get_value}
-                    )
+                    if get_value:
+                        self.names.append(
+                            {"lineno": node.lineno, "name": get_value}
+                        )
 
     def run_visit(self, source):
         self.source = source
