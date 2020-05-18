@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [0.2.6]
 
+[0.2.6 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/32)
+
 - 💪 `--include-star-import command add` Include star imports during scanning and
   refactor.
 
