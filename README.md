@@ -1,7 +1,6 @@
 ![unimport](https://raw.githubusercontent.com/hakancelik96/unimport/master/images/logo/Unimport.png)
 
-**A python CLI library to detect and auto remove unused Python imports by doing static
-code analysis.**
+**A linter & formatter for finding & removing unused import statements.**
 
 [![MIT License](https://img.shields.io/github/license/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/blob/master/LICENSE)
 [![releases](https://img.shields.io/github/release/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/releases)

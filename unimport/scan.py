@@ -43,6 +43,8 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_Import(self, node):
+        if self.skip_import(node.lineno):
+            return
         star = False
         module_name = None
         module = None
@@ -109,8 +111,9 @@ class Scanner(ast.NodeVisitor):
         )
 
     def run_visit(self, source):
+        self.source = source
         try:
-            self.visit(ast.parse(source))
+            self.visit(ast.parse(self.source))
         except SyntaxError as err:
             return
 
@@ -119,6 +122,18 @@ class Scanner(ast.NodeVisitor):
         self.imports.clear()
         self.classes.clear()
         self.functions.clear()
+
+    def skip_import(self, lineno):
+        line = self.source.split("\n")[lineno - 1]
+        start_comment = line.find("#")
+        report_comment = "#unimport:skip"
+        if (
+            report_comment
+            == line[
+                start_comment : start_comment + len(report_comment)
+            ].lower()
+        ):
+            return True
 
     def imp_star_True(self, imp):
         if imp["module"]:

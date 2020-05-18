@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## [0.2.6]
 
 - 💪 `--include-star-import command add` Include star imports during scanning and
   refactor.
@@ -13,6 +13,15 @@ All notable changes to this project will be documented in this file.
   longer be offered as suggestions for star import.
 
 - 🐞 If there is no unused import, the refactor error has been fixed.
+
+- 💪 Import skip feature has been added. Leave '#unimport: skip' at the end of the line
+  to skip imports with some rare cases. **for example:**
+  ```python
+  try:
+    import django #unimport:skip
+  except ImportError:
+    print("install django")
+  ```
 
 ## [0.2.5] - 16/May/2020
 

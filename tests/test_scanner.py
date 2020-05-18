@@ -124,3 +124,39 @@ class TestNames(ScannerTestCase):
             expected_functions,
             expected_imports,
         )
+
+
+class SkipImportTest(ScannerTestCase):
+    def assertUnimportEqual(
+        self,
+        source,
+        expected_names=[],
+        expected_classes=[],
+        expected_functions=[],
+        expected_imports=[],
+    ):
+
+        super().assertUnimportEqual(
+            source,
+            expected_names,
+            expected_classes,
+            expected_functions,
+            expected_imports,
+        )
+
+    def test_inside_try_except(self):
+        source = (
+            "try:\n"
+            "   import django #unimport:skip\n"
+            "except ImportError:\n"
+            "   print('install django')\n"
+        )
+        self.assertUnimportEqual(source,)
+
+    def test_as_import(self):
+        source = "from x import y as z #unimport:skip\n"
+        self.assertUnimportEqual(source,)
+
+    def test_ongoing_comment(self):
+        source = "import unimport #unimport:skip import test\n"
+        self.assertUnimportEqual(source,)
