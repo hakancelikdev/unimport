@@ -1,3 +1,4 @@
+import codeop
 import lib2to3.fixer_util
 import lib2to3.pgen2.token
 import lib2to3.pytree
@@ -25,6 +26,19 @@ class UnusedTestCase(unittest.TestCase):
 
 
 class TestUnusedImport(UnusedTestCase):
+    def test__all__from_import(self):
+        source = (
+            "from codeop import compile_command\n"
+            "__all__ = ['compile_command']"
+        )
+        expected_nused_imports = []
+        self.assertUnimportEqual(source, expected_nused_imports)
+
+    def test__all__star(self):
+        source = "from os import *\n" "__all__ = ['walk']"
+        expected_nused_imports = []
+        self.assertUnimportEqual(source, expected_nused_imports)
+
     def test_comma(self):
         source = "from os import (\n" "    waitpid,\n" "    scandir,\n" ")\n"
         expected_nused_imports = [
@@ -163,7 +177,6 @@ class TestStarImport(UnusedTestCase):
         self.assertUnimportEqual(source, expected_nused_imports)
 
     def test_used_and_unused(self):
-        # BUG the expected situation is not entirely correct.
         source = (
             "from lib2to3.fixer_util import *\n"
             "from lib2to3.pytree import *\n"
@@ -199,7 +212,6 @@ class TestStarImport(UnusedTestCase):
         self.assertUnimportEqual(source, expected_nused_imports)
 
     def test_used_and_unused_2(self):
-        # BUG the expected situation is not entirely correct.
         source = (
             "from lib2to3.fixer_util import *\n"
             "from lib2to3.pytree import *\n"
@@ -240,6 +252,23 @@ class TestStarImport(UnusedTestCase):
 
 
 class TestDuplicate(UnusedTestCase):
+    def test__all__(self):
+        source = (
+            "from codeop import compile_command\n"
+            "import compile_command\n"
+            "__all__ = ['compile_command']"
+        )
+        expected_nused_imports = [
+            {
+                "lineno": 1,
+                "module": codeop,
+                "modules": [],
+                "name": "compile_command",
+                "star": False,
+            }
+        ]
+        self.assertUnimportEqual(source, expected_nused_imports)
+
     def test_full_unused(self):
         source = (
             "from x import y\n"

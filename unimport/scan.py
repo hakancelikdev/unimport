@@ -110,6 +110,23 @@ class Scanner(ast.NodeVisitor):
             {"lineno": node.lineno, "name": ".".join(local_attr)}
         )
 
+    @recursive
+    def visit_Assign(self, node):
+        try:
+            is_all = node.targets[0].id
+        except AttributeError:
+            pass
+        else:
+            if is_all == "__all__":
+                for item in node.value.elts:
+                    if sys.version_info.minor == 8:
+                        get_value = item.value
+                    else:
+                        get_value = item.s
+                    self.names.append(
+                        {"lineno": node.lineno, "name": get_value}
+                    )
+
     def run_visit(self, source):
         self.source = source
         try:
@@ -154,8 +171,10 @@ class Scanner(ast.NodeVisitor):
     def imp_star_False(self, imp):
         for name in self.names:
             if name["name"].startswith(imp["name"]):
+                # used
                 break
         else:
+            # unused
             return imp
 
     def get_unused_imports(self):
@@ -193,10 +212,9 @@ class Scanner(ast.NodeVisitor):
         def find_nearest_imp(name):
             nearest = ""
             for dup_imp in self.get_duplicate_imports():
-                if (
-                    dup_imp["lineno"] < name["lineno"]
-                    and dup_imp["name"] == name["name"]
-                ):
+                if dup_imp["lineno"] < name["lineno"] and name[
+                    "name"
+                ].startswith(dup_imp["name"]):
                     nearest = dup_imp
             return nearest
 

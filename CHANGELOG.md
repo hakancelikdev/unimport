@@ -16,12 +16,23 @@ All notable changes to this project will be documented in this file.
 
 - 💪 Import skip feature has been added. Leave '#unimport: skip' at the end of the line
   to skip imports with some rare cases. **for example:**
+
   ```python
   try:
     import django #unimport:skip
   except ImportError:
     print("install django")
   ```
+
+- 💪 Added support for the rare case of **all**. **for example:**
+
+  ```python
+  from codeop import compile_command
+  __all__ = ["compile_command"]
+  ```
+
+Thanks to this feature, we take the values ​​in the `__all__` list and see if there is
+any matching import statements. If there isn't, this import is unused import.
 
 ## [0.2.5] - 16/May/2020
 
