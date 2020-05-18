@@ -14,6 +14,18 @@
 
 ## Getting Started
 
+---
+
+**Contents:** **[Installation and Usage](#installation-and-usage)** |
+**[Command line options](#command-line-options)** |
+**[Configuring Unimport](#configuring-unimport)** |
+**[Adding pre-commit plugins to your project](#adding-pre-commit-plugins-to-your-project)**
+| **[Our badge](#our-badge-)** | **[CONTRIBUTING](#-contributingmd-)** |
+**[CHANGELOG.md](#changelogmd)** | **[Author / Social](#author--social)** |
+**[Who's using Unimport?](#whos-using-unimport)**
+
+---
+
 ## Installation and Usage
 
 ### Installation
@@ -52,7 +64,7 @@ from i import t, ii
 print(t)
 ```
 
-```
+```bash
 $ unimport example.py
 
 t at example.py:1
@@ -129,6 +141,21 @@ from i import t
 print(t)
 ```
 
+**Star Import** If you want to include star imports during scanning and refactor. Use
+command as follow. ``\$ unimport example.py --include-star-import`
+
+**Rare Cases** We add skip import feature to rare cases import statements.
+
+Leave '#unimport: skip' at the end of the line to skip imports with some rare cases.
+**for example:**
+
+```python
+try:
+  import django #unimport:skip
+except ImportError:
+  print("install django")
+```
+
 ## Command line options
 
 You can list many options by running unimport --help
@@ -181,6 +208,24 @@ exclude =  **/__init__.py
            tests*
 ```
 
+## Adding pre-commit plugins to your project
+
+Once you have [pre-commit](https://pre-commit.com/)
+[installed](https://pre-commit.com/#install), adding pre-commit plugins to your project
+is done with the .pre-commit-config.yaml configuration file.
+
+Add a file called .pre-commit-config.yaml to the root of your project. The pre-commit
+config file describes what repositories and hooks are installed.
+
+```yaml
+repos:
+  - repo: https://github.com/hakancelik96/unimport
+    rev: v0.2.6
+    hooks:
+      - id: unimport
+        args: [-r]
+```
+
 ## Our badge [![](https://img.shields.io/badge/style-unimport-red)](https://github.com/hakancelik96/unimport)
 
 **Please insert this badge into your project**
@@ -190,6 +235,10 @@ exclude =  **/__init__.py
 ## 🤝 [CONTRIBUTING.md](/CONTRIBUTING.md) 🤝
 
 [![](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/images/0)](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/links/0)[![](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/images/1)](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/links/1)[![](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/images/2)](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/links/2)[![](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/images/3)](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/links/3)[![](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/images/4)](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/links/4)[![](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/images/5)](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/links/5)[![](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/images/6)](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/links/6)[![](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/images/7)](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/links/7)
+
+## [CHANGELOG.md](/CHANGELOG.md)
+
+All notable changes to this project will be documented in this file.
 
 ## Author / Social
 
