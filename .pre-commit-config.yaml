@@ -28,7 +28,8 @@ repos:
         entry: "unimport"
         language: python
         args: [-r]
-        exclude: rare_cases/
+        exclude: (/(rare_cases)/|__init__.py)
+        files: "\\.(py)$"
 
   - repo: https://github.com/prettier/prettier
     rev: 1.19.1
