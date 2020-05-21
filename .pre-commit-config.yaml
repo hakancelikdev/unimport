@@ -21,10 +21,12 @@ repos:
       - id: mypy
         exclude: __main__.py
 
-  - repo: https://github.com/hakancelik96/unimport
-    rev: v0.2.5
+  - repo: local
     hooks:
       - id: unimport
+        name: local unimport
+        entry: "unimport"
+        language: python
         args: [-r]
         exclude: rare_cases/
 
