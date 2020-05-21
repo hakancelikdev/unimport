@@ -30,12 +30,11 @@ class Session:
 
     def _list_paths(self, start: Path, include: str, exclude: str):
         include_regex, exclude_regex = re.compile(include), re.compile(exclude)
-        return [
-            filename
-            for filename in start.glob(self.PATTERN)
-            if include_regex.search(str(filename))
-            if not exclude_regex.search(str(filename))
-        ]
+        for filename in start.glob(self.PATTERN):
+            if include_regex.search(
+                str(filename)
+            ) and not exclude_regex.search(str(filename)):
+                yield filename
 
     def refactor(self, source: str) -> str:
         self.scanner.run_visit(source)
