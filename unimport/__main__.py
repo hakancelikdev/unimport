@@ -9,7 +9,6 @@ from unimport.session import Session
 
 parser = argparse.ArgumentParser(
     prog="unimport",
-    usage="unimport path [options]",
     description=__description__,
     epilog="Get rid of all unused imports 🥳",
 )

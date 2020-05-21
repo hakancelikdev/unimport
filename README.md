@@ -169,7 +169,8 @@ __all__ = ["os"] # this import is used and umimport support this cases, it can u
 You can list many options by running unimport --help
 
 ```
-usage: unimport path [options]
+usage: unimport [-h] [-c PATH] [--include include] [--exclude exclude] [--include-star-import] [-d] [-r | -p] [--check] [-v]
+                [sources [sources ...]]
 
 A linter & formatter for finding & removing unused import statements.
 
