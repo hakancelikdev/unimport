@@ -26,7 +26,10 @@ class UnusedTestCase(unittest.TestCase):
 
 
 class TestUnusedImport(UnusedTestCase):
+    include_star_import = True
+
     def test__all__from_import(self):
+        # in this case this import is used
         source = (
             "from codeop import compile_command\n"
             "__all__ = ['compile_command']"
@@ -35,8 +38,55 @@ class TestUnusedImport(UnusedTestCase):
         self.assertUnimportEqual(source, expected_nused_imports)
 
     def test__all__star(self):
+        # in this case this import is used
         source = "from os import *\n" "__all__ = ['walk']"
-        expected_nused_imports = []
+        expected_nused_imports = [
+            {
+                "lineno": 1,
+                "module": os,
+                "modules": ["__all__", "walk"],
+                "name": "os",
+                "star": True,
+            }
+        ]
+        self.assertUnimportEqual(source, expected_nused_imports)
+
+    def test__all__star_unused(self):
+        # in this case this import is unused
+        source = "from os import *\n" "__all__ = ['test']"
+        expected_nused_imports = [
+            {
+                "lineno": 1,
+                "module": os,
+                "modules": ["__all__"],
+                "name": "os",
+                "star": True,
+            }
+        ]
+        self.assertUnimportEqual(source, expected_nused_imports)
+
+    def test_all_bin_op(self):
+        # NOTE no support.
+        for op in "/*-":
+            source = f"from os import *\n" "__all__ = ['w'{op}'alk']"
+            expected_nused_imports = []
+            self.assertUnimportEqual(source, expected_nused_imports)
+
+    def test_all_list_comprehension(self):
+        # NOTE no support.
+        source = (
+            "from os import *\n"
+            "__all__ = [expression for item in ['os', 'walk']]"
+        )
+        expected_nused_imports = [
+            {
+                "lineno": 1,
+                "module": os,
+                "modules": ["__all__"],
+                "name": "os",
+                "star": True,
+            }
+        ]
         self.assertUnimportEqual(source, expected_nused_imports)
 
     def test_comma(self):

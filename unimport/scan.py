@@ -4,6 +4,8 @@ import importlib
 import inspect
 import sys
 
+PY38_PLUS = sys.version_info >= (3, 8)
+
 
 def recursive(func):
     """decorator to make visitor work recursive"""
@@ -18,7 +20,7 @@ def recursive(func):
 class Scanner(ast.NodeVisitor):
     """To detect unused import using ast"""
 
-    ignore_imports = ["__future__", "__doc__"]
+    ignore_imports = ["__future__"]
 
     def __init__(self, source=None, include_star_import=False):
         self.include_star_import = include_star_import
@@ -112,19 +114,18 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_Assign(self, node):
-        try:
-            is_all = node.targets[0].id
-        except AttributeError:
-            pass
-        else:
-            if is_all == "__all__":
-                for item in node.value.elts:
-                    if sys.version_info.minor == 8:
-                        get_value = item.value
-                    else:
-                        get_value = item.s
+        if getattr(node.targets[0], "id", None) == "__all__" and isinstance(
+            node.value, (ast.List, ast.Tuple)
+        ):
+            for item in node.value.elts:
+                get_name = None
+                if PY38_PLUS and isinstance(item, ast.Constant):
+                    get_name = item.value
+                elif isinstance(item, ast.Str):
+                    get_name = item.s
+                if get_name:
                     self.names.append(
-                        {"lineno": node.lineno, "name": get_value}
+                        {"lineno": node.lineno, "name": get_name}
                     )
 
     def run_visit(self, source):
