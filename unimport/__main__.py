@@ -84,6 +84,7 @@ def print_if_exists(sequence):
 
 
 def output(name, path, lineno, modules):
+    modules = modules or ""
     return (
         f"{Color(name).yellow} at "
         f"{Color(str(path)).green}:{Color(str(lineno)).green}"
@@ -91,7 +92,7 @@ def output(name, path, lineno, modules):
     )
 
 
-def get_modules(is_star: bool, modules: str) -> str:
+def get_modules(imp: str, is_star: bool, modules: str) -> str:
     if is_star:
         _modules = ", ".join(modules)
         if len(_modules) > 5:
@@ -102,20 +103,17 @@ def get_modules(is_star: bool, modules: str) -> str:
             modules = f"{_modules}"
     else:
         modules = ""
-    return modules
+    if modules:
+        return f"from {imp} import {modules}"
 
 
 def show(unused_import: list, py_path: str) -> None:
     for imp in unused_import:
-        if (imp["star"] and imp["module"]) or not imp["star"]:
-            print(
-                output(
-                    imp["name"],
-                    py_path,
-                    imp["lineno"],
-                    get_modules(imp["star"], imp["modules"]),
-                )
-            )
+        modules = get_modules(imp["name"], imp["star"], imp["modules"])
+        if (imp["star"] and imp["module"] and bool(modules)) or (
+            not imp["star"]
+        ):
+            print(output(imp["name"], py_path, imp["lineno"], modules,))
 
 
 def main(argv=None):
