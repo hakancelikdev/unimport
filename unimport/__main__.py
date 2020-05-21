@@ -1,18 +1,24 @@
 import argparse
 import pathlib
+import re
 import sys
 
 from unimport import __description__, __version__
 from unimport.color import Color
 from unimport.session import Session
 
-parser = argparse.ArgumentParser(description=__description__)
+parser = argparse.ArgumentParser(
+    prog="unimport",
+    description=__description__,
+    epilog="Get rid of all unused imports 🥳",
+)
 exclusive_group = parser.add_mutually_exclusive_group(required=False)
 parser.add_argument(
     "sources",
     default=[pathlib.Path(".")],
     nargs="*",
     help="files and folders to find the unused imports.",
+    action="store",
     type=pathlib.Path,
 )
 parser.add_argument(
@@ -21,7 +27,24 @@ parser.add_argument(
     default=".",
     help="read configuration from PATH.",
     metavar="PATH",
+    action="store",
     type=pathlib.Path,
+)
+parser.add_argument(
+    "--include",
+    help="file include pattern.",
+    metavar="include",
+    action="store",
+    default="",
+    type=str,
+)
+parser.add_argument(
+    "--exclude",
+    help="file exclude pattern.",
+    metavar="exclude",
+    action="store",
+    default="",
+    type=str,
 )
 parser.add_argument(
     "--include-star-import",
@@ -123,9 +146,20 @@ def main(argv=None):
         config_file=namespace.config,
         include_star_import=namespace.include_star_import,
     )
+    include_list, exclude_list = [], []
+    if namespace.include:
+        include_list.append(namespace.include)
+    if session.config.include or "":
+        include_list.append(session.config.include or "")
+    if namespace.exclude:
+        exclude_list.append(namespace.exclude)
+    if session.config.exclude or "":
+        exclude_list.append(session.config.exclude or "")
+    include = re.compile("|".join(include_list)).pattern
+    exclude = re.compile("|".join(exclude_list)).pattern
     _any_unimport = False
     for source_path in namespace.sources:
-        for py_path in session._list_paths(source_path, "**/*.py"):
+        for py_path in session._list_paths(source_path, include, exclude):
             if not any_namespace or namespace.check:
                 session.scanner.run_visit(source=session._read(py_path)[0])
                 unused_imports = list(session.scanner.get_unused_imports())

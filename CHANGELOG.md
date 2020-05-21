@@ -33,8 +33,13 @@ All notable changes to this project will be documented in this file.
   __all__ = ["compile_command"]
   ```
 
-Thanks to this feature, we take the values ​​in the `__all__` list and see if there is
-any matching import statements. If there isn't, this import is unused import.
+  Thanks to this feature, we take the values ​​in the `__all__` list and see if there is
+  any matching import statements. If there isn't, this import is unused import.
+
+- 💪
+  [Support exclude & include config with regex by @hakancelik96](https://github.com/hakancelik96/unimport/pull/36)
+  After this feature, we can write the file include and exclude pattern setting with
+  regex in the console and in the configuration files.
 
 ## [0.2.5] - 16/May/2020
 

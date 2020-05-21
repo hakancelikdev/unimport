@@ -1,5 +1,5 @@
 import difflib
-import fnmatch
+import re
 import tokenize
 from pathlib import Path
 
@@ -9,6 +9,8 @@ from unimport.scan import Scanner
 
 
 class Session:
+    PATTERN = "**/*.py"
+
     def __init__(self, config_file=None, include_star_import=False):
         self.config = Config(config_file)
         self.scanner = Scanner(include_star_import=include_star_import)
@@ -26,22 +28,14 @@ class Session:
             return "", "utf-8"
         return source, encoding
 
-    def _list_paths(self, start: Path, pattern: str = "**/*.py"):
-        def _is_excluded(path):
-            return any(
-                fnmatch.fnmatch(path, pattern_exclude)
-                for pattern_exclude in self.config.exclude
-            )
-
-        if not start.is_dir():
-            if not _is_excluded(start):
-                yield start
-        else:
-            for dir_ in start.iterdir():
-                if not _is_excluded(dir_):
-                    for path in dir_.glob(pattern):
-                        if not _is_excluded(path):
-                            yield path
+    def _list_paths(self, start: Path, include: str, exclude: str):
+        include_regex, exclude_regex = re.compile(include), re.compile(exclude)
+        return [
+            filename
+            for filename in start.glob(self.PATTERN)
+            if include_regex.search(str(filename))
+            if not exclude_regex.search(str(filename))
+        ]
 
     def refactor(self, source: str) -> str:
         self.scanner.run_visit(source)
