@@ -151,9 +151,17 @@ Leave '#unimport: skip' at the end of the line to skip imports with some rare ca
 
 ```python
 try:
-  import django #unimport:skip
+  import django #unimport:skip this import used but unimport can't understand this case.
 except ImportError:
   print("install django")
+```
+
+another rare case which support by unimport .
+
+```python
+import os
+
+__all__ = ["os"] # this import is used and umimport support this cases, it can understand
 ```
 
 ## Command line options

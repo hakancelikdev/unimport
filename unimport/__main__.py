@@ -106,18 +106,8 @@ def get_modules(is_star: bool, modules: str) -> str:
 
 
 def show(unused_import: list, py_path: str) -> None:
-    if not unused_import:
-        print(
-            Color(
-                "🐍 🕵️‍♂️ ✨ Congratulations there is no unused import in your project. ✨ 🕵️‍♂️ 🐍"
-            ).green
-        )
     for imp in unused_import:
-        if (
-            (imp["star"] and imp["module"])
-            or (not imp["star"] and imp["module"])
-            and (not imp["star"] and not imp["module"])
-        ):
+        if (imp["star"] and imp["module"]) or not imp["star"]:
             print(
                 output(
                     imp["name"],
@@ -135,11 +125,15 @@ def main(argv=None):
         config_file=namespace.config,
         include_star_import=namespace.include_star_import,
     )
+    _any_unimport = False
     for source_path in namespace.sources:
         for py_path in session._list_paths(source_path, "**/*.py"):
             if not any_namespace or namespace.check:
                 session.scanner.run_visit(source=session._read(py_path)[0])
-                show(list(session.scanner.get_unused_imports()), py_path)
+                unused_imports = list(session.scanner.get_unused_imports())
+                show(unused_imports, py_path)
+                if not _any_unimport and not unused_imports:
+                    _any_unimport = True
                 session.scanner.clear()
             if namespace.diff or namespace.permission:
                 exists_diff = print_if_exists(session.diff_file(py_path))
@@ -156,6 +150,12 @@ def main(argv=None):
                 refactor_source = session.refactor_file(py_path, apply=True)
                 if refactor_source != source:
                     print(f"Refactoring '{Color(str(py_path)).green}'")
+    if not _any_unimport:
+        print(
+            Color(
+                "🐍 🕵️‍♂️ ✨ Congratulations there is no unused import in your project. ✨ 🕵️‍♂️ 🐍"
+            ).green
+        )
 
 
 if __name__ == "__main__":
