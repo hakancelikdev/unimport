@@ -119,7 +119,11 @@ class Scanner(ast.NodeVisitor):
         ):
             for item in node.value.elts:
                 get_name = None
-                if PY38_PLUS and isinstance(item, ast.Constant):
+                if (
+                    PY38_PLUS
+                    and isinstance(item, ast.Constant)
+                    and isinstance(item.value, ast.Str)
+                ):
                     get_name = item.value
                 elif isinstance(item, ast.Str):
                     get_name = item.s
