@@ -13,7 +13,5 @@ exclude = '''
 '''
 
 [tool.unimport]
-exclude = [
-  './[0-9].*',
-  'tests'
-]
+exclude = '__init__.py|tests/'
+include = 'test|test2|tests.py'
