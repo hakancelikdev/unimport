@@ -12,45 +12,11 @@ CONFIG_FILES = {"setup.cfg": "unimport"}
 if HAS_TOML is True:
     CONFIG_FILES.update({"pyproject.toml": "tool.unimport"})
 
-DEFAULT_EXCLUDES = {
-    "**/*.git**",
-    "**/*.github**",
-    "**/*build**",
-    "**/*__pycache__**",
-    "**/*develop-eggs**",
-    "**/*dist**",
-    "**/*downloads**",
-    "**/*eggs**",
-    "**/*lib**",
-    "**/*lib64**",
-    "**/*parts**",
-    "**/*sdist**",
-    "**/*var**",
-    "**/*wheels**",
-    "**/*.egg-info**",
-    "**/*MANIFEST**",
-    "**/*htmlcov**",
-    "**/*.tox**",
-    "**/*.hypothesis**",
-    "**/*.pytest_cache**",
-    "**/*instance**",
-    "**/*docs**",
-    "**/*target**",
-    "**/*celerybeat-schedul**",
-    "**/*.venv**",
-    "**/*env**",
-    "**/*venv**",
-    "**/*site**",
-    "**/*.mypy_cache**",
-    "**/*.sage.py",
-    "**/*local_settings.py",
-    "**/*__init__.py",
-}
-
 
 class Config:
+    attrs = ["include", "exclude"]
+
     def __init__(self, config_file=None):
-        self.exclude = DEFAULT_EXCLUDES.copy()
         self.config_file = config_file
         self.config_path, self.section = self.find_config()
         if self.config_path is not None:
@@ -83,9 +49,11 @@ class Config:
         parser = configparser.ConfigParser(allow_no_value=True)
         parser.read(self.config_path)
         if parser.has_section(self.section):
-            self.exclude.update(parser.get(self.section, "exclude").split())
+            for attr in self.attrs:
+                setattr(self, attr, parser.get(self.section, attr) or None)
 
     def parse_toml(self):
         parsed_toml = toml.loads(self.config_path.read_text())
         config = parsed_toml.get("tool", {}).get("unimport", {})
-        self.exclude.update(set(config.get("exclude", [])))
+        for attr in self.attrs:
+            setattr(self, attr, config.get(attr, "") or None)
