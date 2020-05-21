@@ -169,9 +169,9 @@ __all__ = ["os"] # this import is used and umimport support this cases, it can u
 You can list many options by running unimport --help
 
 ```
-usage: unimport [-h] [-c PATH] [--include-star-import] [-d] [-r | -p] [--check] [-v] [sources [sources ...]]
+usage: unimport path [options]
 
-A python CLI library to detect and auto remove unused Python imports by doing static code analysis.
+A linter & formatter for finding & removing unused import statements.
 
 positional arguments:
   sources               files and folders to find the unused imports.
@@ -180,6 +180,8 @@ optional arguments:
   -h, --help            show this help message and exit
   -c PATH, --config PATH
                         read configuration from PATH.
+  --include include     file include pattern.
+  --exclude exclude     file exclude pattern.
   --include-star-import
                         Include star imports during scanning and refactor.
   -d, --diff            Prints a diff of all the changes unimport would make to a file.
@@ -187,6 +189,8 @@ optional arguments:
   -p, --permission      Refactor permission after see diff.
   --check               Prints which file the unused imports are in.
   -v, --version         Prints version of unimport
+
+Get rid of all unused imports 🥳
 ```
 
 ## Configuring Unimport
@@ -197,7 +201,8 @@ you have.
 If you want to use `pyproject.toml` to configure, you must to install it. Try this;
 `pip install toml==0.10.0`
 
-Use `exclude` config name to configure glob patterns for exluding files and folders.
+- `exclude` file exclude pattern.
+- `include` file include pattern.
 
 For example:
 
@@ -205,15 +210,16 @@ For example:
 
 ```ini
 [tool.unimport]
-exclude = ["tests*", "**/__init__.py"]
+exclude = '(__init__.py)|env'
+include = 'my_project'
 ```
 
 **setup.cfg**
 
 ```ini
 [unimport]
-exclude =  **/__init__.py
-           tests*
+exclude = (__init__.py)|env
+include = my_project
 ```
 
 ## Adding pre-commit plugins to your project
