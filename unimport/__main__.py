@@ -1,7 +1,7 @@
 import argparse
-import pathlib
 import re
 import sys
+from pathlib import Path
 
 from unimport import __description__, __version__
 from unimport.color import Color
@@ -15,11 +15,11 @@ parser = argparse.ArgumentParser(
 exclusive_group = parser.add_mutually_exclusive_group(required=False)
 parser.add_argument(
     "sources",
-    default=[pathlib.Path(".")],
+    default=[Path(".")],
     nargs="*",
     help="files and folders to find the unused imports.",
     action="store",
-    type=pathlib.Path,
+    type=Path,
 )
 parser.add_argument(
     "-c",
@@ -28,7 +28,7 @@ parser.add_argument(
     help="read configuration from PATH.",
     metavar="PATH",
     action="store",
-    type=pathlib.Path,
+    type=Path,
 )
 parser.add_argument(
     "--include",
@@ -133,15 +133,15 @@ def get_modules(imp: str, is_star: bool, modules: str) -> str:
 def show(unused_import: list, py_path: str) -> None:
     for imp in unused_import:
         modules = get_modules(imp["name"], imp["star"], imp["modules"])
-        if (imp["star"] and imp["module"] and bool(modules)) or (
-            not imp["star"]
-        ):
+        if (imp["star"] and imp["module"]) or (not imp["star"]):
             print(output(imp["name"], py_path, imp["lineno"], modules,))
 
 
 def main(argv=None):
     namespace = parser.parse_args(argv)
-    any_namespace = any([value for key, value in vars(namespace).items()][3:])
+    namespace.check = namespace.check or not any(
+        [value for key, value in vars(namespace).items()][5:-1]
+    )
     session = Session(
         config_file=namespace.config,
         include_star_import=namespace.include_star_import,
@@ -160,15 +160,17 @@ def main(argv=None):
     _any_unimport = False
     for source_path in namespace.sources:
         for py_path in session._list_paths(source_path, include, exclude):
-            if not any_namespace or namespace.check:
+            if namespace.check:
                 session.scanner.run_visit(source=session._read(py_path)[0])
                 unused_imports = list(session.scanner.get_unused_imports())
                 show(unused_imports, py_path)
-                if not _any_unimport and not unused_imports:
+                if not (not _any_unimport and not unused_imports):
                     _any_unimport = True
                 session.scanner.clear()
             if namespace.diff or namespace.permission:
                 exists_diff = print_if_exists(session.diff_file(py_path))
+                if exists_diff and not _any_unimport:
+                    _any_unimport = True
             if namespace.permission and exists_diff:
                 action = input(
                     f"Apply suggested changes to '{Color(str(py_path)).yellow}' [y/n/q] ? >"
@@ -181,6 +183,8 @@ def main(argv=None):
                 source = session._read(py_path)[0]
                 refactor_source = session.refactor_file(py_path, apply=True)
                 if refactor_source != source:
+                    if not _any_unimport:
+                        _any_unimport = True
                     print(f"Refactoring '{Color(str(py_path)).green}'")
     if not _any_unimport:
         print(
