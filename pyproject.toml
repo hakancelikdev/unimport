@@ -28,4 +28,5 @@ line_length=79
 known_third_party=["libcst", "setuptools"]
 
 [tool.unimport]
-exclude = '(__init__.py)'
+exclude = '(__init__.py)|env'
+
