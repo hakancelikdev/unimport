@@ -149,11 +149,11 @@ def main(argv=None):
     include_list, exclude_list = [], []
     if namespace.include:
         include_list.append(namespace.include)
-    if session.config.include or "":
+    if hasattr(session.config, "include"):
         include_list.append(session.config.include or "")
     if namespace.exclude:
         exclude_list.append(namespace.exclude)
-    if session.config.exclude or "":
+    if hasattr(session.config, "exclude"):
         exclude_list.append(session.config.exclude or "")
     include = re.compile("|".join(include_list)).pattern
     exclude = re.compile("|".join(exclude_list)).pattern
@@ -169,8 +169,6 @@ def main(argv=None):
                 session.scanner.clear()
             if namespace.diff or namespace.permission:
                 exists_diff = print_if_exists(session.diff_file(py_path))
-                if exists_diff and not _any_unimport:
-                    _any_unimport = True
             if namespace.permission and exists_diff:
                 action = input(
                     f"Apply suggested changes to '{Color(str(py_path)).yellow}' [y/n/q] ? >"
@@ -183,13 +181,11 @@ def main(argv=None):
                 source = session._read(py_path)[0]
                 refactor_source = session.refactor_file(py_path, apply=True)
                 if refactor_source != source:
-                    if not _any_unimport:
-                        _any_unimport = True
                     print(f"Refactoring '{Color(str(py_path)).green}'")
-    if not _any_unimport:
+    if not _any_unimport and namespace.check:
         print(
             Color(
-                "🐍 🕵️‍♂️ ✨ Congratulations there is no unused import in your project. ✨ 🕵️‍♂️ 🐍"
+                "✨ Congratulations there is no unused import in your project. ✨"
             ).green
         )
 

@@ -2,9 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.2.6] - 22/May/2020
+## [0.2.61] - 22/May/2020
 
-[0.2.6 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/32)
+[PR: 0.2.6 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/32)
 
 - 💪 `--include-star-import command add` Include star imports during scanning and
   refactor.
@@ -41,11 +41,11 @@ All notable changes to this project will be documented in this file.
   After this feature, we can write the file include and exclude pattern setting with
   regex in the console and in the configuration files.
 
-- 🐞[Show, check and congratulations messages in __main_ by @hakancelik96](https://github.com/hakancelik96/unimport/commit/54129bfc9e78f678bb2fea9b2411355d857a0a37)
+- 🐞[Show, check and congratulations messages in \__main_ by @hakancelik96](https://github.com/hakancelik96/unimport/commit/54129bfc9e78f678bb2fea9b2411355d857a0a37)
 
 - 🐞[--include-star-import command refactor & scan by @hakancelik96](https://github.com/hakancelik96/unimport/commit/d44b2c6d0c5997fb716d58f00d0d5ab2a8042c26)
 
-- 🐞[_list_paths in session by @hakancelik96](https://github.com/hakancelik96/unimport/commit/179ba9c45031de8d5aa1de43e0449ccdeece8d5e)
+- 🐞[\_list_paths in session by @hakancelik96](https://github.com/hakancelik96/unimport/commit/179ba9c45031de8d5aa1de43e0449ccdeece8d5e)
 
 ## [0.2.5] - 16/May/2020
 
