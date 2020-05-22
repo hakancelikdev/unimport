@@ -235,7 +235,7 @@ config file describes what repositories and hooks are installed.
 ```yaml
 repos:
   - repo: https://github.com/hakancelik96/unimport
-    rev: v0.2.6
+    rev: v0.2.61
     hooks:
       - id: unimport
         args: [-r, --include-star-import]

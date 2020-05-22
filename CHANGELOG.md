@@ -47,6 +47,8 @@ All notable changes to this project will be documented in this file.
 
 - 🐞[\_list_paths in session by @hakancelik96](https://github.com/hakancelik96/unimport/commit/179ba9c45031de8d5aa1de43e0449ccdeece8d5e)
 
+- [v0.2.61](https://github.com/hakancelik96/unimport/commit/dca5265eb4c106aaa190ea67af5f8da46202e00b)
+
 ## [0.2.5] - 16/May/2020
 
 [0.2.5 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/31)
