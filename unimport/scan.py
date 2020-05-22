@@ -197,11 +197,11 @@ class Scanner(ast.NodeVisitor):
             else:
                 res = False
                 is_star_import = imp["star"]
-                if self.include_star_import:
-                    res = getattr(self, f"imp_star_{is_star_import}")(imp)
+                if is_star_import:
+                    if self.include_star_import:
+                        res = getattr(self, f"imp_star_{is_star_import}")(imp)
                 else:
-                    if not is_star_import:
-                        res = self.imp_star_False(imp)
+                    res = self.imp_star_False(imp)
                 if res:
                     yield res
 

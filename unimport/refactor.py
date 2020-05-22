@@ -64,16 +64,8 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
         else:
             return updated_node.with_changes(names=names_to_keep)
 
-    def leave_StarImport(self, original_node, updated_node):
-        if isinstance(updated_node.module, cst.Attribute):
-            import_name = self.get_import_name_from_attr(
-                attr_node=updated_node.module
-            )
-        else:
-            import_name = updated_node.module.value
-        imp = self.get_imp(
-            import_name=import_name, location=self.get_location(original_node)
-        )
+    def leave_StarImport(self, original_node, updated_node, **kwargs):
+        imp = kwargs["imp"]
         if imp["modules"]:
             modules = ",".join(imp["modules"])
             names_to_suggestion = []
@@ -94,7 +86,25 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
         self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom
     ) -> cst.ImportFrom:
         if isinstance(updated_node.names, cst.ImportStar):
-            return self.leave_StarImport(original_node, updated_node)
+
+            def get_star_imp():
+                if isinstance(updated_node.module, cst.Attribute):
+                    import_name = self.get_import_name_from_attr(
+                        attr_node=updated_node.module
+                    )
+                else:
+                    import_name = updated_node.module.value
+                return self.get_imp(
+                    import_name=import_name,
+                    location=self.get_location(original_node),
+                )
+
+            imp = get_star_imp()
+            if imp:
+                return self.leave_StarImport(
+                    original_node, updated_node, imp=imp
+                )
+            return original_node
         return self.leave_import_alike(original_node, updated_node)
 
 
