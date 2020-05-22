@@ -238,7 +238,7 @@ repos:
     rev: v0.2.6
     hooks:
       - id: unimport
-        args: [-r]
+        args: [-r, --include-star-import]
 ```
 
 ## Our badge [![](https://img.shields.io/badge/style-unimport-red)](https://github.com/hakancelik96/unimport)
