@@ -9,7 +9,8 @@ from unimport.scan import Scanner
 
 
 class Session:
-    PATTERN = "**/*.py"
+    GLOB_PATTERN = "**/*.py"
+    REGEX_PATTERN = "\\.(py)$"
 
     def __init__(self, config_file=None, include_star_import=False):
         self.config = Config(config_file)
@@ -28,9 +29,16 @@ class Session:
             return "", "utf-8"
         return source, encoding
 
-    def _list_paths(self, start: Path, include: str, exclude: str):
-        include_regex, exclude_regex = re.compile(include), re.compile(exclude)
-        for filename in start.glob(self.PATTERN):
+    def _list_paths(self, start, include, exclude):
+        include_regex, exclude_regex = (
+            re.compile(include or self.REGEX_PATTERN),
+            re.compile(exclude),
+        )
+        if start.is_dir():
+            file_names = start.glob(self.GLOB_PATTERN)
+        else:
+            file_names = [start]
+        for filename in file_names:
             if include_regex.search(
                 str(filename)
             ) and not exclude_regex.search(str(filename)):
