@@ -10,7 +10,8 @@ from unimport.scan import Scanner
 
 class Session:
     GLOB_PATTERN = "**/*.py"
-    REGEX_PATTERN = "\\.(py)$"
+    INCLUDE_REGEX_PATTERN = "\\.(py)$"
+    EXCLUDE_REGEX_PATTERN = "^$"
 
     def __init__(self, config_file=None, include_star_import=False):
         self.config = Config(config_file)
@@ -31,8 +32,8 @@ class Session:
 
     def _list_paths(self, start, include, exclude):
         include_regex, exclude_regex = (
-            re.compile(include or self.REGEX_PATTERN),
-            re.compile(exclude),
+            re.compile(include or self.INCLUDE_REGEX_PATTERN),
+            re.compile(exclude or self.EXCLUDE_REGEX_PATTERN),
         )
         if start.is_dir():
             file_names = start.glob(self.GLOB_PATTERN)
