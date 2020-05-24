@@ -10,7 +10,7 @@
 [![style](https://img.shields.io/badge/style-unimport-red)](https://github.com/hakancelik96/unimport)
 [![](https://img.shields.io/github/contributors/hakancelik96/unimport)](https://github.com/hakancelik96/unimport/graphs/contributors)
 [![](https://pepy.tech/badge/unimport)](https://pepy.tech/badge/unimport)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/unimport)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/unimport)[![codecov](https://codecov.io/gh/hakancelik96/unimport/branch/master/graph/badge.svg)](https://codecov.io/gh/hakancelik96/unimport)
 
 ## Getting Started
 
