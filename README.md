@@ -6,11 +6,10 @@
 [![releases](https://img.shields.io/github/release/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/releases)
 [![last-commit](https://img.shields.io/github/last-commit/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/commits/master)
 [![style](https://img.shields.io/badge/style-black-black)](https://github.com/psf/black)
-[![style](https://img.shields.io/badge/style-isort-lightgrey)](https://github.com/timothycrosley/isort)
-[![style](https://img.shields.io/badge/style-unimport-red)](https://github.com/hakancelik96/unimport)
+[![style](https://img.shields.io/badge/unimport-v0.2.62-red)](https://github.com/hakancelik96/unimport)
 [![](https://img.shields.io/github/contributors/hakancelik96/unimport)](https://github.com/hakancelik96/unimport/graphs/contributors)
 [![](https://pepy.tech/badge/unimport)](https://pepy.tech/badge/unimport)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/unimport)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/unimport)[![codecov](https://codecov.io/gh/hakancelik96/unimport/branch/master/graph/badge.svg)](https://codecov.io/gh/hakancelik96/unimport)
 
 ## Getting Started
 
@@ -21,7 +20,7 @@
 **[Configuring Unimport](#configuring-unimport)** |
 **[Adding pre-commit plugins to your project](#adding-pre-commit-plugins-to-your-project)**
 | **[Our badge](#our-badge-)** | **[CONTRIBUTING](#-contributingmd-)** |
-**[CHANGELOG.md](#changelogmd)** | **[Author / Social](#author--social)** |
+**[CHANGELOG.md](#changelogmd)** | **[Contact](#contact)** |
 **[Who's using Unimport?](#whos-using-unimport)**
 
 ---
@@ -241,11 +240,11 @@ repos:
         args: [-r, --include-star-import]
 ```
 
-## Our badge [![](https://img.shields.io/badge/style-unimport-red)](https://github.com/hakancelik96/unimport)
+## Our badge [![style](https://img.shields.io/badge/unimport-v0.2.62-red)](https://github.com/hakancelik96/unimport)
 
 **Please insert this badge into your project**
 
-`[![](https://img.shields.io/badge/style-unimport-red)](https://github.com/hakancelik96/unimport)`
+`[![style](https://img.shields.io/badge/unimport-v0.2.62-red)](https://github.com/hakancelik96/unimport)`
 
 ## 🤝 [CONTRIBUTING.md](/CONTRIBUTING.md) 🤝
 
@@ -255,12 +254,12 @@ repos:
 
 All notable changes to this project will be documented in this file.
 
-## Author / Social
+## Contact
 
-👤 **Hakan Çelik** 👤
-
+- [![](https://img.shields.io/badge/telegram-@hakancelik-brightgreen?logo=telegram)](https://t.me/hakancelik96)
 - [![](https://img.shields.io/twitter/follow/hakancelik96?style=social)](https://twitter.com/hakancelik96)
 - [![](https://img.shields.io/github/followers/hakancelik96?label=hakancelik96&style=social)](https://github.com/hakancelik96)
+- [Mail](mailto:hakancelik96@outlook.com)
 
 ## Who's using Unimport?
 
