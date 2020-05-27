@@ -30,5 +30,16 @@ class TestConfig(TestCase):
             actual_path, actual_section = config.find_config()
             self.assertEqual(actual_path, config_path["config_file"])
             self.assertEqual(actual_section, config_path["section"])
+
+    def test_attr(self):
+        for config_path in CONFIG_PATHS:
+            config = Config(config_file=config_path["config_file"])
             self.assertEqual(self.include, config.include)
             self.assertEqual(self.exclude, config.exclude)
+
+    def test_is_available_to_parse(self):
+        for config_path in CONFIG_PATHS:
+            config = Config(config_file=config_path["config_file"])
+            self.assertEqual(
+                config.is_available_to_parse(config.config_file), True
+            )
