@@ -64,7 +64,7 @@ class Scanner(ast.NodeVisitor):
                     name = package
                 try:
                     module = importlib.import_module(package)
-                except:
+                except ImportError:
                     pass
                 self.imports.append(
                     {
@@ -136,7 +136,7 @@ class Scanner(ast.NodeVisitor):
         self.source = source
         try:
             self.visit(ast.parse(self.source))
-        except SyntaxError as err:
+        except SyntaxError:
             return
 
     def clear(self):
