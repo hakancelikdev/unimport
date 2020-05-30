@@ -31,7 +31,6 @@ git checkout -b i{your issue number}
 
 ```bash
 $ pre-commit install # to pre-commit will run automatically on git commit!
-$ pre-commit install --hook-type prepare-commit-msg
 ```
 
 ## How to Update My Local Repository
