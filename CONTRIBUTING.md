@@ -60,8 +60,8 @@ help us better understand the change you have made and also it is fun.
 
 You can run the tests by typing the following command.
 
-```
-python -m unitttest
+```python
+python -m unittest
 ```
 
 ## License
