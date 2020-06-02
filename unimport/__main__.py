@@ -171,11 +171,11 @@ def main(argv=None):
                 exists_diff = print_if_exists(session.diff_file(py_path))
             if namespace.permission and exists_diff:
                 action = input(
-                    f"Apply suggested changes to '{Color(str(py_path)).yellow}' [y/n/q] ? >"
-                )
+                    f"Apply suggested changes to '{Color(str(py_path)).yellow}' [Y/n/q] ? >"
+                ).lower()
                 if action == "q":
                     break
-                elif action == "y":
+                elif action == "y" or action == "":
                     namespace.remove = True
             if namespace.remove:
                 source = session._read(py_path)[0]
