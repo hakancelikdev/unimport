@@ -82,8 +82,19 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_Name(self, node):
-        if not hasattr(builtins, node.id):
-            self.names.append({"lineno": node.lineno, "name": node.id})
+        self.names.append({"lineno": node.lineno, "name": node.id})
+
+    def get_names(self):
+        imp_match_built_in = [
+            imp["name"]
+            for imp in self.imports
+            if hasattr(builtins, imp["name"])
+        ]
+        for name in self.names:
+            if any(
+                [imp_name == name["name"] for imp_name in imp_match_built_in]
+            ) or not hasattr(builtins, name["name"]):
+                yield name
 
     @recursive
     def visit_Attribute(self, node):
@@ -160,7 +171,7 @@ class Scanner(ast.NodeVisitor):
     def imp_star_True(self, imp):
         if imp["module"]:
             if imp["module"].__name__ not in sys.builtin_module_names:
-                to_ = {to_cfv["name"] for to_cfv in self.names}
+                to_ = {to_cfv["name"] for to_cfv in self.get_names()}
                 try:
                     s = self.__class__(inspect.getsource(imp["module"]))
                 except OSError:
@@ -174,7 +185,7 @@ class Scanner(ast.NodeVisitor):
         return imp
 
     def imp_star_False(self, imp):
-        for name in self.names:
+        for name in self.get_names():
             if name["name"].startswith(imp["name"]):
                 # used
                 break
@@ -185,7 +196,7 @@ class Scanner(ast.NodeVisitor):
     def get_unused_imports(self):
         for imp in self.imports:
             if self.is_duplicate(imp["name"]):
-                for name in self.names:
+                for name in self.get_names():
                     if name["name"].startswith(
                         imp["name"]
                     ) and not self.is_duplicate_used(name, imp):

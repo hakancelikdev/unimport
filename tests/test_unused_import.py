@@ -23,6 +23,37 @@ class UnusedTestCase(unittest.TestCase):
             expected_nused_imports,
             list(self.session.scanner.get_unused_imports()),
         )
+        self.session.scanner.clear()
+
+
+class TestBuiltin(UnusedTestCase):
+    include_star_import = True
+
+    def test_ConnectionError(self):
+        source = (
+            "from x.y import ConnectionError\n"
+            "try:\n"
+            "   pass\n"
+            "except ConnectionError:\n"
+            "   pass\n"
+        )
+        expected_nused_imports = []
+        self.assertUnimportEqual(source, expected_nused_imports)
+
+    def test_ValueError(self):
+        source = "from x import ValueError\n" "print(ValueError)\n"
+        expected_nused_imports = []
+        self.assertUnimportEqual(source, expected_nused_imports)
+
+    def test_builtins(self):
+        source = (
+            "from builtins import next, object, range\n"
+            "__all__ = ['next', 'object']\n"
+            "for i in range(8):\n"
+            "   pass\n"
+        )
+        expected_nused_imports = []
+        self.assertUnimportEqual(source, expected_nused_imports)
 
 
 class TestUnusedImport(UnusedTestCase):
