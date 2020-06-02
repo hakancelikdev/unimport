@@ -1,4 +1,5 @@
 toml==0.10.0
 pytest
+pytest-cov
 pre-commit==2.4.0
 wheel==0.34.2
