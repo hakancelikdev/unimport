@@ -160,3 +160,7 @@ class SkipImportTest(ScannerTestCase):
     def test_ongoing_comment(self):
         source = "import unimport #unimport:skip import test\n"
         self.assertUnimportEqual(source,)
+
+    def test_skip_comment_second_option(self):
+        source = "import x # unimport:skip test\n"
+        self.assertUnimportEqual(source,)

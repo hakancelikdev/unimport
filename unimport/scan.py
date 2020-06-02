@@ -21,6 +21,7 @@ class Scanner(ast.NodeVisitor):
     """To detect unused import using ast"""
 
     ignore_imports = ["__future__"]
+    skip_comments = ["#unimport:skip", "# unimport:skip"]
 
     def __init__(self, source=None, include_star_import=False):
         self.include_star_import = include_star_import
@@ -147,14 +148,14 @@ class Scanner(ast.NodeVisitor):
     def skip_import(self, lineno):
         line = self.source.split("\n")[lineno - 1]
         start_comment = line.find("#")
-        report_comment = "#unimport:skip"
-        if (
-            report_comment
-            == line[
-                start_comment : start_comment + len(report_comment)
-            ].lower()
-        ):
-            return True
+        for skip_comment in self.skip_comments:
+            if (
+                skip_comment
+                == line[
+                    start_comment : start_comment + len(skip_comment)
+                ].lower()
+            ):
+                return True
 
     def get_names(self):
         imp_match_built_in = [
