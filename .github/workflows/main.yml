@@ -25,4 +25,14 @@ jobs:
       - name: Test with pytest
         run: |
           source env/bin/activate
-          python -m pytest tests/
+          python -m pytest
+
+      - name: Generate coverage report
+        run: |
+          source env/bin/activate
+          pytest --cov=./ --cov-report=xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1.0.7
+        with:
+          token: ${{secrets.CODECOV_TOKEN }}
