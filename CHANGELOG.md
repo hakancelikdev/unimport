@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- [Set default of permission flag as yes (#51) by @semakaratas](https://github.com/hakancelik96/unimport/pull/52)
+
 - [Fix: 'Ignore imports that shadow builtin names' 🐞 💪 🧪 (#45 & #47) by @hakancelik96](https://github.com/hakancelik96/unimport/pull/50)
 
 ## [0.2.62] - 23/May/2020
