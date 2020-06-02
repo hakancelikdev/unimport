@@ -4,6 +4,10 @@
 
 To make an improvement, add a new feature or anything else, please open a issue first.
 
+**Good first issues are the issues that you can quickly solve, we recommend you take a
+look.**
+[Good first issue](https://github.com/hakancelik96/unimport/labels/good%20first%20issue)
+
 ## Fork Repository
 
 [fork the unimport.](https://github.com/hakancelik96/unimport/fork)
