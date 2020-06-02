@@ -19,7 +19,7 @@ class Config:
     def __init__(self, config_file=None):
         self.config_file = config_file
         self.config_path, self.section = self.find_config()
-        if self.config_path is not None:
+        if self.config_path is not None and self.section is not None:
             self.parse()
 
     @staticmethod
@@ -35,11 +35,6 @@ class Config:
             and self.config_file.name in config_files
         ):
             return self.config_file, config_files[self.config_file.name]
-        if self.config_file:
-            for file_name, section in config_files.items():
-                config_path = self.config_file / file_name
-                if self.is_available_to_parse(config_path):
-                    return config_path, section
         return None, None
 
     def parse(self):
