@@ -84,18 +84,6 @@ class Scanner(ast.NodeVisitor):
     def visit_Name(self, node):
         self.names.append({"lineno": node.lineno, "name": node.id})
 
-    def get_names(self):
-        imp_match_built_in = [
-            imp["name"]
-            for imp in self.imports
-            if hasattr(builtins, imp["name"])
-        ]
-        for name in self.names:
-            if any(
-                [imp_name == name["name"] for imp_name in imp_match_built_in]
-            ) or not hasattr(builtins, name["name"]):
-                yield name
-
     @recursive
     def visit_Attribute(self, node):
         local_attr = []
@@ -167,6 +155,18 @@ class Scanner(ast.NodeVisitor):
             ].lower()
         ):
             return True
+
+    def get_names(self):
+        imp_match_built_in = [
+            imp["name"]
+            for imp in self.imports
+            if hasattr(builtins, imp["name"])
+        ]
+        for name in self.names:
+            if any(
+                [imp_name == name["name"] for imp_name in imp_match_built_in]
+            ) or not hasattr(builtins, name["name"]):
+                yield name
 
     def imp_star_True(self, imp):
         if imp["module"]:
