@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+- [Fix: 'Ignore imports that shadow builtin names' 🐞 💪 🧪 (#45 & #47) by @hakancelik96](https://github.com/hakancelik96/unimport/pull/50)
+
 ## [0.2.62] - 23/May/2020
 
 - 🐞[config](https://github.com/hakancelik96/unimport/commit/ee4dbb1301fef66a0cf99e9cfb9b18c6b2f0587d)
