@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- [💪 `#noqa` comment support to skip import (#48) by @hakancelik96](https://github.com/hakancelik96/unimport/pull/54)
+
 - [💪 `typing` imports used in typing comments support only python3.8 (#49) by @hakancelik96](https://github.com/hakancelik96/unimport/pull/53)
 
 - [Set default of permission flag as yes (#51) by @semakaratas](https://github.com/hakancelik96/unimport/pull/52)
