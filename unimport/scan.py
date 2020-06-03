@@ -25,7 +25,7 @@ class Scanner(ast.NodeVisitor):
     """To detect unused import using ast"""
 
     ignore_imports = ["__future__"]
-    skip_comments_regex = "# unimport:skip|# noqa"
+    skip_comments_regex = "#\s*(unimport:skip|noqa)"
 
     def __init__(self, source=None, include_star_import=False):
         self.include_star_import = include_star_import
