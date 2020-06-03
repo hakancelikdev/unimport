@@ -18,6 +18,8 @@
 ---
 
 **Contents:** **[Installation and Usage](#installation-and-usage)** |
+**[Star Import](#star-import)** | **[Typing Comments](#typing-comments)** |
+**[Skip Import](#skip-import)** | **[`__all__`](#__all__)** |
 **[Command line options](#command-line-options)** |
 **[Configuring Unimport](#configuring-unimport)** |
 **[Adding pre-commit plugins to your project](#adding-pre-commit-plugins-to-your-project)**
@@ -142,13 +144,39 @@ from i import t
 print(t)
 ```
 
-**Star Import** If you want to include star imports during scanning and refactor. Use
-command as follow. ``\$ unimport example.py --include-star-import`
+### Star Import
 
-**Rare Cases** We add skip import feature to rare cases import statements.
+If you want to include star imports during scanning and refactor. Use command as follow.
 
-Leave '#unimport: skip' at the end of the line to skip imports with some rare cases.
-**for example:**
+```bash
+$ unimport example.py --include-star-import
+```
+
+### Typing Comments
+
+**This feature is only available for python 3.8.**
+
+Imports in the example below aren't flag as unused by import.
+
+```python
+from typing import Any
+from typing import Tuple
+from typing import Union
+def function(a, b):
+    # type: (Any, str) -> Union[Tuple[None, None], Tuple[str, str]]
+    pass
+```
+
+For more information
+
+[PEP 526 - Syntax for Variable Annotations](https://www.python.org/dev/peps/pep-0526/)
+
+### Skip Import
+
+We add skip import feature to rare cases import statements.
+
+Leave '#unimport: skip' or '# unimport: skip' at the end of the line to skip imports
+with some rare cases. **for example:**
 
 ```python
 try:
@@ -156,6 +184,8 @@ try:
 except ImportError:
   print("install django")
 ```
+
+### `__all__`
 
 another rare case which support by unimport .
 

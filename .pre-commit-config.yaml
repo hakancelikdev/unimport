@@ -15,15 +15,11 @@ repos:
       - id: isort
         additional_dependencies: [toml]
 
-  - repo: local
+  - repo: https://github.com/hakancelik96/unimport
+    rev: v0.2.62
     hooks:
       - id: unimport
-        name: local unimport
-        entry: "unimport"
-        language: python
         args: [-r, --include-star-import]
-        exclude: (__init__.py)
-        files: "\\.(py)$"
 
   - repo: https://github.com/prettier/prettier
     rev: 1.19.1
