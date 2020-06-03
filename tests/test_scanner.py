@@ -173,6 +173,10 @@ class SkipImportTest(ScannerTestCase):
         source = "from x import (t, y, f, r) # noqa\n"
         self.assertUnimportEqual(source)
 
+    def test_noqa_skip_comment_multiple(self):
+        source = "from x import ( # noqa\n" "   t, y,\n" "   f, r\n" ")\n"
+        self.assertUnimportEqual(source)
+
 
 @unittest.skipIf(
     not PY38_PLUS, "This feature is only available for python 3.8."

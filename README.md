@@ -175,14 +175,21 @@ For more information
 
 We add skip import feature to rare cases import statements.
 
-Leave '#unimport: skip' or '# unimport: skip' at the end of the line to skip imports
-with some rare cases. **for example:**
+Leave '# unimport: skip' or '# noqa' at the end of the line to skip imports with some
+rare cases. **for example:**
 
 ```python
 try:
   import django #unimport:skip this import used but unimport can't understand this case.
 except ImportError:
   print("install django")
+```
+
+```python
+from x import ( # noqa
+  t, y,
+  f, r
+)
 ```
 
 ### `__all__`
