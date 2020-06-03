@@ -1,8 +1,11 @@
 import ast
 import builtins
+import contextlib
 import importlib
 import inspect
+import io
 import sys
+import tokenize
 
 PY38_PLUS = sys.version_info >= (3, 8)
 
@@ -85,6 +88,33 @@ class Scanner(ast.NodeVisitor):
     def visit_Name(self, node):
         self.names.append({"lineno": node.lineno, "name": node.id})
 
+    def iter_type_comments(self):
+        """
+        This feature is only available for python 3.8.
+
+        PEP 526 -- Syntax for Variable Annotations
+        https://www.python.org/dev/peps/pep-0526/
+
+        https://docs.python.org/3.8/library/ast.html#ast.parse
+
+        """
+        buffer = io.StringIO(self.source)
+        for token in tokenize.generate_tokens(buffer.readline):
+            if token.type == tokenize.COMMENT:
+                with contextlib.suppress(SyntaxError):
+                    comment_string = token.string.split("# type: ")
+                    if comment_string != [token.string]:
+                        functype = ast.parse(
+                            comment_string[1], mode="func_type"
+                        )
+                        for node in ast.walk(
+                            ast.Module(functype.argtypes + [functype.returns])
+                        ):
+                            if isinstance(node, ast.Name) and isinstance(
+                                node.ctx, ast.Load
+                            ):
+                                yield node
+
     @recursive
     def visit_Attribute(self, node):
         local_attr = []
@@ -134,10 +164,11 @@ class Scanner(ast.NodeVisitor):
 
     def run_visit(self, source):
         self.source = source
-        try:
+        if PY38_PLUS:
+            for node in self.iter_type_comments():
+                self.names.append({"lineno": node.lineno, "name": node.id})
+        with contextlib.suppress(SyntaxError):
             self.visit(ast.parse(self.source))
-        except SyntaxError:
-            return
 
     def clear(self):
         self.names.clear()
