@@ -1,6 +1,9 @@
+import sys
 import unittest
 
 from unimport.session import Session
+
+PY38_PLUS = sys.version_info >= (3, 8)
 
 
 class RefactorTestCase(unittest.TestCase):
@@ -509,4 +512,22 @@ class TestStarImport(RefactorTestCase):
         )
         self.assertEqual(
             expected, self.session.refactor(action),
+        )
+
+
+@unittest.skipIf(
+    not PY38_PLUS, "This feature is only available for python 3.8."
+)
+class TestTypeComments(RefactorTestCase):
+    def test_type_comments(self):
+        action = (
+            "from typing import Any\n"
+            "from typing import Tuple\n"
+            "from typing import Union\n"
+            "def function(a, b):\n"
+            "    # type: (Any, str) -> Union[Tuple[None, None], Tuple[str, str]]\n"
+            "    pass\n"
+        )
+        self.assertEqual(
+            action, self.session.refactor(action),
         )

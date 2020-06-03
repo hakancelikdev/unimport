@@ -1,7 +1,11 @@
 import os
+import sys
+import typing
 import unittest
 
 from unimport.scan import Scanner
+
+PY38_PLUS = sys.version_info >= (3, 8)
 
 
 class ScannerTestCase(unittest.TestCase):
@@ -164,3 +168,56 @@ class SkipImportTest(ScannerTestCase):
     def test_skip_comment_second_option(self):
         source = "import x # unimport:skip test\n"
         self.assertUnimportEqual(source,)
+
+
+@unittest.skipIf(
+    not PY38_PLUS, "This feature is only available for python 3.8."
+)
+class TestTypeComments(ScannerTestCase):
+    def test_type_comments(self):
+        source = (
+            "from typing import Any\n"
+            "from typing import Tuple\n"
+            "from typing import Union\n"
+            "def function(a, b):\n"
+            "    # type: (Any, str) -> Union[Tuple[None, None], Tuple[str, str]]\n"
+            "    pass\n"
+        )
+        expected_names = [
+            {"lineno": 1, "name": "Any"},
+            {"lineno": 1, "name": "Union"},
+            {"lineno": 1, "name": "Tuple"},
+            {"lineno": 1, "name": "Tuple"},
+        ]
+        expected_classes = []
+        expected_functions = [{"lineno": 4, "name": "function"}]
+        expected_imports = [
+            {
+                "lineno": 1,
+                "module": typing,
+                "modules": [],
+                "name": "Any",
+                "star": False,
+            },
+            {
+                "lineno": 2,
+                "module": typing,
+                "modules": [],
+                "name": "Tuple",
+                "star": False,
+            },
+            {
+                "lineno": 3,
+                "module": typing,
+                "modules": [],
+                "name": "Union",
+                "star": False,
+            },
+        ]
+        self.assertUnimportEqual(
+            source,
+            expected_names,
+            expected_classes,
+            expected_functions,
+            expected_imports,
+        )
