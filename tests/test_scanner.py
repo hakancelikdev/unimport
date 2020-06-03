@@ -151,23 +151,27 @@ class SkipImportTest(ScannerTestCase):
     def test_inside_try_except(self):
         source = (
             "try:\n"
-            "   import django #unimport:skip\n"
+            "   import django # unimport:skip\n"
             "except ImportError:\n"
             "   print('install django')\n"
         )
-        self.assertUnimportEqual(source,)
+        self.assertUnimportEqual(source)
 
     def test_as_import(self):
-        source = "from x import y as z #unimport:skip\n"
-        self.assertUnimportEqual(source,)
+        source = "from x import y as z # unimport:skip\n"
+        self.assertUnimportEqual(source)
 
     def test_ongoing_comment(self):
-        source = "import unimport #unimport:skip import test\n"
-        self.assertUnimportEqual(source,)
+        source = "import unimport # unimport:skip import test\n"
+        self.assertUnimportEqual(source)
 
     def test_skip_comment_second_option(self):
         source = "import x # unimport:skip test\n"
-        self.assertUnimportEqual(source,)
+        self.assertUnimportEqual(source)
+
+    def test_noqa_skip_comment(self):
+        source = "from x import (t, y, f, r) # noqa\n"
+        self.assertUnimportEqual(source)
 
 
 @unittest.skipIf(

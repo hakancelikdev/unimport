@@ -4,6 +4,7 @@ import contextlib
 import importlib
 import inspect
 import io
+import re
 import sys
 import tokenize
 
@@ -24,7 +25,7 @@ class Scanner(ast.NodeVisitor):
     """To detect unused import using ast"""
 
     ignore_imports = ["__future__"]
-    skip_comments = ["#unimport:skip", "# unimport:skip"]
+    skip_comments_regex = "# unimport:skip|# noqa"
 
     def __init__(self, source=None, include_star_import=False):
         self.include_star_import = include_star_import
@@ -49,7 +50,7 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_Import(self, node):
-        if self.skip_import(node.lineno):
+        if self.skip_import(node):
             return
         star = False
         module_name = None
@@ -176,17 +177,10 @@ class Scanner(ast.NodeVisitor):
         self.classes.clear()
         self.functions.clear()
 
-    def skip_import(self, lineno):
-        line = self.source.split("\n")[lineno - 1]
-        start_comment = line.find("#")
-        for skip_comment in self.skip_comments:
-            if (
-                skip_comment
-                == line[
-                    start_comment : start_comment + len(skip_comment)
-                ].lower()
-            ):
-                return True
+    def skip_import(self, node):
+        return re.search(
+            self.skip_comments_regex, self.source.split("\n")[node.lineno - 1]
+        )
 
     def get_names(self):
         imp_match_built_in = [
