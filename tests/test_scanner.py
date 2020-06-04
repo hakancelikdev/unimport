@@ -3,16 +3,19 @@ import sys
 import typing
 import unittest
 
-from unimport.scan import Scanner
+from unimport.session import Session
 
 PY38_PLUS = sys.version_info >= (3, 8)
 
 
 class ScannerTestCase(unittest.TestCase):
     maxDiff = None
+    include_star_import = False
 
     def setUp(self):
-        self.scanner = Scanner()
+        self.scanner = Session(
+            include_star_import=self.include_star_import
+        ).scanner
 
     def assertUnimportEqual(
         self,
@@ -27,6 +30,7 @@ class ScannerTestCase(unittest.TestCase):
         self.assertEqual(expected_classes, self.scanner.classes)
         self.assertEqual(expected_functions, self.scanner.functions)
         self.assertEqual(expected_imports, self.scanner.imports)
+        self.scanner.clear()
 
 
 class TestNames(ScannerTestCase):
