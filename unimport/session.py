@@ -3,6 +3,7 @@ import re
 import tokenize
 from pathlib import Path
 
+from unimport.color import Color
 from unimport.config import Config
 from unimport.refactor import refactor_string
 from unimport.scan import Scanner
@@ -20,14 +21,10 @@ class Session:
     def _read(self, path: Path):
         try:
             with tokenize.open(path) as stream:
-                source = stream.read()
-                encoding = stream.encoding
-        except OSError as exc:
-            print(f"{exc} Can't read")
-            return "", "utf-8"
-        except SyntaxError as exc:
-            print(f"{exc} Can't read")
-            return "", "utf-8"
+                source, encoding = stream.read(), stream.encoding
+        except (OSError, SyntaxError) as err:
+            print(Color(str(err)).red)
+            source, encoding = "", "utf-8"
         return source, encoding
 
     def _list_paths(self, start, include, exclude):
@@ -39,11 +36,11 @@ class Session:
             file_names = start.glob(self.GLOB_PATTERN)
         else:
             file_names = [start]
-        for filename in file_names:
-            if include_regex.search(
-                str(filename)
-            ) and not exclude_regex.search(str(filename)):
-                yield filename
+        yield from filter(
+            lambda filename: include_regex.search(str(filename))
+            and not exclude_regex.search(str(filename)),
+            file_names,
+        )
 
     def refactor(self, source: str) -> str:
         self.scanner.run_visit(source)
