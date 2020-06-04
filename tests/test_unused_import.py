@@ -20,8 +20,7 @@ class UnusedTestCase(unittest.TestCase):
     def assertUnimportEqual(self, source, expected_nused_imports):
         self.session.scanner.run_visit(source)
         self.assertEqual(
-            expected_nused_imports,
-            list(self.session.scanner.get_unused_imports()),
+            expected_nused_imports, self.session.scanner.unused_imports,
         )
         self.session.scanner.clear()
 
@@ -56,10 +55,10 @@ class TestBuiltin(UnusedTestCase):
         self.assertUnimportEqual(source, expected_nused_imports)
 
 
-class TestUnusedImport(UnusedTestCase):
+class Test__All__(UnusedTestCase):
     include_star_import = True
 
-    def test__all__from_import(self):
+    def test_from_import(self):
         # in this case this import is used
         source = (
             "from codeop import compile_command\n"
@@ -68,7 +67,7 @@ class TestUnusedImport(UnusedTestCase):
         expected_nused_imports = []
         self.assertUnimportEqual(source, expected_nused_imports)
 
-    def test__all__star(self):
+    def test_star(self):
         # in this case this import is used
         source = "from os import *\n" "__all__ = ['walk']"
         expected_nused_imports = [
@@ -82,7 +81,7 @@ class TestUnusedImport(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_nused_imports)
 
-    def test__all__star_unused(self):
+    def test_star_unused(self):
         # in this case this import is unused
         source = "from os import *\n" "__all__ = ['test']"
         expected_nused_imports = [
@@ -96,14 +95,14 @@ class TestUnusedImport(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_nused_imports)
 
-    def test_all_bin_op(self):
+    def test_bin_op(self):
         # NOTE no support.
         for op in "/*-":
             source = f"from os import *\n" "__all__ = ['w'{op}'alk']"
             expected_nused_imports = []
             self.assertUnimportEqual(source, expected_nused_imports)
 
-    def test_all_list_comprehension(self):
+    def test_list_comprehension(self):
         # NOTE no support.
         source = (
             "from os import *\n"
@@ -119,6 +118,10 @@ class TestUnusedImport(UnusedTestCase):
             }
         ]
         self.assertUnimportEqual(source, expected_nused_imports)
+
+
+class TestUnusedImport(UnusedTestCase):
+    include_star_import = True
 
     def test_comma(self):
         source = "from os import (\n" "    waitpid,\n" "    scandir,\n" ")\n"

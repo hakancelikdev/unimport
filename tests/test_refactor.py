@@ -27,6 +27,15 @@ class TestSyntaxErrorRefactor(RefactorTestCase):
             action, self.session.refactor(action),
         )
 
+    @unittest.skipIf(
+        not PY38_PLUS, "This feature is only available for python 3.8."
+    )
+    def test_type_comments(self):
+        action = "def function(): # type: blabla\n" "    pass\n"
+        self.assertEqual(
+            action, self.session.refactor(action),
+        )
+
 
 class TestUnusedRefactor(RefactorTestCase):
     def test_do_not_remove_augmented_imports(self):
@@ -58,7 +67,7 @@ class TestUnusedRefactor(RefactorTestCase):
             "some()\n"
             "calls()\n\n"
             "# and comments\n"
-            "def maybe_functions(): # type: ignore\n"
+            "def maybe_functions():\n"
             "    after()\n"
             "from x import (\n"
             "    y\n"
@@ -88,7 +97,7 @@ class TestUnusedRefactor(RefactorTestCase):
             "some()\n"
             "calls()\n\n"
             "# and comments\n"
-            "def maybe_functions(): # type: ignore\n"
+            "def maybe_functions():\n"
             "    after()\n"
         )
         self.assertEqual(

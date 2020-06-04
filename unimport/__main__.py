@@ -162,7 +162,7 @@ def main(argv=None):
         for py_path in session._list_paths(source_path, include, exclude):
             if namespace.check:
                 session.scanner.run_visit(source=session._read(py_path)[0])
-                unused_imports = list(session.scanner.get_unused_imports())
+                unused_imports = session.scanner.unused_imports
                 show(unused_imports, py_path)
                 if not (not _any_unimport and not unused_imports):
                     _any_unimport = True

@@ -8,14 +8,17 @@ import re
 import sys
 import tokenize
 
+from unimport.color import Color
+
 PY38_PLUS = sys.version_info >= (3, 8)
+SET_BUILTINS = set(dir(builtins))
 
 
 def recursive(func):
     """decorator to make visitor work recursive"""
 
-    def wrapper(self, node):
-        func(self, node)
+    def wrapper(self, node, *args, **kwargs):
+        func(self, node, *args, **kwargs)
         self.generic_visit(node)
 
     return wrapper
@@ -25,6 +28,7 @@ class Scanner(ast.NodeVisitor):
     """To detect unused import using ast"""
 
     ignore_imports = ["__future__"]
+    ignore_import_names = ["__all__", "__doc__"]
     skip_comments_regex = "#\s*(unimport:skip|noqa)"
 
     def __init__(self, source=None, include_star_import=False):
@@ -49,28 +53,23 @@ class Scanner(ast.NodeVisitor):
             self.functions.append({"lineno": node.lineno, "name": node.name})
 
     @recursive
-    def visit_Import(self, node):
+    def visit_Import(self, node, module_name=None):
         if self.skip_import(node):
             return
         star = False
-        module_name = None
         module = None
-        if hasattr(node, "module"):
-            module_name = node.module
         for alias in node.names:
-            if alias.asname:
-                name = alias.asname
-            else:
-                name = alias.name
+            name = alias.asname or alias.name
             package = module_name or alias.name
-            if package not in self.ignore_imports:
+            if (
+                package not in self.ignore_imports
+                and name not in self.ignore_import_names
+            ):
                 if name == "*":
                     star = True
                     name = package
-                try:
+                with contextlib.suppress(ImportError, ValueError):
                     module = importlib.import_module(package)
-                except ImportError:
-                    pass
                 self.imports.append(
                     {
                         "lineno": node.lineno,
@@ -83,7 +82,7 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_ImportFrom(self, node):
-        self.visit_Import(node)
+        self.visit_Import(node, node.module)
 
     @recursive
     def visit_Name(self, node):
@@ -102,12 +101,16 @@ class Scanner(ast.NodeVisitor):
         buffer = io.StringIO(self.source)
         for token in tokenize.generate_tokens(buffer.readline):
             if token.type == tokenize.COMMENT:
-                with contextlib.suppress(SyntaxError):
-                    comment_string = token.string.split("# type: ")
-                    if comment_string != [token.string]:
+                comment_string = token.string.split("# type: ")
+                if comment_string != [token.string]:
+                    try:
                         functype = ast.parse(
                             comment_string[1], mode="func_type"
                         )
+                    except SyntaxError as err:
+                        error_messages = f"{token.line}\n{comment_string[1]} {Color(str(err)).red}"
+                        print(error_messages)
+                    else:
                         for node in ast.walk(
                             ast.Module(functype.argtypes + [functype.returns])
                         ):
@@ -119,25 +122,11 @@ class Scanner(ast.NodeVisitor):
     @recursive
     def visit_Attribute(self, node):
         local_attr = []
-        if hasattr(node, "attr"):
-            local_attr.append(node.attr)
-        while True:
-            if hasattr(node, "value"):
-                if isinstance(node.value, ast.Attribute):
-                    node = node.value
-                    if hasattr(node, "attr"):
-                        local_attr.append(node.attr)
-                elif isinstance(node.value, ast.Call):
-                    node = node.value
-                    if isinstance(node.func, ast.Name):
-                        local_attr.append(node.func.id)
-                elif isinstance(node.value, ast.Name):
-                    node = node.value
-                    local_attr.append(node.id)
-                else:
-                    break
-            else:
-                break
+        for attr_node in ast.walk(node):
+            if isinstance(attr_node, ast.Name):
+                local_attr.append(attr_node.id)
+            elif isinstance(attr_node, ast.Attribute):
+                local_attr.append(attr_node.attr)
         local_attr.reverse()
         self.names.append(
             {"lineno": node.lineno, "name": ".".join(local_attr)}
@@ -146,22 +135,11 @@ class Scanner(ast.NodeVisitor):
     @recursive
     def visit_Assign(self, node):
         if getattr(node.targets[0], "id", None) == "__all__" and isinstance(
-            node.value, (ast.List, ast.Tuple)
+            node.value, (ast.List, ast.Tuple, ast.Set)
         ):
             for item in node.value.elts:
-                get_name = None
-                if (
-                    PY38_PLUS
-                    and isinstance(item, ast.Constant)
-                    and isinstance(item.value, ast.Str)
-                ):
-                    get_name = item.value
-                elif isinstance(item, ast.Str):
-                    get_name = item.s
-                if get_name:
-                    self.names.append(
-                        {"lineno": node.lineno, "name": get_name}
-                    )
+                if isinstance(item, ast.Str):
+                    self.names.append({"lineno": node.lineno, "name": item.s})
 
     def run_visit(self, source):
         self.source = source
@@ -170,6 +148,9 @@ class Scanner(ast.NodeVisitor):
                 self.names.append({"lineno": node.lineno, "name": node.id})
         with contextlib.suppress(SyntaxError):
             self.visit(ast.parse(self.source))
+        self.import_names = [imp["name"] for imp in self.imports]
+        self.names = list(self.get_names())
+        self.unused_imports = list(self.get_unused_imports())
 
     def clear(self):
         self.names.clear()
@@ -179,76 +160,65 @@ class Scanner(ast.NodeVisitor):
 
     def skip_import(self, node):
         return re.search(
-            self.skip_comments_regex, self.source.split("\n")[node.lineno - 1]
+            self.skip_comments_regex,
+            self.source.split("\n")[node.lineno - 1].lower(),
         )
 
     def get_names(self):
-        imp_match_built_in = [
-            imp["name"]
-            for imp in self.imports
-            if hasattr(builtins, imp["name"])
-        ]
-        for name in self.names:
-            if any(
-                [imp_name == name["name"] for imp_name in imp_match_built_in]
-            ) or not hasattr(builtins, name["name"]):
-                yield name
+        imp_match_built_in = SET_BUILTINS & set(self.import_names)
+        yield from filter(
+            lambda name: list(
+                filter(
+                    lambda imp_name: imp_name == name["name"],
+                    imp_match_built_in,
+                )
+            )
+            or not hasattr(builtins, name["name"]),
+            self.names,
+        )
 
-    def imp_star_True(self, imp):
+    def get_suggestion_modules(self, imp):
         if imp["module"]:
-            if imp["module"].__name__ not in sys.builtin_module_names:
-                to_ = {to_cfv["name"] for to_cfv in self.get_names()}
-                try:
-                    s = self.__class__(inspect.getsource(imp["module"]))
-                except OSError:
-                    pass
-                else:
-                    all_object = s.classes + s.functions + s.names
-                    all_name = {from_cfv["name"] for from_cfv in all_object}
-                    imp["modules"] = sorted(
-                        {cfv for cfv in all_name if cfv in to_}
-                    )
-        return imp
-
-    def imp_star_False(self, imp):
-        for name in self.get_names():
-            if name["name"].startswith(imp["name"]):
-                # used
-                break
-        else:
-            # unused
-            return imp
+            with contextlib.suppress(OSError, TypeError):
+                scanner = self.__class__(inspect.getsource(imp["module"]))
+                objects = scanner.classes + scanner.functions + scanner.names
+                from_all_name = {obj["name"] for obj in objects}
+                to_names = {to_cfv["name"] for to_cfv in self.names}
+                suggestion_modules = sorted(from_all_name & to_names)
+                return suggestion_modules
+        return {}
 
     def get_unused_imports(self):
         for imp in self.imports:
             if self.is_duplicate(imp["name"]):
-                for name in self.get_names():
-                    if name["name"].startswith(
-                        imp["name"]
-                    ) and not self.is_duplicate_used(name, imp):
-                        # This import: used
-                        break
-                else:
-                    # This import: unused
+                if not list(
+                    filter(
+                        lambda name: name["name"].startswith(imp["name"])
+                        and not self.is_duplicate_used(name, imp),
+                        self.names,
+                    )
+                ):
                     yield imp
             else:
-                res = False
-                is_star_import = imp["star"]
-                if is_star_import:
-                    if self.include_star_import:
-                        res = getattr(self, f"imp_star_{is_star_import}")(imp)
+                if imp["star"] and self.include_star_import:
+                    imp["modules"] = self.get_suggestion_modules(imp)
+                    yield imp
                 else:
-                    res = self.imp_star_False(imp)
-                if res:
-                    yield res
+                    if not list(
+                        filter(
+                            lambda name: name["name"].startswith(imp["name"]),
+                            self.names,
+                        )
+                    ):
+                        yield imp
 
     def is_duplicate(self, name):
-        return [imp["name"] for imp in self.imports].count(name) > 1
+        return self.import_names.count(name) > 1
 
     def get_duplicate_imports(self):
-        for imp in self.imports:
-            if self.is_duplicate(imp["name"]):
-                yield imp
+        yield from filter(
+            lambda imp: self.is_duplicate(imp["name"]), self.imports
+        )
 
     def is_duplicate_used(self, name, imp):
         def find_nearest_imp(name):

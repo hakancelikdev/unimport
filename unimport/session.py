@@ -48,8 +48,7 @@ class Session:
     def refactor(self, source: str) -> str:
         self.scanner.run_visit(source)
         refactor = refactor_string(
-            source=source,
-            unused_imports=list(self.scanner.get_unused_imports()),
+            source=source, unused_imports=self.scanner.unused_imports,
         )
         self.scanner.clear()
         return refactor
