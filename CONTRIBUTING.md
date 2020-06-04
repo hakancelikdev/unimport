@@ -1,5 +1,10 @@
 ## Development and Contributing
 
+We do the development process with
+[dev](https://github.com/hakancelik96/unimport/tree/dev) branch. We merge it with the
+[master](https://github.com/hakancelik96/unimport/tree/master) before a new version is
+released. Therefore, our master branch always equal to the most stable version.
+
 ## Issue
 
 To make an improvement, add a new feature or anything else, please open a issue first.
@@ -17,6 +22,7 @@ look.**
 ```bash
 $ git clone git@github.com:<USERNAME>/unimport.git
 $ cd unimport
+$ git checkout dev
 ```
 
 ## Setup Python
