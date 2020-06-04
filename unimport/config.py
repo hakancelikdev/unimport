@@ -45,10 +45,14 @@ class Config:
         parser.read(self.config_path)
         if parser.has_section(self.section):
             for attr in self.attrs:
-                setattr(self, attr, parser.get(self.section, attr) or None)
+                get_value = parser.get(self.section, attr)
+                if get_value:
+                    setattr(self, attr, get_value)
 
     def parse_toml(self):
         parsed_toml = toml.loads(self.config_path.read_text())
         config = parsed_toml.get("tool", {}).get("unimport", {})
         for attr in self.attrs:
-            setattr(self, attr, config.get(attr, None))
+            get_value = config.get(attr, None)
+            if get_value:
+                setattr(self, attr, get_value)
