@@ -23,7 +23,7 @@ class ScannerTestCase(unittest.TestCase):
         expected_imports,
     ):
         self.scanner.run_visit(source)
-        self.assertEqual(expected_names, list(self.scanner.get_names()))
+        self.assertEqual(expected_names, self.scanner.names)
         self.assertEqual(expected_classes, self.scanner.classes)
         self.assertEqual(expected_functions, self.scanner.functions)
         self.assertEqual(expected_imports, self.scanner.imports)
