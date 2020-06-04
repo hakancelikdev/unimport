@@ -50,3 +50,6 @@ class TestSession(unittest.TestCase):
                 "-import os",
             )
             self.assertEqual(diff, diff_file)
+
+    def test_read_with_bad_syntax(self):
+        self.assertEqual(("", "utf-8"), self.session._read("b�se"))
