@@ -150,11 +150,11 @@ def main(argv=None):
     if namespace.include:
         include_list.append(namespace.include)
     if hasattr(session.config, "include"):
-        include_list.append(session.config.include or "")
+        include_list.append(session.config.include)
     if namespace.exclude:
         exclude_list.append(namespace.exclude)
     if hasattr(session.config, "exclude"):
-        exclude_list.append(session.config.exclude or "")
+        exclude_list.append(session.config.exclude)
     include = re.compile("|".join(include_list)).pattern
     exclude = re.compile("|".join(exclude_list)).pattern
     _any_unimport = False
