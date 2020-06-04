@@ -3,6 +3,7 @@ import re
 import tokenize
 from pathlib import Path
 
+from unimport.color import Color
 from unimport.config import Config
 from unimport.refactor import refactor_string
 from unimport.scan import Scanner
@@ -18,8 +19,14 @@ class Session:
         self.scanner = Scanner(include_star_import=include_star_import)
 
     def _read(self, path: Path):
-        with tokenize.open(path) as stream:
-            return stream.read(), stream.encoding
+        try:
+            with tokenize.open(path) as stream:
+                source = stream.read()
+                encoding = stream.encoding
+        except (OSError, SyntaxError) as err:
+            print(Color(str(err)).red)
+            return "", "utf-8"
+        return source, encoding
 
     def _list_paths(self, start, include=None, exclude=None):
         include_regex, exclude_regex = (
