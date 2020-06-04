@@ -33,14 +33,6 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
             ]
         )
 
-    def get_imp(self, import_name, location):
-        for imp in self.unused_imports:
-            if (
-                imp["name"] == import_name
-                and imp["lineno"] == location.start.line
-            ):
-                return imp
-
     def get_location(self, node):
         return self.get_metadata(PositionProvider, node)
 
@@ -94,10 +86,13 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
                     )
                 else:
                     import_name = updated_node.module.value
-                return self.get_imp(
-                    import_name=import_name,
-                    location=self.get_location(original_node),
-                )
+                location = self.get_location(original_node)
+                for imp in self.unused_imports:
+                    if (
+                        imp["name"] == import_name
+                        and imp["lineno"] == location.start.line
+                    ):
+                        return imp
 
             imp = get_star_imp()
             if imp:
