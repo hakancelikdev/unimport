@@ -42,7 +42,7 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_ClassDef(self, node):
-        for function_node in [body for body in node.body]:
+        for function_node in ast.walk(node):
             if isinstance(function_node, ast.FunctionDef):
                 function_node.class_def = True
         self.classes.append({"lineno": node.lineno, "name": node.name})
@@ -148,7 +148,9 @@ class Scanner(ast.NodeVisitor):
                 self.names.append({"lineno": node.lineno, "name": node.id})
         with contextlib.suppress(SyntaxError):
             self.visit(ast.parse(self.source))
-        self.import_names = [imp["name"] for imp in self.imports]
+        self.import_names = [
+            imp["name"] for imp in self.imports
+        ]  # filter(None, self.imports)
         self.names = list(self.get_names())
         self.unused_imports = list(self.get_unused_imports())
 
