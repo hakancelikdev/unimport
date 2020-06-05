@@ -42,7 +42,7 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_ClassDef(self, node):
-        for function_node in [body for body in node.body]:
+        for function_node in ast.walk(node):
             if isinstance(function_node, ast.FunctionDef):
                 function_node.class_def = True
         self.classes.append({"lineno": node.lineno, "name": node.name})

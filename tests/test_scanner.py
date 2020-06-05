@@ -47,15 +47,12 @@ class TestNames(ScannerTestCase):
             {"lineno": 1, "name": "variable",},
             {"lineno": 2, "name": "variable1",},
         ]
-        expected_classes = [{"lineno": 3, "name": "TestClass"}]
-        expected_functions = [{"lineno": 5, "name": "function"}]
-        expected_imports = []
         self.assertUnimportEqual(
             source,
             expected_names,
-            expected_classes,
-            expected_functions,
-            expected_imports,
+            expected_classes=[{"lineno": 3, "name": "TestClass"}],
+            expected_functions=[{"lineno": 5, "name": "function"}],
+            expected_imports=[],
         )
 
     def test_names_with_import(self):
@@ -68,11 +65,6 @@ class TestNames(ScannerTestCase):
             "def test_function():\n"
             "\tpass"
         )
-        expected_names = [
-            {"lineno": 1, "name": "variable",},
-        ]
-        expected_classes = [{"lineno": 3, "name": "TestClass"}]
-        expected_functions = [{"lineno": 6, "name": "test_function"}]
         expected_imports = [
             {
                 "lineno": 2,
@@ -84,28 +76,19 @@ class TestNames(ScannerTestCase):
         ]
         self.assertUnimportEqual(
             source,
-            expected_names,
-            expected_classes,
-            expected_functions,
-            expected_imports,
+            expected_names=[{"lineno": 1, "name": "variable"}],
+            expected_classes=[{"lineno": 3, "name": "TestClass"}],
+            expected_functions=[{"lineno": 6, "name": "test_function"}],
+            expected_imports=expected_imports,
         )
 
     def test_names_with_function(self):
-        source = "variable = 1\n" "def test():\n" "\tpass"
-        expected_names = [
-            {"lineno": 1, "name": "variable"},
-        ]
-        expected_classes = []
-        expected_functions = [
-            {"lineno": 2, "name": "test"},
-        ]
-        expected_imports = []
         self.assertUnimportEqual(
-            source,
-            expected_names,
-            expected_classes,
-            expected_functions,
-            expected_imports,
+            source="variable = 1\n" "def test():\n" "\tpass",
+            expected_names=[{"lineno": 1, "name": "variable"}],
+            expected_classes=[],
+            expected_functions=[{"lineno": 2, "name": "test"}],
+            expected_imports=[],
         )
 
     def test_names_with_class(self):
@@ -117,20 +100,29 @@ class TestNames(ScannerTestCase):
             "\tdef test_function():\n"
             "\t\tpass"
         )
-        expected_names = [
-            {"lineno": 1, "name": "variable"},
-        ]
-        expected_classes = [
-            {"lineno": 4, "name": "test"},
-        ]
-        expected_functions = [{"lineno": 2, "name": "test_function"}]
-        expected_imports = []
         self.assertUnimportEqual(
             source,
-            expected_names,
-            expected_classes,
-            expected_functions,
-            expected_imports,
+            expected_names=[{"lineno": 1, "name": "variable"}],
+            expected_classes=[{"lineno": 4, "name": "test"}],
+            expected_functions=[{"lineno": 2, "name": "test_function"}],
+            expected_imports=[],
+        )
+
+    def test_decator_in_class(self):
+        source = (
+            "class Test:\n"
+            "    def test(self):\n"
+            "        def test2():\n"
+            "            return 'test2'\n"
+            "        return test2\n"
+        )
+
+        self.assertUnimportEqual(
+            source,
+            expected_names=[{"lineno": 5, "name": "test2"}],
+            expected_classes=[{"lineno": 1, "name": "Test"}],
+            expected_functions=[],
+            expected_imports=[],
         )
 
 
