@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- [🐞fix: finding functions during scanning](https://github.com/hakancelik96/unimport/pull/55)
+
 - [💪 `#noqa` comment support to skip import (#48) by @hakancelik96](https://github.com/hakancelik96/unimport/pull/54)
 
 - [💪 `typing` imports used in typing comments support only python3.8 (#49) by @hakancelik96](https://github.com/hakancelik96/unimport/pull/53)
