@@ -148,9 +148,7 @@ class Scanner(ast.NodeVisitor):
                 self.names.append({"lineno": node.lineno, "name": node.id})
         with contextlib.suppress(SyntaxError):
             self.visit(ast.parse(self.source))
-        self.import_names = [
-            imp["name"] for imp in self.imports
-        ]  # filter(None, self.imports)
+        self.import_names = [imp["name"] for imp in self.imports]
         self.names = list(self.get_names())
         self.unused_imports = list(self.get_unused_imports())
 
