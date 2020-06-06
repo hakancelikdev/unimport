@@ -15,5 +15,12 @@ class Color:
     reset = "\033[0m"
 
     def __init__(self, content: str) -> None:
-        for name, code in COLORS.items():
-            setattr(self, name, code + content + self.reset)
+        self.content = content
+
+    def template(self, color: str) -> str:
+        return COLORS[color] + self.content + self.reset
+
+    def __getattribute__(self, name: str):
+        if name in COLORS:
+            return self.template(name)
+        return super().__getattribute__(name)
