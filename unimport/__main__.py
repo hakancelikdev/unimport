@@ -2,6 +2,7 @@ import argparse
 import re
 import sys
 from pathlib import Path
+from typing import Literal, Union
 
 from unimport import __description__, __version__
 from unimport.color import Color
@@ -100,13 +101,14 @@ def color_diff(sequence: tuple) -> str:
     return "\n".join(lines)
 
 
-def print_if_exists(sequence):
+def print_if_exists(sequence: tuple) -> Union[Literal[True], None]:
     if sequence:
         print(color_diff(sequence))
         return True
+    return None
 
 
-def output(name, path, lineno, modules):
+def output(name: str, path: Path, lineno: int, modules: str) -> str:
     modules = modules or ""
     return (
         f"{Color(name).yellow} at "
@@ -115,7 +117,9 @@ def output(name, path, lineno, modules):
     )
 
 
-def get_modules(imp: str, is_star: bool, modules: str) -> str:
+def get_modules(
+    imp: str, is_star: bool, modules: str
+) -> Union[str, Literal[None]]:
     if is_star:
         _modules = ", ".join(modules)
         if len(_modules) > 5:
@@ -128,9 +132,10 @@ def get_modules(imp: str, is_star: bool, modules: str) -> str:
         modules = ""
     if modules:
         return f"from {imp} import {modules}"
+    return None
 
 
-def show(unused_import: list, py_path: str) -> None:
+def show(unused_import, py_path):
     for imp in unused_import:
         modules = get_modules(imp["name"], imp["star"], imp["modules"])
         if (imp["star"] and imp["module"]) or (not imp["star"]):
