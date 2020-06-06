@@ -17,10 +17,10 @@ class UnusedTestCase(unittest.TestCase):
     def setUp(self):
         self.session = Session(include_star_import=self.include_star_import)
 
-    def assertUnimportEqual(self, source, expected_nused_imports):
+    def assertUnimportEqual(self, source, expected_unused_imports):
         self.session.scanner.run_visit(source)
         self.assertEqual(
-            expected_nused_imports, self.session.scanner.unused_imports,
+            expected_unused_imports, self.session.scanner.unused_imports,
         )
         self.session.scanner.clear()
 
@@ -36,13 +36,13 @@ class TestBuiltin(UnusedTestCase):
             "except ConnectionError:\n"
             "   pass\n"
         )
-        expected_nused_imports = []
-        self.assertUnimportEqual(source, expected_nused_imports)
+        expected_unused_imports = []
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_ValueError(self):
         source = "from x import ValueError\n" "print(ValueError)\n"
-        expected_nused_imports = []
-        self.assertUnimportEqual(source, expected_nused_imports)
+        expected_unused_imports = []
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_builtins(self):
         source = (
@@ -51,8 +51,8 @@ class TestBuiltin(UnusedTestCase):
             "for i in range(8):\n"
             "   pass\n"
         )
-        expected_nused_imports = []
-        self.assertUnimportEqual(source, expected_nused_imports)
+        expected_unused_imports = []
+        self.assertUnimportEqual(source, expected_unused_imports)
 
 
 class Test__All__(UnusedTestCase):
@@ -64,13 +64,13 @@ class Test__All__(UnusedTestCase):
             "from codeop import compile_command\n"
             "__all__ = ['compile_command']"
         )
-        expected_nused_imports = []
-        self.assertUnimportEqual(source, expected_nused_imports)
+        expected_unused_imports = []
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_star(self):
         # in this case this import is used
         source = "from os import *\n" "__all__ = ['walk']"
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "module": os,
@@ -79,12 +79,12 @@ class Test__All__(UnusedTestCase):
                 "star": True,
             }
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_star_unused(self):
         # in this case this import is unused
         source = "from os import *\n" "__all__ = ['test']"
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "module": os,
@@ -93,14 +93,14 @@ class Test__All__(UnusedTestCase):
                 "star": True,
             }
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_bin_op(self):
+    def test_plus_bin_op(self):
         # NOTE no support.
-        for op in "/*-":
-            source = f"from os import *\n" "__all__ = ['w'{op}'alk']"
-            expected_nused_imports = []
-            self.assertUnimportEqual(source, expected_nused_imports)
+        op = "+"
+        source = f"from os import *\n" "__all__ = ['w'{op}'alk']"
+        expected_unused_imports = []
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_list_comprehension(self):
         # NOTE no support.
@@ -108,7 +108,7 @@ class Test__All__(UnusedTestCase):
             "from os import *\n"
             "__all__ = [expression for item in ['os', 'walk']]"
         )
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "module": os,
@@ -117,7 +117,7 @@ class Test__All__(UnusedTestCase):
                 "star": True,
             }
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
 
 class TestUnusedImport(UnusedTestCase):
@@ -125,7 +125,7 @@ class TestUnusedImport(UnusedTestCase):
 
     def test_comma(self):
         source = "from os import (\n" "    waitpid,\n" "    scandir,\n" ")\n"
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "module": os,
@@ -141,18 +141,18 @@ class TestUnusedImport(UnusedTestCase):
                 "star": False,
             },
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_module_used(self):
         source = (
             "from pathlib import Path\n" "CURRENT_DIR = Path('.').parent\n"
         )
-        expected_nused_imports = []
-        self.assertUnimportEqual(source, expected_nused_imports)
+        expected_unused_imports = []
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_module_unused(self):
         source = "from pathlib import Path"
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "module": pathlib,
@@ -161,18 +161,18 @@ class TestUnusedImport(UnusedTestCase):
                 "star": False,
             }
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_unknown_module_used(self):
         source = "import x.y\n" "CURRENT_DIR = x.y('.').parent\n"
-        expected_nused_imports = []
-        self.assertUnimportEqual(source, expected_nused_imports)
+        expected_unused_imports = []
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_unknown_module_unused(self):
         source = (
             "import x.y\n" "import d.f.a.s\n" "CURRENT_DIR = x.y('.').parent\n"
         )
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 2,
                 "module": None,
@@ -181,7 +181,7 @@ class TestUnusedImport(UnusedTestCase):
                 "star": False,
             }
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_import_in_function(self):
         source = (
@@ -193,7 +193,7 @@ class TestUnusedImport(UnusedTestCase):
             "from i import t, ii\n"
             "print(t)\n"
         )
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 2,
                 "name": "y",
@@ -223,12 +223,12 @@ class TestUnusedImport(UnusedTestCase):
                 "modules": [],
             },
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_import_after_usage(self):
         source = "def function():\n" "    print(os)\n" "import os\n"
-        expected_nused_imports = []
-        self.assertUnimportEqual(source, expected_nused_imports)
+        expected_unused_imports = []
+        self.assertUnimportEqual(source, expected_unused_imports)
 
 
 class TestStarImport(UnusedTestCase):
@@ -236,7 +236,7 @@ class TestStarImport(UnusedTestCase):
 
     def test_unused(self):
         source = "from os import *\n"
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "module": os,
@@ -245,11 +245,11 @@ class TestStarImport(UnusedTestCase):
                 "modules": [],
             }
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_used(self):
         source = "from os import *\n" "print(walk)\n"
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "name": "os",
@@ -258,7 +258,7 @@ class TestStarImport(UnusedTestCase):
                 "modules": ["walk"],
             }
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_used_and_unused(self):
         source = (
@@ -268,7 +268,7 @@ class TestStarImport(UnusedTestCase):
             "BlankLine, FromImport, Leaf, Newline, Node\n"
             "token.NAME, token.STAR\n"
         )
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "module": lib2to3.fixer_util,
@@ -293,7 +293,7 @@ class TestStarImport(UnusedTestCase):
                 "modules": ["Leaf", "Node"],
             },
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_used_and_unused_2(self):
         source = (
@@ -303,7 +303,7 @@ class TestStarImport(UnusedTestCase):
             "BlankLine, FromImport, Leaf, Newline, Node\n"
             "NAME, STAR\n"
         )
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "name": "lib2to3.fixer_util",
@@ -332,7 +332,7 @@ class TestStarImport(UnusedTestCase):
                 "modules": ["NAME", "STAR"],
             },
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
 
 class TestDuplicate(UnusedTestCase):
@@ -342,7 +342,7 @@ class TestDuplicate(UnusedTestCase):
             "import compile_command\n"
             "__all__ = ['compile_command']"
         )
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "module": codeop,
@@ -351,7 +351,7 @@ class TestDuplicate(UnusedTestCase):
                 "star": False,
             }
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_full_unused(self):
         source = (
@@ -364,7 +364,7 @@ class TestDuplicate(UnusedTestCase):
             "from c import e\n"
             "import e\n"
         )
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "module": None,
@@ -422,7 +422,7 @@ class TestDuplicate(UnusedTestCase):
                 "star": False,
             },
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_one_used(self):
         source = (
@@ -438,7 +438,7 @@ class TestDuplicate(UnusedTestCase):
             "from pathlib import Path\n"
             "p = Path()"
         )
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "name": "y",
@@ -503,7 +503,7 @@ class TestDuplicate(UnusedTestCase):
                 "modules": [],
             },
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_two_used(self):
         source = (
@@ -520,7 +520,7 @@ class TestDuplicate(UnusedTestCase):
             "p = Path()\n"
             "print(ll)\n"
         )
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "name": "y",
@@ -578,7 +578,7 @@ class TestDuplicate(UnusedTestCase):
                 "modules": [],
             },
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_three_used(self):
         source = (
@@ -596,7 +596,7 @@ class TestDuplicate(UnusedTestCase):
             "print(ll)\n"
             "def function(e=e):pass\n"
         )
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "name": "y",
@@ -647,11 +647,11 @@ class TestDuplicate(UnusedTestCase):
                 "modules": [],
             },
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_different_duplicate_unused(self):
         source = "from x import z\n" "from y import z\n"
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "module": None,
@@ -667,11 +667,11 @@ class TestDuplicate(UnusedTestCase):
                 "star": False,
             },
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_different_duplicate_used(self):
         source = "from x import z\n" "from y import z\n" "print(z)\n"
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "module": None,
@@ -680,11 +680,11 @@ class TestDuplicate(UnusedTestCase):
                 "star": False,
             },
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_multi_duplicate(self):
         source = "from x import y, z, t\n" "import t\n" "from l import t\n"
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "name": "y",
@@ -721,7 +721,7 @@ class TestDuplicate(UnusedTestCase):
                 "modules": [],
             },
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_multi_duplicate_one_used(self):
         source = (
@@ -730,7 +730,7 @@ class TestDuplicate(UnusedTestCase):
             "from l import t\n"
             "print(t)\n"
         )
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "name": "y",
@@ -760,7 +760,7 @@ class TestDuplicate(UnusedTestCase):
                 "modules": [],
             },
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_one_used_bottom_multi_duplicate(self):
         source = (
@@ -769,7 +769,7 @@ class TestDuplicate(UnusedTestCase):
             "from x import y, z, t\n"
             "print(t)\n"
         )
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "name": "t",
@@ -799,7 +799,7 @@ class TestDuplicate(UnusedTestCase):
                 "modules": [],
             },
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_two_multi_duplicate_one_used(self):
         source = (
@@ -809,7 +809,7 @@ class TestDuplicate(UnusedTestCase):
             "from i import t, ii\n"
             "print(t)\n"
         )
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "name": "t",
@@ -853,7 +853,7 @@ class TestDuplicate(UnusedTestCase):
                 "modules": [],
             },
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_import_in_function(self):
         source = (
@@ -866,7 +866,7 @@ class TestDuplicate(UnusedTestCase):
             "from i import t, ii\n"
             "print(t)\n"
         )
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "name": "t",
@@ -910,7 +910,7 @@ class TestDuplicate(UnusedTestCase):
                 "modules": [],
             },
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_import_in_function_used_two_different(self):
         source = (
@@ -924,7 +924,7 @@ class TestDuplicate(UnusedTestCase):
             "from i import t, ii\n"
             "print(t)\n"
         )
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 4,
                 "name": "t",
@@ -961,7 +961,7 @@ class TestDuplicate(UnusedTestCase):
                 "modules": [],
             },
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
 
 class TesAsImport(UnusedTestCase):
@@ -974,7 +974,7 @@ class TesAsImport(UnusedTestCase):
             "from fo import (bar, i, x as z)\n"
             "import le as x\n"
         )
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "name": "z",
@@ -1046,7 +1046,7 @@ class TesAsImport(UnusedTestCase):
                 "modules": [],
             },
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_as_import_one_used_in_function_all_cases(self):
         source = (
@@ -1058,7 +1058,7 @@ class TesAsImport(UnusedTestCase):
             "import le as x\n"
             "def x(t=x):pass\n"
         )
-        expected_nused_imports = [
+        expected_unused_imports = [
             {
                 "lineno": 1,
                 "name": "z",
@@ -1123,4 +1123,4 @@ class TesAsImport(UnusedTestCase):
                 "modules": [],
             },
         ]
-        self.assertUnimportEqual(source, expected_nused_imports)
+        self.assertUnimportEqual(source, expected_unused_imports)
