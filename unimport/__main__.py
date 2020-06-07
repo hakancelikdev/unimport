@@ -2,7 +2,6 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from typing import Literal, Union
 
 from unimport import __description__, __version__
 from unimport.color import Color
@@ -101,7 +100,7 @@ def color_diff(sequence: tuple) -> str:
     return "\n".join(lines)
 
 
-def print_if_exists(sequence: tuple) -> Union[Literal[True], None]:
+def print_if_exists(sequence: tuple):
     if sequence:
         print(color_diff(sequence))
         return True
@@ -117,9 +116,7 @@ def output(name: str, path: Path, lineno: int, modules: str) -> str:
     )
 
 
-def get_modules(
-    imp: str, is_star: bool, modules: str
-) -> Union[str, Literal[None]]:
+def get_modules(imp: str, is_star: bool, modules: str):
     if is_star:
         _modules = ", ".join(modules)
         if len(_modules) > 5:

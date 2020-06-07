@@ -17,7 +17,7 @@ class TestSession(unittest.TestCase):
             for p in self.session._list_paths(path):
                 self.assertTrue(str(p).endswith(".py"))
 
-    def temp_refactor(self, source: bytes, expected: str, apply: bool = False):
+    def temp_refactor(self, source: str, expected: str, apply: bool = False):
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py") as tmp:
             tmp.write(source)
             tmp.seek(0)
