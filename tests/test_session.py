@@ -16,11 +16,9 @@ class TestSession(unittest.TestCase):
         for path in [Path("tests"), Path("tests/test_config.py")]:
             for p in self.session._list_paths(path):
                 self.assertTrue(str(p).endswith(".py"))
-                with self.subTest(p=p):
-                    self.session._read(p)
 
     def temp_refactor(self, source: bytes, expected: str, apply: bool = False):
-        with tempfile.NamedTemporaryFile(suffix=".py") as tmp:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py") as tmp:
             tmp.write(source)
             tmp.seek(0)
             result = self.session.refactor_file(
@@ -29,18 +27,18 @@ class TestSession(unittest.TestCase):
             self.assertEqual(result, expected)
 
     def test_refactor_file(self):
-        self.temp_refactor(source=b"import os", expected="")
+        self.temp_refactor(source="import os", expected="")
 
     def test_refactor_file_apply(self):
-        self.temp_refactor(source=b"import os", expected="", apply=True)
+        self.temp_refactor(source="import os", expected="", apply=True)
 
     def test_diff(self):
         diff = ("--- \n", "+++ \n", "@@ -1 +0,0 @@\n", "-import os")
         self.assertEqual(diff, self.session.diff("import os"))
 
     def test_diff_file(self):
-        with tempfile.NamedTemporaryFile(suffix=".py") as tmp:
-            tmp.write(b"import os")
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py") as tmp:
+            tmp.write("import os")
             tmp.seek(0)
             diff_file = self.session.diff_file(path=Path(tmp.name))
             diff = (
@@ -51,5 +49,11 @@ class TestSession(unittest.TestCase):
             )
             self.assertEqual(diff, diff_file)
 
-    def test_read_with_bad_syntax(self):
-        self.assertEqual(("", "utf-8"), self.session._read("b�se"))
+    def test_read(self):
+        source = "b�se"
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py") as tmp:
+            tmp.write(source)
+            tmp.seek(0)
+            self.assertEqual(
+                (source, "utf-8"), self.session._read(Path(tmp.name))
+            )
