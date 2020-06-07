@@ -20,7 +20,7 @@ class TestSession(unittest.TestCase):
                     self.session._read(p)
 
     def temp_refactor(
-        self, source: bytes, expected: str, apply: bool = False
+        self, source: str, expected: str, apply: bool = False
     ) -> None:
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py") as tmp:
             tmp.write(source)
@@ -57,4 +57,6 @@ class TestSession(unittest.TestCase):
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py") as tmp:
             tmp.write("b�se")
             tmp.seek(0)
-            self.assertEqual(("b�se", "utf-8"), self.session._read(tmp.name))
+            self.assertEqual(
+                ("b�se", "utf-8"), self.session._read(Path(tmp.name))
+            )

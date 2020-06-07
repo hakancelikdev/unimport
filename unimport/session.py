@@ -1,8 +1,8 @@
 import difflib
 import re
 import tokenize
-from pathlib import Path, PosixPath
-from typing import Optional, Tuple
+from pathlib import Path
+from typing import Generator, Optional, Tuple
 
 from unimport.color import Color
 from unimport.config import Config
@@ -17,7 +17,7 @@ class Session:
 
     def __init__(
         self,
-        config_file: Optional[PosixPath] = None,
+        config_file: Optional[Path] = None,
         include_star_import: bool = False,
     ) -> None:
         self.config = Config(config_file)
@@ -35,10 +35,10 @@ class Session:
 
     def _list_paths(
         self,
-        start: PosixPath,
+        start: Path,
         include: Optional[str] = None,
         exclude: Optional[str] = None,
-    ) -> None:
+    ) -> Generator[Path, None, None]:
         include_regex, exclude_regex = (
             re.compile(include or self.INCLUDE_REGEX_PATTERN),
             re.compile(exclude or self.EXCLUDE_REGEX_PATTERN),

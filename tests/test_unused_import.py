@@ -6,7 +6,7 @@ import os
 import pathlib
 import re
 import unittest
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 from unimport.session import Session
 
@@ -21,7 +21,9 @@ class UnusedTestCase(unittest.TestCase):
     def assertUnimportEqual(
         self,
         source: str,
-        expected_unused_imports: List[Dict[str, Optional[Union[int, str]]]],
+        expected_unused_imports: List[
+            Dict[str, Union[int, str, None, List[int]]]
+        ],
     ) -> None:
         self.session.scanner.run_visit(source)
         self.assertEqual(

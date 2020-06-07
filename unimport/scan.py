@@ -7,7 +7,7 @@ import io
 import re
 import sys
 import tokenize
-from typing import Any, Callable, Dict, Iterator, Optional, Union
+from typing import (Callable, Dict, Iterable, Iterator, List, Optional, Union)
 
 from _ast import Import, ImportFrom
 from unimport.color import Color
@@ -37,10 +37,10 @@ class Scanner(ast.NodeVisitor):
         self, source: Optional[str] = None, include_star_import: bool = False
     ) -> None:
         self.include_star_import = include_star_import
-        self.names = []
-        self.imports = []
-        self.classes = []
-        self.functions = []
+        self.names: List[Dict[str, Union[str, int]]] = []
+        self.imports: List[Dict[str, Union[int, str, List[str]]]] = []
+        self.classes: List[Dict[str, Union[str, int]]] = []
+        self.functions: List[Dict[str, Union[str, int]]] = []
         if source:
             self.run_visit(source)
 
@@ -162,13 +162,13 @@ class Scanner(ast.NodeVisitor):
         self.classes.clear()
         self.functions.clear()
 
-    def skip_import(self, node: Union[Import, ImportFrom]) -> None:
+    def skip_import(self, node: Union[Import, ImportFrom]):
         return re.search(
             self.skip_comments_regex,
             self.source.split("\n")[node.lineno - 1].lower(),
         )
 
-    def get_names(self) -> None:
+    def get_names(self) -> Iterable[Dict[str, Union[str, int]]]:
         imp_match_built_in = SET_BUILTINS & set(self.import_names)
         yield from filter(
             lambda name: list(
@@ -183,7 +183,7 @@ class Scanner(ast.NodeVisitor):
 
     def get_suggestion_modules(
         self, imp: Dict[str, Optional[Union[int, str]]]
-    ) -> Dict[Any, Any]:
+    ) -> List[Union[str, int]]:
         if imp["module"]:
             with contextlib.suppress(OSError, TypeError):
                 scanner = self.__class__(inspect.getsource(imp["module"]))
@@ -192,7 +192,7 @@ class Scanner(ast.NodeVisitor):
                 to_names = {to_cfv["name"] for to_cfv in self.names}
                 suggestion_modules = sorted(from_all_name & to_names)
                 return suggestion_modules
-        return {}
+        return []
 
     def get_unused_imports(self) -> Iterator[Dict[str, Union[int, str, None]]]:
         for imp in self.imports:
@@ -206,9 +206,10 @@ class Scanner(ast.NodeVisitor):
                 ):
                     yield imp
             else:
-                if imp["star"] and self.include_star_import:
-                    imp["modules"] = self.get_suggestion_modules(imp)
-                    yield imp
+                if imp["star"]:
+                    if self.include_star_import:
+                        imp["modules"] = self.get_suggestion_modules(imp)
+                        yield imp
                 else:
                     if not list(
                         filter(
