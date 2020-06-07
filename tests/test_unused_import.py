@@ -6,6 +6,7 @@ import os
 import pathlib
 import re
 import unittest
+from typing import Dict, List, Optional, Union
 
 from unimport.session import Session
 
@@ -14,10 +15,14 @@ class UnusedTestCase(unittest.TestCase):
     maxDiff = None
     include_star_import = False
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.session = Session(include_star_import=self.include_star_import)
 
-    def assertUnimportEqual(self, source, expected_unused_imports):
+    def assertUnimportEqual(
+        self,
+        source: str,
+        expected_unused_imports: List[Dict[str, Optional[Union[int, str]]]],
+    ) -> None:
         self.session.scanner.run_visit(source)
         self.assertEqual(
             expected_unused_imports, self.session.scanner.unused_imports,
@@ -28,7 +33,7 @@ class UnusedTestCase(unittest.TestCase):
 class TestBuiltin(UnusedTestCase):
     include_star_import = True
 
-    def test_ConnectionError(self):
+    def test_ConnectionError(self) -> None:
         source = (
             "from x.y import ConnectionError\n"
             "try:\n"
@@ -39,12 +44,12 @@ class TestBuiltin(UnusedTestCase):
         expected_unused_imports = []
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_ValueError(self):
+    def test_ValueError(self) -> None:
         source = "from x import ValueError\n" "print(ValueError)\n"
         expected_unused_imports = []
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_builtins(self):
+    def test_builtins(self) -> None:
         source = (
             "from builtins import next, object, range\n"
             "__all__ = ['next', 'object']\n"
@@ -58,7 +63,7 @@ class TestBuiltin(UnusedTestCase):
 class Test__All__(UnusedTestCase):
     include_star_import = True
 
-    def test_from_import(self):
+    def test_from_import(self) -> None:
         # in this case this import is used
         source = (
             "from codeop import compile_command\n"
@@ -67,7 +72,7 @@ class Test__All__(UnusedTestCase):
         expected_unused_imports = []
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_star(self):
+    def test_star(self) -> None:
         # in this case this import is used
         source = "from os import *\n" "__all__ = ['walk']"
         expected_unused_imports = [
@@ -81,7 +86,7 @@ class Test__All__(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_star_unused(self):
+    def test_star_unused(self) -> None:
         # in this case this import is unused
         source = "from os import *\n" "__all__ = ['test']"
         expected_unused_imports = [
@@ -95,14 +100,14 @@ class Test__All__(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_plus_bin_op(self):
+    def test_plus_bin_op(self) -> None:
         # NOTE no support.
         op = "+"
         source = f"from os import *\n" "__all__ = ['w'{op}'alk']"
         expected_unused_imports = []
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_list_comprehension(self):
+    def test_list_comprehension(self) -> None:
         # NOTE no support.
         source = (
             "from os import *\n"
@@ -123,7 +128,7 @@ class Test__All__(UnusedTestCase):
 class TestUnusedImport(UnusedTestCase):
     include_star_import = True
 
-    def test_comma(self):
+    def test_comma(self) -> None:
         source = "from os import (\n" "    waitpid,\n" "    scandir,\n" ")\n"
         expected_unused_imports = [
             {
@@ -143,14 +148,14 @@ class TestUnusedImport(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_module_used(self):
+    def test_module_used(self) -> None:
         source = (
             "from pathlib import Path\n" "CURRENT_DIR = Path('.').parent\n"
         )
         expected_unused_imports = []
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_module_unused(self):
+    def test_module_unused(self) -> None:
         source = "from pathlib import Path"
         expected_unused_imports = [
             {
@@ -163,12 +168,12 @@ class TestUnusedImport(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_unknown_module_used(self):
+    def test_unknown_module_used(self) -> None:
         source = "import x.y\n" "CURRENT_DIR = x.y('.').parent\n"
         expected_unused_imports = []
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_unknown_module_unused(self):
+    def test_unknown_module_unused(self) -> None:
         source = (
             "import x.y\n" "import d.f.a.s\n" "CURRENT_DIR = x.y('.').parent\n"
         )
@@ -183,7 +188,7 @@ class TestUnusedImport(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_import_in_function(self):
+    def test_import_in_function(self) -> None:
         source = (
             "import t\n"
             "from x import y, z\n\n"
@@ -225,7 +230,7 @@ class TestUnusedImport(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_import_after_usage(self):
+    def test_import_after_usage(self) -> None:
         source = "def function():\n" "    print(os)\n" "import os\n"
         expected_unused_imports = []
         self.assertUnimportEqual(source, expected_unused_imports)
@@ -234,7 +239,7 @@ class TestUnusedImport(UnusedTestCase):
 class TestStarImport(UnusedTestCase):
     include_star_import = True
 
-    def test_unused(self):
+    def test_unused(self) -> None:
         source = "from os import *\n"
         expected_unused_imports = [
             {
@@ -247,7 +252,7 @@ class TestStarImport(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_used(self):
+    def test_used(self) -> None:
         source = "from os import *\n" "print(walk)\n"
         expected_unused_imports = [
             {
@@ -260,7 +265,7 @@ class TestStarImport(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_used_and_unused(self):
+    def test_used_and_unused(self) -> None:
         source = (
             "from lib2to3.fixer_util import *\n"
             "from lib2to3.pytree import *\n"
@@ -295,7 +300,7 @@ class TestStarImport(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_used_and_unused_2(self):
+    def test_used_and_unused_2(self) -> None:
         source = (
             "from lib2to3.fixer_util import *\n"
             "from lib2to3.pytree import *\n"
@@ -336,7 +341,7 @@ class TestStarImport(UnusedTestCase):
 
 
 class TestDuplicate(UnusedTestCase):
-    def test__all__(self):
+    def test__all__(self) -> None:
         source = (
             "from codeop import compile_command\n"
             "import compile_command\n"
@@ -353,7 +358,7 @@ class TestDuplicate(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_full_unused(self):
+    def test_full_unused(self) -> None:
         source = (
             "from x import y\n"
             "from x import y\n"
@@ -424,7 +429,7 @@ class TestDuplicate(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_one_used(self):
+    def test_one_used(self) -> None:
         source = (
             "from x import y\n"
             "from x import y\n"
@@ -505,7 +510,7 @@ class TestDuplicate(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_two_used(self):
+    def test_two_used(self) -> None:
         source = (
             "from x import y\n"
             "from x import y\n"
@@ -580,7 +585,7 @@ class TestDuplicate(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_three_used(self):
+    def test_three_used(self) -> None:
         source = (
             "from x import y\n"
             "from x import y\n"
@@ -649,7 +654,7 @@ class TestDuplicate(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_different_duplicate_unused(self):
+    def test_different_duplicate_unused(self) -> None:
         source = "from x import z\n" "from y import z\n"
         expected_unused_imports = [
             {
@@ -669,7 +674,7 @@ class TestDuplicate(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_different_duplicate_used(self):
+    def test_different_duplicate_used(self) -> None:
         source = "from x import z\n" "from y import z\n" "print(z)\n"
         expected_unused_imports = [
             {
@@ -682,7 +687,7 @@ class TestDuplicate(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_multi_duplicate(self):
+    def test_multi_duplicate(self) -> None:
         source = "from x import y, z, t\n" "import t\n" "from l import t\n"
         expected_unused_imports = [
             {
@@ -723,7 +728,7 @@ class TestDuplicate(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_multi_duplicate_one_used(self):
+    def test_multi_duplicate_one_used(self) -> None:
         source = (
             "from x import y, z, t\n"
             "import t\n"
@@ -762,7 +767,7 @@ class TestDuplicate(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_one_used_bottom_multi_duplicate(self):
+    def test_one_used_bottom_multi_duplicate(self) -> None:
         source = (
             "import t\n"
             "from l import t\n"
@@ -801,7 +806,7 @@ class TestDuplicate(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_two_multi_duplicate_one_used(self):
+    def test_two_multi_duplicate_one_used(self) -> None:
         source = (
             "import t\n"
             "from l import t\n"
@@ -855,7 +860,7 @@ class TestDuplicate(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_import_in_function(self):
+    def test_import_in_function(self) -> None:
         source = (
             "import t\n"
             "from l import t\n"
@@ -912,7 +917,7 @@ class TestDuplicate(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_import_in_function_used_two_different(self):
+    def test_import_in_function_used_two_different(self) -> None:
         source = (
             "import t\n"
             "print(t)\n\n"
@@ -965,7 +970,7 @@ class TestDuplicate(UnusedTestCase):
 
 
 class TesAsImport(UnusedTestCase):
-    def test_as_import_all_unused_all_cases(self):
+    def test_as_import_all_unused_all_cases(self) -> None:
         source = (
             "from x import y as z\n"
             "import x\n"
@@ -1048,7 +1053,7 @@ class TesAsImport(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
-    def test_as_import_one_used_in_function_all_cases(self):
+    def test_as_import_one_used_in_function_all_cases(self) -> None:
         source = (
             "from x import y as z\n"
             "import x\n"

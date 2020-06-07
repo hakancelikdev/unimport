@@ -7,14 +7,16 @@ import io
 import re
 import sys
 import tokenize
+from typing import Any, Callable, Dict, Iterator, Optional, Union
 
+from _ast import Import, ImportFrom
 from unimport.color import Color
 
 PY38_PLUS = sys.version_info >= (3, 8)
 SET_BUILTINS = set(dir(builtins))
 
 
-def recursive(func):
+def recursive(func: Callable) -> Callable:
     """decorator to make visitor work recursive"""
 
     def wrapper(self, node, *args, **kwargs):
@@ -31,7 +33,9 @@ class Scanner(ast.NodeVisitor):
     ignore_import_names = ["__all__", "__doc__"]
     skip_comments_regex = "#\s*(unimport:skip|noqa)"
 
-    def __init__(self, source=None, include_star_import=False):
+    def __init__(
+        self, source: Optional[str] = None, include_star_import: bool = False
+    ) -> None:
         self.include_star_import = include_star_import
         self.names = []
         self.imports = []
@@ -141,7 +145,7 @@ class Scanner(ast.NodeVisitor):
                 if isinstance(item, ast.Str):
                     self.names.append({"lineno": node.lineno, "name": item.s})
 
-    def run_visit(self, source):
+    def run_visit(self, source: str) -> None:
         self.source = source
         if PY38_PLUS:
             for node in self.iter_type_comments():
@@ -152,19 +156,19 @@ class Scanner(ast.NodeVisitor):
         self.names = list(self.get_names())
         self.unused_imports = list(self.get_unused_imports())
 
-    def clear(self):
+    def clear(self) -> None:
         self.names.clear()
         self.imports.clear()
         self.classes.clear()
         self.functions.clear()
 
-    def skip_import(self, node):
+    def skip_import(self, node: Union[Import, ImportFrom]) -> None:
         return re.search(
             self.skip_comments_regex,
             self.source.split("\n")[node.lineno - 1].lower(),
         )
 
-    def get_names(self):
+    def get_names(self) -> None:
         imp_match_built_in = SET_BUILTINS & set(self.import_names)
         yield from filter(
             lambda name: list(
@@ -177,7 +181,9 @@ class Scanner(ast.NodeVisitor):
             self.names,
         )
 
-    def get_suggestion_modules(self, imp):
+    def get_suggestion_modules(
+        self, imp: Dict[str, Optional[Union[int, str]]]
+    ) -> Dict[Any, Any]:
         if imp["module"]:
             with contextlib.suppress(OSError, TypeError):
                 scanner = self.__class__(inspect.getsource(imp["module"]))
@@ -188,7 +194,7 @@ class Scanner(ast.NodeVisitor):
                 return suggestion_modules
         return {}
 
-    def get_unused_imports(self):
+    def get_unused_imports(self) -> Iterator[Dict[str, Union[int, str, None]]]:
         for imp in self.imports:
             if self.is_duplicate(imp["name"]):
                 if not list(
@@ -212,15 +218,19 @@ class Scanner(ast.NodeVisitor):
                     ):
                         yield imp
 
-    def is_duplicate(self, name):
+    def is_duplicate(self, name: str) -> bool:
         return self.import_names.count(name) > 1
 
-    def get_duplicate_imports(self):
+    def get_duplicate_imports(self) -> None:
         yield from filter(
             lambda imp: self.is_duplicate(imp["name"]), self.imports
         )
 
-    def is_duplicate_used(self, name, imp):
+    def is_duplicate_used(
+        self,
+        name: Dict[str, Union[int, str]],
+        imp: Dict[str, Optional[Union[int, str]]],
+    ) -> bool:
         def find_nearest_imp(name):
             nearest = ""
             for dup_imp in self.get_duplicate_imports():

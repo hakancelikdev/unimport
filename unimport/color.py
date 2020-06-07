@@ -1,3 +1,5 @@
+from typing import Callable, Union
+
 COLORS = {
     "black": "\033[30m",
     "red": "\033[31m",
@@ -20,7 +22,7 @@ class Color:
     def template(self, color: str) -> str:
         return COLORS[color] + self.content + self.reset
 
-    def __getattribute__(self, name: str):
+    def __getattribute__(self, name: str) -> Union[Callable, str]:
         if name in COLORS:
             return self.template(name)
         return super().__getattribute__(name)

@@ -1,4 +1,10 @@
+from typing import Dict, List, Optional, Union
+
 import libcst as cst
+from libcst._nodes.expression import Attribute
+from libcst._nodes.statement import Import, ImportFrom
+from libcst._position import CodeRange
+from libcst._removal_sentinel import RemovalSentinel
 from libcst.metadata import MetadataWrapper, PositionProvider
 
 from unimport.color import Color
@@ -7,11 +13,13 @@ from unimport.color import Color
 class RemoveUnusedImportTransformer(cst.CSTTransformer):
     METADATA_DEPENDENCIES = [PositionProvider]
 
-    def __init__(self, unused_imports):
+    def __init__(
+        self, unused_imports: List[Dict[str, Optional[Union[int, str]]]]
+    ) -> None:
         self.unused_imports = unused_imports
 
     @staticmethod
-    def get_import_name_from_attr(attr_node):
+    def get_import_name_from_attr(attr_node: Attribute) -> str:
         name = [attr_node.children[2].value]  # last value
         node = attr_node.children[0]
         while hasattr(node, "value"):
@@ -24,7 +32,7 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
         name.reverse()
         return ".".join(name)
 
-    def is_import_used(self, import_name, location):
+    def is_import_used(self, import_name: str, location: CodeRange) -> bool:
         return not any(
             [
                 imp["name"] == import_name
@@ -33,10 +41,14 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
             ]
         )
 
-    def get_location(self, node):
+    def get_location(self, node: Union[Import, ImportFrom]) -> CodeRange:
         return self.get_metadata(PositionProvider, node)
 
-    def leave_import_alike(self, original_node, updated_node):
+    def leave_import_alike(
+        self,
+        original_node: Union[Import, ImportFrom],
+        updated_node: Union[Import, ImportFrom],
+    ) -> Union[Import, ImportFrom, RemovalSentinel]:
         names_to_keep = []
         for import_alias in updated_node.names:
             if isinstance(import_alias.name, cst.Attribute):
@@ -56,7 +68,9 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
         else:
             return updated_node.with_changes(names=names_to_keep)
 
-    def leave_StarImport(self, original_node, updated_node, **kwargs):
+    def leave_StarImport(
+        self, original_node: ImportFrom, updated_node: ImportFrom, **kwargs
+    ) -> Union[ImportFrom, RemovalSentinel]:
         imp = kwargs["imp"]
         if imp["modules"]:
             modules = ",".join(imp["modules"])
@@ -103,7 +117,9 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
         return self.leave_import_alike(original_node, updated_node)
 
 
-def refactor_string(source, unused_imports):
+def refactor_string(
+    source: str, unused_imports: List[Dict[str, Optional[Union[int, str]]]]
+) -> str:
     try:
         wrapper = MetadataWrapper(cst.parse_module(source))
     except cst.ParserSyntaxError as err:

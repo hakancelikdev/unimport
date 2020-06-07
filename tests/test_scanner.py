@@ -2,6 +2,7 @@ import os
 import sys
 import typing
 import unittest
+from typing import Any, Dict, List, Union
 
 from unimport.session import Session
 
@@ -12,19 +13,19 @@ class ScannerTestCase(unittest.TestCase):
     maxDiff = None
     include_star_import = False
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.scanner = Session(
             include_star_import=self.include_star_import
         ).scanner
 
     def assertUnimportEqual(
         self,
-        source,
-        expected_names,
-        expected_classes,
-        expected_functions,
-        expected_imports,
-    ):
+        source: str,
+        expected_names: List[Dict[str, Union[int, str]]],
+        expected_classes: List[Dict[str, Union[int, str]]],
+        expected_functions: List[Dict[str, Union[int, str]]],
+        expected_imports: List[Any],
+    ) -> None:
         self.scanner.run_visit(source)
         self.assertEqual(expected_names, self.scanner.names)
         self.assertEqual(expected_classes, self.scanner.classes)
@@ -34,7 +35,7 @@ class ScannerTestCase(unittest.TestCase):
 
 
 class TestNames(ScannerTestCase):
-    def test_names(self):
+    def test_names(self) -> None:
         source = (
             "variable = 1\n"
             "variable1 = 2\n"
@@ -55,7 +56,7 @@ class TestNames(ScannerTestCase):
             expected_imports=[],
         )
 
-    def test_names_with_import(self):
+    def test_names_with_import(self) -> None:
         source = (
             "variable = 1\n"
             "import os\n"
@@ -82,7 +83,7 @@ class TestNames(ScannerTestCase):
             expected_imports=expected_imports,
         )
 
-    def test_names_with_function(self):
+    def test_names_with_function(self) -> None:
         self.assertUnimportEqual(
             source="variable = 1\n" "def test():\n" "\tpass",
             expected_names=[{"lineno": 1, "name": "variable"}],
@@ -91,7 +92,7 @@ class TestNames(ScannerTestCase):
             expected_imports=[],
         )
 
-    def test_names_with_class(self):
+    def test_names_with_class(self) -> None:
         source = (
             "variable = 1\n"
             "def test_function():\n"
@@ -108,7 +109,7 @@ class TestNames(ScannerTestCase):
             expected_imports=[],
         )
 
-    def test_decator_in_class(self):
+    def test_decator_in_class(self) -> None:
         source = (
             "class Test:\n"
             "    def test(self):\n"
@@ -129,12 +130,12 @@ class TestNames(ScannerTestCase):
 class SkipImportTest(ScannerTestCase):
     def assertUnimportEqual(
         self,
-        source,
-        expected_names=[],
-        expected_classes=[],
-        expected_functions=[],
-        expected_imports=[],
-    ):
+        source: str,
+        expected_names: List[Any] = [],
+        expected_classes: List[Any] = [],
+        expected_functions: List[Any] = [],
+        expected_imports: List[Any] = [],
+    ) -> None:
 
         super().assertUnimportEqual(
             source,
@@ -144,7 +145,7 @@ class SkipImportTest(ScannerTestCase):
             expected_imports,
         )
 
-    def test_inside_try_except(self):
+    def test_inside_try_except(self) -> None:
         source = (
             "try:\n"
             "   import django # unimport:skip\n"
@@ -153,23 +154,23 @@ class SkipImportTest(ScannerTestCase):
         )
         self.assertUnimportEqual(source)
 
-    def test_as_import(self):
+    def test_as_import(self) -> None:
         source = "from x import y as z # unimport:skip\n"
         self.assertUnimportEqual(source)
 
-    def test_ongoing_comment(self):
+    def test_ongoing_comment(self) -> None:
         source = "import unimport # unimport:skip import test\n"
         self.assertUnimportEqual(source)
 
-    def test_skip_comment_second_option(self):
+    def test_skip_comment_second_option(self) -> None:
         source = "import x # unimport:skip test\n"
         self.assertUnimportEqual(source)
 
-    def test_noqa_skip_comment(self):
+    def test_noqa_skip_comment(self) -> None:
         source = "from x import (t, y, f, r) # noqa\n"
         self.assertUnimportEqual(source)
 
-    def test_noqa_skip_comment_multiple(self):
+    def test_noqa_skip_comment_multiple(self) -> None:
         source = "from x import ( # noqa\n" "   t, y,\n" "   f, r\n" ")\n"
         self.assertUnimportEqual(source)
 

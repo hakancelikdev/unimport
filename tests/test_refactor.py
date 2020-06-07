@@ -10,18 +10,18 @@ class RefactorTestCase(unittest.TestCase):
     maxDiff = None
     include_star_import = False
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.session = Session(include_star_import=self.include_star_import)
 
 
 class TestSyntaxErrorRefactor(RefactorTestCase):
-    def test_syntax_error(self):
+    def test_syntax_error(self) -> None:
         action = "a :? = 0\n"
         self.assertEqual(
             action, self.session.refactor(action),
         )
 
-    def test_bad_syntax(self):
+    def test_bad_syntax(self) -> None:
         action = "# -*- coding: utf-8 -*-\n€ = 2\n"
         self.assertEqual(
             action, self.session.refactor(action),
@@ -38,7 +38,7 @@ class TestSyntaxErrorRefactor(RefactorTestCase):
 
 
 class TestUnusedRefactor(RefactorTestCase):
-    def test_do_not_remove_augmented_imports(self):
+    def test_do_not_remove_augmented_imports(self) -> None:
         action = (
             "from django.conf.global_settings import AUTHENTICATION_BACKENDS, TEMPLATE_CONTEXT_PROCESSORS\n"
             "AUTHENTICATION_BACKENDS += ('foo.bar.baz.EmailBackend',)\n"
@@ -51,7 +51,7 @@ class TestUnusedRefactor(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_multiple_imports(self):
+    def test_multiple_imports(self) -> None:
         action = (
             "import x\n"
             "import x.y\n"
@@ -104,7 +104,7 @@ class TestUnusedRefactor(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_future(self):
+    def test_future(self) -> None:
         action = (
             "from __future__ import (\n"
             "    absolute_import, division, print_function, unicode_literals\n"
@@ -114,7 +114,7 @@ class TestUnusedRefactor(RefactorTestCase):
             action, self.session.refactor(action),
         )
 
-    def test_local_import(self):
+    def test_local_import(self) -> None:
         action = (
             "from .x import y\n"
             "from ..z import t\n"
@@ -138,7 +138,7 @@ class TestUnusedRefactor(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_remove_unused_from_imports(self):
+    def test_remove_unused_from_imports(self) -> None:
         action = (
             "import datetime\n"
             "from dateutil.relativedelta import relativedelta\n\n"
@@ -152,7 +152,7 @@ class TestUnusedRefactor(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_inside_function_unused(self):
+    def test_inside_function_unused(self) -> None:
         action = (
             "def foo():\n"
             "    from x import y, z\n"
@@ -176,7 +176,7 @@ class TestUnusedRefactor(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_comment(self):
+    def test_comment(self) -> None:
         action = (
             "# This is not unused import, but it is unused import according to unimport.\n"
             "# CASE 1\n"
@@ -195,7 +195,7 @@ class TestUnusedRefactor(RefactorTestCase):
 
 
 class TestDuplicateUnusedRefactor(RefactorTestCase):
-    def test_full_unused(self):
+    def test_full_unused(self) -> None:
         action = (
             "from x import y\n"
             "from x import y\n"
@@ -211,7 +211,7 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_one_used(self):
+    def test_one_used(self) -> None:
         action = (
             "from x import y\n"
             "from x import y\n"
@@ -230,7 +230,7 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_two_used(self):
+    def test_two_used(self) -> None:
         action = (
             "from x import y\n"
             "from x import y\n"
@@ -256,7 +256,7 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_three_used(self):
+    def test_three_used(self) -> None:
         action = (
             "from x import y\n"
             "from x import y\n"
@@ -284,28 +284,28 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_different_duplicate_unused(self):
+    def test_different_duplicate_unused(self) -> None:
         action = "from x import z\n" "from y import z\n"
         expected = "\n"
         self.assertEqual(
             expected, self.session.refactor(action),
         )
 
-    def test_different_duplicate_used(self):
+    def test_different_duplicate_used(self) -> None:
         action = "from x import z\n" "from y import z\n" "print(z)\n"
         expected = "from y import z\n" "print(z)\n"
         self.assertEqual(
             expected, self.session.refactor(action),
         )
 
-    def test_multi_duplicate(self):
+    def test_multi_duplicate(self) -> None:
         action = "from x import y, z, t\n" "import t\n" "from l import t\n"
         expected = "\n"
         self.assertEqual(
             expected, self.session.refactor(action),
         )
 
-    def test_multi_duplicate_one_used(self):
+    def test_multi_duplicate_one_used(self) -> None:
         action = (
             "from x import y, z, t\n"
             "import t\n"
@@ -317,7 +317,7 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_one_used_bottom_multi_duplicate(self):
+    def test_one_used_bottom_multi_duplicate(self) -> None:
         action = (
             "import t\n"
             "from l import t\n"
@@ -329,7 +329,7 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_two_multi_duplicate_one_used(self):
+    def test_two_multi_duplicate_one_used(self) -> None:
         action = (
             "import t\n"
             "from l import t\n"
@@ -342,7 +342,7 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_import_in_function(self):
+    def test_import_in_function(self) -> None:
         action = (
             "import t\n"
             "from l import t\n"
@@ -364,7 +364,7 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_import_in_function_used_two_different(self):
+    def test_import_in_function_used_two_different(self) -> None:
         action = (
             "import t\n"
             "print(t)\n\n"
@@ -391,7 +391,7 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
 
 
 class TesAsImport(RefactorTestCase):
-    def test_as_import_all_unused_all_cases(self):
+    def test_as_import_all_unused_all_cases(self) -> None:
         action = (
             "from x import y as z\n"
             "import x\n"
@@ -403,7 +403,7 @@ class TesAsImport(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_multiple_from_as_import(self):
+    def test_multiple_from_as_import(self) -> None:
         action = (
             "from f import a as c, l as k, i as ii\n"
             "from fo import (bar, i, x as z)\n"
@@ -413,14 +413,14 @@ class TesAsImport(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_multiple_import_name_as_import(self):
+    def test_multiple_import_name_as_import(self) -> None:
         action = "import a as c, l as k, i as ii\n" "import bar, i, x as z\n"
         expected = "\n"
         self.assertEqual(
             expected, self.session.refactor(action),
         )
 
-    def test_multiple_import_name_as_import_duplicate(self):
+    def test_multiple_import_name_as_import_duplicate(self) -> None:
         action = (
             "import a as c, l as k, i as ii\n"
             "import bar, i, x as z\n"
@@ -432,7 +432,7 @@ class TesAsImport(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_as_import_used_all_cases(self):
+    def test_as_import_used_all_cases(self) -> None:
         action = (
             "from x import y as z\n"
             "import x\n"
@@ -450,7 +450,7 @@ class TesAsImport(RefactorTestCase):
 class TestStarImport(RefactorTestCase):
     include_star_import = True
 
-    def test_inside_function_unused(self):
+    def test_inside_function_unused(self) -> None:
         action = (
             "def foo():\n"
             "    from abc import *\n"
@@ -474,7 +474,7 @@ class TestStarImport(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_star_imports(self):
+    def test_star_imports(self) -> None:
         action = (
             "from os import *\n"
             "from x import y\n"
@@ -498,7 +498,7 @@ class TestStarImport(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
-    def test_star_import_2(self):
+    def test_star_import_2(self) -> None:
         action = (
             "from typing import (\n"
             "    Callable,\n"

@@ -18,7 +18,7 @@ CONFIG_CFG = {
 
 
 class TestConfig(TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.include = "test|test2|tests.py"
         self.exclude = "__init__.py|tests/"
         self.config_toml = Session(
@@ -26,16 +26,16 @@ class TestConfig(TestCase):
         ).config
         self.config_cfg = Session(config_file=CONFIG_CFG["config_file"]).config
 
-    def test_toml_find_config(self):
+    def test_toml_find_config(self) -> None:
         actual_path, actual_section = self.config_toml.find_config()
         self.assertEqual(actual_path, CONFIG_TOML["config_file"])
         self.assertEqual(actual_section, CONFIG_TOML["section"])
 
-    def test_toml_attr(self):
+    def test_toml_attr(self) -> None:
         self.assertEqual(self.include, self.config_toml.include)
         self.assertEqual(self.exclude, self.config_toml.exclude)
 
-    def test_toml_is_available_to_parse(self):
+    def test_toml_is_available_to_parse(self) -> None:
         setattr(CONFIG, "HAS_TOML", True)
         self.assertTrue(
             self.config_toml.is_available_to_parse(
@@ -43,7 +43,7 @@ class TestConfig(TestCase):
             )
         )
 
-    def test_toml_but_has_toml_false(self):
+    def test_toml_but_has_toml_false(self) -> None:
         setattr(CONFIG, "HAS_TOML", False)
         self.assertFalse(
             self.config_toml.is_available_to_parse(
@@ -51,21 +51,21 @@ class TestConfig(TestCase):
             )
         )
 
-    def test_cfg_find_config(self):
+    def test_cfg_find_config(self) -> None:
         actual_path, actual_section = self.config_cfg.find_config()
         self.assertEqual(actual_path, CONFIG_CFG["config_file"])
         self.assertEqual(actual_section, CONFIG_CFG["section"])
 
-    def test_cfg_attr(self):
+    def test_cfg_attr(self) -> None:
         self.assertEqual(self.include, self.config_cfg.include)
         self.assertEqual(self.exclude, self.config_cfg.exclude)
 
-    def test_cfg_is_available_to_parse(self):
+    def test_cfg_is_available_to_parse(self) -> None:
         self.assertTrue(
             self.config_cfg.is_available_to_parse(self.config_cfg.config_file)
         )
 
-    def test_config_file_none_find_config(self):
+    def test_config_file_none_find_config(self) -> None:
         none_config = Session(config_file=None).config
         actual_path, actual_section = none_config.find_config()
         self.assertIsNone(actual_path)

@@ -1,7 +1,8 @@
 import difflib
 import re
 import tokenize
-from pathlib import Path
+from pathlib import Path, PosixPath
+from typing import Optional, Tuple
 
 from unimport.color import Color
 from unimport.config import Config
@@ -14,11 +15,15 @@ class Session:
     INCLUDE_REGEX_PATTERN = "\\.(py)$"
     EXCLUDE_REGEX_PATTERN = "^$"
 
-    def __init__(self, config_file=None, include_star_import=False):
+    def __init__(
+        self,
+        config_file: Optional[PosixPath] = None,
+        include_star_import: bool = False,
+    ) -> None:
         self.config = Config(config_file)
         self.scanner = Scanner(include_star_import=include_star_import)
 
-    def _read(self, path: Path):
+    def _read(self, path: Path) -> Tuple[str, str]:
         try:
             with tokenize.open(path) as stream:
                 source = stream.read()
@@ -28,7 +33,12 @@ class Session:
             return "", "utf-8"
         return source, encoding
 
-    def _list_paths(self, start, include=None, exclude=None):
+    def _list_paths(
+        self,
+        start: PosixPath,
+        include: Optional[str] = None,
+        exclude: Optional[str] = None,
+    ) -> None:
         include_regex, exclude_regex = (
             re.compile(include or self.INCLUDE_REGEX_PATTERN),
             re.compile(exclude or self.EXCLUDE_REGEX_PATTERN),
@@ -51,7 +61,7 @@ class Session:
         self.scanner.clear()
         return refactor
 
-    def refactor_file(self, path: Path, apply: bool = False):
+    def refactor_file(self, path: Path, apply: bool = False) -> str:
         source, encoding = self._read(path)
         result = self.refactor(source)
         if apply:
