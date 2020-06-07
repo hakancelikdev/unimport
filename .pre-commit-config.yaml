@@ -15,6 +15,7 @@ repos:
     rev: 4.3.21-2
     hooks:
       - id: isort
+        files: "\\.(py)$"
 
   - repo: https://github.com/hakancelik96/unimport
     rev: v0.2.62
