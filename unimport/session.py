@@ -14,9 +14,14 @@ class Session:
     INCLUDE_REGEX_PATTERN = "\\.(py)$"
     EXCLUDE_REGEX_PATTERN = "^$"
 
-    def __init__(self, config_file=None, include_star_import=False):
+    def __init__(
+        self, config_file=None, include_star_import=False, show_error=False
+    ):
+        self.show_error = show_error
         self.config = Config(config_file)
-        self.scanner = Scanner(include_star_import=include_star_import)
+        self.scanner = Scanner(
+            include_star_import=include_star_import, show_error=self.show_error
+        )
 
     def _read(self, path: Path):
         try:
@@ -24,7 +29,8 @@ class Session:
                 source = stream.read()
                 encoding = stream.encoding
         except (OSError, SyntaxError) as err:
-            print(Color(str(err)).red)
+            if self.show_error:
+                print(Color(str(err)).red)
             return "", "utf-8"
         return source, encoding
 
@@ -46,7 +52,9 @@ class Session:
     def refactor(self, source: str) -> str:
         self.scanner.run_visit(source)
         refactor = refactor_string(
-            source=source, unused_imports=self.scanner.unused_imports,
+            source=source,
+            unused_imports=self.scanner.unused_imports,
+            show_error=self.show_error,
         )
         self.scanner.clear()
         return refactor

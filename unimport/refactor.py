@@ -103,11 +103,12 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
         return self.leave_import_alike(original_node, updated_node)
 
 
-def refactor_string(source, unused_imports):
+def refactor_string(source, unused_imports, show_error):
     try:
         wrapper = MetadataWrapper(cst.parse_module(source))
     except cst.ParserSyntaxError as err:
-        print(Color(str(err)).red)
+        if show_error:
+            print(Color(str(err)).red)
     else:
         if unused_imports:
             fixed_module = wrapper.visit(

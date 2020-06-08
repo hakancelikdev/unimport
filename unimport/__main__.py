@@ -52,6 +52,11 @@ parser.add_argument(
     help="Include star imports during scanning and refactor.",
 )
 parser.add_argument(
+    "--show-error",
+    action="store_true",
+    help="Show or don't show errors captured during static analysis.",
+)
+parser.add_argument(
     "-d",
     "--diff",
     action="store_true",
@@ -142,11 +147,12 @@ def show(unused_import, py_path):
 def main(argv=None):
     namespace = parser.parse_args(argv)
     namespace.check = namespace.check or not any(
-        [value for key, value in vars(namespace).items()][5:-1]
+        [value for key, value in vars(namespace).items()][6:-1]
     )
     session = Session(
         config_file=namespace.config,
         include_star_import=namespace.include_star_import,
+        show_error=namespace.show_error,
     )
     include_list, exclude_list = [], []
     if namespace.include:
