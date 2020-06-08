@@ -193,6 +193,12 @@ class TestUnusedRefactor(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
+    def test_star(self):
+        action = "from os import *\n" "walk\n"
+        self.assertEqual(
+            action, self.session.refactor(action),
+        )
+
 
 class TestDuplicateUnusedRefactor(RefactorTestCase):
     def test_full_unused(self):
