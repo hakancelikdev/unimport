@@ -4,9 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
-- [🐞fix: Skip star imports when the `--include-star-import` flag is not used](https://github.com/hakancelik96/unimport/pull/60)
+- [🔥 `--show-error` flag add by @hakancelik96](https://github.com/hakancelik96/unimport/pull/61)
 
-- [🐞fix: finding functions during scanning](https://github.com/hakancelik96/unimport/pull/55)
+- [🐞fix: Skip star imports when the `--include-star-import` flag is not used by @hakancelik96](https://github.com/hakancelik96/unimport/pull/60)
+
+- [🐞fix: finding functions during scanning by @hakancelik96](https://github.com/hakancelik96/unimport/pull/55)
 
 - [💪 `#noqa` comment support to skip import (#48) by @hakancelik96](https://github.com/hakancelik96/unimport/pull/54)
 

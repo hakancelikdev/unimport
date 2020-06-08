@@ -26,9 +26,9 @@
 ---
 
 **Contents:** **[Installation and Usage](#installation-and-usage)** |
-**[Star Import](#star-import)** | **[Typing Comments](#typing-comments)** |
-**[Skip Import](#skip-import)** | **[`__all__`](#__all__)** |
-**[Command line options](#command-line-options)** |
+**[Show Error](#show-error)** | **[Star Import](#star-import)** |
+**[Typing Comments](#typing-comments)** | **[Skip Import](#skip-import)** |
+**[`__all__`](#__all__)** | **[Command line options](#command-line-options)** |
 **[Configuring Unimport](#configuring-unimport)** |
 **[Adding pre-commit plugins to your project](#adding-pre-commit-plugins-to-your-project)**
 | **[Our badge](#our-badge-)** | **[CONTRIBUTING](#-contributingmd-)** |
@@ -152,6 +152,12 @@ from i import t
 print(t)
 ```
 
+### Show Error
+
+`Show or don't show errors captured during static analysis.`
+
+Use this flag if you want to see errors ( like `SyntaxError` ) during analysis.
+
 ### Star Import
 
 If you want to include star imports during scanning and refactor. Use command as follow.
@@ -215,7 +221,9 @@ __all__ = ["os"] # this import is used and umimport support this cases, it can u
 You can list many options by running unimport --help
 
 ```
-usage: unimport [-h] [-c PATH] [--include include] [--exclude exclude] [--include-star-import] [-d] [-r | -p] [--check] [-v]
+usage: unimport [-h] [-c PATH] [--include include] [--exclude exclude]
+                [--include-star-import] [--show-error] [-d] [-r | -p]
+                [--check] [-v]
                 [sources [sources ...]]
 
 A linter & formatter for finding & removing unused import statements.
@@ -231,7 +239,10 @@ optional arguments:
   --exclude exclude     file exclude pattern.
   --include-star-import
                         Include star imports during scanning and refactor.
-  -d, --diff            Prints a diff of all the changes unimport would make to a file.
+  --show-error          Show or don't show errors captured during static
+                        analysis.
+  -d, --diff            Prints a diff of all the changes unimport would make
+                        to a file.
   -r, --remove          remove unused imports automatically.
   -p, --permission      Refactor permission after see diff.
   --check               Prints which file the unused imports are in.
