@@ -31,8 +31,11 @@ class Scanner(ast.NodeVisitor):
     ignore_import_names = ["__all__", "__doc__"]
     skip_comments_regex = "#\s*(unimport:skip|noqa)"
 
-    def __init__(self, source=None, include_star_import=False):
+    def __init__(
+        self, source=None, include_star_import=False, show_error=False
+    ):
         self.include_star_import = include_star_import
+        self.show_error = show_error
         self.names = []
         self.imports = []
         self.classes = []
@@ -110,8 +113,9 @@ class Scanner(ast.NodeVisitor):
                             comment_string[1], mode="func_type"
                         )
                     except SyntaxError as err:
-                        error_messages = f"{token.line}\n{comment_string[1]} {Color(str(err)).red}"
-                        print(error_messages)
+                        if self.show_error:
+                            error_messages = f"{token.line}\n{comment_string[1]} {Color(str(err)).red}"
+                            print(error_messages)
                     else:
                         for node in ast.walk(
                             ast.Module(functype.argtypes + [functype.returns])
