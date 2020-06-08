@@ -56,29 +56,31 @@ class Scanner(ast.NodeVisitor):
     def visit_Import(self, node, module_name=None):
         if self.skip_import(node):
             return
-        star = False
         module = None
         for alias in node.names:
-            name = alias.asname or alias.name
             package = module_name or alias.name
-            if (
-                package not in self.ignore_imports
-                and name not in self.ignore_import_names
+            alias_name = alias.asname or alias.name
+            star = True if alias_name == "*" else False
+            name = package if star else alias_name
+            is_package_or_name_ignore = (
+                package in self.ignore_imports
+                or name in self.ignore_import_names
+            )
+            if is_package_or_name_ignore or (
+                star and not self.include_star_import
             ):
-                if name == "*":
-                    star = True
-                    name = package
-                with contextlib.suppress(ImportError, ValueError):
-                    module = importlib.import_module(package)
-                self.imports.append(
-                    {
-                        "lineno": node.lineno,
-                        "name": name,
-                        "star": star,
-                        "module": module,
-                        "modules": [],
-                    }
-                )
+                return
+            with contextlib.suppress(ImportError, ValueError):
+                module = importlib.import_module(package)
+            self.imports.append(
+                {
+                    "lineno": node.lineno,
+                    "name": name,
+                    "star": star,
+                    "module": module,
+                    "modules": [],
+                }
+            )
 
     @recursive
     def visit_ImportFrom(self, node):
