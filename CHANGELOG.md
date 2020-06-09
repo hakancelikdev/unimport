@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- [🔥 If imports inside the `try ... except ImportError, ModuleNotFoundError` block, skip it. ( #46 ) by @hakancelik96 and @isidentical](https://github.com/hakancelik96/unimport/pull/62)
+
 - [🔥 `--show-error` flag add by @hakancelik96](https://github.com/hakancelik96/unimport/pull/61)
 
 - [🐞fix: Skip star imports when the `--include-star-import` flag is not used by @hakancelik96](https://github.com/hakancelik96/unimport/pull/60)

@@ -29,11 +29,6 @@ repos:
     hooks:
       - id: mypy
 
-  - repo: https://github.com/pycqa/pydocstyle
-    rev: 5.0.2
-    hooks:
-      - id: pydocstyle
-
   - repo: https://github.com/prettier/prettier
     rev: 1.19.1
     hooks:
