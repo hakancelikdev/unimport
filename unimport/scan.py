@@ -30,6 +30,7 @@ class Scanner(ast.NodeVisitor):
     ignore_imports = ["__future__"]
     ignore_import_names = ["__all__", "__doc__"]
     skip_comments_regex = "#\s*(unimport:skip|noqa)"
+    any_import_error: bool = False
 
     def __init__(
         self, source=None, include_star_import=False, show_error=False
@@ -147,6 +148,27 @@ class Scanner(ast.NodeVisitor):
                 if isinstance(item, ast.Str):
                     self.names.append({"lineno": node.lineno, "name": item.s})
 
+    def visit_Try(self, node):
+        def any_import_error(items):
+            for item in items:
+                if isinstance(item, ast.Name) and item.id in {
+                    "ModuleNotFoundError",
+                    "ImportError",
+                }:
+                    return True
+                elif isinstance(item, ast.Tuple) and any_import_error(
+                    item.elts
+                ):
+                    return True
+            else:
+                return False
+
+        self.any_import_error = any_import_error(
+            handle.type for handle in node.handlers
+        )
+        self.generic_visit(node)
+        self.any_import_error = False
+
     def run_visit(self, source):
         self.source = source
         if PY38_PLUS:
@@ -165,9 +187,12 @@ class Scanner(ast.NodeVisitor):
         self.functions.clear()
 
     def skip_import(self, node):
-        return re.search(
-            self.skip_comments_regex,
-            self.source.split("\n")[node.lineno - 1].lower(),
+        return (
+            re.search(
+                self.skip_comments_regex,
+                self.source.split("\n")[node.lineno - 1].lower(),
+            )
+            or self.any_import_error
         )
 
     def get_names(self):

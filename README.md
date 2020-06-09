@@ -134,7 +134,7 @@ $ unimport example.py -p
 +from i import t
 
  print(t)
-Apply suggested changes to 'example.py' [y/n/q] ? >
+Apply suggested changes to 'example.py' [Y/n/q] ? >
 ```
 
 **and -r ( remove ) command**
@@ -187,16 +187,11 @@ For more information
 
 ### Skip Import
 
-We add skip import feature to rare cases import statements.
-
-Leave '# unimport: skip' or '# noqa' at the end of the line to skip imports with some
-rare cases. **for example:**
+Leave '# unimport: skip' or '# noqa' at the end of the line to skip imports **for
+example:**
 
 ```python
-try:
-  import django #unimport:skip this import used but unimport can't understand this case.
-except ImportError:
-  print("install django")
+import x #unimport:skip
 ```
 
 ```python
