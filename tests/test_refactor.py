@@ -456,30 +456,6 @@ class TesAsImport(RefactorTestCase):
 class TestStarImport(RefactorTestCase):
     include_star_import = True
 
-    def test_inside_function_unused(self):
-        action = (
-            "def foo():\n"
-            "    from abc import *\n"
-            "    try:\n"
-            "        import t\n"
-            "        print(ABCMeta)\n"
-            "    except ImportError as exception:\n"
-            "        pass\n"
-            "    return math.pi\n"
-        )
-        expected = (
-            "def foo():\n"
-            "    from abc import ABCMeta\n"
-            "    try:\n"
-            "        print(ABCMeta)\n"
-            "    except ImportError as exception:\n"
-            "        pass\n"
-            "    return math.pi\n"
-        )
-        self.assertEqual(
-            expected, self.session.refactor(action),
-        )
-
     def test_star_imports(self):
         action = (
             "from os import *\n"
@@ -545,4 +521,66 @@ class TestTypeComments(RefactorTestCase):
         )
         self.assertEqual(
             action, self.session.refactor(action),
+        )
+
+
+class TestImportError(RefactorTestCase):
+    """
+    Unimport skip imports controlled by ImportError.
+    """
+
+    include_star_import = True
+
+    def test_import_else_another(self):
+        action = (
+            "try:\n"
+            "   import x\n"
+            "except ImportError:\n"
+            "    import y as x\n"
+            "print(x)\n"
+        )
+        self.assertEqual(
+            action, self.session.refactor(action),
+        )
+
+    def test_as_import(self):
+        action = (
+            "try:\n"
+            "    import x\n"
+            "except ImportError as err:\n"
+            "    print('try this code `pip install x`')\n"
+        )
+        self.assertEqual(
+            action, self.session.refactor(action),
+        )
+
+    def test_tuple(self):
+        action = "try:\n" "    import xa\n" "except (A, ImportError): pass\n"
+        self.assertEqual(
+            action, self.session.refactor(action),
+        )
+
+    def test_inside_function_unused(self):
+        action = (
+            "def foo():\n"
+            "    from abc import *\n"
+            "    try:\n"
+            "        import t\n"
+            "        print(ABCMeta)\n"
+            "    except ImportError as exception:\n"
+            "        pass\n"
+            "    return math.pi\n"
+        )
+        expected = (
+            "def foo():\n"
+            "    from abc import ABCMeta\n"
+            "    try:\n"
+            "        import t\n"
+            "        print(ABCMeta)\n"
+            "    except ImportError as exception:\n"
+            "        pass\n"
+            "    return math.pi\n"
+        )
+        self.assertEqual(
+            expected, self.session.refactor(action),
         )
