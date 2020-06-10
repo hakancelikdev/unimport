@@ -3,7 +3,7 @@ from pathlib import Path
 
 from setuptools import setup
 
-import unimport
+from unimport import __description__, __version__
 
 assert sys.version_info >= (3, 6, 0), "unimport requires Python 3.6+"
 
@@ -18,15 +18,16 @@ def get_long_description():
 
 setup(
     name="unimport",
-    version=unimport.__version__,
-    description=unimport.__description__,
+    version=__version__,
+    description=__description__,
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     keywords=["unused", "import"],
-    author=unimport.__author__,
+    author="Hakan Çelik",
     author_email="hakancelik96@outlook.com",
     url="https://github.com/hakancelik96/unimport",
     license="MIT",
+    license_file="LICENSE",
     python_requires=">=3.6.0",
     packages=["unimport"],
     install_requires=["libcst==0.3.5"],
