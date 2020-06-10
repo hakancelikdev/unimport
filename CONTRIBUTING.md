@@ -14,7 +14,7 @@ look.**
 
 ## Clone Repository
 
-```bash
+```shell
 $ git clone git@github.com:<USERNAME>/unimport.git
 $ cd unimport
 ```
@@ -23,7 +23,7 @@ $ cd unimport
 
 Then by setting up and activating a virtualenv:
 
-```bash
+```shell
 $ python3.8 -m venv env #python3.6, python3.7 or python3.8
 $ source env/bin/activate
 $ pip install --upgrade pip # optional, if you have an old system version of pip
@@ -33,22 +33,33 @@ git checkout -b i{your issue number}
 
 ## Install pre-commit hooks
 
-```bash
+```shell
 $ pre-commit install # to pre-commit will run automatically on git commit!
 ```
 
 ## How to Update My Local Repository
 
-```bash
+```shell
 $ git remote add upstream git@github.com:hakancelik96/unimport.git
 $ git fetch upstream # or git fetch --all
 $ git rebase upstream/master
 ```
 
-## Code
+## Testing
+
+After typing your codes, you should run the tests by typing the following command.
+
+```shell
+$ python -m unittest
+```
+
+If all tests pass.
+
+## The final step
 
 After adding a new feature or fixing a bug please report your change to
-[CHANGELOG.md](/CHANGELOG.md)
+[CHANGELOG.md](/CHANGELOG.md) and write your name, github address and email in the
+[AUTHORS.md](/AUTHORS.md) file in alphabetical order.
 
 ### Commit Messages
 
@@ -60,14 +71,6 @@ help us better understand the change you have made and also it is fun.
 - When you make any fix commit; 🐞
 - When you make any optimizasiyon commit; 💊
 - when you make any new feature commit; 🔥
-
-## Testing
-
-You can run the tests by typing the following command.
-
-```python
-python -m unittest
-```
 
 ## License
 

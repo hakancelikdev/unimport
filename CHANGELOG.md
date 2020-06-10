@@ -22,7 +22,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.2.62] - 23/May/2020
 
-- 🐞[config](https://github.com/hakancelik96/unimport/commit/ee4dbb1301fef66a0cf99e9cfb9b18c6b2f0587d)
+- [🐞 Config](https://github.com/hakancelik96/unimport/commit/ee4dbb1301fef66a0cf99e9cfb9b18c6b2f0587d)
 
 ## [0.2.61] - 22/May/2020
 
@@ -58,16 +58,15 @@ All notable changes to this project will be documented in this file.
   Thanks to this feature, we take the values ​​in the `__all__` list and see if there is
   any matching import statements. If there isn't, this import is unused import.
 
-- 💪
-  [Support exclude & include config with regex by @hakancelik96](https://github.com/hakancelik96/unimport/pull/36)
+- [💪 Support exclude & include config with regex by @hakancelik96](https://github.com/hakancelik96/unimport/pull/36)
   After this feature, we can write the file include and exclude pattern setting with
   regex in the console and in the configuration files.
 
-- 🐞[Show, check and congratulations messages in \__main_ by @hakancelik96](https://github.com/hakancelik96/unimport/commit/54129bfc9e78f678bb2fea9b2411355d857a0a37)
+- [🐞 Show, check and congratulations messages in \__main_ by @hakancelik96](https://github.com/hakancelik96/unimport/commit/54129bfc9e78f678bb2fea9b2411355d857a0a37)
 
-- 🐞[--include-star-import command refactor & scan by @hakancelik96](https://github.com/hakancelik96/unimport/commit/d44b2c6d0c5997fb716d58f00d0d5ab2a8042c26)
+- [🐞 --include-star-import command refactor & scan by @hakancelik96](https://github.com/hakancelik96/unimport/commit/d44b2c6d0c5997fb716d58f00d0d5ab2a8042c26)
 
-- 🐞[\_list_paths in session by @hakancelik96](https://github.com/hakancelik96/unimport/commit/179ba9c45031de8d5aa1de43e0449ccdeece8d5e)
+- [🐞 \_list_paths in session by @hakancelik96](https://github.com/hakancelik96/unimport/commit/179ba9c45031de8d5aa1de43e0449ccdeece8d5e)
 
 - [v0.2.61](https://github.com/hakancelik96/unimport/commit/dca5265eb4c106aaa190ea67af5f8da46202e00b)
 
@@ -77,22 +76,18 @@ All notable changes to this project will be documented in this file.
 
 - 💪 Refactor code rewrite using libcst.
 - 🐞 Refactor bugs fix.
-- 🧪
-  [Comma rare case support & test.](https://github.com/hakancelik96/unimport/blob/b8800ec19441bbc452900e1c8b558bea2e43d065/rare_cases/case_comma.py)
+- [🧪 Comma rare case support & test.](https://github.com/hakancelik96/unimport/blob/b8800ec19441bbc452900e1c8b558bea2e43d065/rare_cases/case_comma.py)
 - 💪 pre-commit add & support
 - 🐞 Add Sytranx Error Catcher
 
 ## [0.2.4] - 17/April/2020
 
-- 💪
-  [As import refactor support by @hakancelik96](https://github.com/hakancelik96/unimport/commit/147ed5e836d6a4589a92db4157bfd299ca935b02)
-- 💪
-  [Duplicate detect and refactor support by @hakancelik96](https://github.com/hakancelik96/unimport/pull/23)
+- [💪 As import refactor support by @hakancelik96](https://github.com/hakancelik96/unimport/commit/147ed5e836d6a4589a92db4157bfd299ca935b02)
+- [💪 Duplicate detect and refactor support by @hakancelik96](https://github.com/hakancelik96/unimport/pull/23)
 
 ## [0.2.2] - 4/April/2020
 
-- 🐞
-  [Fix: Scan & Config - Add test to default exlude by @hakancelik96](https://github.com/hakancelik96/unimport/commit/7e789872917c51e5ffa167d26581e5397fd34998)
+- [🐞 Fix: Scan & Config - Add test to default exlude by @hakancelik96](https://github.com/hakancelik96/unimport/commit/7e789872917c51e5ffa167d26581e5397fd34998)
 
 ## [0.2.1] - 8/March/2020
 

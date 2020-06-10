@@ -26,14 +26,18 @@
 ---
 
 **Contents:** **[Installation and Usage](#installation-and-usage)** |
-**[Show Error](#show-error)** | **[Star Import](#star-import)** |
+**[`--check` flag](#--check-flag)** | **[`-d, --diff` flag](#-d---diff-flag)** |
+**[`-p, --permission` flag](#-p---permission-flag)** |
+**[`-r, --remove` flag](#-r---remove-flag)** |
+**[`--show-error` flag](#--show-error-flag)** |
+**[`--include-star-import` flag](#--include-star-import)** |
 **[Typing Comments](#typing-comments)** | **[Skip Import](#skip-import)** |
 **[`__all__`](#__all__)** | **[Command line options](#command-line-options)** |
 **[Configuring Unimport](#configuring-unimport)** |
 **[Adding pre-commit plugins to your project](#adding-pre-commit-plugins-to-your-project)**
 | **[Our badge](#our-badge-)** | **[CONTRIBUTING](#-contributingmd-)** |
 **[CHANGELOG.md](#changelogmd)** | **[Contact](#contact)** |
-**[Who's using Unimport?](#whos-using-unimport)**
+**[Who's using Unimport](#whos-using-unimport)**
 
 ---
 
@@ -44,20 +48,20 @@
 Unimport requires Python 3.6+ and can be easily installed using most common Python
 packaging tools. We recommend installing the latest stable release from PyPI with pip:
 
-```
-pip install unimport
+```shell
+$ pip install unimport
 ```
 
 ### Usage
 
-```
+```shell
 $ unimport [sources [sources ...]]
 ```
 
 _If you do not get any output, congratulations means there is no unused import in your
 project._
 
-#### Let's with example with simple a Python code.
+#### Let's with example with simple a Python code
 
 **example.py**
 
@@ -75,7 +79,21 @@ from i import t, ii
 print(t)
 ```
 
-```bash
+### `--check` flag
+
+> Prints which file the unused imports are in.
+
+When the `--diff`, `--permission` and `--remove` flags are used, the `--check` flag set
+as `False` If you still want to see the results, use the `--check` flag.
+
+#### Usage
+
+- `$ unimport example.py`
+- `$ unimport example.py --check`
+- `$ unimport example.py --diff --check`
+- `$ unimport example.py --check --diff --remove`
+
+```shell
 $ unimport example.py
 
 t at example.py:1
@@ -86,7 +104,14 @@ x at example.py:6
 ii at example.py:9
 ```
 
-**-d ( diff ) command**
+### `-d, --diff` flag
+
+> Prints a diff of all the changes unimport would make to a file.
+
+#### Usage
+
+- `$ unimport example.py -d`
+- `$ unimport example.py --diff`
 
 ```python
 $ unimport example.py -d
@@ -111,7 +136,14 @@ $ unimport example.py -d
 print(t)
 ```
 
-**-p ( permission ) command**
+### `-p, --permission` flag
+
+> Refactor permission after see diff.
+
+#### Usage
+
+- `$ unimport example.py -p`
+- `$ unimport example.py --permission`
 
 ```python
 $ unimport example.py -p
@@ -137,7 +169,14 @@ $ unimport example.py -p
 Apply suggested changes to 'example.py' [Y/n/q] ? >
 ```
 
-**and -r ( remove ) command**
+## `-r, --remove` flag
+
+> remove unused imports automatically.
+
+#### Usage
+
+- `$ unimport example.py -r`
+- `$ unimport example.py --remove`
 
 `$ unimport example.py -r`
 
@@ -152,18 +191,48 @@ from i import t
 print(t)
 ```
 
-### Show Error
+### `--show-error` flag
 
-`Show or don't show errors captured during static analysis.`
+> Show or don't show errors captured during static analysis.
 
 Use this flag if you want to see errors ( like `SyntaxError` ) during analysis.
 
-### Star Import
+#### Usage
 
-If you want to include star imports during scanning and refactor. Use command as follow.
+- `$ unimport example.py --show-error`
 
-```bash
+### `--include-star-import` flag
+
+> Include star imports during scanning and refactor.
+
+**/example.py**
+
+```python
+from os import *
+
+for i in walk("."):
+  print(i)
+```
+
+```shell
 $ unimport example.py --include-star-import
+
+os at example.py:1 from os import walk
+```
+
+```shell
+$ unimport example.py --include-star-import --diff
+--- example.py
+
++++
+
+@@ -1,4 +1,4 @@
+
+-from os import *
++from os import walk
+
+ for i in walk("."):
+   print(i)
 ```
 
 ### Typing Comments
@@ -191,7 +260,7 @@ Leave '# unimport: skip' or '# noqa' at the end of the line to skip imports **fo
 example:**
 
 ```python
-import x #unimport:skip
+import x # unimport:skip
 ```
 
 ```python
@@ -203,25 +272,26 @@ from x import ( # noqa
 
 ### `__all__`
 
-another rare case which support by unimport .
+Unimport looks at the items in the `__all__` list, if it matches the imports, marks it
+as being used.
 
 ```python
 import os
 
-__all__ = ["os"] # this import is used and umimport support this cases, it can understand
+__all__ = ["os"] # this import is used and umimport can understand
 ```
 
 ## Command line options
 
 You can list many options by running unimport --help
 
-```
+```bash
 usage: unimport [-h] [-c PATH] [--include include] [--exclude exclude]
                 [--include-star-import] [--show-error] [-d] [-r | -p]
                 [--check] [-v]
                 [sources [sources ...]]
 
-A linter & formatter for finding & removing unused import statements.
+A linter, formatter for finding and removing unused import statements.
 
 positional arguments:
   sources               files and folders to find the unused imports.
@@ -309,11 +379,11 @@ All notable changes to this project will be documented in this file.
 
 ## Contact
 
-- [![](https://img.shields.io/badge/telegram-@hakancelik-brightgreen?logo=telegram)](https://t.me/hakancelik96)
-- [![](https://img.shields.io/twitter/follow/hakancelik96?style=social)](https://twitter.com/hakancelik96)
-- [![](https://img.shields.io/github/followers/hakancelik96?label=hakancelik96&style=social)](https://github.com/hakancelik96)
-- [Mail](mailto:hakancelik96@outlook.com)
+- [![Telegram](https://img.shields.io/badge/telegram-@hakancelik-brightgreen?logo=telegram)](https://t.me/hakancelik96)
+- [![Twitter](https://img.shields.io/twitter/follow/hakancelik96?style=social)](https://twitter.com/hakancelik96)
+- [![Github](https://img.shields.io/github/followers/hakancelik96?label=hakancelik96&style=social)](https://github.com/hakancelik96)
+- <hakancelik96@outlook.com>
 
-## Who's using Unimport?
+## Who's using Unimport
 
 [![radity.com](https://raw.githubusercontent.com/hakancelik96/unimport/master/images/clients/radity.jpg)](https://radity.com/?ref=unimport)
