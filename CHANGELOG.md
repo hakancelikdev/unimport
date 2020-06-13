@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [unreleased] - ././2020
+
+- [🔥 fix: get_suggestion_modules function fix for `__all__` name when import is star](https://github.com/hakancelik96/unimport/pull/64)
+
 ## [0.2.7] - 9/June/2020
 
 - [🔥 If imports inside the `try ... except ImportError, ModuleNotFoundError` block, skip it. ( #46 ) by @hakancelik96 and @isidentical](https://github.com/hakancelik96/unimport/pull/62)

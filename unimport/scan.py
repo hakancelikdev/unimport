@@ -66,11 +66,7 @@ class Scanner(ast.NodeVisitor):
             alias_name = alias.asname or alias.name
             star = True if alias_name == "*" else False
             name = package if star else alias_name
-            is_package_or_name_ignore = (
-                package in self.ignore_imports
-                or name in self.ignore_import_names
-            )
-            if is_package_or_name_ignore or (
+            if package in self.ignore_imports or (
                 star and not self.include_star_import
             ):
                 return
@@ -214,7 +210,11 @@ class Scanner(ast.NodeVisitor):
                 scanner = self.__class__(inspect.getsource(imp["module"]))
                 objects = scanner.classes + scanner.functions + scanner.names
                 from_all_name = {obj["name"] for obj in objects}
-                to_names = {to_cfv["name"] for to_cfv in self.names}
+                to_names = {
+                    to_cfv["name"]
+                    for to_cfv in self.names
+                    if to_cfv["name"] not in self.ignore_import_names
+                }
                 suggestion_modules = sorted(from_all_name & to_names)
                 return suggestion_modules
         return {}
