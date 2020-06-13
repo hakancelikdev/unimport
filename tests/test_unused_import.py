@@ -74,7 +74,7 @@ class Test__All__(UnusedTestCase):
             {
                 "lineno": 1,
                 "module": os,
-                "modules": ["__all__", "walk"],
+                "modules": ["walk"],
                 "name": "os",
                 "star": True,
             }
@@ -88,7 +88,7 @@ class Test__All__(UnusedTestCase):
             {
                 "lineno": 1,
                 "module": os,
-                "modules": ["__all__"],
+                "modules": [],
                 "name": "os",
                 "star": True,
             }
@@ -97,9 +97,16 @@ class Test__All__(UnusedTestCase):
 
     def test_plus_bin_op(self):
         # NOTE no support.
-        op = "+"
-        source = f"from os import *\n" "__all__ = ['w'{op}'alk']"
-        expected_unused_imports = []
+        source = f"from os import *\n" "__all__ = ['w' + 'alk']"
+        expected_unused_imports = [
+            {
+                "lineno": 1,
+                "module": os,
+                "modules": [],
+                "name": "os",
+                "star": True,
+            }
+        ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_list_comprehension(self):
@@ -112,7 +119,7 @@ class Test__All__(UnusedTestCase):
             {
                 "lineno": 1,
                 "module": os,
-                "modules": ["__all__"],
+                "modules": [],
                 "name": "os",
                 "star": True,
             }
