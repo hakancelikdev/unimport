@@ -1,6 +1,7 @@
 import ast
 import builtins
 import contextlib
+import functools
 import importlib
 import inspect
 import io
@@ -17,8 +18,9 @@ SET_BUILTINS = set(dir(builtins))
 def recursive(func):
     """decorator to make visitor work recursive"""
 
-    def wrapper(self, node, *args, **kwargs):
-        func(self, node, *args, **kwargs)
+    @functools.wraps(func)
+    def wrapper(self, node):
+        func(self, node)
         self.generic_visit(node)
 
     return wrapper
@@ -56,15 +58,13 @@ class Scanner(ast.NodeVisitor):
         if not hasattr(node, "class_def"):
             self.functions.append({"lineno": node.lineno, "name": node.name})
 
-    @recursive
-    def visit_Import(self, node, module_name=None):
+    def alike_import(self, node, module_name=None, star=False):
         if self.skip_import(node):
             return
         module = None
         for alias in node.names:
             package = module_name or alias.name
             alias_name = alias.asname or alias.name
-            star = True if alias_name == "*" else False
             name = package if star else alias_name
             if package in self.ignore_imports or (
                 star and not self.include_star_import
@@ -83,8 +83,14 @@ class Scanner(ast.NodeVisitor):
             )
 
     @recursive
+    def visit_Import(self, node):
+        self.alike_import(node)
+
+    @recursive
     def visit_ImportFrom(self, node):
-        self.visit_Import(node, node.module)
+        self.alike_import(
+            node, module_name=node.module, star=node.names[0].name == "*"
+        )
 
     @recursive
     def visit_Name(self, node):
