@@ -33,8 +33,10 @@
       window.$docsify = {
         name: "Unimport",
         repo: "hakancelik96/unimport",
-        loadNavbar: "nav.md",
+        loadNavbar: true,
         loadSidebar: "summary.md",
+        auto2top: true,
+        coverpage: true,
         hideSidebar: false,
         subMaxLevel: 2,
         homepage: "README.md",
@@ -44,6 +46,14 @@
           buttonText: "Copy to clipboard",
           errorText: "Error",
           successText: "Copied"
+        },
+        share: {
+          reddit: true,
+          linkedin: true,
+          facebook: true,
+          twitter: true,
+          whatsapp: true,
+          telegram: true
         }
       };
     </script>
@@ -62,5 +72,7 @@
     <!-- prism -->
     <script src="//cdn.jsdelivr.net/npm/prismjs/components/prism-bash.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/prismjs/components/prism-python.min.js"></script>
+    <!-- docsify-share -->
+    <script src="//unpkg.com/docsify-share/build/index.min.js"></script>
   </body>
 </html>

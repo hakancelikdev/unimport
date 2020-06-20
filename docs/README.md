@@ -1,3 +1,5 @@
+## Get Started
+
 ![unimport](https://raw.githubusercontent.com/hakancelik96/unimport/master/images/logo/Unimport.png)
 
 **A linter & formatter for finding & removing unused import statements.**
