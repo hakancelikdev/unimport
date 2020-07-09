@@ -12,7 +12,7 @@ import tokenize
 from unimport.color import Color
 
 PY38_PLUS = sys.version_info >= (3, 8)
-SET_BUILTINS = set(dir(builtins))
+BUILTINS = {_build for _build in dir(builtins) if not _build.startswith("_")}
 
 
 def recursive(func):
@@ -198,7 +198,7 @@ class Scanner(ast.NodeVisitor):
         )
 
     def get_names(self):
-        imp_match_built_in = SET_BUILTINS & set(self.import_names)
+        imp_match_built_in = BUILTINS & set(self.import_names)
         yield from filter(
             lambda name: list(
                 filter(
