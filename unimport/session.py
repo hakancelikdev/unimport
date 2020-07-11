@@ -18,7 +18,7 @@ class Session:
         self, config_file=None, include_star_import=False, show_error=False
     ):
         self.show_error = show_error
-        self.config = Config(config_file)
+        self.config = Config(config_file) if config_file else None
         self.scanner = Scanner(
             include_star_import=include_star_import, show_error=self.show_error
         )
