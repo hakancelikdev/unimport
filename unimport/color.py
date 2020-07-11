@@ -1,4 +1,6 @@
-COLORS = {
+from typing import Dict
+
+COLORS: Dict[str, str] = {
     "black": "\033[30m",
     "red": "\033[31m",
     "green": "\033[32m",
@@ -12,7 +14,7 @@ COLORS = {
 
 
 class Color:
-    reset = "\033[0m"
+    reset: str = "\033[0m"
 
     def __init__(self, content: str) -> None:
         self.content = content
@@ -20,7 +22,7 @@ class Color:
     def template(self, color: str) -> str:
         return COLORS[color] + self.content + self.reset
 
-    def __getattribute__(self, name: str):
+    def __getattribute__(self, name: str) -> str:
         if name in COLORS:
             return self.template(name)
         return super().__getattribute__(name)
