@@ -2,9 +2,10 @@ import difflib
 import re
 import tokenize
 from pathlib import Path
+from typing import Optional
 
 from unimport.color import Color
-from unimport.config import Config
+from unimport.config import CONFIG_FILES, Config
 from unimport.refactor import refactor_string
 from unimport.scan import Scanner
 
@@ -15,10 +16,18 @@ class Session:
     EXCLUDE_REGEX_PATTERN = "^$"
 
     def __init__(
-        self, config_file=None, include_star_import=False, show_error=False
+        self,
+        config_file: Optional[Path] = None,
+        *,
+        include_star_import=False,
+        show_error=False
     ):
         self.show_error = show_error
-        self.config = Config(config_file) if config_file else None
+        self.config = (
+            Config(config_file)
+            if config_file and config_file.name in CONFIG_FILES
+            else None
+        )
         self.scanner = Scanner(
             include_star_import=include_star_import, show_error=self.show_error
         )
