@@ -70,9 +70,7 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
 
     @staticmethod
     def leave_StarImport(
-        original_node: cst.ImportFrom,
-        updated_node: cst.ImportFrom,
-        **kwargs
+        original_node: cst.ImportFrom, updated_node: cst.ImportFrom, **kwargs
     ) -> Union[cst.ImportFrom, RemovalSentinel]:
         imp = kwargs["imp"]
         if imp["modules"]:
@@ -88,12 +86,12 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
 
     def leave_Import(
         self, original_node: cst.Import, updated_node: cst.Import
-    ) -> Union[RemovalSentinel, cst.Import, cst.ImportFrom]:
+    ) -> Union[RemovalSentinel, cst.Import]:
         return self.leave_import_alike(original_node, updated_node)
 
     def leave_ImportFrom(
         self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom
-    ) -> Union[RemovalSentinel, cst.Import, cst.ImportFrom]:
+    ) -> Union[RemovalSentinel, cst.ImportFrom]:
         if isinstance(updated_node.names, cst.ImportStar):
 
             def get_star_imp():
