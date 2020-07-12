@@ -17,25 +17,9 @@ def get_parents(node):
         yield parent
 
 
-class AncestorChain(set):
-    def __init__(self, *args):
-        return super().__init__(args)
-
-    def __contains__(self, node):
-        return self.issubset(map(type, get_parents(node)))
-
-
 def first_occurrence(node, *ancestors):
     for parent in get_parents(node):
         if type(parent) in ancestors:
             return parent
-    else:
-        return False
-
-
-def is_parented_by(node, *ancestors):
-    for parent in get_parents(node):
-        if parent in ancestors:
-            return True
     else:
         return False

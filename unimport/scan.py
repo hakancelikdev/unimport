@@ -34,8 +34,8 @@ def recursive(func: Callable) -> Callable:
     """decorator to make visitor work recursive"""
 
     @functools.wraps(func)
-    def wrapper(self, node):
-        func(self, node)
+    def wrapper(self, node, *args, **kwargs):
+        func(self, node, *args, **kwargs)
         self.generic_visit(node)
 
     return wrapper
@@ -71,13 +71,6 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
-        if (
-            node.returns
-            and isinstance(node.returns, ast.Constant)
-            and isinstance(node.returns.value, str)
-        ):
-            with contextlib.suppress(SyntaxError):
-                self.visit(ast.parse(node.returns.value, mode="eval"))
         if not first_occurrence(node, ast.ClassDef):
             self.functions.append({"lineno": node.lineno, "name": node.name})
 
@@ -113,14 +106,21 @@ class Scanner(ast.NodeVisitor):
     @recursive
     def visit_Str(self, node: ast.Str) -> None:
         constant = ast.Constant(node.s)
-        constant.parent = node.parent
-        self.visit_Constant(constant)
+        constant.parent = node.parent  # type: ignore
+        self.visit_Constant(constant, id_=id(node))
 
     @recursive
-    def visit_Constant(self, node: ast.Constant) -> None:
-        if isinstance(node.value, str) and any(
+    def visit_Constant(
+        self, node: ast.Constant, id_: Optional[int] = None
+    ) -> None:
+        id_ = id_ or id(node)
+        parent = first_occurrence(node, ast.FunctionDef)
+        is_annasign_and_arg = any(
             type_parent in {ast.AnnAssign, ast.arg}
             for type_parent in map(type, get_parents(node))
+        )
+        if (parent and id(parent.returns) == id_) or (
+            isinstance(node.value, str) and is_annasign_and_arg
         ):
             with contextlib.suppress(SyntaxError):
                 self.visit(ast.parse(node.value, mode="eval"))
