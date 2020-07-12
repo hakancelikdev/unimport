@@ -2,6 +2,7 @@ import argparse
 import re
 import sys
 from pathlib import Path
+from typing import List, Optional
 
 from unimport import __description__, __version__
 from unimport.color import Color
@@ -144,27 +145,28 @@ def show(unused_import, py_path):
             print(output(imp["name"], py_path, imp["lineno"], modules,))
 
 
-def main(argv=None):
+def main(argv: List[str]):
     namespace = parser.parse_args(argv)
     namespace.check = namespace.check or not any(
-        [value for key, value in vars(namespace).items()][6:-1]
+        [value for _, value in vars(namespace).items()][6:-1]
     )
     session = Session(
         config_file=namespace.config,
         include_star_import=namespace.include_star_import,
         show_error=namespace.show_error,
     )
-    include_list, exclude_list = [], []
+    include_list: List[str] = []
+    exclude_list: List[str] = []
     if namespace.include:
         include_list.append(namespace.include)
     if hasattr(session.config, "include"):
-        include_list.append(session.config.include)
+        include_list.append(session.config.include)  # type: ignore
     if namespace.exclude:
         exclude_list.append(namespace.exclude)
     if hasattr(session.config, "exclude"):
-        exclude_list.append(session.config.exclude)
-    include = re.compile("|".join(include_list)).pattern
-    exclude = re.compile("|".join(exclude_list)).pattern
+        exclude_list.append(session.config.exclude)  # type: ignore
+    include: str = re.compile("|".join(include_list)).pattern
+    exclude: str = re.compile("|".join(exclude_list)).pattern
     _any_unimport = False
     for source_path in namespace.sources:
         for py_path in session._list_paths(source_path, include, exclude):
