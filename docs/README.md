@@ -339,7 +339,7 @@ config file describes what repositories and hooks are installed.
 ```yaml
 repos:
   - repo: https://github.com/hakancelik96/unimport
-    rev: v0.2.7
+    rev: v0.2.8
     hooks:
       - id: unimport
         args: [-r, --include-star-import]
@@ -347,11 +347,11 @@ repos:
 
 ## Our badge
 
-[![style](https://img.shields.io/badge/unimport-v0.2.7-red)](https://github.com/hakancelik96/unimport)
+[![style](https://img.shields.io/badge/unimport-v0.2.8-red)](https://github.com/hakancelik96/unimport)
 
 **Please insert this badge into your project**
 
-`[![style](https://img.shields.io/badge/unimport-v0.2.7-red)](https://github.com/hakancelik96/unimport)`
+`[![style](https://img.shields.io/badge/unimport-v0.2.8-red)](https://github.com/hakancelik96/unimport)`
 
 ## CONTRIBUTING
 
