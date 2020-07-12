@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased] - ././2020
 
+- [💪 Support for type hints (#58) & string typing by @hakancelik96 & @isidentical](https://github.com/hakancelik96/unimport/pull/71)
+  - ```python
+    from typing import List, TYPE_TEST
+    test: 'List[TYPE_TEST]'
+    ```
 - [🔥 fix: get_suggestion_modules function fix for `__all__` name when import is star](https://github.com/hakancelik96/unimport/pull/64)
 
 ## [0.2.7] - 9/June/2020
