@@ -71,6 +71,13 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        if (
+            node.returns
+            and isinstance(node.returns, ast.Constant)
+            and isinstance(node.returns.value, str)
+        ):
+            with contextlib.suppress(SyntaxError):
+                self.visit(ast.parse(node.returns.value, mode="eval"))
         if not first_occurrence(node, ast.ClassDef):
             self.functions.append({"lineno": node.lineno, "name": node.name})
 
@@ -111,19 +118,6 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_Constant(self, node: ast.Constant) -> None:
-        for type_parent in get_parents(node):
-            if (
-                isinstance(type_parent, ast.FunctionDef)
-                and type_parent.returns
-            ):
-                if isinstance(type_parent.returns, ast.Constant):
-                    if type_parent.returns.value == node.value:
-                        with contextlib.suppress(SyntaxError):
-                            self.visit(ast.parse(node.value, mode="eval"))
-                elif isinstance(type_parent.returns, ast.Str):
-                    if type_parent.returns.s == node.value:
-                        with contextlib.suppress(SyntaxError):
-                            self.visit(ast.parse(node.value, mode="eval"))
         if isinstance(node.value, str) and any(
             type_parent in {ast.AnnAssign, ast.arg}
             for type_parent in map(type, get_parents(node))
@@ -175,7 +169,7 @@ class Scanner(ast.NodeVisitor):
                             if isinstance(node, ast.Name) and isinstance(
                                 node.ctx, ast.Load
                             ):
-                                yield node
+                                self.visit(node)
 
     @recursive
     def visit_Attribute(self, node: ast.Attribute) -> None:
@@ -223,8 +217,7 @@ class Scanner(ast.NodeVisitor):
     def run_visit(self, source: str) -> None:
         self.source = source
         if PY38_PLUS:
-            for node in self.iter_type_comments():
-                self.names.append({"lineno": node.lineno, "name": node.id})
+            self.iter_type_comments()
         with contextlib.suppress(SyntaxError):
             tree = ast.parse(self.source)
             relate(tree)
