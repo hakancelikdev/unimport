@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import TYPE_CHECKING, List, Union
 
 import libcst as cst
 from libcst._position import CodeRange
@@ -7,13 +7,14 @@ from libcst.metadata import MetadataWrapper, PositionProvider
 
 from unimport.color import Color
 
+if TYPE_CHECKING:
+    from unimport.models import TYPE_IMPORT
+
 
 class RemoveUnusedImportTransformer(cst.CSTTransformer):
     METADATA_DEPENDENCIES = [PositionProvider]
 
-    def __init__(
-        self, unused_imports: List[Dict[str, Optional[Union[int, str]]]]
-    ) -> None:
+    def __init__(self, unused_imports: "List[TYPE_IMPORT]") -> None:
         self.unused_imports = unused_imports
 
     @staticmethod
@@ -32,11 +33,8 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
 
     def is_import_used(self, import_name: str, location: CodeRange) -> bool:
         return not any(
-            [
-                imp["name"] == import_name
-                and imp["lineno"] == location.start.line
-                for imp in self.unused_imports
-            ]
+            imp["name"] == import_name and imp["lineno"] == location.start.line
+            for imp in self.unused_imports
         )
 
     def get_location(
@@ -119,9 +117,7 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
 
 
 def refactor_string(
-    source: str,
-    unused_imports: List[Dict[str, Optional[Union[int, str]]]],
-    show_error: bool,
+    source: str, unused_imports: "List[TYPE_IMPORT]", show_error: bool,
 ) -> str:
     try:
         wrapper = MetadataWrapper(cst.parse_module(source))

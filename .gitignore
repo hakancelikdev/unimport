@@ -82,10 +82,9 @@ celerybeat-schedule
 *.sage.py
 
 # Environments
-env36/
-.env
+.env*/
 .venv
-env/
+env*/
 venv/
 ENV/
 env.bak/
@@ -103,3 +102,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# typing
+monkeytype.sqlite3

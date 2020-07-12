@@ -8,14 +8,29 @@ import io
 import re
 import sys
 import tokenize
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    Iterator,
+    List,
+    Optional,
+    Set,
+    Union,
+)
 
 from unimport.color import Color
+from unimport.relate import first_occurrence, get_parents, relate
 
-PY38_PLUS = sys.version_info >= (3, 8)
-BUILTINS = {_build for _build in dir(builtins) if not _build.startswith("_")}
+if TYPE_CHECKING:
+    from unimport.models import TYPE_IMPORT, TYPE_NAME
+
+PY38_PLUS: bool = sys.version_info >= (3, 8)
+BUILTINS: Set[str] = {
+    _build for _build in dir(builtins) if not _build.startswith("_")
+}
 
 
-def recursive(func):
+def recursive(func: Callable) -> Callable:
     """decorator to make visitor work recursive"""
 
     @functools.wraps(func)
@@ -29,36 +44,42 @@ def recursive(func):
 class Scanner(ast.NodeVisitor):
     """To detect unused import using ast"""
 
-    ignore_imports = ["__future__"]
-    ignore_import_names = ["__all__", "__doc__"]
-    skip_comments_regex = "#\s*(unimport:skip|noqa)"
+    ignore_imports: List[str] = ["__future__"]
+    ignore_import_names: List[str] = ["__all__", "__doc__"]
+    skip_comments_regex: str = "#\s*(unimport:skip|noqa)"
     any_import_error: bool = False
 
     def __init__(
-        self, source=None, include_star_import=False, show_error=False
+        self,
+        source: Optional[str] = None,
+        *,
+        include_star_import: bool = False,
+        show_error: bool = False,
     ):
         self.include_star_import = include_star_import
         self.show_error = show_error
-        self.names = []
-        self.imports = []
-        self.classes = []
-        self.functions = []
+        self.imports: "List[TYPE_IMPORT]" = []
+        self.classes: "List[TYPE_NAME]" = []
+        self.functions: "List[TYPE_NAME]" = []
+        self.names: "List[TYPE_NAME]" = []
         if source:
             self.run_visit(source)
 
     @recursive
-    def visit_ClassDef(self, node):
-        for function_node in ast.walk(node):
-            if isinstance(function_node, ast.FunctionDef):
-                function_node.class_def = True
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
         self.classes.append({"lineno": node.lineno, "name": node.name})
 
     @recursive
-    def visit_FunctionDef(self, node):
-        if not hasattr(node, "class_def"):
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        if not first_occurrence(node, ast.ClassDef):
             self.functions.append({"lineno": node.lineno, "name": node.name})
 
-    def alike_import(self, node, module_name=None, star=False):
+    def alike_import(
+        self,
+        node: Union[ast.Import, ast.ImportFrom],
+        module_name: Optional[str] = None,
+        star: bool = False,
+    ) -> None:
         if self.skip_import(node):
             return
         module = None
@@ -83,17 +104,45 @@ class Scanner(ast.NodeVisitor):
             )
 
     @recursive
-    def visit_Import(self, node):
+    def visit_Str(self, node: ast.Str) -> None:
+        constant = ast.Constant(node.s)
+        constant.parent = node.parent
+        self.visit_Constant(constant)
+
+    @recursive
+    def visit_Constant(self, node: ast.Constant) -> None:
+        for type_parent in get_parents(node):
+            if (
+                isinstance(type_parent, ast.FunctionDef)
+                and type_parent.returns
+            ):
+                if isinstance(type_parent.returns, ast.Constant):
+                    if type_parent.returns.value == node.value:
+                        with contextlib.suppress(SyntaxError):
+                            self.visit(ast.parse(node.value, mode="eval"))
+                elif isinstance(type_parent.returns, ast.Str):
+                    if type_parent.returns.s == node.value:
+                        with contextlib.suppress(SyntaxError):
+                            self.visit(ast.parse(node.value, mode="eval"))
+        if isinstance(node.value, str) and any(
+            type_parent in {ast.AnnAssign, ast.arg}
+            for type_parent in map(type, get_parents(node))
+        ):
+            with contextlib.suppress(SyntaxError):
+                self.visit(ast.parse(node.value, mode="eval"))
+
+    @recursive
+    def visit_Import(self, node: ast.Import) -> None:
         self.alike_import(node)
 
     @recursive
-    def visit_ImportFrom(self, node):
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
         self.alike_import(
             node, module_name=node.module, star=node.names[0].name == "*"
         )
 
     @recursive
-    def visit_Name(self, node):
+    def visit_Name(self, node: ast.Name) -> None:
         self.names.append({"lineno": node.lineno, "name": node.id})
 
     def iter_type_comments(self):
@@ -129,7 +178,7 @@ class Scanner(ast.NodeVisitor):
                                 yield node
 
     @recursive
-    def visit_Attribute(self, node):
+    def visit_Attribute(self, node: ast.Attribute) -> None:
         local_attr = []
         for attr_node in ast.walk(node):
             if isinstance(attr_node, ast.Name):
@@ -142,7 +191,7 @@ class Scanner(ast.NodeVisitor):
         )
 
     @recursive
-    def visit_Assign(self, node):
+    def visit_Assign(self, node: ast.Assign) -> None:
         if getattr(node.targets[0], "id", None) == "__all__" and isinstance(
             node.value, (ast.List, ast.Tuple, ast.Set)
         ):
@@ -150,7 +199,7 @@ class Scanner(ast.NodeVisitor):
                 if isinstance(item, ast.Str):
                     self.names.append({"lineno": node.lineno, "name": item.s})
 
-    def visit_Try(self, node):
+    def visit_Try(self, node: ast.Try) -> None:
         def any_import_error(items):
             for item in items:
                 if isinstance(item, ast.Name) and item.id in {
@@ -171,33 +220,37 @@ class Scanner(ast.NodeVisitor):
         self.generic_visit(node)
         self.any_import_error = False
 
-    def run_visit(self, source):
+    def run_visit(self, source: str) -> None:
         self.source = source
         if PY38_PLUS:
             for node in self.iter_type_comments():
                 self.names.append({"lineno": node.lineno, "name": node.id})
         with contextlib.suppress(SyntaxError):
-            self.visit(ast.parse(self.source))
+            tree = ast.parse(self.source)
+            relate(tree)
+            self.visit(tree)
         self.import_names = [imp["name"] for imp in self.imports]
         self.names = list(self.get_names())
         self.unused_imports = list(self.get_unused_imports())
 
-    def clear(self):
+    def clear(self) -> None:
         self.names.clear()
         self.imports.clear()
         self.classes.clear()
         self.functions.clear()
 
-    def skip_import(self, node):
+    def skip_import(self, node: Union[ast.ImportFrom, ast.Import]) -> bool:
         return (
-            re.search(
-                self.skip_comments_regex,
-                self.source.split("\n")[node.lineno - 1].lower(),
+            bool(
+                re.search(
+                    self.skip_comments_regex,
+                    self.source.split("\n")[node.lineno - 1].lower(),
+                )
             )
             or self.any_import_error
         )
 
-    def get_names(self):
+    def get_names(self) -> "Iterator[TYPE_NAME]":
         imp_match_built_in = BUILTINS & set(self.import_names)
         yield from filter(
             lambda name: list(
@@ -210,8 +263,8 @@ class Scanner(ast.NodeVisitor):
             self.names,
         )
 
-    def get_suggestion_modules(self, imp):
-        if imp["module"]:
+    def get_suggestion_modules(self, imp: "TYPE_IMPORT") -> List[str]:
+        if imp["module"] is not None:
             with contextlib.suppress(OSError, TypeError):
                 scanner = self.__class__(inspect.getsource(imp["module"]))
                 objects = scanner.classes + scanner.functions + scanner.names
@@ -223,9 +276,9 @@ class Scanner(ast.NodeVisitor):
                 }
                 suggestion_modules = sorted(from_all_name & to_names)
                 return suggestion_modules
-        return {}
+        return []
 
-    def get_unused_imports(self):
+    def get_unused_imports(self) -> "Iterator[TYPE_IMPORT]":
         for imp in self.imports:
             if self.is_duplicate(imp["name"]):
                 if not list(
@@ -249,15 +302,15 @@ class Scanner(ast.NodeVisitor):
                     ):
                         yield imp
 
-    def is_duplicate(self, name):
+    def is_duplicate(self, name: str) -> bool:
         return self.import_names.count(name) > 1
 
-    def get_duplicate_imports(self):
+    def get_duplicate_imports(self) -> "Iterator[TYPE_IMPORT]":
         yield from filter(
             lambda imp: self.is_duplicate(imp["name"]), self.imports
         )
 
-    def is_duplicate_used(self, name, imp):
+    def is_duplicate_used(self, name: "TYPE_NAME", imp: "TYPE_IMPORT") -> bool:
         def find_nearest_imp(name):
             nearest = ""
             for dup_imp in self.get_duplicate_imports():
