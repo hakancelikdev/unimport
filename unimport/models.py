@@ -1,5 +1,5 @@
-from typing import List, TYPE_CHECKING, Optional
 from types import ModuleType
+from typing import TYPE_CHECKING, List, Optional
 
 if TYPE_CHECKING:
     from typing_extensions import TypedDict
@@ -14,4 +14,3 @@ if TYPE_CHECKING:
         star: bool
         module: Optional[ModuleType]
         modules: List[str]
-

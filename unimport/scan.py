@@ -22,7 +22,7 @@ from unimport.color import Color
 from unimport.relate import first_occurrence, get_parents, relate
 
 if TYPE_CHECKING:
-    from unimport.models import TYPE_IMPORT, TYPE_NAME
+    from unimport.models import TYPE_NAME, TYPE_IMPORT
 
 PY38_PLUS: bool = sys.version_info >= (3, 8)
 BUILTINS: Set[str] = {
