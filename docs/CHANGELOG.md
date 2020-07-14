@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.2.8] - 13/July/2020
+## [0.2.8] - ././2020
 
 - [💪 Support for type hints (#58) by @hakancelik96 & string typing @isidentical](https://github.com/hakancelik96/unimport/pull/71)
   - ```python
@@ -11,7 +11,7 @@ All notable changes to this project will be documented in this file.
     ```
 - [🔥 fix: get_suggestion_modules function fix for `__all__` name when import is star](https://github.com/hakancelik96/unimport/pull/64)
 
-## [0.2.7] - 9/June/2020
+## [0.2.8] - 9/June/2020
 
 - [🔥 If imports inside the `try ... except ImportError, ModuleNotFoundError` block, skip it. ( #46 ) by @hakancelik96 and @isidentical](https://github.com/hakancelik96/unimport/pull/62)
 

@@ -91,7 +91,7 @@ class Scanner(ast.NodeVisitor):
                 star and not self.include_star_import
             ):
                 return
-            with contextlib.suppress(ImportError, ValueError):
+            with contextlib.suppress(ImportError, ValueError, AssertionError):
                 module = importlib.import_module(package)
             self.imports.append(
                 {
@@ -103,7 +103,6 @@ class Scanner(ast.NodeVisitor):
                 }
             )
 
-    @recursive
     def visit_Str(self, node: ast.Str) -> None:
         constant = ast.Constant(node.s)
         constant.parent = node.parent  # type: ignore
@@ -119,8 +118,10 @@ class Scanner(ast.NodeVisitor):
             type_parent in {ast.AnnAssign, ast.arg}
             for type_parent in map(type, get_parents(node))
         )
-        if (parent and id(parent.returns) == id_) or (
-            isinstance(node.value, str) and is_annasign_and_arg
+        if (
+            isinstance(node.value, str)
+            and (parent and id(parent.returns) == id_)
+            or is_annasign_and_arg
         ):
             with contextlib.suppress(SyntaxError):
                 self.visit(ast.parse(node.value, mode="eval"))

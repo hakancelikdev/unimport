@@ -5,7 +5,7 @@ from typing import Iterator
 
 
 def relate(tree: ast.Module) -> None:
-    tree.parent = None # type: ignore
+    tree.parent = None  # type: ignore
     for parent in ast.walk(tree):
         for child in ast.iter_child_nodes(parent):
             child.parent = parent  # type: ignore
@@ -14,7 +14,7 @@ def relate(tree: ast.Module) -> None:
 def get_parents(node: ast.AST) -> Iterator[ast.AST]:
     parent = node
     while parent:
-        parent = parent.parent   # type: ignore
+        parent = parent.parent  # type: ignore
         yield parent
 
 

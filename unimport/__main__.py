@@ -145,7 +145,7 @@ def show(unused_import, py_path):
             print(output(imp["name"], py_path, imp["lineno"], modules,))
 
 
-def main(argv: List[str]):
+def main(argv: Optional[List[str]] = None):
     namespace = parser.parse_args(argv)
     namespace.check = namespace.check or not any(
         [value for _, value in vars(namespace).items()][6:-1]
