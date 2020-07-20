@@ -606,6 +606,16 @@ class TestTyping(RefactorTestCase):
             action, self.session.refactor(action),
         )
 
+    def test_function_str_arg(self):
+        action = (
+            """from typing import Literal, Dict\n"""
+            """def test(item, when: "Literal['Dict']"): \n"""
+            """   pass\n"""
+        )
+        self.assertEqual(
+            action, self.session.refactor(action),
+        )
+
     def test_function_return(self):
         action = (
             "from typing import List, TYPE_TEST\n"

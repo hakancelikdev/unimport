@@ -105,26 +105,36 @@ class Scanner(ast.NodeVisitor):
 
     def visit_Str(self, node: ast.Str) -> None:
         constant = ast.Constant(node.s)
-        constant.parent = node.parent  # type: ignore
-        self.visit_Constant(constant, id_=id(node))
+        try:
+            constant.parent = node.parent  # type: ignore
+        except AttributeError:
+            with contextlib.suppress(SyntaxError):
+                self.visit(ast.parse(node.s, mode="eval"))
+        else:
+            self.visit_Constant(constant, id_=id(node))
 
     @recursive
     def visit_Constant(
         self, node: ast.Constant, id_: Optional[int] = None
     ) -> None:
         id_ = id_ or id(node)
-        parent = first_occurrence(node, ast.FunctionDef)
-        is_annasign_and_arg = any(
-            type_parent in {ast.AnnAssign, ast.arg}
-            for type_parent in map(type, get_parents(node))
-        )
-        if (
-            isinstance(node.value, str)
-            and (parent and id(parent.returns) == id_)
-            or is_annasign_and_arg
-        ):
+        try:
+            parent = first_occurrence(node, ast.FunctionDef)
+        except AttributeError:
             with contextlib.suppress(SyntaxError):
                 self.visit(ast.parse(node.value, mode="eval"))
+        else:
+            is_annasign_and_arg = any(
+                type_parent in {ast.AnnAssign, ast.arg}
+                for type_parent in map(type, get_parents(node))
+            )
+            if (
+                isinstance(node.value, str)
+                and (parent and id(parent.returns) == id_)
+                or is_annasign_and_arg
+            ):
+                with contextlib.suppress(SyntaxError):
+                    self.visit(ast.parse(node.value, mode="eval"))
 
     @recursive
     def visit_Import(self, node: ast.Import) -> None:
