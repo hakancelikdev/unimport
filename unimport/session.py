@@ -11,9 +11,9 @@ from unimport.scan import Scanner
 
 
 class Session:
-    GLOB_PATTERN: str = "**/*.py"
-    INCLUDE_REGEX_PATTERN: str = "\\.(py)$"
-    EXCLUDE_REGEX_PATTERN: str = "^$"
+    GLOB_PATTERN = "**/*.py"
+    INCLUDE_REGEX_PATTERN = "\\.(py)$"
+    EXCLUDE_REGEX_PATTERN = "^$"
 
     def __init__(
         self,

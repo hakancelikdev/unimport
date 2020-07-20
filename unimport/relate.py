@@ -15,6 +15,8 @@ def get_parents(node: ast.AST) -> Iterator[ast.AST]:
     parent = node
     while parent:
         parent = parent.parent  # type: ignore
+        if parent is None:
+            continue
         yield parent
 
 

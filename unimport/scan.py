@@ -1,3 +1,7 @@
+"""
+This module performs static analysis using AST on the python code that's given as a string and reports its findings.
+"""
+
 import ast
 import builtins
 import contextlib
@@ -10,12 +14,14 @@ import sys
 import tokenize
 from typing import (
     TYPE_CHECKING,
+    Any,
     Callable,
     Iterator,
     List,
     Optional,
-    Set,
+    TypeVar,
     Union,
+    cast,
 )
 
 from unimport.color import Color
@@ -24,13 +30,13 @@ from unimport.relate import first_occurrence, get_parents, relate
 if TYPE_CHECKING:
     from unimport.models import TYPE_NAME, TYPE_IMPORT
 
-PY38_PLUS: bool = sys.version_info >= (3, 8)
-BUILTINS: Set[str] = {
-    _build for _build in dir(builtins) if not _build.startswith("_")
-}
+PY38_PLUS = sys.version_info >= (3, 8)
+BUILTINS = {_build for _build in dir(builtins) if not _build.startswith("_")}
+
+Function = TypeVar("Function", bound=Callable[..., Any])
 
 
-def recursive(func: Callable) -> Callable:
+def recursive(func: Function) -> Function:
     """decorator to make visitor work recursive"""
 
     @functools.wraps(func)
@@ -38,16 +44,14 @@ def recursive(func: Callable) -> Callable:
         func(self, node, *args, **kwargs)
         self.generic_visit(node)
 
-    return wrapper
+    return cast(Function, wrapper)
 
 
 class Scanner(ast.NodeVisitor):
-    """To detect unused import using ast"""
-
-    ignore_imports: List[str] = ["__future__"]
-    ignore_import_names: List[str] = ["__all__", "__doc__"]
-    skip_comments_regex: str = "#\s*(unimport:skip|noqa)"
-    any_import_error: bool = False
+    ignore_imports = ["__future__"]
+    ignore_import_names = ["__all__", "__doc__"]
+    skip_comments_regex = "#\s*(unimport:skip|noqa)"
+    any_import_error = False
 
     def __init__(
         self,
@@ -56,6 +60,13 @@ class Scanner(ast.NodeVisitor):
         include_star_import: bool = False,
         show_error: bool = False,
     ):
+        """
+        If include_star_import is True during the analysis, it takes into account start imports, if it's False, it doesn't.
+
+        E.g.: from x import * is a star import.
+
+        If show_error is True during the analysis, errors are displayed.
+        """
         self.include_star_import = include_star_import
         self.show_error = show_error
         self.imports: "List[TYPE_IMPORT]" = []
@@ -67,10 +78,28 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
+        """
+        When include_star_import becomes True, instead of suggesting star,
+        it analyses class names and suggests one of the analyzed class's name.
+
+        E.g.: from os import *
+        print(PathLike)
+
+        At this point from os import * becomes > from os import PathLike
+        """
         self.classes.append({"lineno": node.lineno, "name": node.name})
 
     @recursive
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        """
+        When include_star_import becomes True, instead of suggesting star,
+        it analyses function names and suggests one of the analyzed function's name.
+
+        E.g.: from os import *
+        print(walk)
+
+        At this point from os import * becomes > from os import walk
+        """
         if not first_occurrence(node, ast.ClassDef):
             self.functions.append({"lineno": node.lineno, "name": node.name})
 
@@ -91,7 +120,7 @@ class Scanner(ast.NodeVisitor):
                 star and not self.include_star_import
             ):
                 return
-            with contextlib.suppress(ImportError, ValueError, AssertionError):
+            with contextlib.suppress(BaseException):
                 module = importlib.import_module(package)
             self.imports.append(
                 {

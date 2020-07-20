@@ -1,6 +1,4 @@
-from typing import Dict
-
-COLORS: Dict[str, str] = {
+COLORS = {
     "black": "\033[30m",
     "red": "\033[31m",
     "green": "\033[32m",
@@ -14,7 +12,7 @@ COLORS: Dict[str, str] = {
 
 
 class Color:
-    reset: str = "\033[0m"
+    reset = "\033[0m"
 
     def __init__(self, content: str) -> None:
         self.content = content
