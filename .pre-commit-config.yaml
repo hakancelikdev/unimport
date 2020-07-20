@@ -18,7 +18,7 @@ repos:
         files: "\\.(py)$"
 
   - repo: https://github.com/hakancelik96/unimport
-    rev: v0.2.7
+    rev: 38e5cbcb0688b4e283c7c748e530acbae3e206e0
     hooks:
       - id: unimport
         args: [-r, --include-star-import]

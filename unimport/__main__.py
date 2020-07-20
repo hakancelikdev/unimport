@@ -2,6 +2,7 @@ import argparse
 import re
 import sys
 from pathlib import Path
+from typing import List, Optional
 
 from unimport import __description__, __version__
 from unimport.color import Color
@@ -141,28 +142,29 @@ def show(unused_import, py_path):
     for imp in unused_import:
         modules = get_modules(imp["name"], imp["star"], imp["modules"])
         if (imp["star"] and imp["module"]) or (not imp["star"]):
-            print(output(imp["name"], py_path, imp["lineno"], modules,))
+            print(output(imp["name"], py_path, imp["lineno"], modules))
 
 
-def main(argv=None):
+def main(argv: Optional[List[str]] = None) -> None:
     namespace = parser.parse_args(argv)
     namespace.check = namespace.check or not any(
-        [value for key, value in vars(namespace).items()][6:-1]
+        [value for value in vars(namespace).values()][6:-1]
     )
     session = Session(
         config_file=namespace.config,
         include_star_import=namespace.include_star_import,
         show_error=namespace.show_error,
     )
-    include_list, exclude_list = [], []
+    include_list = []
+    exclude_list = []
     if namespace.include:
         include_list.append(namespace.include)
     if hasattr(session.config, "include"):
-        include_list.append(session.config.include)
+        include_list.append(session.config.include)  # type: ignore
     if namespace.exclude:
         exclude_list.append(namespace.exclude)
     if hasattr(session.config, "exclude"):
-        exclude_list.append(session.config.exclude)
+        exclude_list.append(session.config.exclude)  # type: ignore
     include = re.compile("|".join(include_list)).pattern
     exclude = re.compile("|".join(exclude_list)).pattern
     _any_unimport = False
