@@ -217,7 +217,33 @@ $ unimport example.py --include-star-import --diff
    print(i)
 ```
 
-## Typing Comments
+## Typing
+
+Unimport can understand that imports are used these cases.
+
+```python
+from typing import List, Dict
+def test(arg: List[TYPE_TEST]) -> None:
+   pass
+```
+
+### String
+
+Unimport supports the following cases
+
+```python
+from typing import List, Dict
+def test(arg: 'List[Dict]') -> None:
+   pass
+```
+
+```python
+from typing import List, Dict
+def test(arg: "List['Dict']") -> None:
+   pass
+```
+
+### Comments
 
 **This feature is only available for python 3.8.**
 
@@ -267,7 +293,7 @@ __all__ = ["os"] # this import is used and umimport can understand
 
 You can list many options by running unimport --help
 
-```bash
+```
 usage: unimport [-h] [-c PATH] [--include include] [--exclude exclude]
                 [--include-star-import] [--show-error] [-d] [-r | -p]
                 [--check] [-v]

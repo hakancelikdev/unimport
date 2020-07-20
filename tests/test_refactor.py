@@ -589,17 +589,15 @@ class TestTyping(RefactorTestCase):
         )
 
     def test_variable(self):
-        action = (
-            "from typing import List, TYPE_TEST\n" "test: 'List[TYPE_TEST]'\n"
-        )
+        action = "from typing import List, Dict\n" "test: 'List[Dict]'\n"
         self.assertEqual(
             action, self.session.refactor(action),
         )
 
     def test_function_arg(self):
         action = (
-            "from typing import List, TYPE_TEST\n"
-            "def test(arg:'List[TYPE_TEST]'): \n"
+            "from typing import List, Dict\n"
+            "def test(arg:'List[Dict]') -> None : \n"
             "   pass\n"
         )
         self.assertEqual(
@@ -609,7 +607,7 @@ class TestTyping(RefactorTestCase):
     def test_function_str_arg(self):
         action = (
             """from typing import Literal, Dict\n"""
-            """def test(item, when: "Literal['Dict']"): \n"""
+            """def test(item, when: "Literal['Dict']") -> None :\n"""
             """   pass\n"""
         )
         self.assertEqual(
@@ -618,8 +616,8 @@ class TestTyping(RefactorTestCase):
 
     def test_function_return(self):
         action = (
-            "from typing import List, TYPE_TEST\n"
-            "def test(arg: list) -> 'List[TYPE_TEST]': \n"
+            "from typing import List, Dict\n"
+            "def test(arg: list) -> 'List[Dict]': \n"
             "   pass\n"
         )
         self.assertEqual(
