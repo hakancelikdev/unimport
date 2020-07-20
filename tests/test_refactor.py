@@ -506,24 +506,6 @@ class TestStarImport(RefactorTestCase):
         )
 
 
-@unittest.skipIf(
-    not PY38_PLUS, "This feature is only available for python 3.8."
-)
-class TestTypeComments(RefactorTestCase):
-    def test_type_comments(self):
-        action = (
-            "from typing import Any\n"
-            "from typing import Tuple\n"
-            "from typing import Union\n"
-            "def function(a, b):\n"
-            "    # type: (Any, str) -> Union[Tuple[None, None], Tuple[str, str]]\n"
-            "    pass\n"
-        )
-        self.assertEqual(
-            action, self.session.refactor(action),
-        )
-
-
 class TestImportError(RefactorTestCase):
     """
     Unimport skip imports controlled by ImportError.
@@ -583,4 +565,63 @@ class TestImportError(RefactorTestCase):
         )
         self.assertEqual(
             expected, self.session.refactor(action),
+        )
+
+
+class TestTyping(RefactorTestCase):
+
+    include_star_import = True
+
+    @unittest.skipIf(
+        not PY38_PLUS, "This feature is only available for python 3.8."
+    )
+    def test_type_comments(self):
+        action = (
+            "from typing import Any\n"
+            "from typing import Tuple\n"
+            "from typing import Union\n"
+            "def function(a, b):\n"
+            "    # type: (Any, str) -> Union[Tuple[None, None], Tuple[str, str]]\n"
+            "    pass\n"
+        )
+        self.assertEqual(
+            action, self.session.refactor(action),
+        )
+
+    def test_variable(self):
+        action = (
+            "from typing import List, TYPE_TEST\n" "test: 'List[TYPE_TEST]'\n"
+        )
+        self.assertEqual(
+            action, self.session.refactor(action),
+        )
+
+    def test_function_arg(self):
+        action = (
+            "from typing import List, TYPE_TEST\n"
+            "def test(arg:'List[TYPE_TEST]'): \n"
+            "   pass\n"
+        )
+        self.assertEqual(
+            action, self.session.refactor(action),
+        )
+
+    def test_function_str_arg(self):
+        action = (
+            """from typing import Literal, Dict\n"""
+            """def test(item, when: "Literal['Dict']"): \n"""
+            """   pass\n"""
+        )
+        self.assertEqual(
+            action, self.session.refactor(action),
+        )
+
+    def test_function_return(self):
+        action = (
+            "from typing import List, TYPE_TEST\n"
+            "def test(arg: list) -> 'List[TYPE_TEST]': \n"
+            "   pass\n"
+        )
+        self.assertEqual(
+            action, self.session.refactor(action),
         )

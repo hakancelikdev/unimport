@@ -2,9 +2,10 @@ import difflib
 import re
 import tokenize
 from pathlib import Path
+from typing import Iterable, Iterator, Optional, Tuple
 
 from unimport.color import Color
-from unimport.config import Config
+from unimport.config import CONFIG_FILES, Config
 from unimport.refactor import refactor_string
 from unimport.scan import Scanner
 
@@ -15,15 +16,23 @@ class Session:
     EXCLUDE_REGEX_PATTERN = "^$"
 
     def __init__(
-        self, config_file=None, include_star_import=False, show_error=False
-    ):
+        self,
+        config_file: Optional[Path] = None,
+        *,
+        include_star_import: bool = False,
+        show_error: bool = False
+    ) -> None:
         self.show_error = show_error
-        self.config = Config(config_file)
+        self.config = (
+            Config(config_file)
+            if config_file and config_file.name in CONFIG_FILES
+            else None
+        )
         self.scanner = Scanner(
             include_star_import=include_star_import, show_error=self.show_error
         )
 
-    def _read(self, path: Path):
+    def _read(self, path: Path) -> Tuple[str, str]:
         try:
             with tokenize.open(path) as stream:
                 source = stream.read()
@@ -34,11 +43,17 @@ class Session:
             return "", "utf-8"
         return source, encoding
 
-    def _list_paths(self, start, include=None, exclude=None):
+    def _list_paths(
+        self,
+        start: Path,
+        include: Optional[str] = None,
+        exclude: Optional[str] = None,
+    ) -> Iterator[Path]:
         include_regex, exclude_regex = (
             re.compile(include or self.INCLUDE_REGEX_PATTERN),
             re.compile(exclude or self.EXCLUDE_REGEX_PATTERN),
         )
+        file_names: Iterable[Path]
         if start.is_dir():
             file_names = start.glob(self.GLOB_PATTERN)
         else:
@@ -59,21 +74,21 @@ class Session:
         self.scanner.clear()
         return refactor
 
-    def refactor_file(self, path: Path, apply: bool = False):
+    def refactor_file(self, path: Path, apply: bool = False) -> str:
         source, encoding = self._read(path)
         result = self.refactor(source)
         if apply:
             path.write_text(result, encoding=encoding)
         return result
 
-    def diff(self, source: str) -> tuple:
+    def diff(self, source: str) -> Tuple[str, ...]:
         return tuple(
             difflib.unified_diff(
                 source.splitlines(), self.refactor(source).splitlines()
             )
         )
 
-    def diff_file(self, path: Path) -> tuple:
+    def diff_file(self, path: Path) -> Tuple[str, ...]:
         source, _ = self._read(path)
         result = self.refactor_file(path, apply=False)
         return tuple(

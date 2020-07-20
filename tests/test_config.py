@@ -26,11 +26,6 @@ class TestConfig(TestCase):
         ).config
         self.config_cfg = Session(config_file=CONFIG_CFG["config_file"]).config
 
-    def test_toml_find_config(self):
-        actual_path, actual_section = self.config_toml.find_config()
-        self.assertEqual(actual_path, CONFIG_TOML["config_file"])
-        self.assertEqual(actual_section, CONFIG_TOML["section"])
-
     def test_toml_attr(self):
         self.assertEqual(self.include, self.config_toml.include)
         self.assertEqual(self.exclude, self.config_toml.exclude)
@@ -51,11 +46,6 @@ class TestConfig(TestCase):
             )
         )
 
-    def test_cfg_find_config(self):
-        actual_path, actual_section = self.config_cfg.find_config()
-        self.assertEqual(actual_path, CONFIG_CFG["config_file"])
-        self.assertEqual(actual_section, CONFIG_CFG["section"])
-
     def test_cfg_attr(self):
         self.assertEqual(self.include, self.config_cfg.include)
         self.assertEqual(self.exclude, self.config_cfg.exclude)
@@ -65,8 +55,6 @@ class TestConfig(TestCase):
             self.config_cfg.is_available_to_parse(self.config_cfg.config_file)
         )
 
-    def test_config_file_none_find_config(self):
+    def test_config_file_none(self):
         none_config = Session(config_file=None).config
-        actual_path, actual_section = none_config.find_config()
-        self.assertIsNone(actual_path)
-        self.assertIsNone(actual_section)
+        self.assertIsNone(none_config)
