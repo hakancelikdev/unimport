@@ -14,7 +14,7 @@ class TestSession(unittest.TestCase):
 
     def test_list_paths_and_read(self):
         for path in [Path("tests"), Path("tests/test_config.py")]:
-            for p in self.session._list_paths(path):
+            for p in self.session.list_paths(path):
                 self.assertTrue(str(p).endswith(".py"))
 
     def temp_refactor(self, source: str, expected: str, apply: bool = False):
@@ -55,5 +55,5 @@ class TestSession(unittest.TestCase):
             tmp.write(source)
             tmp.seek(0)
             self.assertEqual(
-                (source, "utf-8"), self.session._read(Path(tmp.name))
+                (source, "utf-8"), self.session.read(Path(tmp.name))
             )

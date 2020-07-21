@@ -32,7 +32,7 @@ class Session:
             include_star_import=include_star_import, show_error=self.show_error
         )
 
-    def _read(self, path: Path) -> Tuple[str, str]:
+    def read(self, path: Path) -> Tuple[str, str]:
         try:
             with tokenize.open(path) as stream:
                 source = stream.read()
@@ -43,7 +43,7 @@ class Session:
             return "", "utf-8"
         return source, encoding
 
-    def _list_paths(
+    def list_paths(
         self,
         start: Path,
         include: Optional[str] = None,
@@ -75,7 +75,7 @@ class Session:
         return refactor
 
     def refactor_file(self, path: Path, apply: bool = False) -> str:
-        source, encoding = self._read(path)
+        source, encoding = self.read(path)
         result = self.refactor(source)
         if apply:
             path.write_text(result, encoding=encoding)
@@ -89,7 +89,7 @@ class Session:
         )
 
     def diff_file(self, path: Path) -> Tuple[str, ...]:
-        source, _ = self._read(path)
+        source, _ = self.read(path)
         result = self.refactor_file(path, apply=False)
         return tuple(
             difflib.unified_diff(
