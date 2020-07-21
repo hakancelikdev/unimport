@@ -12,20 +12,8 @@
       name="viewport"
       content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
     />
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/lib/themes/vue.css" />
-    <style>
-      .app-nav {
-        position: relative;
-        z-index: 0;
-      }
-      .content {
-        padding-top: 20px;
-      }
-      .app-name img {
-        max-width: 50%;
-        border-radius: 8px;
-      }
-    </style>
+    <!-- css -->
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/themes/vue.css" />
   </head>
   <body>
     <div id="app"></div>
@@ -33,15 +21,17 @@
       window.$docsify = {
         name: "Unimport",
         repo: "hakancelik96/unimport",
-        loadNavbar: true,
-        loadSidebar: "summary.md",
-        auto2top: true,
-        coverpage: true,
+        logo: "/_media/icon.png",
+        loadSidebar: true,
         hideSidebar: false,
-        subMaxLevel: 2,
+        auto2top: true,
+        ext: ".md",
+        subMaxLevel: 6,
+        coverpage: true,
+        loadNavbar: true,
         homepage: "README.md",
         basePath: "/",
-        logo: "/_media/icon.png",
+        themeColor: "#ed1c23",
         copyCode: {
           buttonText: "Copy to clipboard",
           errorText: "Error",
@@ -54,11 +44,17 @@
           twitter: true,
           whatsapp: true,
           telegram: true
+        },
+        editButton: {
+          username: "hakancelik96",
+          repoName: "unimport",
+          branch: "master",
+          docsPath: "docs"
         }
       };
     </script>
     <!-- docsify -->
-    <script src="//cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
     <!-- search -->
     <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
     <!-- emoji -->
@@ -73,6 +69,8 @@
     <script src="//cdn.jsdelivr.net/npm/prismjs/components/prism-bash.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/prismjs/components/prism-python.min.js"></script>
     <!-- docsify-share -->
-    <script src="//unpkg.com/docsify-share/build/index.min.js"></script>
+    <script src="//unpkg.com/docsify-share@0.1.1/build/index.min.js"></script>
+    <!-- editdoc -->
+    <script src="https://rawcdn.githack.com/hakancelik96/hakancelik.dev/a86e19ad21c7453401112979a388058e8d288ec8/plugin/editdoc.js"></script>
   </body>
 </html>
