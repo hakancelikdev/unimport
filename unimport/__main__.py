@@ -169,9 +169,9 @@ def main(argv: Optional[List[str]] = None) -> None:
     exclude = re.compile("|".join(exclude_list)).pattern
     _any_unimport = False
     for source_path in namespace.sources:
-        for py_path in session._list_paths(source_path, include, exclude):
+        for py_path in session.list_paths(source_path, include, exclude):
             if namespace.check:
-                session.scanner.run_visit(source=session._read(py_path)[0])
+                session.scanner.run_visit(source=session.read(py_path)[0])
                 unused_imports = session.scanner.unused_imports
                 show(unused_imports, py_path)
                 if not (not _any_unimport and not unused_imports):
@@ -188,7 +188,7 @@ def main(argv: Optional[List[str]] = None) -> None:
                 elif action == "y" or action == "":
                     namespace.remove = True
             if namespace.remove:
-                source = session._read(py_path)[0]
+                source = session.read(py_path)[0]
                 refactor_source = session.refactor_file(py_path, apply=True)
                 if refactor_source != source:
                     print(f"Refactoring '{Color(str(py_path)).green}'")
