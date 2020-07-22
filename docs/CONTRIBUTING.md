@@ -17,6 +17,7 @@ look.**
 ```shell
 $ git clone git@github.com:<USERNAME>/unimport.git
 $ cd unimport
+$ git checkout dev
 ```
 
 ## Setup Python
