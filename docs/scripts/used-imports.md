@@ -4,29 +4,37 @@
 from pathlib import Path
 from unimport.session import Session
 
-project_path = "unimport/"  # write the path of your own project
-
-modules = set()
 session = Session()
-for path in session.list_paths(Path(project_path)):
-    try:
-        source = session.read(path)[0]
-    except SyntaxError:
-        continue
-    session.scanner.run_visit(source)
-    import_names = set(session.scanner.import_names)
-    unused_imp_names = {imp["name"] for imp in session.scanner.unused_imports}
-    session.scanner.clear()
-    used_imports =  import_names - unused_imp_names
-    modules.update(used_imports)
 
-print(modules)
 
-# Output
-# {'cast', 'Iterable', 'TYPE_IMPORT', 'refactor_string', 'TYPE_NAME', 'inspect', 'importlib',
-# 'configparser', 'Iterator', 'difflib', '__version__', 'Optional', 'Union', 'ast', 'TypeVar', '__description__',
-# 'Scanner', 'Session', 'builtins', 'Path', 'TYPE_CHECKING', 'List', 'CodeRange',
-# 'first_occurrence', 'sys', 'PositionProvider', 'get_parents', 'CONFIG_FILES',
-# 'tokenize', 'ModuleType', 'MetadataWrapper', 'io', 'Callable', 'RemovalSentinel',
-# 're', 'cst', 'Color', 'contextlib', 'Tuple', 'Any', 'relate', 'argparse', 'TypedDict', 'Config', 'functools'}
+def get_all_modules(project_path):  # write the path of your own project
+    def get_module(imports):
+        return {imp["module"].__name__.split(".")[0] for imp in imports if imp["module"]}
+
+    for path in session.list_paths(Path(project_path)):
+        try:
+            source = session.read(path)[0]
+        except SyntaxError:
+            continue
+        session.scanner.run_visit(source)
+        import_names = get_module(session.scanner.imports)
+        unused_imp_names = get_module(session.scanner.unused_imports)
+        session.scanner.clear()
+        yield import_names - unused_imp_names
+
+if __name__ == "__main__":
+    modules = set()
+    for module in get_all_modules("unimport/"):
+        modules.update(module)
+    print(modules)
+```
+
+## Output
+
+```python
+{
+    're', 'libcst', 'inspect', 'pathlib', 'typing_extensions', 'contextlib', 'ast', 'unimport', 'importlib',
+    'difflib', 'io', 'builtins', 'argparse', 'functools', 'tokenize', 'typing', 'types', 'sys',
+    'configparser'
+}
 ```
