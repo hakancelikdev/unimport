@@ -199,6 +199,13 @@ class TestUnusedRefactor(RefactorTestCase):
             action, self.session.refactor(action),
         )
 
+    def test_startswith_name(self):
+        action = "import xx\n" "xxx = 'test'\n"
+        expected = "xxx = 'test'\n"
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
 
 class TestDuplicateUnusedRefactor(RefactorTestCase):
     def test_full_unused(self):
