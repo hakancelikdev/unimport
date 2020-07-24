@@ -289,6 +289,13 @@ import os
 __all__ = ["os"] # this import is used and umimport can understand
 ```
 
+## Requirements.txt
+
+You can automatically delete unused modules from the requirements.txt file
+(`unimport --requirements --remove`), see the difference (
+`unimport --requirements --diff`), delete it by requesting permission (
+`unimport --requirements --permission`), or just check ( `unimport --requirements`).
+
 ## Command line options
 
 You can list many options by running unimport --help
