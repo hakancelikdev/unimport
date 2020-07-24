@@ -329,7 +329,7 @@ class Scanner(ast.NodeVisitor):
                 else:
                     if not list(
                         filter(
-                            lambda name: name["name"].startswith(imp["name"]),
+                            lambda name: name["name"] == imp["name"],
                             self.names,
                         )
                     ):
