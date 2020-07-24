@@ -1,12 +1,16 @@
 import argparse
+import difflib
 import re
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from unimport import __description__, __version__
 from unimport.color import Color
 from unimport.session import Session
+
+if TYPE_CHECKING:
+    from unimport.models import TYPE_IMPORT
 
 parser = argparse.ArgumentParser(
     prog="unimport",
@@ -76,6 +80,11 @@ exclusive_group.add_argument(
     help="Refactor permission after see diff.",
 )
 parser.add_argument(
+    "--requirements",
+    action="store_true",
+    help="Include requirements.txt file, You can use it with all other arguments",
+)
+parser.add_argument(
     "--check",
     action="store_true",
     help="Prints which file the unused imports are in.",
@@ -106,50 +115,54 @@ def color_diff(sequence: tuple) -> str:
     return "\n".join(lines)
 
 
-def print_if_exists(sequence: tuple):
+def print_if_exists(sequence: tuple) -> bool:
     if sequence:
         print(color_diff(sequence))
-        return True
-    return None
+    return bool(sequence)
 
 
-def output(name: str, path: Path, lineno: int, modules: str) -> str:
-    modules = modules or ""
+def output(
+    module_name: str, path: Path, lineno: int, get_as_import_from: str
+) -> str:
     return (
-        f"{Color(name).yellow} at "
+        f"{Color(module_name).yellow} at "
         f"{Color(str(path)).green}:{Color(str(lineno)).green}"
-        f" {modules}"
+        f" {get_as_import_from or ''}"
     )
 
 
-def get_modules(imp: str, is_star: bool, modules: str):
+def get_as_import_from(
+    import_name: str, is_star: bool, modules: List[str]
+) -> Optional[str]:
+    _modules = ""
     if is_star:
         _modules = ", ".join(modules)
         if len(_modules) > 5:
-            modules = f"({_modules})"
-        elif len(_modules) == 0:
-            modules = ""
-        else:
-            modules = f"{_modules}"
-    else:
-        modules = ""
+            _modules = "(" + _modules + ")"
     if modules:
-        return f"from {imp} import {modules}"
+        return f"from {import_name} import {_modules}"
     return None
 
 
-def show(unused_import, py_path):
+def show(unused_import: "List[TYPE_IMPORT]", py_path: Path) -> None:
     for imp in unused_import:
-        modules = get_modules(imp["name"], imp["star"], imp["modules"])
+        import_from = get_as_import_from(
+            imp["name"], imp["star"], imp["modules"]
+        )
         if (imp["star"] and imp["module"]) or (not imp["star"]):
-            print(output(imp["name"], py_path, imp["lineno"], modules))
+            print(
+                f"{Color(imp['name']).yellow} at "
+                f"{Color(str(py_path)).green}:{Color(str(imp['lineno'])).green}"
+                f" {import_from or ''}"
+            )
 
 
 def main(argv: Optional[List[str]] = None) -> None:
     namespace = parser.parse_args(argv)
     namespace.check = namespace.check or not any(
-        [value for value in vars(namespace).values()][6:-1]
+        [value for value in vars(namespace).values()][7:-2]
     )
+    namespace.diff = namespace.diff or namespace.permission
     session = Session(
         config_file=namespace.config,
         include_star_import=namespace.include_star_import,
@@ -167,17 +180,22 @@ def main(argv: Optional[List[str]] = None) -> None:
         exclude_list.append(session.config.exclude)  # type: ignore
     include = re.compile("|".join(include_list)).pattern
     exclude = re.compile("|".join(exclude_list)).pattern
-    _any_unimport = False
+    unused_modules = set()
     for source_path in namespace.sources:
         for py_path in session.list_paths(source_path, include, exclude):
+            session.scanner.run_visit(source=session.read(py_path)[0])
+            unused_imports = session.scanner.unused_imports
+            unused_modules.update(
+                {
+                    imp["module"].__name__.split(".")[0]  # type: ignore
+                    for imp in unused_imports
+                    if imp["module"]
+                }
+            )
+            session.scanner.clear()
             if namespace.check:
-                session.scanner.run_visit(source=session.read(py_path)[0])
-                unused_imports = session.scanner.unused_imports
                 show(unused_imports, py_path)
-                if not (not _any_unimport and not unused_imports):
-                    _any_unimport = True
-                session.scanner.clear()
-            if namespace.diff or namespace.permission:
+            if namespace.diff:
                 exists_diff = print_if_exists(session.diff_file(py_path))
             if namespace.permission and exists_diff:
                 action = input(
@@ -192,12 +210,44 @@ def main(argv: Optional[List[str]] = None) -> None:
                 refactor_source = session.refactor_file(py_path, apply=True)
                 if refactor_source != source:
                     print(f"Refactoring '{Color(str(py_path)).green}'")
-    if not _any_unimport and namespace.check:
+    if not unused_modules and namespace.check:
         print(
             Color(
                 "✨ Congratulations there is no unused import in your project. ✨"
             ).green
         )
+    if namespace.requirements and unused_modules:
+        result = ""
+        requirements_path = Path("requirements.txt")
+        source, encoding = session.read(requirements_path)
+        for index, requirement in enumerate(source.split("\n")):
+            if requirement.split("==")[0] not in unused_modules:
+                result += f"{requirement}\n"
+            else:
+                if namespace.check and requirement:
+                    print(
+                        f"{Color(requirement).cyan} at "
+                        f"{Color(str(requirements_path)).cyan}:{Color(str(index + 1)).cyan}"
+                    )
+        if namespace.diff:
+            exists_diff = print_if_exists(
+                tuple(
+                    difflib.unified_diff(
+                        source.splitlines(),
+                        result.splitlines(),
+                        fromfile=str(requirements_path),
+                    )
+                )
+            )
+        if namespace.permission and exists_diff:
+            action = input(
+                f"Apply suggested changes to '{Color(str(requirements_path)).cyan}' [Y/n] ? >"
+            ).lower()
+            if action == "y" or action == "":
+                namespace.remove = True
+        if namespace.remove:
+            requirements_path.write_text(result, encoding=encoding)
+            print(f"Refactoring '{Color(str(requirements_path)).cyan}'")
 
 
 if __name__ == "__main__":

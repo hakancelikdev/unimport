@@ -294,9 +294,8 @@ __all__ = ["os"] # this import is used and umimport can understand
 You can list many options by running unimport --help
 
 ```
-usage: unimport [-h] [-c PATH] [--include include] [--exclude exclude]
-                [--include-star-import] [--show-error] [-d] [-r | -p]
-                [--check] [-v]
+usage: unimport [-h] [-c PATH] [--include include] [--exclude exclude] [--include-star-import] [--show-error]
+                [-d] [-r | -p] [--requirements] [--check] [-v]
                 [sources [sources ...]]
 
 A linter, formatter for finding and removing unused import statements.
@@ -312,12 +311,11 @@ optional arguments:
   --exclude exclude     file exclude pattern.
   --include-star-import
                         Include star imports during scanning and refactor.
-  --show-error          Show or don't show errors captured during static
-                        analysis.
-  -d, --diff            Prints a diff of all the changes unimport would make
-                        to a file.
+  --show-error          Show or don't show errors captured during static analysis.
+  -d, --diff            Prints a diff of all the changes unimport would make to a file.
   -r, --remove          remove unused imports automatically.
   -p, --permission      Refactor permission after see diff.
+  --requirements        Include requirements.txt file, You can use it with all other arguments
   --check               Prints which file the unused imports are in.
   -v, --version         Prints version of unimport
 
