@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [0.2.8] - ././2020
 
+- [🔥 Fix: match error between import name and name by @hakancelik96](https://github.com/hakancelik96/unimport/pull/74)
+
 - [💪 Support for type hints (#58) by @hakancelik96 & string typing @isidentical](https://github.com/hakancelik96/unimport/pull/71)
 
   - ```python
