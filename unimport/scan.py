@@ -50,7 +50,8 @@ def recursive(func: Function) -> Function:
 class Scanner(ast.NodeVisitor):
     ignore_imports = ["__future__"]
     ignore_import_names = ["__all__", "__doc__"]
-    skip_comments_regex = "#\s*(unimport:skip|noqa)"
+    skip_file_regex = "#\s*(unimport:\s{0,1}skip_file)"
+    skip_comments_regex = "#\s*(unimport:\s{0,1}skip|noqa)"
     any_import_error = False
 
     def __init__(
@@ -254,6 +255,8 @@ class Scanner(ast.NodeVisitor):
 
     def run_visit(self, source: str) -> None:
         self.source = source
+        if self.skip_file():
+            return
         if PY38_PLUS:
             self.iter_type_comments()
         with contextlib.suppress(SyntaxError):
@@ -275,11 +278,14 @@ class Scanner(ast.NodeVisitor):
             bool(
                 re.search(
                     self.skip_comments_regex,
-                    self.source.split("\n")[node.lineno - 1].lower(),
+                    self.source.splitlines()[node.lineno - 1].lower(),
                 )
             )
             or self.any_import_error
         )
+
+    def skip_file(self) -> bool:
+        return bool(re.search(self.skip_file_regex, self.source.lower()))
 
     def get_names(self) -> "Iterator[TYPE_NAME]":
         imp_match_built_in = BUILTINS & set(self.import_names)
