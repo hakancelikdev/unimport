@@ -3,7 +3,7 @@ import difflib
 import re
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, Tuple
 
 from unimport import __description__, __version__
 from unimport.color import Color
@@ -98,7 +98,7 @@ parser.add_argument(
 )
 
 
-def color_diff(sequence: tuple) -> str:
+def color_diff(sequence: Tuple[str, ...]) -> str:
     contents = "\n".join(sequence)
     lines = contents.split("\n")
     for i, line in enumerate(lines):
@@ -115,7 +115,7 @@ def color_diff(sequence: tuple) -> str:
     return "\n".join(lines)
 
 
-def print_if_exists(sequence: tuple) -> bool:
+def print_if_exists(sequence: Tuple[str, ...]) -> bool:
     if sequence:
         print(color_diff(sequence))
     return bool(sequence)
@@ -214,8 +214,8 @@ def main(argv: Optional[List[str]] = None) -> None:
         if not requirements_path.exists():
             return
         result = ""
-        source, encoding = session.read(requirements_path)
-        for index, requirement in enumerate(source.split("\n")):
+        source = requirements_path.read_text()
+        for index, requirement in enumerate(source.splitlines()):
             if requirement.split("==")[0] not in unused_modules:
                 result += f"{requirement}\n"
             else:
@@ -241,7 +241,7 @@ def main(argv: Optional[List[str]] = None) -> None:
             if action == "y" or action == "":
                 namespace.remove = True
         if namespace.remove:
-            requirements_path.write_text(result, encoding=encoding)
+            requirements_path.write_text(result)
             print(f"Refactoring '{Color(str(requirements_path)).cyan}'")
 
 
