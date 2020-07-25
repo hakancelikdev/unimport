@@ -170,14 +170,14 @@ def main(argv: Optional[List[str]] = None) -> None:
         exclude_list.append(session.config.exclude)  # type: ignore
     include = re.compile("|".join(include_list)).pattern
     exclude = re.compile("|".join(exclude_list)).pattern
-    _any_unimport = False
+    is_unused_module = False
     unused_modules = set()
     for source_path in namespace.sources:
         for py_path in session.list_paths(source_path, include, exclude):
             session.scanner.run_visit(source=session.read(py_path)[0])
             unused_imports = session.scanner.unused_imports
-            if not _any_unimport and unused_imports:
-                _any_unimport = True
+            if not is_unused_module and unused_imports:
+                is_unused_module = True
             unused_modules.update(
                 {
                     imp["module"].__name__.split(".")[0]  # type: ignore
@@ -203,7 +203,7 @@ def main(argv: Optional[List[str]] = None) -> None:
                 refactor_source = session.refactor_file(py_path, apply=True)
                 if refactor_source != source:
                     print(f"Refactoring '{Color(str(py_path)).green}'")
-    if not _any_unimport and namespace.check:
+    if not is_unused_module and namespace.check:
         print(
             Color(
                 "✨ Congratulations there is no unused import in your project. ✨"
