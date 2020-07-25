@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [0.2.8] - ././2020
 
+- [💪 Support: file-wide skips by @hakancelik96](https://github.com/hakancelik96/unimport/pull/77)
+
+  - Now, you can skip a file by typing `# unimport: skip_file` anywhere in that file.
+
 - [💪 Support: requirements.txt file by @hakancelik96](https://github.com/hakancelik96/unimport/pull/75)
 
   - Now, You can automatically delete unused modules from the requirements.txt file (
