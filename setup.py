@@ -30,7 +30,7 @@ setup(
     license_file="LICENSE",
     python_requires=">=3.6.0",
     packages=["unimport"],
-    install_requires=["libcst==0.3.5"],
+    install_requires=["libcst==0.3.8"],
     extras_require={"pyproject": ["toml"]},
     zip_safe=False,
     include_package_data=True,

@@ -289,14 +289,20 @@ import os
 __all__ = ["os"] # this import is used and umimport can understand
 ```
 
+## Requirements.txt
+
+You can automatically delete unused modules from the requirements.txt file
+(`unimport --requirements --remove`), see the difference (
+`unimport --requirements --diff`), delete it by requesting permission (
+`unimport --requirements --permission`), or just check ( `unimport --requirements`).
+
 ## Command line options
 
 You can list many options by running unimport --help
 
 ```
-usage: unimport [-h] [-c PATH] [--include include] [--exclude exclude]
-                [--include-star-import] [--show-error] [-d] [-r | -p]
-                [--check] [-v]
+usage: unimport [-h] [-c PATH] [--include include] [--exclude exclude] [--include-star-import] [--show-error]
+                [-d] [-r | -p] [--requirements] [--check] [-v]
                 [sources [sources ...]]
 
 A linter, formatter for finding and removing unused import statements.
@@ -312,12 +318,11 @@ optional arguments:
   --exclude exclude     file exclude pattern.
   --include-star-import
                         Include star imports during scanning and refactor.
-  --show-error          Show or don't show errors captured during static
-                        analysis.
-  -d, --diff            Prints a diff of all the changes unimport would make
-                        to a file.
+  --show-error          Show or don't show errors captured during static analysis.
+  -d, --diff            Prints a diff of all the changes unimport would make to a file.
   -r, --remove          remove unused imports automatically.
   -p, --permission      Refactor permission after see diff.
+  --requirements        Include requirements.txt file, You can use it with all other arguments
   --check               Prints which file the unused imports are in.
   -v, --version         Prints version of unimport
 
@@ -368,16 +373,16 @@ repos:
     rev: v0.2.8
     hooks:
       - id: unimport
-        args: [-r, --include-star-import]
+        args: [--remove, --requirements, --include-star-import]
 ```
 
 ## Our badge
 
-[![style](https://img.shields.io/badge/unimport-v0.2.8-red)](https://github.com/hakancelik96/unimport)
+[![style](https://img.shields.io/badge/unimport-ED1C24)](https://github.com/hakancelik96/unimport)
 
 **Please insert this badge into your project**
 
-`[![style](https://img.shields.io/badge/unimport-v0.2.8-red)](https://github.com/hakancelik96/unimport)`
+`[![style](https://img.shields.io/badge/unimport-ED1C24)](https://github.com/hakancelik96/unimport)`
 
 ## CONTRIBUTING
 
@@ -390,13 +395,6 @@ repos:
 All notable changes to this project will be documented in this file.
 
 [CHANGELOG.md](/CHANGELOG.md)
-
-## Contact
-
-- [![Telegram](https://img.shields.io/badge/telegram-@hakancelik-brightgreen?logo=telegram)](https://t.me/hakancelik96)
-- [![Twitter](https://img.shields.io/twitter/follow/hakancelik96?style=social)](https://twitter.com/hakancelik96)
-- [![Github](https://img.shields.io/github/followers/hakancelik96?label=hakancelik96&style=social)](https://github.com/hakancelik96)
-- <hakancelik96@outlook.com>
 
 ## Who's using Unimport
 

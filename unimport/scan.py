@@ -147,6 +147,8 @@ class Scanner(ast.NodeVisitor):
         self, node: ast.Constant, id_: Optional[int] = None
     ) -> None:
         id_ = id_ or id(node)
+        if not isinstance(node.value, (str, bytes)):
+            return
         try:
             parent = first_occurrence(node, ast.FunctionDef)
         except AttributeError:
@@ -157,11 +159,7 @@ class Scanner(ast.NodeVisitor):
                 type_parent in {ast.AnnAssign, ast.arg}
                 for type_parent in map(type, get_parents(node))
             )
-            if (
-                isinstance(node.value, str)
-                and (parent and id(parent.returns) == id_)
-                or is_annasign_and_arg
-            ):
+            if (parent and id(parent.returns) == id_) or is_annasign_and_arg:
                 with contextlib.suppress(SyntaxError):
                     self.visit(ast.parse(node.value, mode="eval"))
 

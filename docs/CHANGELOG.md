@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [0.2.8] - ././2020
 
+- [💪 Support: requirements.txt file by @hakancelik96](https://github.com/hakancelik96/unimport/pull/75)
+
+  - Now, You can automatically delete unused modules from the requirements.txt file (
+    `unimport --requirements --remove`), see the difference (
+    `unimport --requirements --diff`), delete it by requesting permission (
+    `unimport --requirements --permission`), or just check ( `unimport --requirements`).
+
 - [🔥 Fix: match error between import name and name by @hakancelik96](https://github.com/hakancelik96/unimport/pull/74)
 
 - [💪 Support for type hints (#58) by @hakancelik96 & string typing @isidentical](https://github.com/hakancelik96/unimport/pull/71)
