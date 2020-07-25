@@ -278,14 +278,17 @@ class Scanner(ast.NodeVisitor):
             bool(
                 re.search(
                     self.skip_comments_regex,
-                    self.source.splitlines()[node.lineno - 1].lower(),
+                    self.source.splitlines()[node.lineno - 1],
+                    re.IGNORECASE,
                 )
             )
             or self.any_import_error
         )
 
     def skip_file(self) -> bool:
-        return bool(re.search(self.skip_file_regex, self.source.lower()))
+        return bool(
+            re.search(self.skip_file_regex, self.source, re.IGNORECASE)
+        )
 
     def get_names(self) -> "Iterator[TYPE_NAME]":
         imp_match_built_in = BUILTINS & set(self.import_names)
