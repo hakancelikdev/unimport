@@ -170,11 +170,14 @@ def main(argv: Optional[List[str]] = None) -> None:
         exclude_list.append(session.config.exclude)  # type: ignore
     include = re.compile("|".join(include_list)).pattern
     exclude = re.compile("|".join(exclude_list)).pattern
+    _any_unimport = False
     unused_modules = set()
     for source_path in namespace.sources:
         for py_path in session.list_paths(source_path, include, exclude):
             session.scanner.run_visit(source=session.read(py_path)[0])
             unused_imports = session.scanner.unused_imports
+            if not _any_unimport and unused_imports:
+                _any_unimport = True
             unused_modules.update(
                 {
                     imp["module"].__name__.split(".")[0]  # type: ignore
@@ -200,15 +203,17 @@ def main(argv: Optional[List[str]] = None) -> None:
                 refactor_source = session.refactor_file(py_path, apply=True)
                 if refactor_source != source:
                     print(f"Refactoring '{Color(str(py_path)).green}'")
-    if not unused_modules and namespace.check:
+    if not _any_unimport and namespace.check:
         print(
             Color(
                 "✨ Congratulations there is no unused import in your project. ✨"
             ).green
         )
     if namespace.requirements and unused_modules:
-        result = ""
         requirements_path = Path("requirements.txt")
+        if not requirements_path.exists():
+            return
+        result = ""
         source, encoding = session.read(requirements_path)
         for index, requirement in enumerate(source.split("\n")):
             if requirement.split("==")[0] not in unused_modules:
