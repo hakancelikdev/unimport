@@ -373,16 +373,16 @@ repos:
     rev: v0.2.8
     hooks:
       - id: unimport
-        args: [-r, --include-star-import]
+        args: [--remove, --requirements, --include-star-import]
 ```
 
 ## Our badge
 
-[![style](https://img.shields.io/badge/unimport-v0.2.8-red)](https://github.com/hakancelik96/unimport)
+[![style](https://img.shields.io/badge/unimport-ED1C24)](https://github.com/hakancelik96/unimport)
 
 **Please insert this badge into your project**
 
-`[![style](https://img.shields.io/badge/unimport-v0.2.8-red)](https://github.com/hakancelik96/unimport)`
+`[![style](https://img.shields.io/badge/unimport-ED1C24)](https://github.com/hakancelik96/unimport)`
 
 ## CONTRIBUTING
 
@@ -395,13 +395,6 @@ repos:
 All notable changes to this project will be documented in this file.
 
 [CHANGELOG.md](/CHANGELOG.md)
-
-## Contact
-
-- [![Telegram](https://img.shields.io/badge/telegram-@hakancelik-brightgreen?logo=telegram)](https://t.me/hakancelik96)
-- [![Twitter](https://img.shields.io/twitter/follow/hakancelik96?style=social)](https://twitter.com/hakancelik96)
-- [![Github](https://img.shields.io/github/followers/hakancelik96?label=hakancelik96&style=social)](https://github.com/hakancelik96)
-- <hakancelik96@outlook.com>
 
 ## Who's using Unimport
 

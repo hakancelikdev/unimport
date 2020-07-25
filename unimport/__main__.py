@@ -121,16 +121,6 @@ def print_if_exists(sequence: tuple) -> bool:
     return bool(sequence)
 
 
-def output(
-    module_name: str, path: Path, lineno: int, get_as_import_from: str
-) -> str:
-    return (
-        f"{Color(module_name).yellow} at "
-        f"{Color(str(path)).green}:{Color(str(lineno)).green}"
-        f" {get_as_import_from or ''}"
-    )
-
-
 def get_as_import_from(
     import_name: str, is_star: bool, modules: List[str]
 ) -> Optional[str]:
@@ -160,7 +150,7 @@ def show(unused_import: "List[TYPE_IMPORT]", py_path: Path) -> None:
 def main(argv: Optional[List[str]] = None) -> None:
     namespace = parser.parse_args(argv)
     namespace.check = namespace.check or not any(
-        [value for value in vars(namespace).values()][7:-2]
+        [namespace.diff, namespace.remove, namespace.permission]
     )
     namespace.diff = namespace.diff or namespace.permission
     session = Session(
