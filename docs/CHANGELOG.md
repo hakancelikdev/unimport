@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.2.8] - ././2020
+## [0.2.8] - 27/July/2020
 
 - [💪 Support: file-wide skips by @hakancelik96](https://github.com/hakancelik96/unimport/pull/77)
 
