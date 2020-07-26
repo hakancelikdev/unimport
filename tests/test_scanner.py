@@ -127,21 +127,13 @@ class TestNames(ScannerTestCase):
 
 
 class SkipImportTest(ScannerTestCase):
-    def assertUnimportEqual(
-        self,
-        source,
-        expected_names=[],
-        expected_classes=[],
-        expected_functions=[],
-        expected_imports=[],
-    ):
-
+    def assertSkipEqual(self, source):
         super().assertUnimportEqual(
             source,
-            expected_names,
-            expected_classes,
-            expected_functions,
-            expected_imports,
+            expected_names=[],
+            expected_classes=[],
+            expected_functions=[],
+            expected_imports=[],
         )
 
     def test_inside_try_except(self):
@@ -151,27 +143,35 @@ class SkipImportTest(ScannerTestCase):
             "except ImportError:\n"
             "   print('install django')\n"
         )
-        self.assertUnimportEqual(source)
+        self.assertSkipEqual(source)
 
     def test_as_import(self):
         source = "from x import y as z # unimport:skip\n"
-        self.assertUnimportEqual(source)
+        self.assertSkipEqual(source)
 
     def test_ongoing_comment(self):
         source = "import unimport # unimport:skip import test\n"
-        self.assertUnimportEqual(source)
+        self.assertSkipEqual(source)
 
     def test_skip_comment_second_option(self):
         source = "import x # unimport:skip test\n"
-        self.assertUnimportEqual(source)
+        self.assertSkipEqual(source)
 
     def test_noqa_skip_comment(self):
         source = "from x import (t, y, f, r) # noqa\n"
-        self.assertUnimportEqual(source)
+        self.assertSkipEqual(source)
 
     def test_noqa_skip_comment_multiple(self):
         source = "from x import ( # noqa\n" "   t, y,\n" "   f, r\n" ")\n"
-        self.assertUnimportEqual(source)
+        self.assertSkipEqual(source)
+
+    def test_skip_file(self):
+        source = "# unimport:skip_file\n" "import x\n"
+        self.assertSkipEqual(source)
+
+    def test_skip_file_after_import(self):
+        source = "import x\n" "# unimport:skip_file\n"
+        self.assertSkipEqual(source)
 
 
 @unittest.skipIf(
