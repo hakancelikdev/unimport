@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [0.2.8] - ././2020
 
+- [🔥 Fix: preserve import styles](https://github.com/hakancelik96/unimport/pull/76)
+
 - [💪 Support: requirements.txt file by @hakancelik96](https://github.com/hakancelik96/unimport/pull/75)
 
   - Now, You can automatically delete unused modules from the requirements.txt file (
