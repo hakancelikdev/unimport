@@ -195,7 +195,7 @@ def main(argv: Optional[List[str]] = None) -> None:
                     f"Apply suggested changes to '{Color(str(py_path)).yellow}' [Y/n/q] ? >"
                 ).lower()
                 if action == "q":
-                    break
+                    return
                 elif action == "y" or action == "":
                     namespace.remove = True
             if namespace.remove:
