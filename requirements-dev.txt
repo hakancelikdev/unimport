@@ -1,6 +1,6 @@
-toml==0.10.0
-pytest
-pytest-cov
-pre-commit==2.4.0
+toml==0.10.1
+pytest==5.4.3
+pytest-cov==2.10.0
+pre-commit==2.6.0
 wheel==0.34.2
 libcst==0.3.8
