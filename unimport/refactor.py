@@ -61,6 +61,8 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
                 names_to_keep.append(import_alias)
         if not names_to_keep:
             return cst.RemoveFromParent()
+        elif len(updated_node.names) == len(names_to_keep):
+            return updated_node
         else:
             names_to_keep[-1] = names_to_keep[-1].with_changes(
                 comma=cst.MaybeSentinel.DEFAULT
