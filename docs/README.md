@@ -223,7 +223,7 @@ Unimport can understand that imports are used these cases.
 
 ```python
 from typing import List, Dict
-def test(arg: List[TYPE_TEST]) -> None:
+def test(arg: List[Dict]) -> None:
    pass
 ```
 
