@@ -283,7 +283,7 @@ from x import ( # noqa
 To skip a file by typing `# unimport: skip_file` anywhere in that file **for example:**
 
 ```python
-# unimport: skip
+# unimport: skip_file
 
 import x
 
@@ -294,7 +294,7 @@ or
 ```python
 import x
 
-# unimport: skip
+# unimport: skip_file
 
 ```
 
