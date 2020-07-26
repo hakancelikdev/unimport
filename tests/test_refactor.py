@@ -630,3 +630,56 @@ class TestTyping(RefactorTestCase):
         self.assertEqual(
             action, self.session.refactor(action),
         )
+
+
+class TestStyle(RefactorTestCase):
+    def test_1_vertical(self):
+        action = (
+            "from x import (\n"
+            "   q,\n"
+            "   e,\n"
+            "   r,\n"
+            "   t\n"
+            ")\n"
+            "import y\n"
+            "import u\n"
+            "y, q, e, r, t\n"
+        )
+        expected = (
+            "from x import (\n"
+            "   q,\n"
+            "   e,\n"
+            "   r,\n"
+            "   t\n"
+            ")\n"
+            "import y\n"
+            "y, q, e, r, t\n"
+        )
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
+    def test_2_1_vertical(self):
+        action = (
+            "from x import (\n"
+            "   q,\n"
+            "   e,\n"
+            "   r,\n"
+            "   t\n"
+            ")\n"
+            "import y\n"
+            "import u\n"
+            "y, q, e, t\n"
+        )
+        expected = (
+            "from x import (\n"
+            "   q,\n"
+            "   e,\n"
+            "   t\n"
+            ")\n"
+            "import y\n"
+            "y, q, e, t\n"
+        )
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
