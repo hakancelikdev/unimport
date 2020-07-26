@@ -278,6 +278,26 @@ from x import ( # noqa
 )
 ```
 
+## File Wide Skips
+
+To skip a file by typing `# unimport: skip_file` anywhere in that file **for example:**
+
+```python
+# unimport: skip_file
+
+import x
+
+```
+
+or
+
+```python
+import x
+
+# unimport: skip_file
+
+```
+
 ## `__all__`
 
 Unimport looks at the items in the `__all__` list, if it matches the imports, marks it
