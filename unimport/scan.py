@@ -28,7 +28,7 @@ from unimport.color import Color
 from unimport.relate import first_occurrence, get_parents, relate
 
 if TYPE_CHECKING:
-    from unimport.models import TYPE_NAME, TYPE_IMPORT
+    from unimport.models import TYPE_IMPORT, TYPE_NAME
 
 PY38_PLUS = sys.version_info >= (3, 8)
 BUILTINS = {_build for _build in dir(builtins) if not _build.startswith("_")}
