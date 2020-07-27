@@ -354,9 +354,10 @@ class Scanner(ast.NodeVisitor):
         def find_nearest_imp(name):
             nearest = ""
             for dup_imp in self.get_duplicate_imports():
-                if dup_imp["lineno"] < name["lineno"] and name[
-                    "name"
-                ].startswith(dup_imp["name"]):
+                if (
+                    dup_imp["lineno"] < name["lineno"]
+                    and name["name"] == dup_imp["name"]
+                ):
                     nearest = dup_imp
             return nearest
 
