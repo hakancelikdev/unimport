@@ -17,7 +17,6 @@ look.**
 ```shell
 $ git clone git@github.com:<USERNAME>/unimport.git
 $ cd unimport
-$ git checkout dev
 ```
 
 ## Setup Python
@@ -28,7 +27,7 @@ Then by setting up and activating a virtualenv:
 $ python3.8 -m venv env #python3.6, python3.7 or python3.8
 $ source env/bin/activate
 $ pip install --upgrade pip # optional, if you have an old system version of pip
-$ pip install -r requirements.txt -r requirements-dev.txt
+$ pip install -r requirements-dev.txt
 git checkout -b i{your issue number}
 ```
 
