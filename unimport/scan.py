@@ -320,15 +320,10 @@ class Scanner(ast.NodeVisitor):
 
     def get_unused_imports(self) -> "Iterator[TYPE_IMPORT]":
         for imp in self.imports:
-            if self.is_duplicate(imp["name"]):
-                if not list(
-                    filter(
-                        lambda name: name["name"].startswith(imp["name"])
-                        and not self.is_duplicate_used(name, imp),
-                        self.names,
-                    )
-                ):
-                    yield imp
+            if self.is_duplicate(imp["name"]) and not self.is_duplicate_used(
+                imp
+            ):
+                yield imp
             else:
                 if imp["star"] and self.include_star_import:
                     imp["modules"] = self.get_suggestion_modules(imp)
@@ -350,15 +345,18 @@ class Scanner(ast.NodeVisitor):
             lambda imp: self.is_duplicate(imp["name"]), self.imports
         )
 
-    def is_duplicate_used(self, name: "TYPE_NAME", imp: "TYPE_IMPORT") -> bool:
-        def find_nearest_imp(name):
-            nearest = ""
-            for dup_imp in self.get_duplicate_imports():
+    def is_duplicate_used(self, imp: "TYPE_IMPORT") -> bool:
+        def find_nearest_imp(name: "TYPE_NAME") -> "TYPE_IMPORT":
+            nearest = imp
+            for duplicate in self.get_duplicate_imports():
                 if (
-                    dup_imp["lineno"] < name["lineno"]
-                    and name["name"] == dup_imp["name"]
+                    duplicate["lineno"] < name["lineno"]
+                    and name["name"] == duplicate["name"]
                 ):
-                    nearest = dup_imp
+                    nearest = duplicate
             return nearest
 
-        return imp != find_nearest_imp(name)
+        for name in self.names:
+            if name["name"] == imp["name"] and imp == find_nearest_imp(name):
+                return True
+        return False
