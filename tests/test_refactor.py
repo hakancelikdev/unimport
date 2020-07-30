@@ -402,6 +402,13 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
             expected, self.session.refactor(action),
         )
 
+    def test_startswith_name(self):
+        action = "import aa\n" "import aa\n" "aaa\n"
+        expected = "aaa\n"
+        self.assertEqual(
+            expected, self.session.refactor(action),
+        )
+
 
 class TesAsImport(RefactorTestCase):
     def test_as_import_all_unused_all_cases(self):
