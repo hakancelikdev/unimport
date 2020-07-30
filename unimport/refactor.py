@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Union
+from typing import List, Union
 
 import libcst as cst
 from libcst._position import CodeRange
@@ -6,15 +6,13 @@ from libcst._removal_sentinel import RemovalSentinel
 from libcst.metadata import MetadataWrapper, PositionProvider
 
 from unimport.color import Color
-
-if TYPE_CHECKING:
-    from unimport.models import TYPE_IMPORT
+from unimport.scan import Import
 
 
 class RemoveUnusedImportTransformer(cst.CSTTransformer):
     METADATA_DEPENDENCIES = [PositionProvider]
 
-    def __init__(self, unused_imports: "List[TYPE_IMPORT]") -> None:
+    def __init__(self, unused_imports: List[Import]) -> None:
         self.unused_imports = unused_imports
 
     @staticmethod
@@ -33,7 +31,7 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
 
     def is_import_used(self, import_name: str, location: CodeRange) -> bool:
         return not any(
-            imp["name"] == import_name and imp["lineno"] == location.start.line
+            imp.name == import_name and imp.lineno == location.start.line
             for imp in self.unused_imports
         )
 
@@ -74,14 +72,14 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
         original_node: cst.ImportFrom, updated_node: cst.ImportFrom, **kwargs
     ) -> Union[cst.ImportFrom, RemovalSentinel]:
         imp = kwargs["imp"]
-        if imp["modules"]:
-            modules = ",".join(imp["modules"])
+        if imp.modules:
+            modules = ",".join(imp.modules)
             names_to_suggestion = []
             for module in modules.split(","):
                 names_to_suggestion.append(cst.ImportAlias(cst.Name(module)))
             return updated_node.with_changes(names=names_to_suggestion)
         else:
-            if imp["module"]:
+            if imp.module:
                 return cst.RemoveFromParent()
         return original_node
 
@@ -105,8 +103,8 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
                 location = self.get_location(original_node)
                 for imp in self.unused_imports:
                     if (
-                        imp["name"] == import_name
-                        and imp["lineno"] == location.start.line
+                        imp.name == import_name
+                        and imp.lineno == location.start.line
                     ):
                         return imp
 
@@ -120,7 +118,7 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
 
 
 def refactor_string(
-    source: str, unused_imports: "List[TYPE_IMPORT]", show_error: bool,
+    source: str, unused_imports: List[Import], show_error: bool,
 ) -> str:
     try:
         wrapper = MetadataWrapper(cst.parse_module(source))

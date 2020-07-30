@@ -3,14 +3,12 @@ import difflib
 import re
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from unimport import __description__, __version__
 from unimport.color import Color
+from unimport.scan import Import
 from unimport.session import Session
-
-if TYPE_CHECKING:
-    from unimport.models import TYPE_IMPORT
 
 parser = argparse.ArgumentParser(
     prog="unimport",
@@ -134,15 +132,13 @@ def get_as_import_from(
     return None
 
 
-def show(unused_import: "List[TYPE_IMPORT]", py_path: Path) -> None:
+def show(unused_import: List[Import], py_path: Path) -> None:
     for imp in unused_import:
-        import_from = get_as_import_from(
-            imp["name"], imp["star"], imp["modules"]
-        )
-        if (imp["star"] and imp["module"]) or (not imp["star"]):
+        import_from = get_as_import_from(imp.name, imp.star, imp.modules)
+        if (imp.star and imp.module) or (not imp.star):
             print(
-                f"{Color(imp['name']).yellow} at "
-                f"{Color(str(py_path)).green}:{Color(str(imp['lineno'])).green}"
+                f"{Color(imp.name).yellow} at "
+                f"{Color(str(py_path)).green}:{Color(str(imp.lineno)).green}"
                 f" {import_from or ''}"
             )
 
@@ -180,9 +176,9 @@ def main(argv: Optional[List[str]] = None) -> None:
                 is_unused_module = True
             unused_modules.update(
                 {
-                    imp["module"].__name__.split(".")[0]  # type: ignore
+                    imp.module.__name__.split(".")[0]  # type: ignore
                     for imp in unused_imports
-                    if imp["module"]
+                    if imp.module
                 }
             )
             session.scanner.clear()
