@@ -9,7 +9,7 @@ session = Session()
 
 def get_all_modules(project_path):  # write the path of your own project
     def get_module(imports):
-        return {imp["module"].__name__.split(".")[0] for imp in imports if imp["module"]}
+        return {imp.module.__name__.split(".")[0] for imp in imports if imp.module}
 
     for path in session.list_paths(Path(project_path)):
         try:

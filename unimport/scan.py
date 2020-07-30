@@ -12,12 +12,13 @@ import io
 import re
 import sys
 import tokenize
+from types import ModuleType
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     Iterator,
     List,
+    NamedTuple,
     Optional,
     TypeVar,
     Union,
@@ -27,13 +28,23 @@ from typing import (
 from unimport.color import Color
 from unimport.relate import first_occurrence, get_parents, relate
 
-if TYPE_CHECKING:
-    from unimport.models import TYPE_IMPORT, TYPE_NAME
-
 PY38_PLUS = sys.version_info >= (3, 8)
 BUILTINS = {_build for _build in dir(builtins) if not _build.startswith("_")}
 
 Function = TypeVar("Function", bound=Callable[..., Any])
+
+
+class Name(NamedTuple):
+    lineno: int
+    name: str
+
+
+class Import(NamedTuple):
+    lineno: int
+    name: str
+    star: bool
+    module: Optional[ModuleType]
+    modules: List[str]
 
 
 def recursive(func: Function) -> Function:
@@ -70,10 +81,10 @@ class Scanner(ast.NodeVisitor):
         """
         self.include_star_import = include_star_import
         self.show_error = show_error
-        self.imports: "List[TYPE_IMPORT]" = []
-        self.classes: "List[TYPE_NAME]" = []
-        self.functions: "List[TYPE_NAME]" = []
-        self.names: "List[TYPE_NAME]" = []
+        self.imports: List[Import] = []
+        self.classes: List[Name] = []
+        self.functions: List[Name] = []
+        self.names: List[Name] = []
         if source:
             self.run_visit(source)
 
@@ -88,7 +99,7 @@ class Scanner(ast.NodeVisitor):
 
         At this point from os import * becomes > from os import PathLike
         """
-        self.classes.append({"lineno": node.lineno, "name": node.name})
+        self.classes.append(Name(lineno=node.lineno, name=node.name))
 
     @recursive
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
@@ -102,7 +113,7 @@ class Scanner(ast.NodeVisitor):
         At this point from os import * becomes > from os import walk
         """
         if not first_occurrence(node, ast.ClassDef):
-            self.functions.append({"lineno": node.lineno, "name": node.name})
+            self.functions.append(Name(lineno=node.lineno, name=node.name))
 
     def alike_import(
         self,
@@ -124,13 +135,13 @@ class Scanner(ast.NodeVisitor):
             with contextlib.suppress(BaseException):
                 module = importlib.import_module(package)
             self.imports.append(
-                {
-                    "lineno": node.lineno,
-                    "name": name,
-                    "star": star,
-                    "module": module,
-                    "modules": [],
-                }
+                Import(
+                    lineno=node.lineno,
+                    name=name,
+                    star=star,
+                    module=module,
+                    modules=[],
+                )
             )
 
     def visit_Str(self, node: ast.Str) -> None:
@@ -176,7 +187,7 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_Name(self, node: ast.Name) -> None:
-        self.names.append({"lineno": node.lineno, "name": node.id})
+        self.names.append(Name(lineno=node.lineno, name=node.id))
 
     def iter_type_comments(self):
         """
@@ -219,9 +230,7 @@ class Scanner(ast.NodeVisitor):
             elif isinstance(attr_node, ast.Attribute):
                 local_attr.append(attr_node.attr)
         local_attr.reverse()
-        self.names.append(
-            {"lineno": node.lineno, "name": ".".join(local_attr)}
-        )
+        self.names.append(Name(lineno=node.lineno, name=".".join(local_attr)))
 
     @recursive
     def visit_Assign(self, node: ast.Assign) -> None:
@@ -230,7 +239,7 @@ class Scanner(ast.NodeVisitor):
         ):
             for item in node.value.elts:
                 if isinstance(item, ast.Str):
-                    self.names.append({"lineno": node.lineno, "name": item.s})
+                    self.names.append(Name(lineno=node.lineno, name=item.s))
 
     def visit_Try(self, node: ast.Try) -> None:
         def any_import_error(items):
@@ -263,7 +272,7 @@ class Scanner(ast.NodeVisitor):
             tree = ast.parse(self.source)
             relate(tree)
             self.visit(tree)
-        self.import_names = [imp["name"] for imp in self.imports]
+        self.import_names = [imp.name for imp in self.imports]
         self.names = list(self.get_names())
         self.unused_imports = list(self.get_unused_imports())
 
@@ -290,73 +299,67 @@ class Scanner(ast.NodeVisitor):
             re.search(self.skip_file_regex, self.source, re.IGNORECASE)
         )
 
-    def get_names(self) -> "Iterator[TYPE_NAME]":
+    def get_names(self) -> Iterator[Name]:
         imp_match_built_in = BUILTINS & set(self.import_names)
         yield from filter(
             lambda name: list(
                 filter(
-                    lambda imp_name: imp_name == name["name"],
-                    imp_match_built_in,
+                    lambda imp_name: imp_name == name.name, imp_match_built_in,
                 )
             )
-            or not hasattr(builtins, name["name"]),
+            or not hasattr(builtins, name.name),
             self.names,
         )
 
-    def get_suggestion_modules(self, imp: "TYPE_IMPORT") -> List[str]:
-        if imp["module"] is not None:
+    def get_suggestion_modules(self, imp: Import) -> List[str]:
+        if imp.module is not None:
             with contextlib.suppress(OSError, TypeError):
-                scanner = self.__class__(inspect.getsource(imp["module"]))
+                scanner = self.__class__(inspect.getsource(imp.module))
                 objects = scanner.classes + scanner.functions + scanner.names
-                from_all_name = {obj["name"] for obj in objects}
+                from_all_name = {obj.name for obj in objects}
                 to_names = {
-                    to_cfv["name"]
+                    to_cfv.name
                     for to_cfv in self.names
-                    if to_cfv["name"] not in self.ignore_import_names
+                    if to_cfv.name not in self.ignore_import_names
                 }
                 suggestion_modules = sorted(from_all_name & to_names)
                 return suggestion_modules
         return []
 
-    def get_unused_imports(self) -> "Iterator[TYPE_IMPORT]":
+    def get_unused_imports(self) -> Iterator[Import]:
         for imp in self.imports:
-            if self.is_duplicate(imp["name"]) and not self.is_duplicate_used(
-                imp
-            ):
+            if self.is_duplicate(imp.name) and not self.is_duplicate_used(imp):
                 yield imp
             else:
-                if imp["star"] and self.include_star_import:
-                    imp["modules"] = self.get_suggestion_modules(imp)
+                if imp.star and self.include_star_import:
+                    imp.modules.extend(self.get_suggestion_modules(imp))
                     yield imp
                 else:
                     if not list(
-                        filter(
-                            lambda name: name["name"] == imp["name"],
-                            self.names,
-                        )
+                        filter(lambda name: name.name == imp.name, self.names,)
                     ):
                         yield imp
 
     def is_duplicate(self, name: str) -> bool:
         return self.import_names.count(name) > 1
 
-    def get_duplicate_imports(self) -> "Iterator[TYPE_IMPORT]":
+    def get_duplicate_imports(self) -> Iterator[Import]:
         yield from filter(
-            lambda imp: self.is_duplicate(imp["name"]), self.imports
+            lambda imp: self.is_duplicate(imp.name), self.imports
         )
 
-    def is_duplicate_used(self, imp: "TYPE_IMPORT") -> bool:
-        def find_nearest_imp(name: "TYPE_NAME") -> "TYPE_IMPORT":
+    def is_duplicate_used(self, imp: Import) -> bool:
+        def find_nearest_imp(name: Name) -> Import:
             nearest = imp
             for duplicate in self.get_duplicate_imports():
                 if (
-                    duplicate["lineno"] < name["lineno"]
-                    and name["name"] == duplicate["name"]
+                    duplicate.lineno < name.lineno
+                    and name.name == duplicate.name
                 ):
                     nearest = duplicate
             return nearest
 
         for name in self.names:
-            if name["name"] == imp["name"] and imp == find_nearest_imp(name):
+            if name.name == imp.name and imp == find_nearest_imp(name):
                 return True
         return False
