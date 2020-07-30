@@ -26,7 +26,6 @@ from typing import (
 )
 
 from unimport.color import Color
-from unimport.relate import first_occurrence, get_parents, relate
 
 PY38_PLUS = sys.version_info >= (3, 8)
 BUILTINS = {_build for _build in dir(builtins) if not _build.startswith("_")}
@@ -112,7 +111,7 @@ class Scanner(ast.NodeVisitor):
 
         At this point from os import * becomes > from os import walk
         """
-        if not first_occurrence(node, ast.ClassDef):
+        if not Relate.first_occurrence(node, ast.ClassDef):
             self.functions.append(Name(lineno=node.lineno, name=node.name))
 
     def alike_import(
@@ -162,14 +161,14 @@ class Scanner(ast.NodeVisitor):
         if not isinstance(node.value, (str, bytes)):
             return
         try:
-            parent = first_occurrence(node, ast.FunctionDef)
+            parent = Relate.first_occurrence(node, ast.FunctionDef)
         except AttributeError:
             with contextlib.suppress(SyntaxError):
                 self.visit(ast.parse(node.value, mode="eval"))
         else:
             is_annasign_and_arg = any(
                 type_parent in {ast.AnnAssign, ast.arg}
-                for type_parent in map(type, get_parents(node))
+                for type_parent in map(type, Relate.get_parents(node))
             )
             if (parent and id(parent.returns) == id_) or is_annasign_and_arg:
                 with contextlib.suppress(SyntaxError):
@@ -270,7 +269,7 @@ class Scanner(ast.NodeVisitor):
             self.iter_type_comments()
         with contextlib.suppress(SyntaxError):
             tree = ast.parse(self.source)
-            relate(tree)
+            Relate(tree)
             self.visit(tree)
         self.import_names = [imp.name for imp in self.imports]
         self.names = list(self.get_names())
@@ -363,3 +362,30 @@ class Scanner(ast.NodeVisitor):
             if name.name == imp.name and imp == find_nearest_imp(name):
                 return True
         return False
+
+
+class Relate:
+    # https://tree.science/using-ancestral-chains-in-ast.html
+
+    def __init__(self, tree: ast.Module) -> None:
+        tree.parent = None  # type: ignore
+        for parent in ast.walk(tree):
+            for child in ast.iter_child_nodes(parent):
+                child.parent = parent  # type: ignore
+
+    @classmethod
+    def get_parents(cls, node: ast.AST) -> Iterator[ast.AST]:
+        parent = node
+        while parent:
+            parent = parent.parent  # type: ignore
+            if parent is None:
+                continue
+            yield parent
+
+    @classmethod
+    def first_occurrence(cls, node: ast.AST, *ancestors):
+        for parent in cls.get_parents(node):
+            if type(parent) in ancestors:
+                return parent
+        else:
+            return False
