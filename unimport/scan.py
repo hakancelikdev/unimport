@@ -62,14 +62,9 @@ class Scanner(ast.NodeVisitor):
     ignore_import_names = ["__all__", "__doc__"]
     skip_file_regex = "#\s*(unimport:\s{0,1}skip_file)"
     skip_comments_regex = "#\s*(unimport:\s{0,1}skip|noqa)"
-    any_import_error = False
 
     def __init__(
-        self,
-        source: Optional[str] = None,
-        *,
-        include_star_import: bool = False,
-        show_error: bool = False,
+        self, *, include_star_import: bool = False, show_error: bool = False,
     ):
         """
         If include_star_import is True during the analysis, it takes into account start imports, if it's False, it doesn't.
@@ -84,8 +79,9 @@ class Scanner(ast.NodeVisitor):
         self.classes: List[Name] = []
         self.functions: List[Name] = []
         self.names: List[Name] = []
-        if source:
-            self.run_visit(source)
+        self.import_names: List[str] = []
+        self.unused_imports: List[Import] = []
+        self.any_import_error = False
 
     @recursive
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
@@ -280,6 +276,8 @@ class Scanner(ast.NodeVisitor):
         self.imports.clear()
         self.classes.clear()
         self.functions.clear()
+        self.import_names.clear()
+        self.unused_imports.clear()
 
     def skip_import(self, node: Union[ast.ImportFrom, ast.Import]) -> bool:
         return (
@@ -313,7 +311,8 @@ class Scanner(ast.NodeVisitor):
     def get_suggestion_modules(self, imp: Import) -> List[str]:
         if imp.module is not None:
             with contextlib.suppress(OSError, TypeError):
-                scanner = self.__class__(inspect.getsource(imp.module))
+                scanner = self.__class__()
+                scanner.run_visit(inspect.getsource(imp.module))
                 objects = scanner.classes + scanner.functions + scanner.names
                 from_all_name = {obj.name for obj in objects}
                 to_names = {
