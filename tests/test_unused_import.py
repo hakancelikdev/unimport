@@ -19,7 +19,7 @@ class UnusedTestCase(unittest.TestCase):
         self.session = Session(include_star_import=self.include_star_import)
 
     def assertUnimportEqual(self, source, expected_unused_imports):
-        self.session.scanner.run_visit(source)
+        self.session.scanner.scan(source)
         self.assertEqual(
             expected_unused_imports, self.session.scanner.unused_imports,
         )

@@ -16,7 +16,7 @@ def get_all_modules(project_path):  # write the path of your own project
             source = session.read(path)[0]
         except SyntaxError:
             continue
-        session.scanner.run_visit(source)
+        session.scanner.scan(source)
         import_names = get_module(session.scanner.imports)
         unused_imp_names = get_module(session.scanner.unused_imports)
         session.scanner.clear()

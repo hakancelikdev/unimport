@@ -257,7 +257,7 @@ class Scanner(ast.NodeVisitor):
         self.generic_visit(node)
         self.any_import_error = False
 
-    def run_visit(self, source: str) -> None:
+    def scan(self, source: str) -> None:
         self.source = source
         if self.skip_file():
             return
@@ -312,7 +312,7 @@ class Scanner(ast.NodeVisitor):
         if imp.module is not None:
             with contextlib.suppress(OSError, TypeError):
                 scanner = self.__class__()
-                scanner.run_visit(inspect.getsource(imp.module))
+                scanner.scan(inspect.getsource(imp.module))
                 objects = scanner.classes + scanner.functions + scanner.names
                 from_all_name = {obj.name for obj in objects}
                 to_names = {

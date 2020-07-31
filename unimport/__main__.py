@@ -170,7 +170,7 @@ def main(argv: Optional[List[str]] = None) -> None:
     unused_modules = set()
     for source_path in namespace.sources:
         for py_path in session.list_paths(source_path, include, exclude):
-            session.scanner.run_visit(source=session.read(py_path)[0])
+            session.scanner.scan(source=session.read(py_path)[0])
             unused_imports = session.scanner.unused_imports
             if not is_unused_module and unused_imports:
                 is_unused_module = True
