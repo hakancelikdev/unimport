@@ -2,9 +2,10 @@
 
 ```python
 from pathlib import Path
-from unimport.session import Session
 
-session = Session()
+import unimport
+
+session = unimport.Session()
 
 
 def get_all_modules(project_path):  # write the path of your own project
