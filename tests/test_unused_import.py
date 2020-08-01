@@ -220,8 +220,6 @@ class TestStarImport(UnusedTestCase):
                     "Newline",
                     "Node",  #
                     "token",  #
-                    "token.NAME",  #
-                    "token.STAR",  #
                 ],
             ),
             ImportFrom(
