@@ -3,12 +3,12 @@ import difflib
 import re
 import sys
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 from unimport import __description__, __version__
 from unimport.color import Color
-from unimport.scan import Import
 from unimport.session import Session
+from unimport.statement import Import, ImportFrom
 
 parser = argparse.ArgumentParser(
     prog="unimport",
@@ -119,28 +119,33 @@ def print_if_exists(sequence: Tuple[str, ...]) -> bool:
     return bool(sequence)
 
 
-def get_as_import_from(
-    import_name: str, is_star: bool, modules: List[str]
-) -> Optional[str]:
-    _modules = ""
-    if is_star:
-        _modules = ", ".join(modules)
-        if len(_modules) > 5:
-            _modules = "(" + _modules + ")"
-    if modules:
-        return f"from {import_name} import {_modules}"
-    return None
-
-
-def show(unused_import: List[Import], py_path: Path) -> None:
+def show(
+    unused_import: List[Union[Import, ImportFrom]], py_path: Path
+) -> None:
     for imp in unused_import:
-        import_from = get_as_import_from(imp.name, imp.star, imp.modules)
-        if (imp.star and imp.module) or (not imp.star):
-            print(
-                f"{Color(imp.name).yellow} at "
-                f"{Color(str(py_path)).green}:{Color(str(imp.lineno)).green}"
-                f" {import_from or ''}"
+        context = ""
+        if (
+            isinstance(imp, ImportFrom)
+            and imp.star
+            and imp.module
+            and imp.modules
+        ):
+            context = (
+                Color(f"from {imp.name} import *").red
+                + " -> "
+                + Color(
+                    f"from {imp.name} import {', '.join(imp.modules)}"
+                ).green
             )
+        else:
+            context = Color(imp.name).yellow
+        print(
+            context
+            + " at "
+            + Color(str(py_path)).green
+            + ":"
+            + Color(str(imp.lineno)).green
+        )
 
 
 def main(argv: Optional[List[str]] = None) -> None:
@@ -174,16 +179,17 @@ def main(argv: Optional[List[str]] = None) -> None:
             unused_imports = session.scanner.unused_imports
             if not is_unused_module and unused_imports:
                 is_unused_module = True
-            unused_modules.update(
-                {
-                    imp.module.__name__.split(".")[0]  # type: ignore
-                    for imp in unused_imports
-                    if imp.module
-                }
-            )
-            session.scanner.clear()
+            if unused_imports:
+                unused_modules.update(
+                    {
+                        imp.module.__name__.split(".")[0]  # type: ignore
+                        for imp in unused_imports
+                        if imp.module
+                    }
+                )
             if namespace.check:
                 show(unused_imports, py_path)
+            session.scanner.clear()
             if namespace.diff:
                 exists_diff = print_if_exists(session.diff_file(py_path))
             if namespace.permission and exists_diff:
