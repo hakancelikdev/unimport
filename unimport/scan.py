@@ -307,13 +307,16 @@ class Scanner(ast.NodeVisitor):
             return []
         scanner = self.__class__()
         try:
-            scanner.scan(inspect.getsource(imp.module))
+            source = inspect.getsource(imp.module)
         except (OSError, TypeError):
             return []
         else:
+            scanner.scan(source)
             objects = scanner.classes + scanner.functions + scanner.names
-            from_all_name = {obj.name for obj in objects}
-            to_names = {
+            from_all_name = {
+                obj.name.split(".")[0] for obj in objects
+            }  # from module
+            to_names = {  # current
                 to_cfv.name
                 for to_cfv in self.names
                 if to_cfv.name not in self.ignore_import_names

@@ -70,18 +70,17 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
 
     @staticmethod
     def leave_StarImport(
-        original_node: cst.ImportFrom, updated_node: cst.ImportFrom, **kwargs
+        original_node: cst.ImportFrom,
+        updated_node: cst.ImportFrom,
+        imp: ImportFrom,
     ) -> Union[cst.ImportFrom, cst.RemovalSentinel]:
-        imp = kwargs["imp"]
         if imp.modules:
-            modules = ",".join(imp.modules)
-            names_to_suggestion = []
-            for module in modules.split(","):
-                names_to_suggestion.append(cst.ImportAlias(cst.Name(module)))
+            names_to_suggestion = [
+                cst.ImportAlias(cst.Name(module)) for module in imp.modules
+            ]
             return updated_node.with_changes(names=names_to_suggestion)
-        else:
-            if imp.module:
-                return cst.RemoveFromParent()
+        elif imp.module:
+            return cst.RemoveFromParent()
         return original_node
 
     def leave_Import(
@@ -111,9 +110,7 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
 
             imp = get_star_imp()
             if imp:
-                return self.leave_StarImport(
-                    original_node, updated_node, imp=imp
-                )
+                return self.leave_StarImport(original_node, updated_node, imp)
             return original_node
         return self.leave_import_alike(original_node, updated_node)
 
@@ -121,7 +118,7 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
 def refactor_string(
     source: str,
     unused_imports: List[Union[Import, ImportFrom]],
-    show_error: bool,
+    show_error: bool = False,
 ) -> str:
     try:
         wrapper = cst.MetadataWrapper(cst.parse_module(source))
