@@ -148,7 +148,7 @@ def show(
         )
 
 
-def main(argv: Optional[List[str]] = None) -> None:
+def main(argv: Optional[List[str]] = None) -> int:
     namespace = parser.parse_args(argv)
     namespace.check = namespace.check or not any(
         [namespace.diff, namespace.remove, namespace.permission]
@@ -194,7 +194,7 @@ def main(argv: Optional[List[str]] = None) -> None:
                     f"Apply suggested changes to '{Color(str(py_path)).yellow}' [Y/n/q] ? >"
                 ).lower()
                 if action == "q":
-                    sys.exit(1)
+                    return 1
                 elif action == "y" or action == "":
                     namespace.remove = True
             if namespace.remove:
@@ -245,8 +245,8 @@ def main(argv: Optional[List[str]] = None) -> None:
             requirements_path.write_text(result)
             print(f"Refactoring '{Color(str(requirements_path)).cyan}'")
     if unused_modules:
-        sys.exit(1)
+        return 1
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    sys.exit(main(sys.argv[1:]))
