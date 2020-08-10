@@ -148,7 +148,7 @@ def show(
         )
 
 
-def main(argv: Optional[List[str]] = None) -> None:
+def main(argv: Optional[List[str]] = None) -> int:
     namespace = parser.parse_args(argv)
     namespace.check = namespace.check or not any(
         [namespace.diff, namespace.remove, namespace.permission]
@@ -171,14 +171,11 @@ def main(argv: Optional[List[str]] = None) -> None:
         exclude_list.append(session.config.exclude)  # type: ignore
     include = re.compile("|".join(include_list)).pattern
     exclude = re.compile("|".join(exclude_list)).pattern
-    is_unused_module = False
     unused_modules = set()
     for source_path in namespace.sources:
         for py_path in session.list_paths(source_path, include, exclude):
             session.scanner.scan(source=session.read(py_path)[0])
             unused_imports = session.scanner.unused_imports
-            if not is_unused_module and unused_imports:
-                is_unused_module = True
             if unused_imports:
                 unused_modules.update(
                     {
@@ -197,7 +194,7 @@ def main(argv: Optional[List[str]] = None) -> None:
                     f"Apply suggested changes to '{Color(str(py_path)).yellow}' [Y/n/q] ? >"
                 ).lower()
                 if action == "q":
-                    return
+                    return 1
                 elif action == "y" or action == "":
                     namespace.remove = True
             if namespace.remove:
@@ -205,16 +202,18 @@ def main(argv: Optional[List[str]] = None) -> None:
                 refactor_source = session.refactor_file(py_path, apply=True)
                 if refactor_source != source:
                     print(f"Refactoring '{Color(str(py_path)).green}'")
-    if not is_unused_module and namespace.check:
+    if not unused_modules and namespace.check:
         print(
             Color(
                 "✨ Congratulations there is no unused import in your project. ✨"
             ).green
         )
-    if namespace.requirements and unused_modules:
-        requirements_path = Path("requirements.txt")
-        if not requirements_path.exists():
-            return
+    requirements_path = Path("requirements.txt")
+    if (
+        namespace.requirements
+        and unused_modules
+        and requirements_path.exists()
+    ):
         result = ""
         source = requirements_path.read_text()
         for index, requirement in enumerate(source.splitlines()):
@@ -245,7 +244,10 @@ def main(argv: Optional[List[str]] = None) -> None:
         if namespace.remove:
             requirements_path.write_text(result)
             print(f"Refactoring '{Color(str(requirements_path)).cyan}'")
+    if unused_modules:
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    sys.exit(main(sys.argv[1:]))
