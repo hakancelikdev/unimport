@@ -38,16 +38,16 @@ def recursive(func: Function) -> Function:
     """decorator to make visitor work recursive"""
 
     @functools.wraps(func)
-    def wrapper(self, node, *args, **kwargs):
-        func(self, node, *args, **kwargs)
-        self.generic_visit(node)
+    def wrapper(self, *args, **kwargs):
+        func(self, *args, **kwargs)
+        self.generic_visit(*args)
 
     return cast(Function, wrapper)
 
 
 class Scanner(ast.NodeVisitor):
-    ignore_imports = ["__future__"]
-    ignore_import_names = ["__all__", "__doc__"]
+    ignore_imports = ("__future__",)
+    ignore_import_names = ("__all__", "__doc__")
     skip_file_regex = "#\s*(unimport:\s{0,1}skip_file)"
     skip_comments_regex = "#\s*(unimport:\s{0,1}skip|noqa)"
 
@@ -82,7 +82,8 @@ class Scanner(ast.NodeVisitor):
 
         At this point from os import * becomes > from os import PathLike
         """
-        self.classes.append(Name(lineno=node.lineno, name=node.name))
+        if not self.include_star_import:
+            self.classes.append(Name(lineno=node.lineno, name=node.name))
 
     @recursive
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
@@ -95,7 +96,10 @@ class Scanner(ast.NodeVisitor):
 
         At this point from os import * becomes > from os import walk
         """
-        if not Relate.first_occurrence(node, ast.ClassDef):
+        if (
+            not Relate.first_occurrence(node, ast.ClassDef)
+            and not self.include_star_import
+        ):
             self.functions.append(Name(lineno=node.lineno, name=node.name))
 
     def visit_Str(self, node: ast.Str) -> None:
