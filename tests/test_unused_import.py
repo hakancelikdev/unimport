@@ -14,9 +14,13 @@ from unimport.statement import Import, ImportFrom
 class UnusedTestCase(unittest.TestCase):
     maxDiff = None
     include_star_import = False
+    show_error = True
 
     def setUp(self):
-        self.session = Session(include_star_import=self.include_star_import)
+        self.session = Session(
+            include_star_import=self.include_star_import,
+            show_error=self.show_error,
+        )
 
     def assertUnimportEqual(self, source, expected_unused_imports):
         self.session.scanner.scan(source)
@@ -178,6 +182,19 @@ class TestUnusedImport(UnusedTestCase):
         source = "def function():\n" "    print(os)\n" "import os\n"
         expected_unused_imports = []
         self.assertUnimportEqual(source, expected_unused_imports)
+
+    def test_double_underscore_builtins_names(self):
+        source = (
+            "from globals import (\n"
+            "    __name__, __doc__, __package__,\n"
+            "   __loader__, __spec__, __annotations__,\n"
+            "   __builtins__"
+            ")\n"
+            "__name__, __doc__, __package__,\n"
+            "__loader__, __spec__, __annotations__,\n"
+            "__builtins__\n"
+        )
+        self.assertUnimportEqual(source, [])
 
 
 class TestStarImport(UnusedTestCase):

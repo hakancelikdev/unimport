@@ -4,7 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - ././2020
 
-- [Support for exit code and add some enhancement by @furkanonder](https://github.com/hakancelik96/unimport/pull/81)
+- [🔥 Fix: Double underscore in builtins imports by @hakancelik96](https://github.com/hakancelik96/unimport/pull/82)
+- [💪 Support for exit code and add some enhancement by @furkanonder](https://github.com/hakancelik96/unimport/pull/81)
 - [🔥 Fix: incorrect matching import and name by @hakancelik96](https://github.com/hakancelik96/unimport/pull/78)
 
 ## [0.2.8] - 27/July/2020
