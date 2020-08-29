@@ -302,7 +302,7 @@ class Scanner(ast.NodeVisitor):
                     lambda imp_name: imp_name == name.name, imp_match_built_in,
                 )
             )
-            or not hasattr(builtins, name.name),
+            or name.name not in BUILTINS,
             self.names,
         )
 
