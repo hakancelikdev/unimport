@@ -191,7 +191,11 @@ class TestTypeComments(ScannerTestCase):
                 lineno=1, name="Any", star=False, module=typing, modules=[]
             ),
             ImportFrom(
-                lineno=2, name="Tuple", star=False, module=typing, modules=[],
+                lineno=2,
+                name="Tuple",
+                star=False,
+                module=typing,
+                modules=[],
             ),
             ImportFrom(
                 lineno=3, name="Union", star=False, module=typing, modules=[]

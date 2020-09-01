@@ -25,7 +25,8 @@ class UnusedTestCase(unittest.TestCase):
     def assertUnimportEqual(self, source, expected_unused_imports):
         self.session.scanner.scan(source)
         self.assertEqual(
-            expected_unused_imports, self.session.scanner.unused_imports,
+            expected_unused_imports,
+            self.session.scanner.unused_imports,
         )
         self.session.scanner.clear()
 
