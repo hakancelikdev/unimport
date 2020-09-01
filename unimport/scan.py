@@ -52,7 +52,10 @@ class Scanner(ast.NodeVisitor):
     skip_comments_regex = "#\s*(unimport:\s{0,1}skip|noqa)"
 
     def __init__(
-        self, *, include_star_import: bool = False, show_error: bool = False,
+        self,
+        *,
+        include_star_import: bool = False,
+        show_error: bool = False,
     ):
         """
         If include_star_import is True during the analysis, it takes into account start imports, if it's False, it doesn't.
@@ -149,7 +152,11 @@ class Scanner(ast.NodeVisitor):
             except BaseException:
                 module = None
             self.imports.append(
-                Import(lineno=node.lineno, name=name, module=module,)
+                Import(
+                    lineno=node.lineno,
+                    name=name,
+                    module=module,
+                )
             )
 
     @recursive
@@ -299,7 +306,8 @@ class Scanner(ast.NodeVisitor):
         yield from filter(
             lambda name: list(
                 filter(
-                    lambda imp_name: imp_name == name.name, imp_match_built_in,
+                    lambda imp_name: imp_name == name.name,
+                    imp_match_built_in,
                 )
             )
             or name.name not in BUILTINS,
@@ -342,7 +350,10 @@ class Scanner(ast.NodeVisitor):
                     yield imp
                 else:
                     if not list(
-                        filter(lambda name: name.name == imp.name, self.names,)
+                        filter(
+                            lambda name: name.name == imp.name,
+                            self.names,
+                        )
                     ):
                         yield imp
 
