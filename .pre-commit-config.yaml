@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/psf/black
-    rev: 19.10b0
+    rev: 20.8b1
     hooks:
       - id: black
         args: [--line-length=79]
@@ -12,7 +12,7 @@ repos:
       - id: seed-isort-config
 
   - repo: https://github.com/timothycrosley/isort
-    rev: 5.1.4
+    rev: 5.4.2
     hooks:
       - id: isort
         files: "\\.(py)$"
@@ -30,7 +30,7 @@ repos:
       - id: mypy
 
   - repo: https://github.com/prettier/prettier
-    rev: 2.0.5
+    rev: 2.1.1
     hooks:
       - id: prettier
         args: [--prose-wrap=always, --print-width=88]

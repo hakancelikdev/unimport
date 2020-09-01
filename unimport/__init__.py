@@ -6,7 +6,7 @@ from unimport.statement import Import, ImportFrom, Name
 __description__ = (
     "A linter, formatter for finding and removing unused import statements."
 )
-__version__ = "0.2.8"
+__version__ = "0.2.9"
 __all__ = [
     "Import",
     "ImportFrom",

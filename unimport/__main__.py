@@ -246,7 +246,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             print(f"Refactoring '{Color(str(requirements_path)).cyan}'")
     if unused_modules:
         return 1
-    return 0
+    else:
+        return 0
 
 
 if __name__ == "__main__":

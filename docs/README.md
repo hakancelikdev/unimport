@@ -355,7 +355,7 @@ It's possible to configure **unimport** from `pyproject.toml` or `setup.cfg` fil
 you have.
 
 If you want to use `pyproject.toml` to configure, you must to install it. Try this;
-`pip install toml==0.10.0`
+`pip install toml==0.10.1`
 
 - `exclude` file exclude pattern.
 - `include` file include pattern.
@@ -390,7 +390,7 @@ config file describes what repositories and hooks are installed.
 ```yaml
 repos:
   - repo: https://github.com/hakancelik96/unimport
-    rev: v0.2.8
+    rev: v0.2.9
     hooks:
       - id: unimport
         args: [--remove, --requirements, --include-star-import]
