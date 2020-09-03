@@ -7,7 +7,7 @@ from unimport.statement import Import, ImportFrom
 
 
 class RemoveUnusedImportTransformer(cst.CSTTransformer):
-    METADATA_DEPENDENCIES = [cst.metadata.PositionProvider]
+    METADATA_DEPENDENCIES = (cst.metadata.PositionProvider,)
 
     def __init__(
         self, unused_imports: List[Union[Import, ImportFrom]]

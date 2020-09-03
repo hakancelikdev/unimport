@@ -5,95 +5,10 @@ import sys
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
-from unimport import __description__, __version__
+import unimport.constants as C
 from unimport.color import Color
 from unimport.session import Session
 from unimport.statement import Import, ImportFrom
-
-parser = argparse.ArgumentParser(
-    prog="unimport",
-    description=__description__,
-    epilog="Get rid of all unused imports 🥳",
-)
-exclusive_group = parser.add_mutually_exclusive_group(required=False)
-parser.add_argument(
-    "sources",
-    default=[Path(".")],
-    nargs="*",
-    help="files and folders to find the unused imports.",
-    action="store",
-    type=Path,
-)
-parser.add_argument(
-    "-c",
-    "--config",
-    default=".",
-    help="read configuration from PATH.",
-    metavar="PATH",
-    action="store",
-    type=Path,
-)
-parser.add_argument(
-    "--include",
-    help="file include pattern.",
-    metavar="include",
-    action="store",
-    default="",
-    type=str,
-)
-parser.add_argument(
-    "--exclude",
-    help="file exclude pattern.",
-    metavar="exclude",
-    action="store",
-    default="",
-    type=str,
-)
-parser.add_argument(
-    "--include-star-import",
-    action="store_true",
-    help="Include star imports during scanning and refactor.",
-)
-parser.add_argument(
-    "--show-error",
-    action="store_true",
-    help="Show or don't show errors captured during static analysis.",
-)
-parser.add_argument(
-    "-d",
-    "--diff",
-    action="store_true",
-    help="Prints a diff of all the changes unimport would make to a file.",
-)
-exclusive_group.add_argument(
-    "-r",
-    "--remove",
-    action="store_true",
-    help="remove unused imports automatically.",
-)
-exclusive_group.add_argument(
-    "-p",
-    "--permission",
-    action="store_true",
-    help="Refactor permission after see diff.",
-)
-parser.add_argument(
-    "--requirements",
-    action="store_true",
-    help="Include requirements.txt file, You can use it with all other arguments",
-)
-parser.add_argument(
-    "--check",
-    action="store_true",
-    help="Prints which file the unused imports are in.",
-)
-parser.add_argument(
-    "-v",
-    "--version",
-    action="version",
-    version=f"Unimport {__version__}",
-    help="Prints version of unimport",
-)
 
 
 def color_diff(sequence: Tuple[str, ...]) -> str:
@@ -149,6 +64,92 @@ def show(
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    argv = argv if argv is not None else sys.argv[1:]
+    parser = argparse.ArgumentParser(
+        prog="unimport",
+        description=C.DESCRIPTION,
+        epilog="Get rid of all unused imports 🥳",
+    )
+    exclusive_group = parser.add_mutually_exclusive_group(required=False)
+    parser.add_argument(
+        "sources",
+        default=[Path(".")],
+        nargs="*",
+        help="files and folders to find the unused imports.",
+        action="store",
+        type=Path,
+    )
+    parser.add_argument(
+        "-c",
+        "--config",
+        default=".",
+        help="read configuration from PATH.",
+        metavar="PATH",
+        action="store",
+        type=Path,
+    )
+    parser.add_argument(
+        "--include",
+        help="file include pattern.",
+        metavar="include",
+        action="store",
+        default="",
+        type=str,
+    )
+    parser.add_argument(
+        "--exclude",
+        help="file exclude pattern.",
+        metavar="exclude",
+        action="store",
+        default="",
+        type=str,
+    )
+    parser.add_argument(
+        "--include-star-import",
+        action="store_true",
+        help="Include star imports during scanning and refactor.",
+    )
+    parser.add_argument(
+        "--show-error",
+        action="store_true",
+        help="Show or don't show errors captured during static analysis.",
+    )
+    parser.add_argument(
+        "-d",
+        "--diff",
+        action="store_true",
+        help="Prints a diff of all the changes unimport would make to a file.",
+    )
+    exclusive_group.add_argument(
+        "-r",
+        "--remove",
+        action="store_true",
+        help="remove unused imports automatically.",
+    )
+    exclusive_group.add_argument(
+        "-p",
+        "--permission",
+        action="store_true",
+        help="Refactor permission after see diff.",
+    )
+    parser.add_argument(
+        "--requirements",
+        action="store_true",
+        help="Include requirements.txt file, You can use it with all other arguments",
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Prints which file the unused imports are in.",
+    )
+    parser.add_argument(
+        "-v",
+        "--version",
+        action="version",
+        version=f"Unimport {C.VERSION}",
+        help="Prints version of unimport",
+    )
+
     namespace = parser.parse_args(argv)
     namespace.check = namespace.check or not any(
         [namespace.diff, namespace.remove, namespace.permission]
@@ -251,4 +252,4 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    exit(main())
