@@ -3,7 +3,7 @@ from pathlib import Path
 
 from setuptools import setup
 
-from unimport import __description__, __version__
+import unimport.constants as C
 
 assert sys.version_info >= (3, 6, 0), "unimport requires Python 3.6+"
 
@@ -18,8 +18,8 @@ def get_long_description():
 
 setup(
     name="unimport",
-    version=__version__,
-    description=__description__,
+    version=C.VERSION,
+    description=C.DESCRIPTION,
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     keywords=["unused", "import"],
