@@ -105,12 +105,12 @@ class Scanner(ast.NodeVisitor):
             self.functions.append(Name(lineno=node.lineno, name=node.name))
 
     def visit_Str(self, node: ast.Str) -> None:
+        # only not PY38_PLUS
         constant = ast.Constant(node.s)
         try:
             constant.parent = node.parent  # type: ignore
         except AttributeError:
-            with contextlib.suppress(SyntaxError):
-                self.visit(ast.parse(node.s, mode="eval"))
+            self.run_visit(node.s, mode="eval")
         else:
             self.visit_Constant(constant, id_=id(node))
 
@@ -124,8 +124,7 @@ class Scanner(ast.NodeVisitor):
         try:
             parent = Relate.first_occurrence(node, ast.FunctionDef)
         except AttributeError:
-            with contextlib.suppress(SyntaxError):
-                self.visit(ast.parse(node.value, mode="eval"))
+            self.run_visit(node.value, mode="eval")
         else:
             is_annasign_and_arg = any(
                 type_parent in {ast.AnnAssign, ast.arg}
@@ -193,34 +192,16 @@ class Scanner(ast.NodeVisitor):
     def iter_type_comments(self):
         """
         This feature is only available for python 3.8.
-
         PEP 526 -- Syntax for Variable Annotations
         https://www.python.org/dev/peps/pep-0526/
-
         https://docs.python.org/3.8/library/ast.html#ast.parse
-
         """
         buffer = io.StringIO(self.source)
         for token in tokenize.generate_tokens(buffer.readline):
             if token.type == tokenize.COMMENT:
                 comment_string = token.string.split("# type: ")
                 if comment_string != [token.string]:
-                    try:
-                        functype = ast.parse(
-                            comment_string[1], mode="func_type"
-                        )
-                    except SyntaxError as err:
-                        if self.show_error:
-                            error_messages = f"{token.line}\n{comment_string[1]} {Color(str(err)).red}"
-                            print(error_messages)
-                    else:
-                        for node in ast.walk(
-                            ast.Module(functype.argtypes + [functype.returns])
-                        ):
-                            if isinstance(node, ast.Name) and isinstance(
-                                node.ctx, ast.Load
-                            ):
-                                self.visit(node)
+                    self.run_visit(comment_string[1], mode="func_type")
 
     @recursive
     def visit_Attribute(self, node: ast.Attribute) -> None:
@@ -267,13 +248,19 @@ class Scanner(ast.NodeVisitor):
             return
         if PY38_PLUS:
             self.iter_type_comments()
-        with contextlib.suppress(SyntaxError):
-            tree = ast.parse(self.source)
-            Relate(tree)
-            self.visit(tree)
+        self.run_visit(self.source)
         self.import_names = [imp.name for imp in self.imports]
         self.names = list(self.get_names())
         self.unused_imports = list(self.get_unused_imports())
+
+    def run_visit(self, source: Union[str, bytes], mode: str = "exec") -> None:
+        try:
+            tree = ast.parse(source, mode=mode)
+        except SyntaxError as err:
+            print(Color(str(err)).red)
+        else:
+            Relate(tree)
+            self.visit(tree)
 
     def clear(self) -> None:
         self.names.clear()
