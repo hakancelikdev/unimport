@@ -7,7 +7,6 @@ import builtins
 import contextlib
 import functools
 import importlib
-import inspect
 import io
 import re
 import sys
@@ -317,24 +316,16 @@ class Scanner(ast.NodeVisitor):
     def get_suggestion_modules(self, imp: ImportFrom) -> List[str]:
         if imp.module is None:
             return []
-        scanner = self.__class__()
-        try:
-            source = inspect.getsource(imp.module)
-        except (OSError, TypeError):
-            return []
-        else:
-            scanner.scan(source)
-            objects = scanner.classes + scanner.functions + scanner.names
-            from_all_name = {
-                obj.name.split(".")[0] for obj in objects
-            }  # from module
-            to_names = {  # current
-                to_cfv.name
-                for to_cfv in self.names
-                if to_cfv.name not in self.ignore_import_names
-            }
-            suggestion_modules = sorted(from_all_name & to_names)
-            return suggestion_modules
+        current_names = {  # current
+            to_cfv.name
+            for to_cfv in self.names
+            if to_cfv.name not in self.ignore_import_names
+        }
+        modules = {
+            module for module in dir(imp.module) if not module.startswith("_")
+        }
+        suggestion_modules = sorted(modules & current_names)
+        return suggestion_modules
 
     def get_unused_imports(self) -> Iterator[Union[Import, ImportFrom]]:
         for imp in self.imports:

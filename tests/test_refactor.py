@@ -551,6 +551,24 @@ class TestStarImport(RefactorTestCase):
             self.session.refactor(action),
         )
 
+    def test_two_suggestion(self):
+        action = (
+            "from time import *\n"
+            "from os import *\n"
+            "time()  # Function from time module.\n"
+            "path.join()\n"
+        )
+        expected = (
+            "from time import time\n"
+            "from os import path\n"
+            "time()  # Function from time module.\n"
+            "path.join()\n"
+        )
+        self.assertEqual(
+            expected,
+            self.session.refactor(action),
+        )
+
 
 class TestImportError(RefactorTestCase):
     """
