@@ -5,7 +5,7 @@ from typing import Iterator
 class Relate:
     # https://tree.science/using-ancestral-chains-in-ast.html
 
-    def __init__(self, tree: ast.Module) -> None:
+    def __init__(self, tree: ast.AST) -> None:
         tree.parent = None  # type: ignore
         for parent in ast.walk(tree):
             for child in ast.iter_child_nodes(parent):
