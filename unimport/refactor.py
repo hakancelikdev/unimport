@@ -41,6 +41,32 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
     ) -> cst._position.CodeRange:
         return self.get_metadata(cst.metadata.PositionProvider, node)
 
+    def get_rpar(
+        self, rpar: cst.RightParen, location: cst._position.CodeRange
+    ) -> cst.RightParen:
+        return (
+            cst.RightParen(
+                whitespace_before=cst.ParenthesizedWhitespace(
+                    first_line=cst.TrailingWhitespace(
+                        whitespace=cst.SimpleWhitespace(
+                            value="",
+                        ),
+                        comment=None,
+                        newline=cst.Newline(
+                            value=None,
+                        ),
+                    ),
+                    empty_lines=[],
+                    indent=True,
+                    last_line=cst.SimpleWhitespace(
+                        value="",
+                    ),
+                )
+            )
+            if rpar and location.start.line != location.end.line
+            else rpar
+        )
+
     def leave_import_alike(
         self,
         original_node: Union[cst.Import, cst.ImportFrom],
@@ -112,7 +138,12 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
             if imp:
                 return self.leave_StarImport(original_node, updated_node, imp)
             return original_node
-        return self.leave_import_alike(original_node, updated_node)
+        rpar = self.get_rpar(
+            updated_node.rpar, self.get_location(original_node)
+        )
+        return self.leave_import_alike(
+            original_node, updated_node.with_changes(rpar=rpar)
+        )
 
 
 def refactor_string(

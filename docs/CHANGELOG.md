@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - ././2020
+
+- [🐞 Fix: vertical style issue by @hadialqattan](https://github.com/hakancelik96/unimport/pull/85)
+  - ```python
+    from foo import (
+        Foo,
+        Bar,
+        FooBar,
+    )
+    Foo, Bar
+    ```
+
 ## [0.2.9] - 1/September/2020
 
 - [🔥 Fix: Double underscore in builtins imports by @hakancelik96](https://github.com/hakancelik96/unimport/pull/82)
