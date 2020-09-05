@@ -4,7 +4,6 @@ repos:
     hooks:
       - id: black
         args: [--line-length=79]
-        language_version: python3.6
 
   - repo: https://github.com/asottile/seed-isort-config
     rev: v2.2.0
@@ -12,13 +11,13 @@ repos:
       - id: seed-isort-config
 
   - repo: https://github.com/timothycrosley/isort
-    rev: 5.4.2
+    rev: 5.5.1
     hooks:
       - id: isort
         files: "\\.(py)$"
 
   - repo: https://github.com/hakancelik96/unimport
-    rev: 0.2.8
+    rev: master
     hooks:
       - id: unimport
         args: [-r]
@@ -28,6 +27,7 @@ repos:
     rev: v0.782
     hooks:
       - id: mypy
+        args: [--no-strict-optional, --ignore-missing-imports]
 
   - repo: https://github.com/prettier/prettier
     rev: 2.1.1

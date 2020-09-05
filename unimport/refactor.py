@@ -1,13 +1,17 @@
-from typing import List, Optional, Union
+from typing import List, Optional, Sequence, TypeVar, Union, cast
 
 import libcst as cst
+import libcst.matchers as m
+from libcst.metadata import PositionProvider
 
 from unimport.color import Color
 from unimport.statement import Import, ImportFrom
 
+ImportT = TypeVar("ImportT", bound=Union[cst.Import, cst.ImportFrom])
+
 
 class RemoveUnusedImportTransformer(cst.CSTTransformer):
-    METADATA_DEPENDENCIES = (cst.metadata.PositionProvider,)
+    METADATA_DEPENDENCIES = (PositionProvider,)
 
     def __init__(
         self, unused_imports: List[Union[Import, ImportFrom]]
@@ -16,14 +20,14 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
 
     @staticmethod
     def get_import_name_from_attr(attr_node: cst.Attribute) -> str:
-        name = [attr_node.children[2].value]  # last value
-        node = attr_node.children[0]
-        while hasattr(node, "value"):
-            if hasattr(node, "attr"):
+        name = [attr_node.attr.value]  # last value
+        node = attr_node.value
+        while m.matches(node, m.OneOf(m.Name(), m.Attribute())):
+            if isinstance(node, cst.Attribute):
                 name.append(node.attr.value)
                 node = node.value
             else:
-                name.append(node.value)
+                name.append(cst.ensure_type(node, cst.Name).value)
                 break
         name.reverse()
         return ".".join(name)
@@ -43,7 +47,7 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
 
     def get_rpar(
         self, rpar: Optional[cst.RightParen], location: cst._position.CodeRange
-    ) -> cst.RightParen:
+    ) -> Optional[cst.RightParen]:
         if not rpar or location.start.line == location.end.line:
             return rpar
         else:
@@ -53,30 +57,37 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
 
     def leave_import_alike(
         self,
-        original_node: Union[cst.Import, cst.ImportFrom],
-        updated_node: Union[cst.Import, cst.ImportFrom],
-    ) -> Union[cst.RemovalSentinel, cst.Import, cst.ImportFrom]:
+        original_node: ImportT,
+        updated_node: ImportT,
+    ) -> Union[cst.RemovalSentinel, ImportT]:
         names_to_keep = []
-        for import_alias in updated_node.names:
+
+        names = cast(Sequence[cst.ImportAlias], updated_node.names)
+        # already handled by leave_ImportFrom
+        for import_alias in names:
             if isinstance(import_alias.name, cst.Attribute):
                 import_name = self.get_import_name_from_attr(
                     attr_node=import_alias.name
                 )
             else:
-                import_name = (import_alias.asname or import_alias).name.value
+                raw_import = import_alias.asname or import_alias
+                raw_import_name = cst.ensure_type(raw_import.name, cst.Name)
+                import_name = raw_import_name.value
             if self.is_import_used(
                 import_name, self.get_location(original_node)
             ):
                 names_to_keep.append(import_alias)
         if not names_to_keep:
             return cst.RemoveFromParent()
-        elif len(updated_node.names) == len(names_to_keep):
+        elif len(names) == len(names_to_keep):
             return updated_node
         else:
             names_to_keep[-1] = names_to_keep[-1].with_changes(
                 comma=cst.MaybeSentinel.DEFAULT
             )
-            return updated_node.with_changes(names=names_to_keep)
+            return cast(
+                ImportT, updated_node.with_changes(names=names_to_keep)
+            )
 
     @staticmethod
     def leave_StarImport(
