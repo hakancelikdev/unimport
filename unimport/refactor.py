@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Optional, Union
 
 import libcst as cst
 
@@ -40,6 +40,16 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
         self, node: Union[cst.Import, cst.ImportFrom]
     ) -> cst._position.CodeRange:
         return self.get_metadata(cst.metadata.PositionProvider, node)
+
+    def get_rpar(
+        self, rpar: Optional[cst.RightParen], location: cst._position.CodeRange
+    ) -> cst.RightParen:
+        if not rpar or location.start.line == location.end.line:
+            return rpar
+        else:
+            return cst.RightParen(
+                whitespace_before=cst.ParenthesizedWhitespace()
+            )
 
     def leave_import_alike(
         self,
@@ -112,7 +122,12 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
             if imp:
                 return self.leave_StarImport(original_node, updated_node, imp)
             return original_node
-        return self.leave_import_alike(original_node, updated_node)
+        rpar = self.get_rpar(
+            updated_node.rpar, self.get_location(original_node)
+        )
+        return self.leave_import_alike(
+            original_node, updated_node.with_changes(rpar=rpar)
+        )
 
 
 def refactor_string(
