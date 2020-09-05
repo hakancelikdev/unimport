@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - ././2020
 
-- [🐞 Fix: vertical style issue by @hadialqattan](https://github.com/hakancelik96/unimport/pull/85)
+- [🐞 Fix: vertical style issue by @hadialqattan](https://github.com/hakancelik96/unimport/pull/86)
   - ```python
     from foo import (
         Foo,
