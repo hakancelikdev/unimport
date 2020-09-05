@@ -2,8 +2,8 @@
 
 **A linter & formatter for finding & removing unused import statements.**
 
-![Lint](https://github.com/hakancelik96/unimport/workflows/Lint/badge.svg)
-![Test](https://github.com/hakancelik96/unimport/workflows/Test/badge.svg)
+![pre-commit](https://github.com/hakancelik96/unimport/workflows/pre-commit/badge.svg)
+![test](https://github.com/hakancelik96/unimport/workflows/Test/badge.svg)
 
 [![Forks](https://img.shields.io/github/forks/hakancelik96/unimport)](https://github.com/hakancelik96/unimport/fork)
 [![Issues](https://img.shields.io/github/issues/hakancelik96/unimport)](https://github.com/hakancelik96/unimport/issues)
