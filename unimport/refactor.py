@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Optional, Union
 
 import libcst as cst
 
@@ -42,7 +42,7 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
         return self.get_metadata(cst.metadata.PositionProvider, node)
 
     def get_rpar(
-        self, rpar: cst.RightParen, location: cst._position.CodeRange
+        self, rpar: Optional[cst.RightParen], location: cst._position.CodeRange
     ) -> cst.RightParen:
         if not rpar or location.start.line == location.end.line:
             return rpar
