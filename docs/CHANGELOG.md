@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased] - ././2020
 
 - [🐞 Fix: vertical style issue by @hadialqattan](https://github.com/hakancelik96/unimport/pull/86)
+
   - ```python
     from foo import (
         Foo,
@@ -13,6 +14,8 @@ All notable changes to this project will be documented in this file.
     )
     Foo, Bar
     ```
+
+- [🐞 Fix: More than one star import exist on the same file.](https://github.com/hakancelik96/unimport/issues/84)
 
 ## [0.2.9] - 1/September/2020
 
