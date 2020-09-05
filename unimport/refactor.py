@@ -48,7 +48,7 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
             return rpar
         else:
             return cst.RightParen(
-                whitespace_before=cst.ParenthesizedWhitespace(indent=True)
+                whitespace_before=cst.ParenthesizedWhitespace()
             )
 
     def leave_import_alike(
