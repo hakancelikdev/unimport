@@ -44,28 +44,12 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
     def get_rpar(
         self, rpar: cst.RightParen, location: cst._position.CodeRange
     ) -> cst.RightParen:
-        return (
-            cst.RightParen(
-                whitespace_before=cst.ParenthesizedWhitespace(
-                    first_line=cst.TrailingWhitespace(
-                        whitespace=cst.SimpleWhitespace(
-                            value="",
-                        ),
-                        comment=None,
-                        newline=cst.Newline(
-                            value=None,
-                        ),
-                    ),
-                    empty_lines=[],
-                    indent=True,
-                    last_line=cst.SimpleWhitespace(
-                        value="",
-                    ),
-                )
+        if not rpar or location.start.line == location.end.line:
+            return rpar
+        else:
+            return cst.RightParen(
+                whitespace_before=cst.ParenthesizedWhitespace(indent=True)
             )
-            if rpar and location.start.line != location.end.line
-            else rpar
-        )
 
     def leave_import_alike(
         self,

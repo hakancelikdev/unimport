@@ -777,3 +777,18 @@ class TestStyle(RefactorTestCase):
             expected,
             self.session.refactor(action),
         )
+
+    def test_4_1_paren_horizontal(self):
+        action = (
+            "from x import (q, e, r, x, t)\n"
+            "import y\n"
+            "import u\n"
+            "y, q, e, r\n"
+        )
+        expected = (
+            "from x import (q, e, r, x)\n" "import y\n" "q, e, r, x, y\n"
+        )
+        self.assertEqual(
+            expected,
+            self.session.refactor(action),
+        )
