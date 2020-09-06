@@ -40,10 +40,7 @@ $ pip install unimport
 $ unimport [sources [sources ...]]
 ```
 
-_If you do not get any output, congratulations means there is no unused import in your
-project._
-
-#### Let's with example with simple a Python code
+#### Let's start with a simple Python code
 
 **example.py**
 
