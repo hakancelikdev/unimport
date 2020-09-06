@@ -14,13 +14,9 @@ from unimport.statement import Import, ImportFrom
 class UnusedTestCase(unittest.TestCase):
     maxDiff = None
     include_star_import = False
-    show_error = True
 
     def setUp(self):
-        self.session = Session(
-            include_star_import=self.include_star_import,
-            show_error=self.show_error,
-        )
+        self.session = Session(include_star_import=self.include_star_import)
 
     def assertUnimportEqual(self, source, expected_unused_imports):
         self.session.scanner.scan(source)
