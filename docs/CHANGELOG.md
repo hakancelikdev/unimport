@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - ././2020
+## [0.2.10] - 6/September/2020
 
 - [🐞 Fix: vertical style issue by @hadialqattan](https://github.com/hakancelik96/unimport/pull/86)
 
@@ -15,7 +15,9 @@ All notable changes to this project will be documented in this file.
     Foo, Bar
     ```
 
-- [🐞 Fix: More than one star import exist on the same file.](https://github.com/hakancelik96/unimport/issues/84)
+- [🐞 Fix: More than one star import exist on the same file by @hakancelik96.](https://github.com/hakancelik96/unimport/issues/84)
+
+- [💪 Getting rid of some bad practice & 🐞 Fix: pre-commit bug by @hakancelik96](https://github.com/hakancelik96/unimport/commit/bd93a0cf6b1d5d27bf6a669f2a029faaf225ae5f)
 
 ## [0.2.9] - 1/September/2020
 
