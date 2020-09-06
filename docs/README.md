@@ -43,7 +43,7 @@ $ unimport [sources [sources ...]]
 _If you do not get any output, congratulations means there is no unused import in your
 project._
 
-#### Let's start with a simple python code
+#### Let's start with a simple Python code
 
 **example.py**
 
