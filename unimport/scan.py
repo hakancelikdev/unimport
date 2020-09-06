@@ -257,7 +257,8 @@ class Scanner(ast.NodeVisitor):
         try:
             tree = ast.parse(source, mode=mode)
         except SyntaxError as err:
-            print(Color(str(err)).red)
+            if self.show_error:
+                print(Color(str(err)).red)
         else:
             Relate(tree)
             self.visit(tree)
