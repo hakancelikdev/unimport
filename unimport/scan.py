@@ -28,7 +28,9 @@ from unimport.relate import Relate
 from unimport.statement import Import, ImportFrom, Name
 
 PY38_PLUS = sys.version_info >= (3, 8)
-BUILTINS = {_build for _build in dir(builtins) if not _build.startswith("_")}
+BUILTINS = frozenset(
+    _build for _build in dir(builtins) if not _build.startswith("_")
+)
 
 Function = TypeVar("Function", bound=Callable[..., Any])
 
