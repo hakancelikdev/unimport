@@ -1,6 +1,5 @@
-"""
-This module performs static analysis using AST on the python code that's given as a string and reports its findings.
-"""
+"""This module performs static analysis using AST on the python code that's
+given as a string and reports its findings."""
 
 import ast
 import builtins
@@ -36,7 +35,7 @@ Function = TypeVar("Function", bound=Callable[..., Any])
 
 
 def recursive(func: Function) -> Function:
-    """decorator to make visitor work recursive"""
+    """decorator to make visitor work recursive."""
 
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
@@ -58,8 +57,8 @@ class Scanner(ast.NodeVisitor):
         include_star_import: bool = False,
         show_error: bool = False,
     ):
-        """
-        If include_star_import is True during the analysis, it takes into account start imports, if it's False, it doesn't.
+        """If include_star_import is True during the analysis, it takes into
+        account start imports, if it's False, it doesn't.
 
         E.g.: from x import * is a star import.
 
@@ -77,8 +76,7 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
-        """
-        When include_star_import becomes True, instead of suggesting star,
+        """When include_star_import becomes True, instead of suggesting star,
         it analyses class names and suggests one of the analyzed class's name.
 
         E.g.: from os import *
@@ -91,9 +89,9 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
-        """
-        When include_star_import becomes True, instead of suggesting star,
-        it analyses function names and suggests one of the analyzed function's name.
+        """When include_star_import becomes True, instead of suggesting star,
+        it analyses function names and suggests one of the analyzed function's
+        name.
 
         E.g.: from os import *
         print(walk)
@@ -192,8 +190,8 @@ class Scanner(ast.NodeVisitor):
         self.names.append(Name(lineno=node.lineno, name=node.id))
 
     def iter_type_comments(self):
-        """
-        This feature is only available for python 3.8.
+        """This feature is only available for python 3.8.
+
         PEP 526 -- Syntax for Variable Annotations
         https://www.python.org/dev/peps/pep-0526/
         https://docs.python.org/3.8/library/ast.html#ast.parse
