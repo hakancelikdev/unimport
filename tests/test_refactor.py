@@ -571,9 +571,7 @@ class TestStarImport(RefactorTestCase):
 
 
 class TestImportError(RefactorTestCase):
-    """
-    Unimport skip imports controlled by ImportError.
-    """
+    """Unimport skip imports controlled by ImportError."""
 
     include_star_import = True
 
