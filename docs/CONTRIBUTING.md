@@ -19,21 +19,17 @@ $ git clone git@github.com:<USERNAME>/unimport.git
 $ cd unimport
 ```
 
-## Setup Python
-
-Then by setting up and activating a virtualenv:
+## Setup Branch
 
 ```shell
-$ python3.8 -m venv env #python3.6, python3.7 or python3.8
-$ source env/bin/activate
-$ pip install --upgrade pip # optional, if you have an old system version of pip
-$ pip install -r requirements-dev.txt
 git checkout -b i{your issue number}
 ```
 
 ## Install pre-commit hooks
 
 ```shell
+$ pip3 install --upgrade pip # optional, if you have an old system version of pip
+$ pip3 instal pre-commit
 $ pre-commit install # to pre-commit will run automatically on git commit!
 ```
 
@@ -47,10 +43,14 @@ $ git rebase upstream/master
 
 ## Testing
 
+Firstly make sure you have py3.6, py3.7, and py3.8 python versions installed on your
+system.
+
 After typing your codes, you should run the tests by typing the following command.
 
 ```shell
-$ python -m unittest
+$ pip3 install tox
+$ tox
 ```
 
 If all tests pass.
