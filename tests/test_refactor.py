@@ -435,7 +435,7 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
         )
 
 
-class TesAsImport(RefactorTestCase):
+class TestAsImport(RefactorTestCase):
     def test_as_import_all_unused_all_cases(self):
         action = (
             "from x import y as z\n"

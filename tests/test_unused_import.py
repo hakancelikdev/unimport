@@ -615,7 +615,7 @@ class TestDuplicate(UnusedTestCase):
         self.assertUnimportEqual(source, expected_unused_imports)
 
 
-class TesAsImport(UnusedTestCase):
+class TestAsImport(UnusedTestCase):
     def test_as_import_all_unused_all_cases(self):
         source = (
             "from x import y as z\n"
