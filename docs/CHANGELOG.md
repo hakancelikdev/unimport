@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - ././2020
+
+- [💪 Support async def by @hakancelik96](https://github.com/hakancelik96/unimport/issues/92)
+
 ## [0.2.10] - 6/September/2020
 
 - [🐞 Fix: vertical style issue by @hadialqattan](https://github.com/hakancelik96/unimport/pull/86)

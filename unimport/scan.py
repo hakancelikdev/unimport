@@ -87,7 +87,9 @@ class Scanner(ast.NodeVisitor):
             self.classes.append(Name(lineno=node.lineno, name=node.name))
 
     @recursive
-    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+    def visit_FunctionDef(
+        self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]
+    ) -> None:
         """When include_star_import becomes True, instead of suggesting star,
         it analyses function names and suggests one of the analyzed function's
         name.
@@ -102,6 +104,8 @@ class Scanner(ast.NodeVisitor):
             and not self.include_star_import
         ):
             self.functions.append(Name(lineno=node.lineno, name=node.name))
+
+    visit_AsyncFunctionDef = visit_FunctionDef
 
     def visit_str_helper(self, value: str, node: ast.AST) -> None:
         parent = Relate.first_occurrence(
