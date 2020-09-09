@@ -1,12 +1,14 @@
 import ast
-from typing import Iterator
+from typing import Iterator, Optional
 
 
 class Relate:
     # https://tree.science/using-ancestral-chains-in-ast.html
 
-    def __init__(self, tree: ast.AST) -> None:
-        tree.parent = None  # type: ignore
+    def __init__(
+        self, tree: ast.AST, parent: Optional[ast.AST] = None
+    ) -> None:
+        tree.parent = parent  # type: ignore
         for parent in ast.walk(tree):
             for child in ast.iter_child_nodes(parent):
                 child.parent = parent  # type: ignore
@@ -26,4 +28,4 @@ class Relate:
             if type(parent) in ancestors:
                 return parent
         else:
-            return False
+            return None
