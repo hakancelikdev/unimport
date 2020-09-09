@@ -3,7 +3,6 @@ given as a string and reports its findings."""
 
 import ast
 import builtins
-import contextlib
 import functools
 import importlib
 import io
@@ -104,35 +103,25 @@ class Scanner(ast.NodeVisitor):
         ):
             self.functions.append(Name(lineno=node.lineno, name=node.name))
 
-    def visit_Str(self, node: ast.Str) -> None:
-        # only not PY38_PLUS
-        constant = ast.Constant(node.s)
-        try:
-            constant.parent = node.parent  # type: ignore
-        except AttributeError:
-            self.run_visit(node.s, mode="eval")
-        else:
-            self.visit_Constant(constant, id_=id(node))
+    def visit_str_helper(self, value: str, node: ast.AST) -> None:
+        parent = Relate.first_occurrence(
+            node, ast.FunctionDef, ast.AsyncFunctionDef
+        )
+        is_annassign_or_arg = any(
+            isinstance(parent, (ast.AnnAssign, ast.arg))
+            for parent in Relate.get_parents(node)
+        )
+        if is_annassign_or_arg or (
+            parent is not None and parent.returns is node
+        ):
+            self.run_visit(value, mode="eval", parent=node.parent)  # type: ignore
 
-    @recursive
-    def visit_Constant(
-        self, node: ast.Constant, id_: Optional[int] = None
-    ) -> None:
-        id_ = id_ or id(node)
-        if not isinstance(node.value, (str, bytes)):
-            return
-        try:
-            parent = Relate.first_occurrence(node, ast.FunctionDef)
-        except AttributeError:
-            self.run_visit(node.value, mode="eval")
-        else:
-            is_annasign_and_arg = any(
-                type_parent in {ast.AnnAssign, ast.arg}
-                for type_parent in map(type, Relate.get_parents(node))
-            )
-            if (parent and id(parent.returns) == id_) or is_annasign_and_arg:
-                with contextlib.suppress(SyntaxError):
-                    self.visit(ast.parse(node.value, mode="eval"))
+    def visit_Str(self, node: ast.Str) -> None:
+        self.visit_str_helper(node.s, node)
+
+    def visit_Constant(self, node: ast.Constant) -> None:
+        if isinstance(node.value, str):
+            self.visit_str_helper(node.value, node)
 
     @recursive
     def visit_Import(self, node: ast.Import) -> None:
@@ -253,14 +242,19 @@ class Scanner(ast.NodeVisitor):
         self.names = list(self.get_names())
         self.unused_imports = list(self.get_unused_imports())
 
-    def run_visit(self, source: Union[str, bytes], mode: str = "exec") -> None:
+    def run_visit(
+        self,
+        source: Union[str, bytes],
+        mode: str = "exec",
+        parent: Optional[ast.AST] = None,
+    ) -> None:
         try:
             tree = ast.parse(source, mode=mode)
         except SyntaxError as err:
             if self.show_error:
                 print(Color(str(err)).red)
         else:
-            Relate(tree)
+            Relate(tree, parent=parent)
             self.visit(tree)
 
     def clear(self) -> None:
