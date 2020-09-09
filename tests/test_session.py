@@ -10,9 +10,7 @@ class TestSession(unittest.TestCase):
     include_star_import = True
 
     def setUp(self):
-        self.session = Session(
-            include_star_import=self.include_star_import, show_error=True
-        )
+        self.session = Session(include_star_import=self.include_star_import)
 
     def test_list_paths_and_read(self):
         for path in [Path("tests"), Path("tests/test_config.py")]:
