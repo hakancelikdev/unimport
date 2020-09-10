@@ -69,7 +69,7 @@ help us better understand the change you have made and also it is fun.
 - When you make any support commit; 💪
 - When you make any tests commit; 🧪
 - When you make any fix commit; 🐞
-- When you make any optimizasiyon commit; 💊
+- When you make any optimization commit; 💊
 - when you make any new feature commit; 🔥
 
 ## License
