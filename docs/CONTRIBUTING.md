@@ -58,8 +58,8 @@ If all tests pass.
 ## The final step
 
 After adding a new feature or fixing a bug please report your change to
-[CHANGELOG.md](/CHANGELOG.md) and write your name, github address and email in the
-[AUTHORS.md](/AUTHORS.md) file in alphabetical order.
+[CHANGELOG.md](/docs/CHANGELOG.md) and write your name, github address and email in the
+[AUTHORS.md](/docs/AUTHORS.md) file in alphabetical order.
 
 ### Commit Messages
 
