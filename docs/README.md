@@ -295,6 +295,10 @@ import x
 
 ```
 
+## `.gitignore`
+
+To skip `.gitignore` glob patterns use `--gitignore` flag.
+
 ## `__all__`
 
 Unimport looks at the items in the `__all__` list, if it matches the imports, marks it
@@ -318,7 +322,7 @@ You can automatically delete unused modules from the requirements.txt file
 You can list many options by running unimport --help
 
 ```
-usage: unimport [-h] [-c PATH] [--include include] [--exclude exclude] [--include-star-import] [--show-error]
+usage: unimport [-h] [-c PATH] [--include include] [--exclude exclude] [--gitignore] [--include-star-import] [--show-error]
                 [-d] [-r | -p] [--requirements] [--check] [-v]
                 [sources [sources ...]]
 
@@ -333,6 +337,7 @@ optional arguments:
                         read configuration from PATH.
   --include include     file include pattern.
   --exclude exclude     file exclude pattern.
+  --gitignore           exclude .gitignore patterns. if present.
   --include-star-import
                         Include star imports during scanning and refactor.
   --show-error          Show or don't show errors captured during static analysis.
