@@ -1,3 +1,4 @@
 ignore:
   - "setup.py"
   - "models.py"
+  - "__main__.py"

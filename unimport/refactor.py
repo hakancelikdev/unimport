@@ -150,7 +150,7 @@ def refactor_string(
         wrapper = cst.MetadataWrapper(cst.parse_module(source))
     except cst.ParserSyntaxError as err:
         if show_error:
-            print(Color(str(err)).red)
+            print(Color(str(err)).red)  # pragma: no cover
     else:
         if unused_imports:
             fixed_module = wrapper.visit(
