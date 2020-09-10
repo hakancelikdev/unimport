@@ -4,6 +4,8 @@ import tokenize
 from pathlib import Path
 from typing import Iterable, Iterator, Optional, Tuple
 
+from pathspec import PathSpec
+
 from unimport.color import Color
 from unimport.config import CONFIG_FILES, Config
 from unimport.refactor import refactor_string
@@ -46,6 +48,7 @@ class Session:
     def list_paths(
         self,
         start: Path,
+        gitignore: PathSpec,
         include: Optional[str] = None,
         exclude: Optional[str] = None,
     ) -> Iterator[Path]:
@@ -60,7 +63,8 @@ class Session:
             file_names = [start]
         yield from filter(
             lambda filename: include_regex.search(str(filename))
-            and not exclude_regex.search(str(filename)),
+            and not exclude_regex.search(str(filename))
+            and not gitignore.match_file(str(filename)),
             file_names,
         )
 
