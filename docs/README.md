@@ -361,6 +361,7 @@ If you want to use `pyproject.toml` to configure, you must to install it. Try th
 
 - `exclude` file exclude pattern.
 - `include` file include pattern.
+- `gitignore` glob exclude patterns.
 
 For example:
 
@@ -370,6 +371,7 @@ For example:
 [tool.unimport]
 exclude = '(__init__.py)|env'
 include = 'my_project'
+gitignore = true
 ```
 
 **setup.cfg**
@@ -378,6 +380,7 @@ include = 'my_project'
 [unimport]
 exclude = (__init__.py)|env
 include = my_project
+gitignore = True
 ```
 
 ## Adding pre-commit plugins to your project

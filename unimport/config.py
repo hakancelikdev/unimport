@@ -15,7 +15,7 @@ if HAS_TOML is True:
 
 
 class Config:
-    attrs = ("include", "exclude")
+    attrs = ("include", "exclude", "gitignore")
 
     def __init__(self, config_file: Path) -> None:
         self.config_file = config_file
