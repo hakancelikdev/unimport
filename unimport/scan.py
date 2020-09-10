@@ -5,10 +5,8 @@ import ast
 import builtins
 import functools
 import importlib
-import io
 import re
 import sys
-import tokenize
 from types import ModuleType
 from typing import (
     Any,
@@ -99,6 +97,8 @@ class Scanner(ast.NodeVisitor):
 
         At this point from os import * becomes > from os import walk
         """
+        if PY38_PLUS and node.type_comment:
+            self.run_visit(node.type_comment, "func_type")
         if (
             not Relate.first_occurrence(node, ast.ClassDef)
             and not self.include_star_import
@@ -182,20 +182,6 @@ class Scanner(ast.NodeVisitor):
     def visit_Name(self, node: ast.Name) -> None:
         self.names.append(Name(lineno=node.lineno, name=node.id))
 
-    def iter_type_comments(self):
-        """This feature is only available for python 3.8.
-
-        PEP 526 -- Syntax for Variable Annotations
-        https://www.python.org/dev/peps/pep-0526/
-        https://docs.python.org/3.8/library/ast.html#ast.parse
-        """
-        buffer = io.StringIO(self.source)
-        for token in tokenize.generate_tokens(buffer.readline):
-            if token.type == tokenize.COMMENT:
-                comment_string = token.string.split("# type: ")
-                if comment_string != [token.string]:
-                    self.run_visit(comment_string[1], mode="func_type")
-
     @recursive
     def visit_Attribute(self, node: ast.Attribute) -> None:
         local_attr = []
@@ -209,12 +195,19 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_Assign(self, node: ast.Assign) -> None:
+        if PY38_PLUS and node.type_comment:
+            self.run_visit(node.type_comment, "eval")
         if getattr(node.targets[0], "id", None) == "__all__" and isinstance(
             node.value, (ast.List, ast.Tuple, ast.Set)
         ):
             for item in node.value.elts:
                 if isinstance(item, ast.Str):
                     self.names.append(Name(lineno=node.lineno, name=item.s))
+
+    @recursive
+    def visit_arg(self, node: ast.arg) -> None:
+        if PY38_PLUS and node.type_comment:
+            self.run_visit(node.type_comment, "eval")
 
     def visit_Try(self, node: ast.Try) -> None:
         def any_import_error(items) -> bool:
@@ -239,8 +232,6 @@ class Scanner(ast.NodeVisitor):
         self.source = source
         if self.skip_file():
             return
-        if PY38_PLUS:
-            self.iter_type_comments()
         self.run_visit(self.source)
         self.import_names = [imp.name for imp in self.imports]
         self.names = list(self.get_names())
@@ -253,7 +244,10 @@ class Scanner(ast.NodeVisitor):
         parent: Optional[ast.AST] = None,
     ) -> None:
         try:
-            tree = ast.parse(source, mode=mode)
+            if PY38_PLUS:
+                tree = ast.parse(source, mode=mode, type_comments=True)
+            else:
+                tree = ast.parse(source, mode=mode)
         except SyntaxError as err:
             if self.show_error:
                 print(Color(str(err)).red)
