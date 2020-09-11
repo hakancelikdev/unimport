@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - ././2020
 
-- [💪 Support gitignore exclude patterns by @hadialqattan](https://github.com/hakancelik96/unimport/pull/94)
+- [💪 Support .gitignore exclude patterns by @hadialqattan](https://github.com/hakancelik96/unimport/pull/94)
 - [💪 Support async def by @hakancelik96](https://github.com/hakancelik96/unimport/issues/92)
 
 ## [0.2.10] - 6/September/2020
