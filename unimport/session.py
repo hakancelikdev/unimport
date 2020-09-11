@@ -4,7 +4,10 @@ import tokenize
 from pathlib import Path
 from typing import Iterable, Iterator, Optional, Tuple
 
-from pathspec import PathSpec
+try:
+    from pathspec import PathSpec
+except ModuleNotFoundError:
+    PathSpec = None
 
 from unimport.color import Color
 from unimport.config import CONFIG_FILES, Config
@@ -48,7 +51,7 @@ class Session:
     def list_paths(
         self,
         start: Path,
-        gitignore: PathSpec,
+        gitignore: Optional[PathSpec],
         include: Optional[str] = None,
         exclude: Optional[str] = None,
     ) -> Iterator[Path]:
@@ -61,12 +64,17 @@ class Session:
             file_names = start.glob(self.GLOB_PATTERN)
         else:
             file_names = [start]
-        yield from filter(
-            lambda filename: include_regex.search(str(filename))
-            and not exclude_regex.search(str(filename))
-            and not gitignore.match_file(str(filename)),
-            file_names,
-        )
+
+        def matcher(filename: Path):
+            return (
+                include_regex.search(str(filename))
+                and not exclude_regex.search(str(filename))
+                and not (
+                    gitignore.match_file(str(filename)) if gitignore else False
+                )
+            )
+
+        yield from filter(matcher, file_names)
 
     def refactor(self, source: str) -> str:
         self.scanner.scan(source)

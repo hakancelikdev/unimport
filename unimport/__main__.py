@@ -7,7 +7,10 @@ import tokenize
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
-from pathspec import PathSpec
+try:
+    from pathspec import PathSpec
+except ModuleNotFoundError:
+    PathSpec = None
 
 import unimport.constants as C
 from unimport.color import Color
@@ -69,6 +72,8 @@ def show(
 
 def get_gitignore(root: Union[Path, str]) -> PathSpec:
     """Return a PathSpec matching gitignore content."""
+    if not PathSpec:
+        return None
     lines: List[str] = []
     path = os.path.join(root, ".gitignore")
     if os.path.isfile(path) and root:

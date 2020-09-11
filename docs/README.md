@@ -297,7 +297,10 @@ import x
 
 ## `.gitignore`
 
-To skip `.gitignore` glob patterns use `--gitignore` flag.
+It's possible to skip `.gitignore` glob patterns using `--gitignore` flag.
+
+If you want to use `--gitignore` flag, you must install it. Try this;
+`pip install pathspec==0.8.0`
 
 ## `__all__`
 
