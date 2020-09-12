@@ -60,7 +60,7 @@ If all tests pass.
 After adding a new feature or fixing a bug please report your change to
 [CHANGELOG.md](CHANGELOG.md)
 and write your name, github address and email in the
-[AUTHORS.md](https://github.com/hakancelik96/unimport/blob/master/docs/AUTHORS.md) file
+[AUTHORS.md](AUTHORS.md) file
 in alphabetical order.
 
 ### Commit Messages
