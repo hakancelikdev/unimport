@@ -58,7 +58,7 @@ If all tests pass.
 ## The final step
 
 After adding a new feature or fixing a bug please report your change to
-[CHANGELOG.md](https://github.com/hakancelik96/unimport/blob/master/docs/CHANGELOG.md)
+[CHANGELOG.md](CHANGELOG.md)
 and write your name, github address and email in the
 [AUTHORS.md](https://github.com/hakancelik96/unimport/blob/master/docs/AUTHORS.md) file
 in alphabetical order.
