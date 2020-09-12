@@ -97,8 +97,7 @@ class Scanner(ast.NodeVisitor):
 
         At this point from os import * becomes > from os import walk
         """
-        if PY38_PLUS and node.type_comment:
-            self.run_visit(node.type_comment, "func_type")
+        self._type_comment(node)
         if (
             not Relate.first_occurrence(node, ast.ClassDef)
             and not self.include_star_import
@@ -195,8 +194,7 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_Assign(self, node: ast.Assign) -> None:
-        if PY38_PLUS and node.type_comment:
-            self.run_visit(node.type_comment, "eval")
+        self._type_comment(node)
         if getattr(node.targets[0], "id", None) == "__all__" and isinstance(
             node.value, (ast.List, ast.Tuple, ast.Set)
         ):
@@ -206,8 +204,7 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_arg(self, node: ast.arg) -> None:
-        if PY38_PLUS and node.type_comment:
-            self.run_visit(node.type_comment, "eval")
+        self._type_comment(node)
 
     def visit_Try(self, node: ast.Try) -> None:
         def any_import_error(items) -> bool:
@@ -236,6 +233,16 @@ class Scanner(ast.NodeVisitor):
         self.import_names = [imp.name for imp in self.imports]
         self.names = list(self.get_names())
         self.unused_imports = list(self.get_unused_imports())
+
+    def _type_comment(self, node: ast.AST) -> None:
+        ASTFunctionT = (ast.FunctionDef, ast.AsyncFunctionDef)
+        if isinstance(node, ASTFunctionT):
+            mode = "func_type"
+        else:
+            mode = "eval"
+        type_comment = getattr(node, "type_comment", None)
+        if type_comment is not None:
+            self.run_visit(type_comment, mode, node)
 
     def run_visit(
         self,
