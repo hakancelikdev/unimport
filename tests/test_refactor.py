@@ -655,6 +655,51 @@ class TestTyping(RefactorTestCase):
             self.session.refactor(action),
         )
 
+    @unittest.skipIf(
+        not PY38_PLUS, "This feature is only available for python 3.8."
+    )
+    def test_type_comments_with_variable(self):
+        action = (
+            "from typing import List\n"
+            "test_variable = [2] # type: List[int]\n"
+        )
+        self.assertEqual(
+            action,
+            self.session.refactor(action),
+        )
+
+    @unittest.skipIf(
+        not PY38_PLUS, "This feature is only available for python 3.8."
+    )
+    def test_type_comment_params(self):
+        action = (
+            "from typing import List\n"
+            "def x(\n"
+            "   f: # type:List,\n"
+            "   r: # type:str\n"
+            "):\n"
+            "   pass\n"
+        )
+        self.assertEqual(
+            action,
+            self.session.refactor(action),
+        )
+
+    @unittest.skipIf(
+        not PY38_PLUS, "This feature is only available for python 3.8."
+    )
+    def test_type_comment_funcdef(self):
+        action = (
+            "from typing import List\n"
+            "def x(y):\n"
+            "   # type: (str) -> List[str]"
+            "   pass\n"
+        )
+        self.assertEqual(
+            action,
+            self.session.refactor(action),
+        )
+
     def test_variable(self):
         action = "from typing import List, Dict\n" "test: 'List[Dict]'\n"
         self.assertEqual(
