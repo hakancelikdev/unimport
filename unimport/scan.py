@@ -29,6 +29,7 @@ BUILTINS = frozenset(
 )
 
 Function = TypeVar("Function", bound=Callable[..., Any])
+ASTFunctionT = (ast.FunctionDef, ast.AsyncFunctionDef)
 
 
 def recursive(func: Function) -> Function:
@@ -107,9 +108,7 @@ class Scanner(ast.NodeVisitor):
     visit_AsyncFunctionDef = visit_FunctionDef
 
     def visit_str_helper(self, value: str, node: ast.AST) -> None:
-        parent = Relate.first_occurrence(
-            node, ast.FunctionDef, ast.AsyncFunctionDef
-        )
+        parent = Relate.first_occurrence(node, *ASTFunctionT)
         is_annassign_or_arg = any(
             isinstance(parent, (ast.AnnAssign, ast.arg))
             for parent in Relate.get_parents(node)
@@ -235,7 +234,6 @@ class Scanner(ast.NodeVisitor):
         self.unused_imports = list(self.get_unused_imports())
 
     def _type_comment(self, node: ast.AST) -> None:
-        ASTFunctionT = (ast.FunctionDef, ast.AsyncFunctionDef)
         if isinstance(node, ASTFunctionT):
             mode = "func_type"
         else:
