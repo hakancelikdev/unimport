@@ -59,7 +59,6 @@ If all tests pass.
 
 After adding a new feature or fixing a bug please report your change to
 [CHANGELOG.md](CHANGELOG.md) and write your name, GitHub address, and email in the
-and write your name, github address and email in the
 [AUTHORS.md](AUTHORS.md) file
 in alphabetical order.
 
