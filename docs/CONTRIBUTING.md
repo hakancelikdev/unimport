@@ -58,8 +58,8 @@ If all tests pass.
 ## The final step
 
 After adding a new feature or fixing a bug please report your change to
-[CHANGELOG.md](/CHANGELOG.md) and write your name, github address and email in the
-[AUTHORS.md](/AUTHORS.md) file in alphabetical order.
+[CHANGELOG.md](/docs/CHANGELOG.md) and write your name, github address and email in the
+[AUTHORS.md](/docs/AUTHORS.md) file in alphabetical order.
 
 ### Commit Messages
 
@@ -69,7 +69,7 @@ help us better understand the change you have made and also it is fun.
 - When you make any support commit; 💪
 - When you make any tests commit; 🧪
 - When you make any fix commit; 🐞
-- When you make any optimizasiyon commit; 💊
+- When you make any optimization commit; 💊
 - when you make any new feature commit; 🔥
 
 ## License
