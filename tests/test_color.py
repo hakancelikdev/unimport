@@ -1,7 +1,7 @@
 import textwrap
 import unittest
 
-from unimport.color import COLORS, Color # unimport: skip
+from unimport.color import COLORS, Color  # unimport: skip
 
 
 class TestColor(unittest.TestCase):
