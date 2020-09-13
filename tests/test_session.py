@@ -26,6 +26,12 @@ class TestSession(unittest.TestCase):
             )
             self.assertEqual(result, expected)
 
+    def test_bad_encoding(self):
+        # Make conflict between BOM and encoding Cookie.
+        # https://docs.python.org/3/library/tokenize.html#tokenize.detect_encoding
+        bad_encoding = "\ufeff\n# -*- coding: utf-32 -*-\nbad encoding"
+        self.temp_refactor(source=bad_encoding, expected="")
+
     def test_refactor_file(self):
         self.temp_refactor(source="import os", expected="")
 
