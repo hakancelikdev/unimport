@@ -1,6 +1,6 @@
 import unittest
 
-from semantic_version import Version
+import semantic_version
 
 from unimport.constants import DESCRIPTION, VERSION
 
