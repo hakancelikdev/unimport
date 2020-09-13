@@ -7,7 +7,7 @@ from unimport.constants import DESCRIPTION, VERSION
 
 class TestMetadata(unittest.TestCase):
     def test_description(self):
-        self.assertEqual(type(DESCRIPTION), str)
+        self.assertIsInstance(DESCRIPTION, str)
         self.assertGreater(len(DESCRIPTION), 0, "Too short description.")
 
     def test_version(self):
