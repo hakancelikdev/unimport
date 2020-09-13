@@ -129,10 +129,9 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
                     ):
                         return imp
 
-            imp = get_star_imp()
-            if imp:
-                return self.leave_StarImport(original_node, updated_node, imp)
-            return original_node
+            return self.leave_StarImport(
+                original_node, updated_node, get_star_imp()
+            )
         rpar = self.get_rpar(
             updated_node.rpar, self.get_location(original_node)
         )
@@ -150,7 +149,7 @@ def refactor_string(
         wrapper = cst.MetadataWrapper(cst.parse_module(source))
     except cst.ParserSyntaxError as err:
         if show_error:
-            print(Color(str(err)).red)
+            print(Color(str(err)).red)  # pragma: no cover
     else:
         if unused_imports:
             fixed_module = wrapper.visit(

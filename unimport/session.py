@@ -39,7 +39,7 @@ class Session:
                 encoding = stream.encoding
         except (OSError, SyntaxError) as err:
             if self.show_error:
-                print(Color(str(err)).red)
+                print(Color(str(err)).red)  # pragma: no cover
             return "", "utf-8"
         return source, encoding
 
