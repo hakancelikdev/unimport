@@ -132,7 +132,6 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
             imp = get_star_imp()
             if imp:
                 return self.leave_StarImport(original_node, updated_node, imp)
-            return original_node
         rpar = self.get_rpar(
             updated_node.rpar, self.get_location(original_node)
         )
