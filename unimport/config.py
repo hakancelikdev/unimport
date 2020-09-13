@@ -4,7 +4,7 @@ from pathlib import Path
 
 try:
     import toml
-except ImportError:
+except ImportError:  # pragma: no cover
     HAS_TOML = False
 else:
     HAS_TOML = True
