@@ -8,10 +8,10 @@ from typing import List, Optional, Tuple, Union
 
 try:
     from pathspec.patterns.gitwildmatch import GitWildMatchPattern
-
-    HAS_PATHSPEC = True
 except ImportError:
     HAS_PATHSPEC = False
+else:
+    HAS_PATHSPEC = True
 
 import unimport.constants as C
 from unimport.color import Color
@@ -74,7 +74,7 @@ def show(
 def get_exclude_list_from_gitignore() -> List[str]:
     """Converts .gitignore patterns to regex and return this exclude regex
     list."""
-    path: Path = Path(".gitignore")
+    path = Path(".gitignore")
     gitignore_regex: List[str] = []
     if path.is_file():
         for line in tokenize.open(path).readlines():
