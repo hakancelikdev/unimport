@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - ././2020
 
+- [💪 Support .gitignore exclude patterns by @hadialqattan](https://github.com/hakancelik96/unimport/pull/102)
 - [💊 Optimize Python >=3.8 type comments support method by @hadialqattan](https://github.com/hakancelik96/unimport/pull/95)
 - [💪 Improve test coverage by @hadialqattan](https://github.com/hakancelik96/unimport/pull/93)
 - [💪 Support async def by @hakancelik96](https://github.com/hakancelik96/unimport/issues/92)
