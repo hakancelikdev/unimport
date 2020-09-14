@@ -38,12 +38,15 @@ class Config:
         if parser.has_section(self.section):
             get_value: Union[str, bool]
             for attr in self.attrs:
-                get_value = parser.get(self.section, attr)
-                if get_value:
+                try:
+                    get_value = parser.get(self.section, attr)
+                except configparser.NoOptionError:
+                    pass
+                else:
                     if get_value == "True":
-                        get_value = True
+                        get_value = True  # pragma: no cover
                     elif get_value == "False":
-                        get_value = False  # pragma: no cover
+                        get_value = False
                     setattr(self, attr, get_value)
 
     def parse_toml(self) -> None:
@@ -51,5 +54,4 @@ class Config:
         config = parsed_toml.get("tool", {}).get("unimport", {})
         for attr in self.attrs:
             get_value = config.get(attr, None)
-            if get_value:
-                setattr(self, attr, get_value)
+            setattr(self, attr, get_value)
