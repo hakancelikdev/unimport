@@ -1,6 +1,6 @@
 import configparser
-from ast import literal_eval
 from pathlib import Path
+from typing import Union
 
 try:
     import toml
@@ -36,11 +36,14 @@ class Config:
         parser = configparser.ConfigParser(allow_no_value=True)
         parser.read(self.config_file)
         if parser.has_section(self.section):
+            get_value: Union[str, bool]
             for attr in self.attrs:
                 get_value = parser.get(self.section, attr)
-                if attr == "gitignore":
-                    get_value = literal_eval(get_value)
                 if get_value:
+                    if get_value == "True":
+                        get_value = True
+                    elif get_value == "False":
+                        get_value = False  # pragma: no cover
                     setattr(self, attr, get_value)
 
     def parse_toml(self) -> None:

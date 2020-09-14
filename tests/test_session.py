@@ -2,8 +2,6 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from pathspec import PathSpec
-
 from unimport.session import Session
 
 
@@ -16,7 +14,7 @@ class TestSession(unittest.TestCase):
 
     def test_list_paths_and_read(self):
         for path in [Path("tests"), Path("tests/test_config.py")]:
-            for p in self.session.list_paths(path, PathSpec("")):
+            for p in self.session.list_paths(path):
                 self.assertTrue(str(p).endswith(".py"))
 
     def temp_refactor(self, source: str, expected: str, apply: bool = False):

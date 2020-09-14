@@ -7,9 +7,11 @@ from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
 try:
-    from pathspec import PathSpec
-except ModuleNotFoundError:
-    PathSpec = None
+    from pathspec.patterns.gitwildmatch import GitWildMatchPattern
+
+    HAS_PATHSPEC = True
+except ImportError:
+    HAS_PATHSPEC = False
 
 import unimport.constants as C
 from unimport.color import Color
@@ -69,15 +71,17 @@ def show(
         )
 
 
-def get_gitignore() -> PathSpec:
-    """Return a PathSpec matching gitignore content."""
-    if not PathSpec:
-        return None
-    lines: List[str] = []
+def get_exclude_list_from_gitignore() -> List[str]:
+    """Converts .gitignore patterns to regex and return this exclude regex
+    list."""
     path: Path = Path(".gitignore")
+    gitignore_regex: List[str] = []
     if path.is_file():
-        lines = tokenize.open(path).readlines()
-    return PathSpec.from_lines("gitwildmatch", lines)
+        for line in tokenize.open(path).readlines():
+            regex = GitWildMatchPattern.pattern_to_regex(line)[0]
+            if regex:
+                gitignore_regex.append(regex)
+    return gitignore_regex
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -192,17 +196,15 @@ def main(argv: Optional[List[str]] = None) -> int:
         exclude_list.append(namespace.exclude)
     if hasattr(session.config, "exclude"):
         exclude_list.append(session.config.exclude)  # type: ignore
-    if namespace.gitignore:
-        gitignore = get_gitignore()
-    else:
-        gitignore = None
+    if HAS_PATHSPEC and (
+        namespace.gitignore or (hasattr(session.config, "gitignore") and session.config.gitignore)  # type: ignore
+    ):
+        exclude_list.extend(get_exclude_list_from_gitignore())
     include = re.compile("|".join(include_list)).pattern
     exclude = re.compile("|".join(exclude_list)).pattern
     unused_modules = set()
     for source_path in namespace.sources:
-        for py_path in session.list_paths(
-            source_path, gitignore, include, exclude
-        ):
+        for py_path in session.list_paths(source_path, include, exclude):
             session.scanner.scan(source=session.read(py_path)[0])
             unused_imports = session.scanner.unused_imports
             if unused_imports:
