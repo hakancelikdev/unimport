@@ -15,3 +15,4 @@ exclude = '''
 [tool.unimport]
 exclude = '__init__.py|tests/'
 include = 'test|test2|tests.py'
+gitignore = true

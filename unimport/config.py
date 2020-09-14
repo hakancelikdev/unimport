@@ -1,4 +1,5 @@
 import configparser
+from ast import literal_eval
 from pathlib import Path
 
 try:
@@ -15,7 +16,7 @@ if HAS_TOML is True:
 
 
 class Config:
-    attrs = ("include", "exclude")
+    attrs = ("include", "exclude", "gitignore")
 
     def __init__(self, config_file: Path) -> None:
         self.config_file = config_file
@@ -37,6 +38,8 @@ class Config:
         if parser.has_section(self.section):
             for attr in self.attrs:
                 get_value = parser.get(self.section, attr)
+                if attr == "gitignore":
+                    get_value = literal_eval(get_value)
                 if get_value:
                     setattr(self, attr, get_value)
 

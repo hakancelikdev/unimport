@@ -2,8 +2,14 @@ import argparse
 import difflib
 import re
 import sys
+import tokenize
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
+
+try:
+    from pathspec import PathSpec
+except ModuleNotFoundError:
+    PathSpec = None
 
 import unimport.constants as C
 from unimport.color import Color
@@ -63,6 +69,17 @@ def show(
         )
 
 
+def get_gitignore() -> PathSpec:
+    """Return a PathSpec matching gitignore content."""
+    if not PathSpec:
+        return None
+    lines: List[str] = []
+    path: Path = Path(".gitignore")
+    if path.is_file():
+        lines = tokenize.open(path).readlines()
+    return PathSpec.from_lines("gitwildmatch", lines)
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     parser = argparse.ArgumentParser(
@@ -103,6 +120,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         action="store",
         default="",
         type=str,
+    )
+    parser.add_argument(
+        "--gitignore",
+        action="store_true",
+        help="exclude .gitignore patterns. if present.",
     )
     parser.add_argument(
         "--include-star-import",
@@ -170,11 +192,17 @@ def main(argv: Optional[List[str]] = None) -> int:
         exclude_list.append(namespace.exclude)
     if hasattr(session.config, "exclude"):
         exclude_list.append(session.config.exclude)  # type: ignore
+    if namespace.gitignore:
+        gitignore = get_gitignore()
+    else:
+        gitignore = None
     include = re.compile("|".join(include_list)).pattern
     exclude = re.compile("|".join(exclude_list)).pattern
     unused_modules = set()
     for source_path in namespace.sources:
-        for py_path in session.list_paths(source_path, include, exclude):
+        for py_path in session.list_paths(
+            source_path, gitignore, include, exclude
+        ):
             session.scanner.scan(source=session.read(py_path)[0])
             unused_imports = session.scanner.unused_imports
             if unused_imports:

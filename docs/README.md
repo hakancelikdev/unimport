@@ -295,6 +295,13 @@ import x
 
 ```
 
+## `.gitignore`
+
+It's possible to skip `.gitignore` glob patterns using `--gitignore` flag.
+
+If you want to use `--gitignore` flag, you must install it. Try this;
+`pip install pathspec==0.8.0`
+
 ## `__all__`
 
 Unimport looks at the items in the `__all__` list, if it matches the imports, marks it
@@ -318,7 +325,7 @@ You can automatically delete unused modules from the requirements.txt file
 You can list many options by running unimport --help
 
 ```
-usage: unimport [-h] [-c PATH] [--include include] [--exclude exclude] [--include-star-import] [--show-error]
+usage: unimport [-h] [-c PATH] [--include include] [--exclude exclude] [--gitignore] [--include-star-import] [--show-error]
                 [-d] [-r | -p] [--requirements] [--check] [-v]
                 [sources [sources ...]]
 
@@ -333,6 +340,7 @@ optional arguments:
                         read configuration from PATH.
   --include include     file include pattern.
   --exclude exclude     file exclude pattern.
+  --gitignore           exclude .gitignore patterns. if present.
   --include-star-import
                         Include star imports during scanning and refactor.
   --show-error          Show or don't show errors captured during static analysis.
@@ -356,6 +364,7 @@ If you want to use `pyproject.toml` to configure, you must to install it. Try th
 
 - `exclude` file exclude pattern.
 - `include` file include pattern.
+- `gitignore` glob exclude patterns.
 
 For example:
 
@@ -365,6 +374,7 @@ For example:
 [tool.unimport]
 exclude = '(__init__.py)|env'
 include = 'my_project'
+gitignore = true
 ```
 
 **setup.cfg**
@@ -373,6 +383,7 @@ include = 'my_project'
 [unimport]
 exclude = (__init__.py)|env
 include = my_project
+gitignore = True
 ```
 
 ## Adding pre-commit plugins to your project
