@@ -1,5 +1,6 @@
 import configparser
 from pathlib import Path
+from typing import Union
 
 try:
     import toml
@@ -15,7 +16,7 @@ if HAS_TOML is True:
 
 
 class Config:
-    attrs = ("include", "exclude")
+    attrs = ("include", "exclude", "gitignore")
 
     def __init__(self, config_file: Path) -> None:
         self.config_file = config_file
@@ -35,9 +36,14 @@ class Config:
         parser = configparser.ConfigParser(allow_no_value=True)
         parser.read(self.config_file)
         if parser.has_section(self.section):
+            get_value: Union[str, bool]
             for attr in self.attrs:
                 get_value = parser.get(self.section, attr)
                 if get_value:
+                    if get_value == "True":
+                        get_value = True
+                    elif get_value == "False":
+                        get_value = False  # pragma: no cover
                     setattr(self, attr, get_value)
 
     def parse_toml(self) -> None:

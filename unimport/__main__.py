@@ -2,8 +2,16 @@ import argparse
 import difflib
 import re
 import sys
+import tokenize
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
+
+try:
+    from pathspec.patterns.gitwildmatch import GitWildMatchPattern
+
+    HAS_PATHSPEC = True
+except ImportError:
+    HAS_PATHSPEC = False
 
 import unimport.constants as C
 from unimport.color import Color
@@ -63,6 +71,19 @@ def show(
         )
 
 
+def get_exclude_list_from_gitignore() -> List[str]:
+    """Converts .gitignore patterns to regex and return this exclude regex
+    list."""
+    path: Path = Path(".gitignore")
+    gitignore_regex: List[str] = []
+    if path.is_file():
+        for line in tokenize.open(path).readlines():
+            regex = GitWildMatchPattern.pattern_to_regex(line)[0]
+            if regex:
+                gitignore_regex.append(regex)
+    return gitignore_regex
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     parser = argparse.ArgumentParser(
@@ -103,6 +124,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         action="store",
         default="",
         type=str,
+    )
+    parser.add_argument(
+        "--gitignore",
+        action="store_true",
+        help="exclude .gitignore patterns. if present.",
     )
     parser.add_argument(
         "--include-star-import",
@@ -170,6 +196,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         exclude_list.append(namespace.exclude)
     if hasattr(session.config, "exclude"):
         exclude_list.append(session.config.exclude)  # type: ignore
+    if HAS_PATHSPEC and (
+        namespace.gitignore or (hasattr(session.config, "gitignore") and session.config.gitignore)  # type: ignore
+    ):
+        exclude_list.extend(get_exclude_list_from_gitignore())
     include = re.compile("|".join(include_list)).pattern
     exclude = re.compile("|".join(exclude_list)).pattern
     unused_modules = set()
