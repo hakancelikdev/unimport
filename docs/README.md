@@ -398,7 +398,7 @@ config file describes what repositories and hooks are installed.
 ```yaml
 repos:
   - repo: https://github.com/hakancelik96/unimport
-    rev: v0.2.9
+    rev: stable
     hooks:
       - id: unimport
         args: [--remove, --requirements, --include-star-import]
