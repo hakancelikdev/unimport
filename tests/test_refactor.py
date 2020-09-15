@@ -218,6 +218,25 @@ class TestUnusedRefactor(RefactorTestCase):
             self.session.refactor(action),
         )
 
+    def test_get_star_imp_none(self):
+        action = (
+            "try:\n"
+            "    from x import *\n"
+            "except ImportError:\n"
+            "    pass\n"
+            "import t\n"
+        )
+        expected = (
+            "try:\n"
+            "    from x import *\n"
+            "except ImportError:\n"
+            "    pass\n"
+        )
+        self.assertEqual(
+            expected,
+            self.session.refactor(action),
+        )
+
 
 class TestDuplicateUnusedRefactor(RefactorTestCase):
     def test_full_unused(self):
