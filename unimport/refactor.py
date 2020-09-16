@@ -147,13 +147,13 @@ def refactor_string(
     unused_imports: List[Union[Import, ImportFrom]],
     show_error: bool = False,
 ) -> str:
-    try:
-        wrapper = cst.MetadataWrapper(cst.parse_module(source))
-    except cst.ParserSyntaxError as err:
-        if show_error:
-            print(Color(str(err)).red)  # pragma: no cover
-    else:
-        if unused_imports:
+    if unused_imports:
+        try:
+            wrapper = cst.MetadataWrapper(cst.parse_module(source))
+        except cst.ParserSyntaxError as err:
+            if show_error:
+                print(Color(str(err)).red)
+        else:
             fixed_module = wrapper.visit(
                 RemoveUnusedImportTransformer(unused_imports)
             )

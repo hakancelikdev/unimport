@@ -74,12 +74,16 @@ class Session:
         self.scanner.clear()
         return refactor
 
-    def refactor_file(self, path: Path, apply: bool = False) -> str:
+    def refactor_file(
+        self, path: Path, apply: bool = False
+    ) -> Tuple[str, bool]:
         source, encoding = self.read(path)
         result = self.refactor(source)
-        if apply:
+        if apply and source != result:
             path.write_text(result, encoding=encoding)
-        return result
+            return result, True
+        else:
+            return result, False
 
     def diff(self, source: str) -> Tuple[str, ...]:
         return tuple(
@@ -90,7 +94,7 @@ class Session:
 
     def diff_file(self, path: Path) -> Tuple[str, ...]:
         source, _ = self.read(path)
-        result = self.refactor_file(path, apply=False)
+        result, _ = self.refactor_file(path, apply=False)
         return tuple(
             difflib.unified_diff(
                 source.splitlines(), result.splitlines(), fromfile=str(path)

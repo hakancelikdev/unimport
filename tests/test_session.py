@@ -21,7 +21,7 @@ class TestSession(unittest.TestCase):
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py") as tmp:
             tmp.write(source)
             tmp.seek(0)
-            result = self.session.refactor_file(
+            result, _ = self.session.refactor_file(
                 path=Path(tmp.name), apply=apply
             )
             self.assertEqual(result, expected)
