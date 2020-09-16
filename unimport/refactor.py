@@ -4,7 +4,6 @@ import libcst as cst
 import libcst.matchers as m
 from libcst.metadata import PositionProvider
 
-from unimport.color import Color
 from unimport.statement import Import, ImportFrom
 
 ImportT = TypeVar("ImportT", bound=Union[cst.Import, cst.ImportFrom])
@@ -148,14 +147,9 @@ def refactor_string(
     show_error: bool = False,
 ) -> str:
     if unused_imports:
-        try:
-            wrapper = cst.MetadataWrapper(cst.parse_module(source))
-        except cst.ParserSyntaxError as err:
-            if show_error:
-                print(Color(str(err)).red)
-        else:
-            fixed_module = wrapper.visit(
-                RemoveUnusedImportTransformer(unused_imports)
-            )
-            return fixed_module.code
+        wrapper = cst.MetadataWrapper(cst.parse_module(source))
+        fixed_module = wrapper.visit(
+            RemoveUnusedImportTransformer(unused_imports)
+        )
+        return fixed_module.code
     return source
