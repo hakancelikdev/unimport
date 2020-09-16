@@ -64,41 +64,16 @@ class Scanner(ast.NodeVisitor):
         self.include_star_import = include_star_import
         self.show_error = show_error
         self.imports: List[Union[Import, ImportFrom]] = []
-        self.classes: List[Name] = []
-        self.functions: List[Name] = []
         self.names: List[Name] = []
         self.import_names: List[str] = []
         self.unused_imports: List[Union[Import, ImportFrom]] = []
         self.any_import_error = False
 
     @recursive
-    def visit_ClassDef(self, node: ast.ClassDef) -> None:
-        """When include_star_import becomes True, instead of suggesting star,
-        it analyses class names and suggests one of the analyzed class's name.
-        E.g.: from os import *
-        print(PathLike)
-        At this point from os import * becomes > from os import PathLike
-        """
-        if not self.include_star_import:
-            self.classes.append(Name(lineno=node.lineno, name=node.name))
-
-    @recursive
     def visit_FunctionDef(
         self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]
     ) -> None:
-        """When include_star_import becomes True, instead of suggesting star,
-        it analyses function names and suggests one of the analyzed function's
-        name.
-        E.g.: from os import *
-        print(walk)
-        At this point from os import * becomes > from os import walk
-        """
         self._type_comment(node)
-        if (
-            not Relate.first_occurrence(node, ast.ClassDef)
-            and not self.include_star_import
-        ):
-            self.functions.append(Name(lineno=node.lineno, name=node.name))
 
     visit_AsyncFunctionDef = visit_FunctionDef
 
@@ -242,8 +217,8 @@ class Scanner(ast.NodeVisitor):
     def clear(self) -> None:
         self.names.clear()
         self.imports.clear()
-        self.classes.clear()
-        self.functions.clear()
+        # self.classes.clear()
+        # self.functions.clear()
         self.import_names.clear()
         self.unused_imports.clear()
 
@@ -277,13 +252,14 @@ class Scanner(ast.NodeVisitor):
             self.names,
         )
 
-    def get_suggestion_modules(self, name: str) -> List[str]:
+    def get_suggestion_modules(self, import_name: str) -> List[str]:
         names = {
             to_cfv.name.split(".")[0]
             for to_cfv in self.names
             if to_cfv.name not in self.ignore_import_names
         }
-        return sorted(get_modules_from_name(name) & names)
+        from_names = ImportableNames.get_names(import_name)
+        return sorted(from_names & names)
 
     def get_unused_imports(self) -> Iterator[Union[Import, ImportFrom]]:
         for imp in self.imports:
@@ -333,20 +309,53 @@ class Scanner(ast.NodeVisitor):
         return False
 
 
-def get_modules_from_name(name: str) -> Set[str]:
-    modules: Set[str] = set()
-    try:
-        spec = importlib.util.find_spec(name)  # type: ignore
-    except (ModuleNotFoundError, ValueError):
-        return modules
-    if spec is None:
-        return modules
-    if name in sys.builtin_module_names:
-        return set(dir(importlib.import_module(name)))
-    source = spec.loader.get_data(spec.loader.path).decode("utf-8")
-    scanner = Scanner()
-    scanner.scan(source)
-    modules.update({c.name.split(".")[0] for c in scanner.classes})
-    modules.update({f.name.split(".")[0] for f in scanner.functions})
-    modules.update({n.name.split(".")[0] for n in scanner.names})
-    return modules
+class ImportableNames(ast.NodeVisitor):
+    def __init__(self, source: str) -> None:
+        self.importable_names: Set[str] = set()
+        tree = ast.parse(source)
+        Relate(tree)
+        self.visit(tree)
+
+    @recursive
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
+        """When include_star_import becomes True, instead of suggesting star,
+        it analyses class names and suggests one of the analyzed class's name.
+        E.g.: from os import *
+        print(PathLike)
+        At this point from os import * becomes > from os import PathLike
+        """
+        self.importable_names.add(node.name)
+
+    @recursive
+    def visit_FunctionDef(
+        self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]
+    ) -> None:
+        """When include_star_import becomes True, instead of suggesting star,
+        it analyses function names and suggests one of the analyzed function's
+        name.
+        E.g.: from os import *
+        print(walk)
+        At this point from os import * becomes > from os import walk
+        """
+        if not Relate.first_occurrence(node, ast.ClassDef):
+            self.importable_names.add(node.name)
+
+    visit_AsyncFunctionDef = visit_FunctionDef
+
+    @recursive
+    def visit_Name(self, node: ast.Name) -> None:
+        self.importable_names.add(node.id.split(".")[0])
+
+    @staticmethod
+    def get_names(import_name: str) -> Set[str]:
+        try:
+            spec = importlib.util.find_spec(import_name)  # type: ignore
+        except (ModuleNotFoundError, ValueError):
+            return set()
+        if spec is None:
+            return set()
+        if import_name in sys.builtin_module_names:
+            return set(dir(importlib.import_module(import_name)))
+        source = spec.loader.get_data(spec.loader.path).decode("utf-8")
+        scanner = ImportableNames(source)
+        return scanner.importable_names

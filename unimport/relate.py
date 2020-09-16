@@ -13,8 +13,8 @@ class Relate:
             for child in ast.iter_child_nodes(parent):
                 child.parent = parent  # type: ignore
 
-    @classmethod
-    def get_parents(cls, node: ast.AST) -> Iterator[ast.AST]:
+    @staticmethod
+    def get_parents(node: ast.AST) -> Iterator[ast.AST]:
         parent = node
         while parent:
             parent = parent.parent  # type: ignore
