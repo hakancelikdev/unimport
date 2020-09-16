@@ -90,18 +90,16 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
 
     @staticmethod
     def leave_StarImport(
-        original_node: cst.ImportFrom,
         updated_node: cst.ImportFrom,
         imp: ImportFrom,
     ) -> Union[cst.ImportFrom, cst.RemovalSentinel]:
-        if imp.modules:
+        if imp.suggestion:
             names_to_suggestion = [
-                cst.ImportAlias(cst.Name(module)) for module in imp.modules
+                cst.ImportAlias(cst.Name(module)) for module in imp.suggestion
             ]
             return updated_node.with_changes(names=names_to_suggestion)
-        elif imp.module:
+        else:
             return cst.RemoveFromParent()
-        return original_node
 
     def leave_Import(
         self, original_node: cst.Import, updated_node: cst.Import
@@ -130,7 +128,7 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
 
             imp = get_star_imp()
             if imp:
-                return self.leave_StarImport(original_node, updated_node, imp)
+                return self.leave_StarImport(updated_node, imp)
             else:
                 return original_node
         rpar = self.get_rpar(

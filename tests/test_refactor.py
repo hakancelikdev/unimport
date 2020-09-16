@@ -533,7 +533,6 @@ class TestStarImport(RefactorTestCase):
         )
         expected = (
             "from re import match, search\n"
-            "from t.s.d import *\n"
             "from lib2to3.pgen2.token import NAME\n\n"
             "print(match)\n"
             "print(search)\n"

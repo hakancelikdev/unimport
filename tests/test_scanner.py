@@ -70,7 +70,7 @@ class TestNames(ScannerTestCase):
             expected_names=[Name(lineno=1, name="variable")],
             expected_classes=[Name(lineno=3, name="TestClass")],
             expected_functions=[Name(lineno=6, name="test_function")],
-            expected_imports=[Import(lineno=2, module=os, name="os")],
+            expected_imports=[Import(lineno=2, name="os")],
         )
 
     def test_names_with_function(self):
@@ -187,19 +187,14 @@ class TestTypeComments(ScannerTestCase):
         expected_classes = []
         expected_functions = [Name(4, "function")]
         expected_imports = [
-            ImportFrom(
-                lineno=1, name="Any", star=False, module=typing, modules=[]
-            ),
+            ImportFrom(lineno=1, name="Any", star=False, suggestion=[]),
             ImportFrom(
                 lineno=2,
                 name="Tuple",
                 star=False,
-                module=typing,
-                modules=[],
+                suggestion=[],
             ),
-            ImportFrom(
-                lineno=3, name="Union", star=False, module=typing, modules=[]
-            ),
+            ImportFrom(lineno=3, name="Union", star=False, suggestion=[]),
         ]
         self.assertUnimportEqual(
             source,

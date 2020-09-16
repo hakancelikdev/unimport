@@ -1,5 +1,4 @@
-from types import ModuleType
-from typing import List, NamedTuple, Optional
+from typing import List, NamedTuple
 
 
 class Name(NamedTuple):
@@ -7,15 +6,13 @@ class Name(NamedTuple):
     name: str
 
 
-class Import(NamedTuple):
+class Import(Name):
     lineno: int
     name: str
-    module: Optional[ModuleType]
 
 
 class ImportFrom(NamedTuple):
     lineno: int
     name: str
     star: bool
-    module: Optional[ModuleType]
-    modules: List[str]
+    suggestion: List[str]

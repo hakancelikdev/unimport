@@ -7,13 +7,13 @@ import functools
 import importlib
 import re
 import sys
-from types import ModuleType
 from typing import (
     Any,
     Callable,
     Iterator,
     List,
     Optional,
+    Set,
     TypeVar,
     Union,
     cast,
@@ -59,7 +59,6 @@ class Scanner(ast.NodeVisitor):
         account start imports, if it's False, it doesn't.
 
         E.g.: from x import * is a star import.
-
         If show_error is True during the analysis, errors are displayed.
         """
         self.include_star_import = include_star_import
@@ -76,10 +75,8 @@ class Scanner(ast.NodeVisitor):
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         """When include_star_import becomes True, instead of suggesting star,
         it analyses class names and suggests one of the analyzed class's name.
-
         E.g.: from os import *
         print(PathLike)
-
         At this point from os import * becomes > from os import PathLike
         """
         if not self.include_star_import:
@@ -92,10 +89,8 @@ class Scanner(ast.NodeVisitor):
         """When include_star_import becomes True, instead of suggesting star,
         it analyses function names and suggests one of the analyzed function's
         name.
-
         E.g.: from os import *
         print(walk)
-
         At this point from os import * becomes > from os import walk
         """
         self._type_comment(node)
@@ -130,21 +125,12 @@ class Scanner(ast.NodeVisitor):
         if self.skip_import(node):
             return
         for alias in node.names:
-            package = alias.name
-            alias_name = alias.asname or alias.name
-            name = alias_name
-            if package in self.ignore_imports:
+            if alias.name in self.ignore_imports:
                 return
-            module: Optional[ModuleType]
-            try:
-                module = importlib.import_module(package)
-            except BaseException:
-                module = None
             self.imports.append(
                 Import(
                     lineno=node.lineno,
-                    name=name,
-                    module=module,
+                    name=alias.asname or alias.name,
                 )
             )
 
@@ -156,23 +142,16 @@ class Scanner(ast.NodeVisitor):
         for alias in node.names:
             package = node.module or alias.name
             alias_name = alias.asname or alias.name
-            name = package if is_star else alias_name
             if package in self.ignore_imports or (
                 is_star and not self.include_star_import
             ):
                 return
-            module: Optional[ModuleType]
-            try:
-                module = importlib.import_module(package)
-            except BaseException:
-                module = None
             self.imports.append(
                 ImportFrom(
                     lineno=node.lineno,
-                    name=name,
+                    name=package if is_star else alias_name,
                     star=is_star,
-                    module=module,
-                    modules=[],
+                    suggestion=[],
                 )
             )
 
@@ -298,19 +277,13 @@ class Scanner(ast.NodeVisitor):
             self.names,
         )
 
-    def get_suggestion_modules(self, imp: ImportFrom) -> List[str]:
-        if imp.module is None:
-            return []
-        current_names = {  # current
-            to_cfv.name
+    def get_suggestion_modules(self, name: str) -> List[str]:
+        names = {
+            to_cfv.name.split(".")[0]
             for to_cfv in self.names
             if to_cfv.name not in self.ignore_import_names
         }
-        modules = {
-            module for module in dir(imp.module) if not module.startswith("_")
-        }
-        suggestion_modules = sorted(modules & current_names)
-        return suggestion_modules
+        return sorted(get_modules_from_name(name) & names)
 
     def get_unused_imports(self) -> Iterator[Union[Import, ImportFrom]]:
         for imp in self.imports:
@@ -322,7 +295,9 @@ class Scanner(ast.NodeVisitor):
                     and imp.star
                     and self.include_star_import
                 ):
-                    imp.modules.extend(self.get_suggestion_modules(imp))
+                    imp.suggestion.extend(
+                        self.get_suggestion_modules(imp.name)
+                    )
                     yield imp
                 else:
                     if not list(
@@ -356,3 +331,22 @@ class Scanner(ast.NodeVisitor):
             if name.name == imp.name and imp == find_nearest_imp(name):
                 return True
         return False
+
+
+def get_modules_from_name(name: str) -> Set[str]:
+    modules: Set[str] = set()
+    try:
+        spec = importlib.util.find_spec(name)  # type: ignore
+    except (ModuleNotFoundError, ValueError):
+        return modules
+    if spec is None:
+        return modules
+    if name in sys.builtin_module_names:
+        return set(dir(importlib.import_module(name)))
+    source = spec.loader.get_data(spec.loader.path).decode("utf-8")
+    scanner = Scanner()
+    scanner.scan(source)
+    modules.update({c.name.split(".")[0] for c in scanner.classes})
+    modules.update({f.name.split(".")[0] for f in scanner.functions})
+    modules.update({n.name.split(".")[0] for n in scanner.names})
+    return modules

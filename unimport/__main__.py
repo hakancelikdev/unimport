@@ -47,17 +47,12 @@ def show(
 ) -> None:
     for imp in unused_import:
         context = ""
-        if (
-            isinstance(imp, ImportFrom)
-            and imp.star
-            and imp.module
-            and imp.modules
-        ):
+        if isinstance(imp, ImportFrom) and imp.star and imp.suggestion:
             context = (
                 Color(f"from {imp.name} import *").red
                 + " -> "
                 + Color(
-                    f"from {imp.name} import {', '.join(imp.modules)}"
+                    f"from {imp.name} import {', '.join(imp.suggestion)}"
                 ).green
             )
         else:
@@ -208,13 +203,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             session.scanner.scan(source=session.read(py_path)[0])
             unused_imports = session.scanner.unused_imports
             if unused_imports:
-                unused_modules.update(
-                    {
-                        imp.module.__name__.split(".")[0]  # type: ignore
-                        for imp in unused_imports
-                        if imp.module
-                    }
-                )
+                unused_modules.update(set(unused_imports))
             if namespace.check:
                 show(unused_imports, py_path)
             session.scanner.clear()
