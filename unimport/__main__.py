@@ -228,11 +228,11 @@ def main(argv: Optional[List[str]] = None) -> int:
                     return 1
                 elif action == "y" or action == "":
                     namespace.remove = True
-            if namespace.remove:
-                source = session.read(py_path)[0]
-                refactor_source = session.refactor_file(py_path, apply=True)
-                if refactor_source != source:
-                    print(f"Refactoring '{Color(str(py_path)).green}'")
+            if (
+                namespace.remove
+                and session.refactor_file(py_path, apply=True)[1]
+            ):
+                print(f"Refactoring '{Color(str(py_path)).green}'")
     if not unused_modules and namespace.check:
         print(
             Color(
