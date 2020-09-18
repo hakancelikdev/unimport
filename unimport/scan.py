@@ -312,9 +312,13 @@ class Scanner(ast.NodeVisitor):
 class ImportableVisitor(ast.NodeVisitor):
     def __init__(self):
         self.importable_nodes: List[Union[ast.Str, ast.Constant]] = []
-        self.suggestions_nodes: list[
+        self.suggestions_nodes: List[
             Union[
-                ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Name
+                ast.ClassDef,
+                ast.FunctionDef,
+                ast.AsyncFunctionDef,
+                ast.Name,
+                ast.alias,
             ]
         ] = []
 
@@ -405,10 +409,10 @@ class ImportableVisitor(ast.NodeVisitor):
         if importable:
             return frozenset(importable)
         else:
-            for node in importable_visitor.suggestions_nodes:
+            for node in importable_visitor.suggestions_nodes:  # type: ignore
                 if isinstance(node, ast.Name):
                     importable.add(node.id)
-                elif isinstance(node, (ast.Import, ast.ImportFrom)):
+                elif isinstance(node, ast.alias):
                     importable.add(node.asname or node.name)
                 elif isinstance(
                     node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
