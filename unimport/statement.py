@@ -7,8 +7,7 @@ class Name(NamedTuple):
 
 
 class Import(Name):
-    lineno: int
-    name: str
+    pass
 
 
 class ImportFrom(NamedTuple):

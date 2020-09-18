@@ -86,7 +86,7 @@ class Scanner(ast.NodeVisitor):
         if is_annassign_or_arg or (
             parent is not None and parent.returns is node
         ):
-            self.run_visit(value, mode="eval", parent=node.parent)  # type: ignore
+            self.traverse(value, mode="eval", parent=node.parent)  # type: ignore
 
     def visit_Str(self, node: ast.Str) -> None:
         self.visit_str_helper(node.s, node)
@@ -182,7 +182,7 @@ class Scanner(ast.NodeVisitor):
         self.source = source
         if self.skip_file():
             return
-        self.run_visit(self.source)
+        self.traverse(self.source)
         self.import_names = [imp.name for imp in self.imports]
         self.names = list(self.get_names())
         self.unused_imports = list(self.get_unused_imports())
@@ -194,9 +194,9 @@ class Scanner(ast.NodeVisitor):
             mode = "eval"
         type_comment = getattr(node, "type_comment", None)
         if type_comment is not None:
-            self.run_visit(type_comment, mode, node)
+            self.traverse(type_comment, mode, node)
 
-    def run_visit(
+    def traverse(
         self,
         source: Union[str, bytes],
         mode: str = "exec",
@@ -217,8 +217,6 @@ class Scanner(ast.NodeVisitor):
     def clear(self) -> None:
         self.names.clear()
         self.imports.clear()
-        # self.classes.clear()
-        # self.functions.clear()
         self.import_names.clear()
         self.unused_imports.clear()
 
@@ -310,8 +308,10 @@ class Scanner(ast.NodeVisitor):
 
 
 class ImportableNames(ast.NodeVisitor):
-    def __init__(self, source: str) -> None:
+    def __init__(self) -> None:
         self.importable_names: Set[str] = set()
+
+    def traverse(self, source: str):
         tree = ast.parse(source)
         Relate(tree)
         self.visit(tree)
@@ -357,5 +357,6 @@ class ImportableNames(ast.NodeVisitor):
         if import_name in sys.builtin_module_names:
             return set(dir(importlib.import_module(import_name)))
         source = spec.loader.get_data(spec.loader.path).decode("utf-8")
-        scanner = ImportableNames(source)
+        scanner = ImportableNames()
+        scanner.traverse(source)
         return scanner.importable_names
