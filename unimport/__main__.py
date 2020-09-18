@@ -47,12 +47,12 @@ def show(
 ) -> None:
     for imp in unused_import:
         context = ""
-        if isinstance(imp, ImportFrom) and imp.star and imp.suggestion:
+        if isinstance(imp, ImportFrom) and imp.star and imp.suggestions:
             context = (
                 Color(f"from {imp.name} import *").red
                 + " -> "
                 + Color(
-                    f"from {imp.name} import {', '.join(imp.suggestion)}"
+                    f"from {imp.name} import {', '.join(imp.suggestions)}"
                 ).green
             )
         else:

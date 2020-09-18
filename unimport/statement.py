@@ -14,4 +14,4 @@ class ImportFrom(NamedTuple):
     lineno: int
     name: str
     star: bool
-    suggestion: List[str]
+    suggestions: List[str]

@@ -569,7 +569,7 @@ class TestStarImport(RefactorTestCase):
             self.session.refactor(action),
         )
 
-    def test_two_suggestion(self):
+    def test_two_suggestions(self):
         action = (
             "from time import *\n"
             "from os import *\n"

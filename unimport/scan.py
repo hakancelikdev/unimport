@@ -10,6 +10,7 @@ import sys
 from typing import (
     Any,
     Callable,
+    FrozenSet,
     Iterator,
     List,
     Optional,
@@ -126,7 +127,7 @@ class Scanner(ast.NodeVisitor):
                     lineno=node.lineno,
                     name=package if is_star else alias_name,
                     star=is_star,
-                    suggestion=[],
+                    suggestions=[],
                 )
             )
 
@@ -250,7 +251,7 @@ class Scanner(ast.NodeVisitor):
             self.names,
         )
 
-    def get_suggestion_modules(self, import_name: str) -> List[str]:
+    def get_suggestions(self, import_name: str) -> List[str]:
         names = {
             to_cfv.name.split(".")[0]
             for to_cfv in self.names
@@ -269,9 +270,7 @@ class Scanner(ast.NodeVisitor):
                     and imp.star
                     and self.include_star_import
                 ):
-                    imp.suggestion.extend(
-                        self.get_suggestion_modules(imp.name)
-                    )
+                    imp.suggestions.extend(self.get_suggestions(imp.name))
                     yield imp
                 else:
                     if not list(
@@ -347,16 +346,16 @@ class ImportableNames(ast.NodeVisitor):
         self.importable_names.add(node.id.split(".")[0])
 
     @staticmethod
-    def get_names(import_name: str) -> Set[str]:
+    def get_names(import_name: str) -> FrozenSet[str]:
+        if import_name in sys.builtin_module_names:
+            return frozenset(dir(importlib.import_module(import_name)))
         try:
             spec = importlib.util.find_spec(import_name)  # type: ignore
         except (ModuleNotFoundError, ValueError):
-            return set()
+            return frozenset()
         if spec is None:
-            return set()
-        if import_name in sys.builtin_module_names:
-            return set(dir(importlib.import_module(import_name)))
+            return frozenset()
         source = spec.loader.get_data(spec.loader.path).decode("utf-8")
         scanner = ImportableNames()
         scanner.traverse(source)
-        return scanner.importable_names
+        return frozenset(scanner.importable_names)

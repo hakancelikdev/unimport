@@ -163,14 +163,14 @@ class TestTypeComments(ScannerTestCase):
             Name(lineno=1, name="Tuple"),
         ]
         expected_imports = [
-            ImportFrom(lineno=1, name="Any", star=False, suggestion=[]),
+            ImportFrom(lineno=1, name="Any", star=False, suggestions=[]),
             ImportFrom(
                 lineno=2,
                 name="Tuple",
                 star=False,
-                suggestion=[],
+                suggestions=[],
             ),
-            ImportFrom(lineno=3, name="Union", star=False, suggestion=[]),
+            ImportFrom(lineno=3, name="Union", star=False, suggestions=[]),
         ]
         self.assertUnimportEqual(
             source,

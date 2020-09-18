@@ -93,11 +93,11 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
         updated_node: cst.ImportFrom,
         imp: ImportFrom,
     ) -> Union[cst.ImportFrom, cst.RemovalSentinel]:
-        if imp.suggestion:
-            names_to_suggestion = [
-                cst.ImportAlias(cst.Name(module)) for module in imp.suggestion
+        if imp.suggestions:
+            names_to_suggestions = [
+                cst.ImportAlias(cst.Name(module)) for module in imp.suggestions
             ]
-            return updated_node.with_changes(names=names_to_suggestion)
+            return updated_node.with_changes(names=names_to_suggestions)
         else:
             return cst.RemoveFromParent()
 
