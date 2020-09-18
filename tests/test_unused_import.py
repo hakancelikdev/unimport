@@ -63,9 +63,14 @@ class Test__All__(UnusedTestCase):
 
     def test_star(self):
         # in this case this import is used
-        source = "from os import *\n" "__all__ = ['walk']"
+        source = "from os import *\n" "__all__ = ['walk', 'removedirs']"
         expected_unused_imports = [
-            ImportFrom(lineno=1, suggestions=["walk"], name="os", star=True),
+            ImportFrom(
+                lineno=1,
+                suggestions=["removedirs", "walk"],
+                name="os",
+                star=True,
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 

@@ -313,6 +313,26 @@ import os
 __all__ = ["os"] # this import is used and umimport can understand
 ```
 
+Other supported operations, **append** and **extend**
+
+```python
+from os import *
+
+__all__ = []
+__all__.append("removedirs")
+__all__.extend(["walk"])
+```
+
+after refactoring
+
+```python
+from os import removedirs, walk
+
+__all__ = []
+__all__.append("removedirs")
+__all__.extend(["walk"])
+```
+
 ## Requirements.txt
 
 You can automatically delete unused modules from the requirements.txt file

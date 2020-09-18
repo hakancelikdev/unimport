@@ -14,7 +14,6 @@ from typing import (
     Iterator,
     List,
     Optional,
-    Set,
     TypeVar,
     Union,
     cast,
@@ -149,12 +148,6 @@ class Scanner(ast.NodeVisitor):
     @recursive
     def visit_Assign(self, node: ast.Assign) -> None:
         self._type_comment(node)
-        if getattr(node.targets[0], "id", None) == "__all__" and isinstance(
-            node.value, (ast.List, ast.Tuple, ast.Set)
-        ):
-            for item in node.value.elts:
-                if isinstance(item, ast.Str):
-                    self.names.append(Name(lineno=node.lineno, name=item.s))
 
     @recursive
     def visit_arg(self, node: ast.arg) -> None:
@@ -184,6 +177,16 @@ class Scanner(ast.NodeVisitor):
         if self.skip_file():
             return
         self.traverse(self.source)
+        """
+        Receive items on the __all__ list
+        """
+        importable_visitor = ImportableVisitor()
+        importable_visitor.traverse(self.source)
+        for node in importable_visitor.importable_nodes:
+            if isinstance(node, ast.Str):
+                self.names.append(Name(lineno=node.lineno, name=node.s))
+            elif isinstance(node, ast.Constant):
+                self.names.append(Name(lineno=node.lineno, name=node.value))
         self.import_names = [imp.name for imp in self.imports]
         self.names = list(self.get_names())
         self.unused_imports = list(self.get_unused_imports())
@@ -257,7 +260,7 @@ class Scanner(ast.NodeVisitor):
             for to_cfv in self.names
             if to_cfv.name not in self.ignore_import_names
         }
-        from_names = ImportableNames.get_names(import_name)
+        from_names = ImportableVisitor.get_importable_names(import_name)
         return sorted(from_names & names)
 
     def get_unused_imports(self) -> Iterator[Union[Import, ImportFrom]]:
@@ -306,47 +309,82 @@ class Scanner(ast.NodeVisitor):
         return False
 
 
-class ImportableNames(ast.NodeVisitor):
-    def __init__(self) -> None:
-        self.importable_names: Set[str] = set()
+class ImportableVisitor(ast.NodeVisitor):
+    def __init__(self):
+        self.importable_nodes: List[Union[ast.Str, ast.Constant]] = []
+        self.suggestions_nodes: list[
+            Union[
+                ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Name
+            ]
+        ] = []
 
     def traverse(self, source: str):
-        tree = ast.parse(source)
-        relate(tree)
-        self.visit(tree)
+        try:
+            tree = ast.parse(source)
+        except SyntaxError:
+            pass
+        else:
+            relate(tree)
+            self.visit(tree)
 
     @recursive
-    def visit_ClassDef(self, node: ast.ClassDef) -> None:
-        """When include_star_import becomes True, instead of suggesting star,
-        it analyses class names and suggests one of the analyzed class's name.
-        E.g.: from os import *
-        print(PathLike)
-        At this point from os import * becomes > from os import PathLike
-        """
-        self.importable_names.add(node.name)
-
-    @recursive
-    def visit_FunctionDef(
-        self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]
+    def visit_CFN(
+        self,
+        node: Union[
+            ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Name
+        ],
     ) -> None:
-        """When include_star_import becomes True, instead of suggesting star,
-        it analyses function names and suggests one of the analyzed function's
-        name.
-        E.g.: from os import *
-        print(walk)
-        At this point from os import * becomes > from os import walk
-        """
-        if not first_occurrence(node, ast.ClassDef):
-            self.importable_names.add(node.name)
+        if not first_occurrence(
+            node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+        ):
+            self.suggestions_nodes.append(node)
 
-    visit_AsyncFunctionDef = visit_FunctionDef
+    visit_ClassDef = visit_CFN
+    visit_FunctionDef = visit_CFN
+    visit_AsyncFunctionDef = visit_CFN
+    visit_Name = visit_CFN
 
     @recursive
-    def visit_Name(self, node: ast.Name) -> None:
-        self.importable_names.add(node.id.split(".")[0])
+    def visit_Import(self, node: ast.Import) -> None:
+        for alias in node.names:
+            self.suggestions_nodes.append(alias)
+
+    @recursive
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
+        if not node.names[0].name == "*":
+            for alias in node.names:
+                self.suggestions_nodes.append(alias)
+
+    @recursive
+    def visit_Assign(self, node: ast.Assign) -> None:
+        if getattr(node.targets[0], "id", None) == "__all__" and isinstance(
+            node.value, (ast.List, ast.Tuple, ast.Set)
+        ):
+            for item in node.value.elts:
+                if isinstance(item, ast.Str):
+                    self.importable_nodes.append(item)
+
+    @recursive
+    def visit_Expr(self, node: ast.Expr) -> None:
+        if (
+            isinstance(node.value, ast.Call)
+            and isinstance(node.value.func, ast.Attribute)
+            and isinstance(node.value.func.value, ast.Name)
+            and node.value.func.value.id == "__all__"
+        ):
+            if node.value.func.attr == "append":
+                for arg in node.value.args:
+                    if isinstance(arg, ast.Constant):
+                        self.importable_nodes.append(arg)
+            elif node.value.func.attr == "extend":
+                for arg in node.value.args:
+                    if isinstance(arg, ast.List):
+                        for item in arg.elts:
+                            if isinstance(item, ast.Constant):
+                                self.importable_nodes.append(item)
 
     @staticmethod
-    def get_names(import_name: str) -> FrozenSet[str]:
+    def get_importable_names(import_name: str) -> FrozenSet[str]:
         if import_name in sys.builtin_module_names:
             return frozenset(dir(importlib.import_module(import_name)))
         try:
@@ -356,6 +394,24 @@ class ImportableNames(ast.NodeVisitor):
         if spec is None:
             return frozenset()
         source = spec.loader.get_data(spec.loader.path).decode("utf-8")
-        scanner = ImportableNames()
-        scanner.traverse(source)
-        return frozenset(scanner.importable_names)
+        importable = set()
+        importable_visitor = ImportableVisitor()
+        importable_visitor.traverse(source)
+        for node in importable_visitor.importable_nodes:
+            if isinstance(node, ast.Str):
+                importable.add(node.s)
+            elif isinstance(node, ast.Constant):
+                importable.add(node.value)
+        if importable:
+            return frozenset(importable)
+        else:
+            for node in importable_visitor.suggestions_nodes:
+                if isinstance(node, ast.Name):
+                    importable.add(node.id)
+                elif isinstance(node, (ast.Import, ast.ImportFrom)):
+                    importable.add(node.asname or node.name)
+                elif isinstance(
+                    node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
+                ):
+                    importable.add(node.name)
+            return frozenset(importable)

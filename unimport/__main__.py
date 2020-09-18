@@ -203,7 +203,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             session.scanner.scan(source=session.read(py_path)[0])
             unused_imports = session.scanner.unused_imports
             if unused_imports:
-                unused_modules.update(set(unused_imports))
+                unused_modules.update(unused_imports)
             if namespace.check:
                 show(unused_imports, py_path)
             session.scanner.clear()
