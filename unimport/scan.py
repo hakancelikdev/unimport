@@ -20,7 +20,7 @@ from typing import (
 )
 
 from unimport.color import Color
-from unimport.relate import Relate
+from unimport.relate import first_occurrence, get_parents, relate
 from unimport.statement import Import, ImportFrom, Name
 
 PY38_PLUS = sys.version_info >= (3, 8)
@@ -78,10 +78,10 @@ class Scanner(ast.NodeVisitor):
     visit_AsyncFunctionDef = visit_FunctionDef
 
     def visit_str_helper(self, value: str, node: ast.AST) -> None:
-        parent = Relate.first_occurrence(node, *ASTFunctionT)
+        parent = first_occurrence(node, *ASTFunctionT)
         is_annassign_or_arg = any(
             isinstance(parent, (ast.AnnAssign, ast.arg))
-            for parent in Relate.get_parents(node)
+            for parent in get_parents(node)
         )
         if is_annassign_or_arg or (
             parent is not None and parent.returns is node
@@ -211,7 +211,7 @@ class Scanner(ast.NodeVisitor):
             if self.show_error:
                 print(Color(str(err)).red)
         else:
-            Relate(tree, parent=parent)
+            relate(tree, parent=parent)
             self.visit(tree)
 
     def clear(self) -> None:
@@ -313,7 +313,7 @@ class ImportableNames(ast.NodeVisitor):
 
     def traverse(self, source: str):
         tree = ast.parse(source)
-        Relate(tree)
+        relate(tree)
         self.visit(tree)
 
     @recursive
@@ -337,7 +337,7 @@ class ImportableNames(ast.NodeVisitor):
         print(walk)
         At this point from os import * becomes > from os import walk
         """
-        if not Relate.first_occurrence(node, ast.ClassDef):
+        if not first_occurrence(node, ast.ClassDef):
             self.importable_names.add(node.name)
 
     visit_AsyncFunctionDef = visit_FunctionDef
