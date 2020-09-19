@@ -423,27 +423,3 @@ repos:
       - id: unimport
         args: [--remove, --requirements, --include-star-import]
 ```
-
-## Our badge
-
-[![style](https://img.shields.io/badge/unimport-ED1C24)](https://github.com/hakancelik96/unimport)
-
-**Please insert this badge into your project**
-
-`[![style](https://img.shields.io/badge/unimport-ED1C24)](https://github.com/hakancelik96/unimport)`
-
-## CONTRIBUTING
-
-[![](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/images/0)](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/links/0)[![](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/images/1)](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/links/1)[![](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/images/2)](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/links/2)[![](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/images/3)](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/links/3)[![](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/images/4)](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/links/4)[![](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/images/5)](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/links/5)[![](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/images/6)](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/links/6)[![](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/images/7)](https://sourcerer.io/fame/hakancelik96/hakancelik96/unimport/links/7)
-
-[CONTRIBUTING.md](/CONTRIBUTING.md)
-
-## CHANGELOG
-
-All notable changes to this project will be documented in this file.
-
-[CHANGELOG.md](/CHANGELOG.md)
-
-## Who's using Unimport
-
-[![radity.com](https://raw.githubusercontent.com/hakancelik96/unimport/master/images/clients/radity.jpg)](https://radity.com/?ref=unimport)
