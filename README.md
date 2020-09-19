@@ -13,7 +13,6 @@
 [![Stars](https://img.shields.io/github/stars/hakancelik96/unimport)](https://github.com/hakancelik96/unimport/stargazers)
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/3fbd4686e97b4e19906ca2fa933e4cfc)](https://app.codacy.com/manual/hakancelik96/unimport?utm_source=github.com&utm_medium=referral&utm_content=hakancelik96/unimport&utm_campaign=Badge_Grade_Settings)
-[![Codecov](https://codecov.io/gh/hakancelik96/unimport/branch/master/graph/badge.svg)](https://codecov.io/gh/hakancelik96/unimport)
 [![Style](https://img.shields.io/badge/style-black-black)](https://github.com/psf/black)
 
 [![Contributors](https://img.shields.io/github/contributors/hakancelik96/unimport)](https://github.com/hakancelik96/unimport/graphs/contributors)

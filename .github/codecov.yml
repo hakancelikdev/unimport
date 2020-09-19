@@ -1,4 +1,0 @@
-ignore:
-  - "setup.py"
-  - "models.py"
-  - "unimport/__main__.py"
