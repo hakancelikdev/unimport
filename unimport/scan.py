@@ -373,13 +373,13 @@ class ImportableVisitor(ast.NodeVisitor):
         ):
             if node.value.func.attr == "append":
                 for arg in node.value.args:
-                    if isinstance(arg, ast.Constant):
+                    if isinstance(arg, (ast.Constant, ast.Str)):
                         self.importable_nodes.append(arg)
             elif node.value.func.attr == "extend":
                 for arg in node.value.args:
                     if isinstance(arg, ast.List):
                         for item in arg.elts:
-                            if isinstance(item, ast.Constant):
+                            if isinstance(item, (ast.Constant, ast.Str)):
                                 self.importable_nodes.append(item)
 
     @staticmethod
