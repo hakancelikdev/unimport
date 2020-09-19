@@ -276,12 +276,7 @@ class Scanner(ast.NodeVisitor):
                     imp.suggestions.extend(self.get_suggestions(imp.name))
                     yield imp
                 else:
-                    if not list(
-                        filter(
-                            lambda name: name.name == imp.name,
-                            self.names,
-                        )
-                    ):
+                    if not any(name.name == imp.name for name in self.names):
                         yield imp
 
     def is_duplicate(self, name: str) -> bool:

@@ -4,9 +4,9 @@ from typing import Iterator, Optional
 
 def relate(tree: ast.AST, parent: Optional[ast.AST] = None):
     tree.parent = parent  # type: ignore
-    for parent in ast.walk(tree):
-        for child in ast.iter_child_nodes(parent):
-            child.parent = parent  # type: ignore
+    for node in ast.walk(tree):
+        for child in ast.iter_child_nodes(node):
+            child.parent = node  # type: ignore
 
 
 def get_parents(node: ast.AST) -> Iterator[ast.AST]:
@@ -20,7 +20,7 @@ def get_parents(node: ast.AST) -> Iterator[ast.AST]:
 
 def first_occurrence(node: ast.AST, *ancestors):
     for parent in get_parents(node):
-        if type(parent) in ancestors:
+        if isinstance(parent, ancestors):
             return parent
     else:
         return None

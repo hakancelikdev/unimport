@@ -192,7 +192,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     if hasattr(session.config, "exclude"):
         exclude_list.append(session.config.exclude)  # type: ignore
     if HAS_PATHSPEC and (
-        namespace.gitignore or (hasattr(session.config, "gitignore") and session.config.gitignore)  # type: ignore
+        namespace.gitignore
+        or (hasattr(session.config, "gitignore") and session.config.gitignore)  # type: ignore
     ):
         exclude_list.extend(get_exclude_list_from_gitignore())
     include = re.compile("|".join(include_list)).pattern
@@ -215,7 +216,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 ).lower()
                 if action == "q":
                     return 1
-                elif action == "y" or action == "":
+                elif action in ["y", ""]:
                     namespace.remove = True
             if (
                 namespace.remove
@@ -259,7 +260,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             action = input(
                 f"Apply suggested changes to '{Color(str(requirements_path)).cyan}' [Y/n] ? >"
             ).lower()
-            if action == "y" or action == "":
+            if action in ["y", ""]:
                 namespace.remove = True
         if namespace.remove:
             requirements_path.write_text(result)
@@ -271,4 +272,4 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main())

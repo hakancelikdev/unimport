@@ -2,7 +2,7 @@ from typing import List, Optional, Sequence, TypeVar, Union, cast
 
 import libcst as cst
 import libcst.matchers as m
-from libcst.metadata import PositionProvider
+from libcst.metadata import CodeRange, PositionProvider
 
 from unimport.statement import Import, ImportFrom
 
@@ -31,9 +31,7 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
         name.reverse()
         return ".".join(name)
 
-    def is_import_used(
-        self, import_name: str, location: cst._position.CodeRange
-    ) -> bool:
+    def is_import_used(self, import_name: str, location: CodeRange) -> bool:
         return not any(
             imp.name == import_name and imp.lineno == location.start.line
             for imp in self.unused_imports
@@ -41,11 +39,12 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
 
     def get_location(
         self, node: Union[cst.Import, cst.ImportFrom]
-    ) -> cst._position.CodeRange:
+    ) -> CodeRange:
         return self.get_metadata(cst.metadata.PositionProvider, node)
 
+    @staticmethod
     def get_rpar(
-        self, rpar: Optional[cst.RightParen], location: cst._position.CodeRange
+        rpar: Optional[cst.RightParen], location: CodeRange
     ) -> Optional[cst.RightParen]:
         if not rpar or location.start.line == location.end.line:
             return rpar
@@ -111,7 +110,7 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
     ) -> Union[cst.RemovalSentinel, cst.ImportFrom]:
         if isinstance(updated_node.names, cst.ImportStar):
 
-            def get_star_imp():
+            def get_star_imp() -> Optional[ImportFrom]:
                 if isinstance(updated_node.module, cst.Attribute):
                     import_name = self.get_import_name_from_attr(
                         attr_node=updated_node.module
@@ -121,10 +120,13 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
                 location = self.get_location(original_node)
                 for imp in self.unused_imports:
                     if (
-                        imp.name == import_name
+                        isinstance(imp, ImportFrom)
+                        and imp.name == import_name
                         and imp.lineno == location.start.line
                     ):
                         return imp
+                else:
+                    return None
 
             imp = get_star_imp()
             if imp:
@@ -142,7 +144,6 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
 def refactor_string(
     source: str,
     unused_imports: List[Union[Import, ImportFrom]],
-    show_error: bool = False,
 ) -> str:
     if unused_imports:
         wrapper = cst.MetadataWrapper(cst.parse_module(source))

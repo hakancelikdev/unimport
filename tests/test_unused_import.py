@@ -84,7 +84,7 @@ class Test__All__(UnusedTestCase):
 
     def test_plus_bin_op(self):
         # NOTE no support.
-        source = f"from os import *\n" "__all__ = ['w' + 'alk']"
+        source = "from os import *\n" "__all__ = ['w' + 'alk']"
         expected_unused_imports = [
             ImportFrom(lineno=1, suggestions=[], name="os", star=True),
         ]
