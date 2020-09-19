@@ -3,6 +3,7 @@ import difflib
 import re
 import sys
 import tokenize
+from distutils.util import strtobool
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
@@ -216,8 +217,13 @@ def main(argv: Optional[List[str]] = None) -> int:
                 ).lower()
                 if action == "q":
                     return 1
-                elif action in ["y", ""]:
-                    namespace.remove = True
+                try:
+                    action_bool = strtobool(action)
+                except ValueError:
+                    pass
+                else:
+                    if action_bool:
+                        namespace.remove = True
             if (
                 namespace.remove
                 and session.refactor_file(py_path, apply=True)[1]
@@ -260,8 +266,13 @@ def main(argv: Optional[List[str]] = None) -> int:
             action = input(
                 f"Apply suggested changes to '{Color(str(requirements_path)).cyan}' [Y/n] ? >"
             ).lower()
-            if action in ["y", ""]:
-                namespace.remove = True
+            try:
+                action_bool = strtobool(action)
+            except ValueError:
+                pass
+            else:
+                if action_bool:
+                    namespace.remove = True
         if namespace.remove:
             requirements_path.write_text(result)
             print(f"Refactoring '{Color(str(requirements_path)).cyan}'")
