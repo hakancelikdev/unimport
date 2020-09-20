@@ -51,7 +51,7 @@ def recursive(func: Function) -> Function:
 
 class Scanner(ast.NodeVisitor):
     ignore_imports = ("__future__",)
-    ignore_import_names = ("__all__", "__doc__")
+    ignore_import_names = ("__all__", "__doc__", "__name__")
     skip_file_regex = "# *(unimport: {0,1}skip_file)"
     skip_comments_regex = "# *(unimport: {0,1}skip|noqa)"
 
@@ -376,14 +376,18 @@ class ImportableVisitor(ast.NodeVisitor):
 
 class ImportableNames:
     @functools.lru_cache()
-    def get_source(self, import_name: str) -> str:
+    def get_spec(self, import_name: str):
         try:
-            spec = importlib.util.find_spec(import_name)  # type: ignore
+            return importlib.util.find_spec(import_name)  # type: ignore
         except (ImportError, ValueError):
-            return ""
-        if spec is None:
-            return ""
-        return spec.loader.get_data(spec.loader.path).decode("utf-8")
+            return None
+
+    @functools.lru_cache()
+    def get_source(self, import_name: str) -> Optional[str]:
+        spec = self.get_spec(import_name)
+        if spec and spec.loader.path.endswith(".py"):
+            return spec.loader.get_data(spec.loader.path).decode("utf-8")
+        return None
 
     @staticmethod
     @functools.lru_cache()
@@ -391,8 +395,8 @@ class ImportableNames:
         importable_visitor = ImportableVisitor()
         try:
             importable_visitor.traverse(source)
-        except SyntaxError:
-            return None
+        except SyntaxError:  # pragma: no cover
+            return None  # pragma: no cover
         return importable_visitor
 
     @staticmethod
@@ -428,10 +432,16 @@ class ImportableNames:
 
     @functools.lru_cache()
     def get_names_by_imp(self, import_name: str) -> FrozenSet[str]:
-        if import_name in sys.builtin_module_names:
+        spec = self.get_spec(import_name)
+        if import_name in sys.builtin_module_names or (
+            spec and spec.loader.path.endswith(".os")
+        ):
             return self.get_names_from_builtin(import_name)
         source = self.get_source(import_name)
-        visitor = self.get_visitor(source)
-        return self.get_names_from_all(
-            visitor
-        ) or self.get_names_from_suggestion(visitor)
+        if source is not None:
+            visitor = self.get_visitor(source)
+            return self.get_names_from_all(
+                visitor
+            ) or self.get_names_from_suggestion(visitor)
+        else:
+            return frozenset()
