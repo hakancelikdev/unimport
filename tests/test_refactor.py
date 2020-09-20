@@ -109,12 +109,19 @@ class TestUnusedRefactor(RefactorTestCase):
             self.session.refactor(action),
         )
 
-    def test_future(self):
+    def test_future_from_import(self):
         action = (
             "from __future__ import (\n"
             "    absolute_import, division, print_function, unicode_literals\n"
             ")\n"
         )
+        self.assertEqual(
+            action,
+            self.session.refactor(action),
+        )
+
+    def test_future_import(self):
+        action = "import __future__\n" "__future__.absolute_import\n"
         self.assertEqual(
             action,
             self.session.refactor(action),

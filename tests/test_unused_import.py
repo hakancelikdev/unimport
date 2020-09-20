@@ -74,6 +74,38 @@ class Test__All__(UnusedTestCase):
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
+    def test_append(self):
+        source = (
+            "from os import *\n"
+            "__all__ = ['walk']\n"
+            "__all__.append('removedirs')\n"
+        )
+        expected_unused_imports = [
+            ImportFrom(
+                lineno=1,
+                suggestions=["removedirs", "walk"],
+                name="os",
+                star=True,
+            ),
+        ]
+        self.assertUnimportEqual(source, expected_unused_imports)
+
+    def test_extend(self):
+        source = (
+            "from os import *\n"
+            "__all__ = ['walk']\n"
+            "__all__.extend(['removedirs'])\n"
+        )
+        expected_unused_imports = [
+            ImportFrom(
+                lineno=1,
+                suggestions=["removedirs", "walk"],
+                name="os",
+                star=True,
+            ),
+        ]
+        self.assertUnimportEqual(source, expected_unused_imports)
+
     def test_star_unused(self):
         # in this case this import is unused
         source = "from os import *\n" "__all__ = ['test']"
@@ -98,6 +130,13 @@ class Test__All__(UnusedTestCase):
         )
         expected_unused_imports = [
             ImportFrom(lineno=1, suggestions=[], name="os", star=True),
+        ]
+        self.assertUnimportEqual(source, expected_unused_imports)
+
+    def test_unknown(self):
+        source = "from x import *\n" "__all__ = ['xx']"
+        expected_unused_imports = [
+            ImportFrom(lineno=1, suggestions=[], name="x", star=True),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
