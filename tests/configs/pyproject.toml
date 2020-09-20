@@ -13,6 +13,10 @@ exclude = '''
 '''
 
 [tool.unimport]
+sources = ["path1", "path2"]
 exclude = '__init__.py|tests/'
 include = 'test|test2|tests.py'
 gitignore = true
+requirements = true
+remove = false
+diff = true

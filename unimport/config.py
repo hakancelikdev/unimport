@@ -1,6 +1,7 @@
 import configparser
+from ast import literal_eval
 from pathlib import Path
-from typing import Union
+from typing import List
 
 try:
     import toml
@@ -16,7 +17,14 @@ if HAS_TOML is True:
 
 
 class Config:
-    attrs = ("include", "exclude", "gitignore")
+
+    sources: List[Path] = []
+    include: List[str] = []
+    exclude: List[str] = []
+    requirements = False
+    gitignore = False
+    remove = False
+    diff = False
 
     def __init__(self, config_file: Path) -> None:
         self.config_file = config_file
@@ -36,22 +44,33 @@ class Config:
         parser = configparser.ConfigParser(allow_no_value=True)
         parser.read(self.config_file)
         if parser.has_section(self.section):
-            get_value: Union[str, bool]
-            for attr in self.attrs:
-                try:
-                    get_value = parser.get(self.section, attr)
-                except configparser.NoOptionError:
-                    pass
-                else:
-                    if get_value == "True":
-                        get_value = True  # pragma: no cover
-                    elif get_value == "False":
-                        get_value = False
-                    setattr(self, attr, get_value)
+            sources = literal_eval(
+                parser.get(
+                    self.section, "sources", fallback=[]  # type: ignore
+                )
+            )
+            self.sources = [Path(path) for path in sources]
+            self.include = [parser.get(self.section, "include", fallback="")]  # type: ignore
+            self.exclude = [parser.get(self.section, "exclude", fallback="")]  # type: ignore
+            self.requirements = parser.getboolean(
+                self.section, "requirements", fallback=False
+            )
+            self.gitignore = parser.getboolean(
+                self.section, "gitignore", fallback=False
+            )
+            self.remove = parser.getboolean(
+                self.section, "remove", fallback=False
+            )
+            self.diff = parser.getboolean(self.section, "diff", fallback=False)
 
     def parse_toml(self) -> None:
         parsed_toml = toml.loads(self.config_file.read_text())
         config = parsed_toml.get("tool", {}).get("unimport", {})
-        for attr in self.attrs:
-            get_value = config.get(attr, None)
-            setattr(self, attr, get_value)
+        sources = config.get("sources", [])
+        self.sources = [Path(path) for path in sources]
+        self.include = [config.get("include", "")]
+        self.exclude = [config.get("exclude", "")]
+        self.requirements = config.get("requirements", False)
+        self.gitignore = config.get("gitignore", False)
+        self.remove = config.get("remove", False)
+        self.diff = config.get("diff", False)
