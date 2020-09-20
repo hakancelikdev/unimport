@@ -119,7 +119,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         metavar="include",
         action="store",
         default=[],
-        type=str,
+        type=lambda value: [value],
     )
     parser.add_argument(
         "--exclude",
@@ -127,7 +127,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         metavar="exclude",
         action="store",
         default=[],
-        type=str,
+        type=lambda value: [value],
     )
     parser.add_argument(
         "--gitignore",
@@ -187,20 +187,19 @@ def main(argv: Optional[List[str]] = None) -> int:
         show_error=namespace.show_error,
     )
     namespace.remove = namespace.remove or session.config.remove  # type: ignore
-    namespace.diff = namespace.diff or session.config.diff  # type: ignore
+    namespace.diff = any((namespace.diff, session.config.diff, namespace.permission))  # type: ignore
+    namespace.check = namespace.check or not any(
+        (namespace.diff, namespace.remove)
+    )
     namespace.requirements = (
         namespace.requirements or session.config.requirements  # type: ignore
     )
-    namespace.diff = namespace.diff or namespace.permission
     namespace.gitignore = namespace.gitignore or session.config.gitignore  # type: ignore
     namespace.sources.extend(session.config.sources)  # type: ignore
     namespace.include.extend(session.config.include)  # type: ignore
     namespace.exclude.extend(session.config.exclude)  # type: ignore
     if HAS_PATHSPEC and namespace.gitignore:
         namespace.exclude.extend(get_exclude_list_from_gitignore())
-    namespace.check = namespace.check or not any(
-        [namespace.diff, namespace.remove, namespace.permission]
-    )
     include = re.compile("|".join(namespace.include)).pattern
     exclude = re.compile("|".join(namespace.exclude)).pattern
     unused_modules = set()
