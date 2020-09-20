@@ -109,12 +109,19 @@ class TestUnusedRefactor(RefactorTestCase):
             self.session.refactor(action),
         )
 
-    def test_future(self):
+    def test_future_from_import(self):
         action = (
             "from __future__ import (\n"
             "    absolute_import, division, print_function, unicode_literals\n"
             ")\n"
         )
+        self.assertEqual(
+            action,
+            self.session.refactor(action),
+        )
+
+    def test_future_import(self):
+        action = "import __future__\n" "__future__.absolute_import\n"
         self.assertEqual(
             action,
             self.session.refactor(action),
@@ -533,7 +540,6 @@ class TestStarImport(RefactorTestCase):
         )
         expected = (
             "from re import match, search\n"
-            "from t.s.d import *\n"
             "from lib2to3.pgen2.token import NAME\n\n"
             "print(match)\n"
             "print(search)\n"
@@ -570,7 +576,7 @@ class TestStarImport(RefactorTestCase):
             self.session.refactor(action),
         )
 
-    def test_two_suggestion(self):
+    def test_two_suggestions(self):
         action = (
             "from time import *\n"
             "from os import *\n"

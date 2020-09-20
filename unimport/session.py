@@ -69,7 +69,6 @@ class Session:
         refactor = refactor_string(
             source=source,
             unused_imports=self.scanner.unused_imports,
-            show_error=self.show_error,
         )
         self.scanner.clear()
         return refactor
