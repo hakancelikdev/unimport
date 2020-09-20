@@ -295,7 +295,7 @@ import x
 
 ```
 
-## `.gitignore`
+## `--gitignore`
 
 It's possible to skip `.gitignore` glob patterns using `--gitignore` flag.
 
@@ -392,18 +392,26 @@ For example:
 
 ```ini
 [tool.unimport]
-exclude = '(__init__.py)|env'
-include = 'my_project'
+sources = ["path1", "path2"]
+exclude = '__init__.py|tests/'
+include = 'test|test2|tests.py'
 gitignore = true
+requirements = true
+remove = false
+diff = true
 ```
 
 **setup.cfg**
 
 ```ini
 [unimport]
-exclude = (__init__.py)|env
-include = my_project
-gitignore = True
+sources = ["path1", "path2"]
+exclude = __init__.py|tests/
+include = test|test2|tests.py
+gitignore = true
+requirements = true
+remove = false
+diff = true
 ```
 
 ## Adding pre-commit plugins to your project

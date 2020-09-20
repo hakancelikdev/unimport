@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - ././2020
 
+- [Configuration extend and refactoring by @hakancelik96](https://github.com/hakancelik96/unimport/pull/111)
 - [General refactoring by @hakancelik96](https://github.com/hakancelik96/unimport/pull/108)
   - Support append and extend `__all__` list
   - Star import suggestions improved

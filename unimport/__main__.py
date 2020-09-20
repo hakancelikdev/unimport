@@ -118,7 +118,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         help="file include pattern.",
         metavar="include",
         action="store",
-        default="",
+        default=[],
         type=str,
     )
     parser.add_argument(
@@ -126,7 +126,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         help="file exclude pattern.",
         metavar="exclude",
         action="store",
-        default="",
+        default=[],
         type=str,
     )
     parser.add_argument(
@@ -181,32 +181,28 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
 
     namespace = parser.parse_args(argv)
-    namespace.check = namespace.check or not any(
-        [namespace.diff, namespace.remove, namespace.permission]
-    )
-    namespace.diff = namespace.diff or namespace.permission
     session = Session(
         config_file=namespace.config,
         include_star_import=namespace.include_star_import,
         show_error=namespace.show_error,
     )
-    include_list = []
-    exclude_list = []
-    if namespace.include:
-        include_list.append(namespace.include)
-    if hasattr(session.config, "include"):
-        include_list.append(session.config.include)  # type: ignore
-    if namespace.exclude:
-        exclude_list.append(namespace.exclude)
-    if hasattr(session.config, "exclude"):
-        exclude_list.append(session.config.exclude)  # type: ignore
-    if HAS_PATHSPEC and (
-        namespace.gitignore
-        or (hasattr(session.config, "gitignore") and session.config.gitignore)  # type: ignore
-    ):
-        exclude_list.extend(get_exclude_list_from_gitignore())
-    include = re.compile("|".join(include_list)).pattern
-    exclude = re.compile("|".join(exclude_list)).pattern
+    namespace.remove = namespace.remove or session.config.remove  # type: ignore
+    namespace.diff = namespace.diff or session.config.diff  # type: ignore
+    namespace.requirements = (
+        namespace.requirements or session.config.requirements  # type: ignore
+    )
+    namespace.diff = namespace.diff or namespace.permission
+    namespace.gitignore = namespace.gitignore or session.config.gitignore  # type: ignore
+    namespace.sources.extend(session.config.sources)  # type: ignore
+    namespace.include.extend(session.config.include)  # type: ignore
+    namespace.exclude.extend(session.config.exclude)  # type: ignore
+    if HAS_PATHSPEC and namespace.gitignore:
+        namespace.exclude.extend(get_exclude_list_from_gitignore())
+    namespace.check = namespace.check or not any(
+        [namespace.diff, namespace.remove, namespace.permission]
+    )
+    include = re.compile("|".join(namespace.include)).pattern
+    exclude = re.compile("|".join(namespace.exclude)).pattern
     unused_modules = set()
     for source_path in namespace.sources:
         for py_path in session.list_paths(source_path, include, exclude):
