@@ -434,7 +434,7 @@ class ImportableNames:
     def get_names_by_imp(self, import_name: str) -> FrozenSet[str]:
         spec = self.get_spec(import_name)
         if import_name in sys.builtin_module_names or (
-            spec and spec.loader.path.endswith(".os")
+            spec and spec.loader.path.endswith(".so")
         ):
             return self.get_names_from_builtin(import_name)
         source = self.get_source(import_name)
