@@ -67,6 +67,14 @@ def show(
         )
 
 
+def actiontobool(action: str) -> bool:
+    try:
+        action_to_bool = strtobool(action)
+    except ValueError:
+        return False
+    return action_to_bool
+
+
 def get_exclude_list_from_gitignore() -> List[str]:
     """Converts .gitignore patterns to regex and return this exclude regex
     list."""
@@ -217,13 +225,8 @@ def main(argv: Optional[List[str]] = None) -> int:
                 ).lower()
                 if action == "q":
                     return 1
-                try:
-                    action_bool = strtobool(action)
-                except ValueError:
-                    pass
-                else:
-                    if action_bool:
-                        namespace.remove = True
+                elif actiontobool(action):
+                    namespace.remove = True
             if (
                 namespace.remove
                 and session.refactor_file(py_path, apply=True)[1]
@@ -266,13 +269,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             action = input(
                 f"Apply suggested changes to '{Color(str(requirements_path)).cyan}' [Y/n] ? >"
             ).lower()
-            try:
-                action_bool = strtobool(action)
-            except ValueError:
-                pass
-            else:
-                if action_bool:
-                    namespace.remove = True
+            if actiontobool(action):
+                namespace.remove = True
         if namespace.remove:
             requirements_path.write_text(result)
             print(f"Refactoring '{Color(str(requirements_path)).cyan}'")

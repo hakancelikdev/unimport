@@ -29,7 +29,13 @@ BUILTINS = frozenset(
 )
 
 Function = TypeVar("Function", bound=Callable[..., Any])
-ASTFunctionT = (ast.FunctionDef, ast.AsyncFunctionDef)
+ASTImportableT = Union[
+    ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Name, ast.alias
+]
+ImportT = Union[Import, ImportFrom]
+CFNT = Union[ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Name]
+DefTuple = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+ASTFunctionTuple = (ast.FunctionDef, ast.AsyncFunctionDef)
 
 
 def recursive(func: Function) -> Function:
@@ -63,10 +69,10 @@ class Scanner(ast.NodeVisitor):
         """
         self.include_star_import = include_star_import
         self.show_error = show_error
-        self.imports: List[Union[Import, ImportFrom]] = []
+        self.imports: List[ImportT] = []
         self.names: List[Name] = []
         self.import_names: List[str] = []
-        self.unused_imports: List[Union[Import, ImportFrom]] = []
+        self.unused_imports: List[ImportT] = []
         self.any_import_error = False
 
     @recursive
@@ -78,7 +84,7 @@ class Scanner(ast.NodeVisitor):
     visit_AsyncFunctionDef = visit_FunctionDef
 
     def visit_str_helper(self, value: str, node: ast.AST) -> None:
-        parent = first_occurrence(node, *ASTFunctionT)
+        parent = first_occurrence(node, *ASTFunctionTuple)
         is_annassign_or_arg = any(
             isinstance(parent, (ast.AnnAssign, ast.arg))
             for parent in get_parents(node)
@@ -176,23 +182,16 @@ class Scanner(ast.NodeVisitor):
         self.source = source
         if self.skip_file():
             return
-        self.traverse(self.source)
-        """
-        Receive items on the __all__ list
-        """
-        importable_visitor = ImportableVisitor()
-        importable_visitor.traverse(self.source)
-        for node in importable_visitor.importable_nodes:
-            if isinstance(node, ast.Str):
-                self.names.append(Name(lineno=node.lineno, name=node.s))
-            elif isinstance(node, ast.Constant):
-                self.names.append(Name(lineno=node.lineno, name=node.value))
+        try:
+            self.traverse(self.source)
+        except SyntaxError:
+            return None
         self.import_names = [imp.name for imp in self.imports]
         self.names = list(self.get_names())
         self.unused_imports = list(self.get_unused_imports())
 
     def _type_comment(self, node: ast.AST) -> None:
-        if isinstance(node, ASTFunctionT):
+        if isinstance(node, ASTFunctionTuple):
             mode = "func_type"
         else:
             mode = "eval"
@@ -214,9 +213,18 @@ class Scanner(ast.NodeVisitor):
         except SyntaxError as err:
             if self.show_error:
                 print(Color(str(err)).red)
-        else:
-            relate(tree, parent=parent)
-            self.visit(tree)
+            raise err
+        relate(tree, parent=parent)
+        self.visit(tree)
+        """
+        Receive items on the __all__ list
+        """
+        importable_visitor = ImportableNames().get_visitor(self.source)
+        for node in importable_visitor.importable_nodes:
+            if isinstance(node, ast.Str):
+                self.names.append(Name(lineno=node.lineno, name=node.s))
+            elif isinstance(node, ast.Constant):
+                self.names.append(Name(lineno=node.lineno, name=node.value))
 
     def clear(self) -> None:
         self.names.clear()
@@ -224,7 +232,7 @@ class Scanner(ast.NodeVisitor):
         self.import_names.clear()
         self.unused_imports.clear()
 
-    def skip_import(self, node: Union[ast.ImportFrom, ast.Import]) -> bool:
+    def skip_import(self, node: Union[ast.Import, ast.ImportFrom]) -> bool:
         return (
             bool(
                 re.search(
@@ -260,10 +268,10 @@ class Scanner(ast.NodeVisitor):
             for to_cfv in self.names
             if to_cfv.name not in self.ignore_import_names
         }
-        from_names = ImportableVisitor.get_importable_names(import_name)
+        from_names = ImportableNames().get_names_by_imp(import_name)
         return sorted(from_names & names)
 
-    def get_unused_imports(self) -> Iterator[Union[Import, ImportFrom]]:
+    def get_unused_imports(self) -> Iterator[ImportT]:
         for imp in self.imports:
             if self.is_duplicate(imp.name) and not self.is_duplicate_used(imp):
                 yield imp
@@ -282,13 +290,13 @@ class Scanner(ast.NodeVisitor):
     def is_duplicate(self, name: str) -> bool:
         return self.import_names.count(name) > 1
 
-    def get_duplicate_imports(self) -> Iterator[Union[Import, ImportFrom]]:
+    def get_duplicate_imports(self) -> Iterator[ImportT]:
         yield from filter(
             lambda imp: self.is_duplicate(imp.name), self.imports
         )
 
-    def is_duplicate_used(self, imp: Union[Import, ImportFrom]) -> bool:
-        def find_nearest_imp(name: Name) -> Union[Import, ImportFrom]:
+    def is_duplicate_used(self, imp: ImportT) -> bool:
+        def find_nearest_imp(name: Name) -> ImportT:
             nearest = imp
             for duplicate in self.get_duplicate_imports():
                 if (
@@ -305,37 +313,20 @@ class Scanner(ast.NodeVisitor):
 
 
 class ImportableVisitor(ast.NodeVisitor):
-    def __init__(self):
-        self.importable_nodes: List[Union[ast.Str, ast.Constant]] = []
-        self.suggestions_nodes: List[
-            Union[
-                ast.ClassDef,
-                ast.FunctionDef,
-                ast.AsyncFunctionDef,
-                ast.Name,
-                ast.alias,
-            ]
-        ] = []
+    def __init__(self) -> None:
+        self.importable_nodes: List[
+            Union[ast.Str, ast.Constant]
+        ] = []  # nodes on the __all__ list
+        self.suggestions_nodes: List[ASTImportableT] = []  # nodes on the CFN
 
-    def traverse(self, source: str):
-        try:
-            tree = ast.parse(source)
-        except SyntaxError:
-            pass
-        else:
-            relate(tree)
-            self.visit(tree)
+    def traverse(self, source: str) -> None:
+        tree = ast.parse(source)
+        relate(tree)
+        self.visit(tree)
 
     @recursive
-    def visit_CFN(
-        self,
-        node: Union[
-            ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Name
-        ],
-    ) -> None:
-        if not first_occurrence(
-            node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
-        ):
+    def visit_CFN(self, node: CFNT) -> None:
+        if not first_occurrence(node, DefTuple):
             self.suggestions_nodes.append(node)
 
     visit_ClassDef = visit_CFN
@@ -382,35 +373,65 @@ class ImportableVisitor(ast.NodeVisitor):
                             if isinstance(item, (ast.Constant, ast.Str)):
                                 self.importable_nodes.append(item)
 
-    @staticmethod
-    def get_importable_names(import_name: str) -> FrozenSet[str]:
-        if import_name in sys.builtin_module_names:
-            return frozenset(dir(importlib.import_module(import_name)))
+
+class ImportableNames:
+    @functools.lru_cache()
+    def get_source(self, import_name: str) -> str:
         try:
             spec = importlib.util.find_spec(import_name)  # type: ignore
-        except (ModuleNotFoundError, ValueError):
-            return frozenset()
+        except (ImportError, ValueError):
+            return ""
         if spec is None:
-            return frozenset()
-        source = spec.loader.get_data(spec.loader.path).decode("utf-8")
-        importable = set()
+            return ""
+        return spec.loader.get_data(spec.loader.path).decode("utf-8")
+
+    @staticmethod
+    @functools.lru_cache()
+    def get_visitor(source: str) -> Optional[ImportableVisitor]:
         importable_visitor = ImportableVisitor()
-        importable_visitor.traverse(source)
-        for node in importable_visitor.importable_nodes:
+        try:
+            importable_visitor.traverse(source)
+        except SyntaxError:
+            return None
+        return importable_visitor
+
+    @staticmethod
+    @functools.lru_cache()
+    def get_names_from_builtin(import_name: str) -> FrozenSet[str]:
+        return frozenset(dir(importlib.import_module(import_name)))
+
+    @staticmethod
+    @functools.lru_cache()
+    def get_names_from_all(visitor: ImportableVisitor) -> FrozenSet[str]:
+        names = set()
+        for node in visitor.importable_nodes:
             if isinstance(node, ast.Str):
-                importable.add(node.s)
+                names.add(node.s)
             elif isinstance(node, ast.Constant):
-                importable.add(node.value)
-        if importable:
-            return frozenset(importable)
-        else:
-            for node in importable_visitor.suggestions_nodes:  # type: ignore
-                if isinstance(node, ast.Name):
-                    importable.add(node.id)
-                elif isinstance(node, ast.alias):
-                    importable.add(node.asname or node.name)
-                elif isinstance(
-                    node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
-                ):
-                    importable.add(node.name)
-            return frozenset(importable)
+                names.add(node.value)
+        return frozenset(names)
+
+    @staticmethod
+    @functools.lru_cache()
+    def get_names_from_suggestion(
+        visitor: ImportableVisitor,
+    ) -> FrozenSet[str]:
+        names = set()
+        for node in visitor.suggestions_nodes:  # type: ignore
+            if isinstance(node, ast.Name):
+                names.add(node.id)
+            elif isinstance(node, ast.alias):
+                names.add(node.asname or node.name)
+            elif isinstance(node, DefTuple):
+                names.add(node.name)
+        return frozenset(names)
+
+    @functools.lru_cache()
+    def get_names_by_imp(self, import_name: str) -> FrozenSet[str]:
+        if import_name in sys.builtin_module_names:
+            return self.get_names_from_builtin(import_name)
+        source = self.get_source(import_name)
+        visitor = self.get_visitor(source)
+        return self.get_names_from_all(
+            visitor
+        ) or self.get_names_from_suggestion(visitor)
