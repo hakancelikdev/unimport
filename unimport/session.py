@@ -26,7 +26,7 @@ class Session:
         self.config = (
             Config(config_file)
             if config_file and config_file.name in CONFIG_FILES
-            else None
+            else Config
         )
         self.scanner = Scanner(
             include_star_import=include_star_import, show_error=self.show_error
