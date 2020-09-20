@@ -3,6 +3,7 @@ import difflib
 import re
 import sys
 import tokenize
+from distutils.util import strtobool
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
@@ -47,17 +48,12 @@ def show(
 ) -> None:
     for imp in unused_import:
         context = ""
-        if (
-            isinstance(imp, ImportFrom)
-            and imp.star
-            and imp.module
-            and imp.modules
-        ):
+        if isinstance(imp, ImportFrom) and imp.star and imp.suggestions:
             context = (
                 Color(f"from {imp.name} import *").red
                 + " -> "
                 + Color(
-                    f"from {imp.name} import {', '.join(imp.modules)}"
+                    f"from {imp.name} import {', '.join(imp.suggestions)}"
                 ).green
             )
         else:
@@ -69,6 +65,14 @@ def show(
             + ":"
             + Color(str(imp.lineno)).green
         )
+
+
+def actiontobool(action: str) -> bool:
+    try:
+        action_to_bool = strtobool(action)
+    except ValueError:
+        return False
+    return action_to_bool
 
 
 def get_exclude_list_from_gitignore() -> List[str]:
@@ -197,7 +201,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     if hasattr(session.config, "exclude"):
         exclude_list.append(session.config.exclude)  # type: ignore
     if HAS_PATHSPEC and (
-        namespace.gitignore or (hasattr(session.config, "gitignore") and session.config.gitignore)  # type: ignore
+        namespace.gitignore
+        or (hasattr(session.config, "gitignore") and session.config.gitignore)  # type: ignore
     ):
         exclude_list.extend(get_exclude_list_from_gitignore())
     include = re.compile("|".join(include_list)).pattern
@@ -208,13 +213,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             session.scanner.scan(source=session.read(py_path)[0])
             unused_imports = session.scanner.unused_imports
             if unused_imports:
-                unused_modules.update(
-                    {
-                        imp.module.__name__.split(".")[0]  # type: ignore
-                        for imp in unused_imports
-                        if imp.module
-                    }
-                )
+                unused_modules.update({imp.name for imp in unused_imports})
             if namespace.check:
                 show(unused_imports, py_path)
             session.scanner.clear()
@@ -226,7 +225,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 ).lower()
                 if action == "q":
                     return 1
-                elif action == "y" or action == "":
+                elif actiontobool(action):
                     namespace.remove = True
             if (
                 namespace.remove
@@ -270,7 +269,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             action = input(
                 f"Apply suggested changes to '{Color(str(requirements_path)).cyan}' [Y/n] ? >"
             ).lower()
-            if action == "y" or action == "":
+            if actiontobool(action):
                 namespace.remove = True
         if namespace.remove:
             requirements_path.write_text(result)
@@ -282,4 +281,4 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main())

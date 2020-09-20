@@ -8,7 +8,7 @@ class TestColor(unittest.TestCase):
     def setUp(self):
         self.test_content = "Test Content"
 
-    for color in COLORS.keys():
+    for color in COLORS:
         test_template = textwrap.dedent(
             f"""
             def test_{color}(self):
