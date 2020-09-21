@@ -3,8 +3,10 @@ given as a string and reports its findings."""
 
 import ast
 import builtins
+import distutils.sysconfig
 import functools
 import importlib
+import importlib.util
 import re
 import sys
 from typing import (
@@ -20,13 +22,14 @@ from typing import (
 )
 
 from unimport.color import Color
+from unimport.constants import PY38_PLUS
 from unimport.relate import first_occurrence, get_parents, relate
 from unimport.statement import Import, ImportFrom, Name
 
-PY38_PLUS = sys.version_info >= (3, 8)
-BUILTINS = frozenset(
-    _build for _build in dir(builtins) if not _build.startswith("_")
-)
+IGNORE_IMPORT_NAMES = frozenset({"__all__", "__doc__", "__name__"})
+BUILTINS = frozenset(dir(builtins))
+STDLIB_PATH = distutils.sysconfig.get_python_lib(standard_lib=True)
+BUILTIN_MODULE_NAMES = frozenset(sys.builtin_module_names)
 
 Function = TypeVar("Function", bound=Callable[..., Any])
 ASTImportableT = Union[
@@ -50,8 +53,8 @@ def recursive(func: Function) -> Function:
 
 
 class Scanner(ast.NodeVisitor):
-    ignore_imports = ("__future__",)
-    ignore_import_names = ("__all__", "__doc__", "__name__")
+    ignore_modules_imports = ("__future__",)
+    ignore_alias_imports = ("__all__", "__doc__")
     skip_file_regex = "# *(unimport: {0,1}skip_file)"
     skip_comments_regex = "# *(unimport: {0,1}skip|noqa)"
 
@@ -106,8 +109,6 @@ class Scanner(ast.NodeVisitor):
         if self.skip_import(node):
             return
         for alias in node.names:
-            if alias.name in self.ignore_imports:
-                return
             self.imports.append(
                 Import(
                     lineno=node.lineno,
@@ -123,8 +124,10 @@ class Scanner(ast.NodeVisitor):
         for alias in node.names:
             package = node.module or alias.name
             alias_name = alias.asname or alias.name
-            if package in self.ignore_imports or (
-                is_star and not self.include_star_import
+            if (
+                (package in self.ignore_modules_imports)
+                or (alias_name in self.ignore_alias_imports)
+                or (is_star and not self.include_star_import)
             ):
                 return
             self.imports.append(
@@ -221,10 +224,10 @@ class Scanner(ast.NodeVisitor):
         """
         importable_visitor = ImportableNames().get_visitor(self.source)
         for node in importable_visitor.importable_nodes:
-            if isinstance(node, ast.Str):
-                self.names.append(Name(lineno=node.lineno, name=node.s))
-            elif isinstance(node, ast.Constant):
+            if isinstance(node, ast.Constant):
                 self.names.append(Name(lineno=node.lineno, name=node.value))
+            elif isinstance(node, ast.Str):
+                self.names.append(Name(lineno=node.lineno, name=node.s))
 
     def clear(self) -> None:
         self.names.clear()
@@ -251,23 +254,15 @@ class Scanner(ast.NodeVisitor):
 
     def get_names(self) -> Iterator[Name]:
         imp_match_built_in = BUILTINS & set(self.import_names)
-        yield from filter(
-            lambda name: list(
-                filter(
-                    lambda imp_name: imp_name == name.name,
-                    imp_match_built_in,
-                )
-            )
-            or name.name not in BUILTINS,
-            self.names,
-        )
+        for name in self.names:
+            if [imp_name == name.name for imp_name in imp_match_built_in] or (
+                name.name.split(".")[0] not in IGNORE_IMPORT_NAMES
+                and name.name.split(".")[0] not in BUILTINS
+            ):
+                yield name
 
     def get_suggestions(self, import_name: str) -> List[str]:
-        names = {
-            to_cfv.name.split(".")[0]
-            for to_cfv in self.names
-            if to_cfv.name not in self.ignore_import_names
-        }
+        names = {to_cfv.name.split(".")[0] for to_cfv in self.names}
         from_names = ImportableNames().get_names_by_imp(import_name)
         return sorted(from_names & names)
 
@@ -351,7 +346,7 @@ class ImportableVisitor(ast.NodeVisitor):
             node.value, (ast.List, ast.Tuple, ast.Set)
         ):
             for item in node.value.elts:
-                if isinstance(item, ast.Str):
+                if isinstance(item, (ast.Constant, ast.Str)):
                     self.importable_nodes.append(item)
 
     @recursive
@@ -379,7 +374,7 @@ class ImportableNames:
     def get_spec(self, import_name: str):
         try:
             return importlib.util.find_spec(import_name)  # type: ignore
-        except (ImportError, ValueError):
+        except (ImportError, AttributeError, TypeError, ValueError):
             return None
 
     @functools.lru_cache()
@@ -401,7 +396,7 @@ class ImportableNames:
 
     @staticmethod
     @functools.lru_cache()
-    def get_names_from_builtin(import_name: str) -> FrozenSet[str]:
+    def get_names_from_dir(import_name: str) -> FrozenSet[str]:
         return frozenset(dir(importlib.import_module(import_name)))
 
     @staticmethod
@@ -409,10 +404,10 @@ class ImportableNames:
     def get_names_from_all(visitor: ImportableVisitor) -> FrozenSet[str]:
         names = set()
         for node in visitor.importable_nodes:
-            if isinstance(node, ast.Str):
-                names.add(node.s)
-            elif isinstance(node, ast.Constant):
+            if isinstance(node, ast.Constant):
                 names.add(node.value)
+            elif isinstance(node, ast.Str):
+                names.add(node.s)
         return frozenset(names)
 
     @staticmethod
@@ -432,11 +427,8 @@ class ImportableNames:
 
     @functools.lru_cache()
     def get_names_by_imp(self, import_name: str) -> FrozenSet[str]:
-        spec = self.get_spec(import_name)
-        if import_name in sys.builtin_module_names or (
-            spec and spec.loader.path.endswith(".so")
-        ):
-            return self.get_names_from_builtin(import_name)
+        if self.is_dirable(import_name):
+            return self.get_names_from_dir(import_name)
         source = self.get_source(import_name)
         if source is not None:
             visitor = self.get_visitor(source)
@@ -445,3 +437,17 @@ class ImportableNames:
             ) or self.get_names_from_suggestion(visitor)
         else:
             return frozenset()
+
+    def is_dirable(self, import_name: str) -> bool:
+        if import_name in BUILTIN_MODULE_NAMES:
+            return True
+        spec = self.get_spec(import_name)
+        if spec:
+            return any(
+                (
+                    spec.origin.startswith(STDLIB_PATH),
+                    spec.origin in ["built-in", "frozen"],
+                    spec.origin.endswith(".so"),
+                )
+            )
+        return False

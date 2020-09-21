@@ -1,9 +1,7 @@
-import sys
 import unittest
 
+from unimport.constants import PY38_PLUS
 from unimport.session import Session
-
-PY38_PLUS = sys.version_info >= (3, 8)
 
 
 class RefactorTestCase(unittest.TestCase):

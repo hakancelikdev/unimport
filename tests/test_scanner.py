@@ -1,12 +1,8 @@
-import os
-import sys
-import typing
 import unittest
 
+from unimport.constants import PY38_PLUS
 from unimport.session import Session
 from unimport.statement import Import, ImportFrom, Name
-
-PY38_PLUS = sys.version_info >= (3, 8)
 
 
 class ScannerTestCase(unittest.TestCase):
