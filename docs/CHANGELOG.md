@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - ././2020
+## [0.3.0] - 22/September/2020
 
 - [🐞💊 Fix, improve: Names, Imports and star suggestion by @hakancelik96](https://github.com/hakancelik96/unimport/pull/112)
 - [💪💊 Configuration extend and refactoring by @hakancelik96](https://github.com/hakancelik96/unimport/pull/111)
