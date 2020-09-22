@@ -397,7 +397,11 @@ class ImportableNames:
     @staticmethod
     @functools.lru_cache()
     def get_names_from_dir(import_name: str) -> FrozenSet[str]:
-        return frozenset(dir(importlib.import_module(import_name)))
+        try:
+            module = importlib.import_module(import_name)
+        except (ImportError, AttributeError, TypeError, ValueError):
+            return frozenset()
+        return frozenset(dir(module))
 
     @staticmethod
     @functools.lru_cache()
