@@ -1,14 +1,9 @@
 """This module performs static analysis using AST on the python code that's
 given as a string and reports its findings."""
-
 import ast
 import builtins
-import distutils.sysconfig
 import functools
-import importlib
-import importlib.util
 import re
-import sys
 from typing import (
     Any,
     Callable,
@@ -25,11 +20,10 @@ from unimport.color import Color
 from unimport.constants import PY38_PLUS
 from unimport.relate import first_occurrence, get_parents, relate
 from unimport.statement import Import, ImportFrom, Name
+from unimport.utils import get_dir, get_source, is_std
 
 IGNORE_IMPORT_NAMES = frozenset({"__all__", "__doc__", "__name__"})
 BUILTINS = frozenset(dir(builtins))
-STDLIB_PATH = distutils.sysconfig.get_python_lib(standard_lib=True)
-BUILTIN_MODULE_NAMES = frozenset(sys.builtin_module_names)
 
 Function = TypeVar("Function", bound=Callable[..., Any])
 ASTImportableT = Union[
@@ -222,7 +216,8 @@ class Scanner(ast.NodeVisitor):
         """
         Receive items on the __all__ list
         """
-        importable_visitor = ImportableNames().get_visitor(self.source)
+        importable_visitor = ImportableVisitor()
+        importable_visitor.traverse(self.source)
         for node in importable_visitor.importable_nodes:
             if isinstance(node, ast.Constant):
                 self.names.append(Name(lineno=node.lineno, name=node.value))
@@ -263,7 +258,7 @@ class Scanner(ast.NodeVisitor):
 
     def get_suggestions(self, import_name: str) -> List[str]:
         names = {to_cfv.name.split(".")[0] for to_cfv in self.names}
-        from_names = ImportableNames().get_names_by_imp(import_name)
+        from_names = ImportableVisitor().get_names(import_name)
         return sorted(from_names & names)
 
     def get_unused_imports(self) -> Iterator[ImportT]:
@@ -368,59 +363,28 @@ class ImportableVisitor(ast.NodeVisitor):
                             if isinstance(item, (ast.Constant, ast.Str)):
                                 self.importable_nodes.append(item)
 
+    def get_names(self, import_name: str) -> FrozenSet[str]:
+        if is_std(import_name):
+            return get_dir(import_name)
+        visitor = self.__class__()
+        source = get_source(import_name)
+        if source:
+            visitor.traverse(source)
+            return visitor.get_all() or visitor.get_suggestion()
+        return frozenset()
 
-class ImportableNames:
-    @functools.lru_cache()
-    def get_spec(self, import_name: str):
-        try:
-            return importlib.util.find_spec(import_name)  # type: ignore
-        except (ImportError, AttributeError, TypeError, ValueError):
-            return None
-
-    @functools.lru_cache()
-    def get_source(self, import_name: str) -> Optional[str]:
-        spec = self.get_spec(import_name)
-        if spec and spec.loader.path.endswith(".py"):
-            return spec.loader.get_data(spec.loader.path).decode("utf-8")
-        return None
-
-    @staticmethod
-    @functools.lru_cache()
-    def get_visitor(source: str) -> Optional[ImportableVisitor]:
-        importable_visitor = ImportableVisitor()
-        try:
-            importable_visitor.traverse(source)
-        except SyntaxError:  # pragma: no cover
-            return None  # pragma: no cover
-        return importable_visitor
-
-    @staticmethod
-    @functools.lru_cache()
-    def get_names_from_dir(import_name: str) -> FrozenSet[str]:
-        try:
-            module = importlib.import_module(import_name)
-        except (ImportError, AttributeError, TypeError, ValueError):
-            return frozenset()
-        return frozenset(dir(module))
-
-    @staticmethod
-    @functools.lru_cache()
-    def get_names_from_all(visitor: ImportableVisitor) -> FrozenSet[str]:
+    def get_all(self) -> FrozenSet[str]:
         names = set()
-        for node in visitor.importable_nodes:
+        for node in self.importable_nodes:
             if isinstance(node, ast.Constant):
                 names.add(node.value)
             elif isinstance(node, ast.Str):
                 names.add(node.s)
         return frozenset(names)
 
-    @staticmethod
-    @functools.lru_cache()
-    def get_names_from_suggestion(
-        visitor: ImportableVisitor,
-    ) -> FrozenSet[str]:
+    def get_suggestion(self) -> FrozenSet[str]:
         names = set()
-        for node in visitor.suggestions_nodes:  # type: ignore
+        for node in self.suggestions_nodes:  # type: ignore
             if isinstance(node, ast.Name):
                 names.add(node.id)
             elif isinstance(node, ast.alias):
@@ -428,30 +392,3 @@ class ImportableNames:
             elif isinstance(node, DefTuple):
                 names.add(node.name)
         return frozenset(names)
-
-    @functools.lru_cache()
-    def get_names_by_imp(self, import_name: str) -> FrozenSet[str]:
-        if self.is_dirable(import_name):
-            return self.get_names_from_dir(import_name)
-        source = self.get_source(import_name)
-        if source is not None:
-            visitor = self.get_visitor(source)
-            return self.get_names_from_all(
-                visitor
-            ) or self.get_names_from_suggestion(visitor)
-        else:
-            return frozenset()
-
-    def is_dirable(self, import_name: str) -> bool:
-        if import_name in BUILTIN_MODULE_NAMES:
-            return True
-        spec = self.get_spec(import_name)
-        if spec:
-            return any(
-                (
-                    spec.origin.startswith(STDLIB_PATH),
-                    spec.origin in ["built-in", "frozen"],
-                    spec.origin.endswith(".so"),
-                )
-            )
-        return False

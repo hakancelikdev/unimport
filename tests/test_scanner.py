@@ -2,7 +2,7 @@ import tempfile
 import unittest
 
 from unimport.constants import PY38_PLUS
-from unimport.scan import ImportableNames
+from unimport.scan import ImportableVisitor
 from unimport.session import Session
 from unimport.statement import Import, ImportFrom, Name
 
@@ -181,7 +181,7 @@ class TestImportable(unittest.TestCase):
     maxDiff = None
 
     def setUp(self):
-        self.importable = ImportableNames()
+        self.importable = ImportableVisitor()
 
     def test_get_names_from_all(self):
         source = (
@@ -191,8 +191,8 @@ class TestImportable(unittest.TestCase):
             "\n"
         )
         expected = frozenset({"test3", "test", "test2"})
-        visitor = self.importable.get_visitor(source)
-        self.assertEqual(expected, self.importable.get_names_from_all(visitor))
+        self.importable.traverse(source)
+        self.assertEqual(expected, self.importable.get_all())
 
     def test_get_names_from_suggestion(self):
         source = (
@@ -205,7 +205,5 @@ class TestImportable(unittest.TestCase):
             "\n"
         )
         expected = frozenset({"xx", "NAME", "b", "A"})
-        visitor = self.importable.get_visitor(source)
-        self.assertEqual(
-            expected, self.importable.get_names_from_suggestion(visitor)
-        )
+        self.importable.traverse(source)
+        self.assertEqual(expected, self.importable.get_suggestion())
