@@ -592,6 +592,19 @@ class TestStarImport(RefactorTestCase):
             self.session.refactor(action),
         )
 
+    def test_get_source_from_importable_names(self):
+        action = (
+            "from libcst.metadata import *\n" "CodeRange, PositionProvider\n"
+        )
+        expected = (
+            "from libcst.metadata import CodeRange, PositionProvider\n"
+            "CodeRange, PositionProvider\n"
+        )
+        self.assertEqual(
+            expected,
+            self.session.refactor(action),
+        )
+
 
 class TestImportError(RefactorTestCase):
     """Unimport skip imports controlled by ImportError."""
