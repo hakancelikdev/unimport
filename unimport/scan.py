@@ -29,6 +29,7 @@ Function = TypeVar("Function", bound=Callable[..., Any])
 ASTImportableT = Union[
     ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Name, ast.alias
 ]
+ASTFunctionT = Union[ast.FunctionDef, ast.AsyncFunctionDef]
 ImportT = Union[Import, ImportFrom]
 CFNT = Union[ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Name]
 DefTuple = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
@@ -73,9 +74,7 @@ class Scanner(ast.NodeVisitor):
         self.any_import_error = False
 
     @recursive
-    def visit_FunctionDef(
-        self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]
-    ) -> None:
+    def visit_FunctionDef(self, node: ASTFunctionT) -> None:
         self._type_comment(node)
 
     visit_AsyncFunctionDef = visit_FunctionDef
