@@ -1,9 +1,7 @@
-import sys
 import unittest
 
+from unimport.constants import PY38_PLUS
 from unimport.session import Session
-
-PY38_PLUS = sys.version_info >= (3, 8)
 
 
 class RefactorTestCase(unittest.TestCase):
@@ -588,6 +586,19 @@ class TestStarImport(RefactorTestCase):
             "from os import path\n"
             "time()  # Function from time module.\n"
             "path.join()\n"
+        )
+        self.assertEqual(
+            expected,
+            self.session.refactor(action),
+        )
+
+    def test_get_source_from_importable_names(self):
+        action = (
+            "from libcst.metadata import *\n" "CodeRange, PositionProvider\n"
+        )
+        expected = (
+            "from libcst.metadata import CodeRange, PositionProvider\n"
+            "CodeRange, PositionProvider\n"
         )
         self.assertEqual(
             expected,
