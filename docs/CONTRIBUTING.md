@@ -49,7 +49,7 @@ system.
 After typing your codes, you should run the tests by typing the following command.
 
 ```shell
-$ pip3 install tox
+$ python3.8 -m pip install tox
 $ tox
 ```
 
