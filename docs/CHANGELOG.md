@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - ././2020
+
+- [💪 Support Windows OS coloring and encoding by @hadialqattan](https://github.com/hakancelik96/unimport/pull/102)
+
 ## [0.3.0] - 22/September/2020
 
 - [🐞💊 Fix, improve: Names, Imports and star suggestion by @hakancelik96](https://github.com/hakancelik96/unimport/pull/112)

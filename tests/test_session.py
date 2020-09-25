@@ -18,7 +18,9 @@ class TestSession(unittest.TestCase):
                 self.assertTrue(str(p).endswith(".py"))
 
     def temp_refactor(self, source: str, expected: str, apply: bool = False):
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".py") as tmp:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".py", encoding="utf-8"
+        ) as tmp:
             tmp.write(source)
             tmp.seek(0)
             result, _ = self.session.refactor_file(
@@ -43,7 +45,9 @@ class TestSession(unittest.TestCase):
         self.assertEqual(diff, self.session.diff("import os"))
 
     def test_diff_file(self):
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".py") as tmp:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".py", encoding="utf-8"
+        ) as tmp:
             tmp.write("import os")
             tmp.seek(0)
             diff_file = self.session.diff_file(path=Path(tmp.name))
@@ -57,7 +61,9 @@ class TestSession(unittest.TestCase):
 
     def test_read(self):
         source = "b�se"
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".py") as tmp:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".py", encoding="utf-8"
+        ) as tmp:
             tmp.write(source)
             tmp.seek(0)
             self.assertEqual(
