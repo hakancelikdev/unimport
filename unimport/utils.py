@@ -24,7 +24,7 @@ def get_source(import_name: str) -> Optional[str]:
     return None
 
 
-def get_spec(import_name: str):
+def get_spec(import_name: str) -> Optional[str]:
     try:
         return importlib.util.find_spec(import_name)  # type: ignore
     except (ImportError, AttributeError, TypeError, ValueError):
