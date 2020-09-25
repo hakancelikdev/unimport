@@ -2,6 +2,7 @@
 
 import distutils.sysconfig
 import importlib
+import importlib.machinery
 import sys
 from typing import FrozenSet, Optional
 
