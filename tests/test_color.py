@@ -14,7 +14,7 @@ class TestColor(unittest.TestCase):
             def test_{color}(self):
                 action_test = COLORS["{color}"] + self.test_content + Color.reset
                 expected_text = Color(self.test_content).{color}
-                self.assertEqual(action_test, expected_text)
+                self.assertIn(expected_text, action_test)
             """
         )
         exec(test_template)
