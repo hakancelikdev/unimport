@@ -54,10 +54,7 @@ class Scanner(ast.NodeVisitor):
     skip_comments_regex = "# *(unimport: {0,1}skip|noqa)"
 
     def __init__(
-        self,
-        *,
-        include_star_import: bool = False,
-        show_error: bool = False,
+        self, *, include_star_import: bool = False, show_error: bool = False,
     ):
         """If include_star_import is True during the analysis, it takes into
         account start imports, if it's False, it doesn't.
@@ -103,10 +100,7 @@ class Scanner(ast.NodeVisitor):
             return
         for alias in node.names:
             self.imports.append(
-                Import(
-                    lineno=node.lineno,
-                    name=alias.asname or alias.name,
-                )
+                Import(lineno=node.lineno, name=alias.asname or alias.name,)
             )
 
     @recursive

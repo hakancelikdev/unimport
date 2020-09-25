@@ -17,10 +17,7 @@ class ScannerTestCase(unittest.TestCase):
         ).scanner
 
     def assertUnimportEqual(
-        self,
-        source,
-        expected_names=[],
-        expected_imports=[],
+        self, source, expected_names=[], expected_imports=[],
     ):
         self.scanner.scan(source)
         self.assertEqual(expected_names, self.scanner.names)
@@ -78,8 +75,7 @@ class TestNames(ScannerTestCase):
             "\t\tpass"
         )
         self.assertUnimportEqual(
-            source,
-            expected_names=[Name(lineno=1, name="variable")],
+            source, expected_names=[Name(lineno=1, name="variable")],
         )
 
     def test_decator_in_class(self):
@@ -92,16 +88,13 @@ class TestNames(ScannerTestCase):
         )
 
         self.assertUnimportEqual(
-            source,
-            expected_names=[Name(lineno=5, name="test2")],
+            source, expected_names=[Name(lineno=5, name="test2")],
         )
 
 
 class SkipImportTest(ScannerTestCase):
     def assertSkipEqual(self, source):
-        super().assertUnimportEqual(
-            source,
-        )
+        super().assertUnimportEqual(source,)
 
     def test_inside_try_except(self):
         source = (
@@ -162,18 +155,11 @@ class TestTypeComments(ScannerTestCase):
         ]
         expected_imports = [
             ImportFrom(lineno=1, name="Any", star=False, suggestions=[]),
-            ImportFrom(
-                lineno=2,
-                name="Tuple",
-                star=False,
-                suggestions=[],
-            ),
+            ImportFrom(lineno=2, name="Tuple", star=False, suggestions=[],),
             ImportFrom(lineno=3, name="Union", star=False, suggestions=[]),
         ]
         self.assertUnimportEqual(
-            source,
-            expected_names,
-            expected_imports,
+            source, expected_names, expected_imports,
         )
 
 
