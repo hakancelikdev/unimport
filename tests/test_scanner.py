@@ -1,12 +1,10 @@
-import os
-import sys
-import typing
+import tempfile
 import unittest
 
+from unimport.constants import PY38_PLUS
+from unimport.scan import ImportableVisitor
 from unimport.session import Session
 from unimport.statement import Import, ImportFrom, Name
-
-PY38_PLUS = sys.version_info >= (3, 8)
 
 
 class ScannerTestCase(unittest.TestCase):
@@ -21,15 +19,11 @@ class ScannerTestCase(unittest.TestCase):
     def assertUnimportEqual(
         self,
         source,
-        expected_names,
-        expected_classes,
-        expected_functions,
-        expected_imports,
+        expected_names=[],
+        expected_imports=[],
     ):
         self.scanner.scan(source)
         self.assertEqual(expected_names, self.scanner.names)
-        self.assertEqual(expected_classes, self.scanner.classes)
-        self.assertEqual(expected_functions, self.scanner.functions)
         self.assertEqual(expected_imports, self.scanner.imports)
         self.scanner.clear()
 
@@ -50,9 +44,6 @@ class TestNames(ScannerTestCase):
                 Name(lineno=1, name="variable"),
                 Name(lineno=2, name="variable1"),
             ],
-            expected_classes=[Name(lineno=3, name="TestClass")],
-            expected_functions=[Name(lineno=5, name="function")],
-            expected_imports=[],
         )
 
     def test_names_with_import(self):
@@ -68,18 +59,13 @@ class TestNames(ScannerTestCase):
         self.assertUnimportEqual(
             source,
             expected_names=[Name(lineno=1, name="variable")],
-            expected_classes=[Name(lineno=3, name="TestClass")],
-            expected_functions=[Name(lineno=6, name="test_function")],
-            expected_imports=[Import(lineno=2, module=os, name="os")],
+            expected_imports=[Import(lineno=2, name="os")],
         )
 
     def test_names_with_function(self):
         self.assertUnimportEqual(
             source="variable = 1\n" "def test():\n" "\tpass",
             expected_names=[Name(lineno=1, name="variable")],
-            expected_classes=[],
-            expected_functions=[Name(lineno=2, name="test")],
-            expected_imports=[],
         )
 
     def test_names_with_class(self):
@@ -94,9 +80,6 @@ class TestNames(ScannerTestCase):
         self.assertUnimportEqual(
             source,
             expected_names=[Name(lineno=1, name="variable")],
-            expected_classes=[Name(lineno=4, name="test")],
-            expected_functions=[Name(lineno=2, name="test_function")],
-            expected_imports=[],
         )
 
     def test_decator_in_class(self):
@@ -111,9 +94,6 @@ class TestNames(ScannerTestCase):
         self.assertUnimportEqual(
             source,
             expected_names=[Name(lineno=5, name="test2")],
-            expected_classes=[Name(lineno=1, name="Test")],
-            expected_functions=[],
-            expected_imports=[],
         )
 
 
@@ -121,10 +101,6 @@ class SkipImportTest(ScannerTestCase):
     def assertSkipEqual(self, source):
         super().assertUnimportEqual(
             source,
-            expected_names=[],
-            expected_classes=[],
-            expected_functions=[],
-            expected_imports=[],
         )
 
     def test_inside_try_except(self):
@@ -184,27 +160,50 @@ class TestTypeComments(ScannerTestCase):
             Name(lineno=1, name="Tuple"),
             Name(lineno=1, name="Tuple"),
         ]
-        expected_classes = []
-        expected_functions = [Name(4, "function")]
         expected_imports = [
-            ImportFrom(
-                lineno=1, name="Any", star=False, module=typing, modules=[]
-            ),
+            ImportFrom(lineno=1, name="Any", star=False, suggestions=[]),
             ImportFrom(
                 lineno=2,
                 name="Tuple",
                 star=False,
-                module=typing,
-                modules=[],
+                suggestions=[],
             ),
-            ImportFrom(
-                lineno=3, name="Union", star=False, module=typing, modules=[]
-            ),
+            ImportFrom(lineno=3, name="Union", star=False, suggestions=[]),
         ]
         self.assertUnimportEqual(
             source,
             expected_names,
-            expected_classes,
-            expected_functions,
             expected_imports,
         )
+
+
+class TestImportable(unittest.TestCase):
+    maxDiff = None
+
+    def setUp(self):
+        self.importable = ImportableVisitor()
+
+    def test_get_names_from_all(self):
+        source = (
+            "__all__ = ['test']\n"
+            "__all__.append('test2')\n"
+            "__all__.extend(['test3'])\n"
+            "\n"
+        )
+        expected = frozenset({"test3", "test", "test2"})
+        self.importable.traverse(source)
+        self.assertEqual(expected, self.importable.get_all())
+
+    def test_get_names_from_suggestion(self):
+        source = (
+            "import xx\n"
+            "class A:\n"
+            "   pass\n"
+            "def b():\n"
+            "   FUNCNAME = 'test'\n"
+            "NAME='NAME'\n"
+            "\n"
+        )
+        expected = frozenset({"xx", "NAME", "b", "A"})
+        self.importable.traverse(source)
+        self.assertEqual(expected, self.importable.get_suggestion())

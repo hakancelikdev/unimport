@@ -2,7 +2,7 @@
 
 ![logo](_media/icon.png ":size=50%")
 
-# UNIMPORT <small>0.2.9</small>
+# UNIMPORT <small>0.3.0</small>
 
 > A linter & formatter for finding & removing unused import statements.
 

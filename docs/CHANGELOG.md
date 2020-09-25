@@ -2,8 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - ././2020
+## [0.3.0] - 22/September/2020
 
+- [🐞💊 Fix, improve: Names, Imports and star suggestion by @hakancelik96](https://github.com/hakancelik96/unimport/pull/112)
+- [💪💊 Configuration extend and refactoring by @hakancelik96](https://github.com/hakancelik96/unimport/pull/111)
+- [💪💊 General refactoring by @hakancelik96](https://github.com/hakancelik96/unimport/pull/108)
+  - Support append and extend `__all__` list
+  - Star import suggestions improved
 - [🐞 Fix: Unnecessary refactoring by @hakancelik96](https://github.com/hakancelik96/unimport/pull/107)
 - [💪 Support .gitignore exclude patterns by @hadialqattan](https://github.com/hakancelik96/unimport/pull/102)
 - [💊 Optimize Python >=3.8 type comments support method by @hadialqattan](https://github.com/hakancelik96/unimport/pull/95)

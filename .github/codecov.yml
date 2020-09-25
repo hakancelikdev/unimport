@@ -1,4 +1,16 @@
+coverage:
+  status:
+    project: yes
+    patch: yes
+    changes: yes
+
+comment:
+  layout: "reach, diff, files"
+  behavior: default
+  require_changes: no
+
 ignore:
   - "setup.py"
   - "models.py"
   - "unimport/__main__.py"
+  - "unimport/main.py"

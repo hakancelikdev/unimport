@@ -1,9 +1,7 @@
-import sys
 import unittest
 
+from unimport.constants import PY38_PLUS
 from unimport.session import Session
-
-PY38_PLUS = sys.version_info >= (3, 8)
 
 
 class RefactorTestCase(unittest.TestCase):
@@ -109,12 +107,19 @@ class TestUnusedRefactor(RefactorTestCase):
             self.session.refactor(action),
         )
 
-    def test_future(self):
+    def test_future_from_import(self):
         action = (
             "from __future__ import (\n"
             "    absolute_import, division, print_function, unicode_literals\n"
             ")\n"
         )
+        self.assertEqual(
+            action,
+            self.session.refactor(action),
+        )
+
+    def test_future_import(self):
+        action = "import __future__\n" "__future__.absolute_import\n"
         self.assertEqual(
             action,
             self.session.refactor(action),
@@ -533,7 +538,6 @@ class TestStarImport(RefactorTestCase):
         )
         expected = (
             "from re import match, search\n"
-            "from t.s.d import *\n"
             "from lib2to3.pgen2.token import NAME\n\n"
             "print(match)\n"
             "print(search)\n"
@@ -570,7 +574,7 @@ class TestStarImport(RefactorTestCase):
             self.session.refactor(action),
         )
 
-    def test_two_suggestion(self):
+    def test_two_suggestions(self):
         action = (
             "from time import *\n"
             "from os import *\n"
@@ -582,6 +586,19 @@ class TestStarImport(RefactorTestCase):
             "from os import path\n"
             "time()  # Function from time module.\n"
             "path.join()\n"
+        )
+        self.assertEqual(
+            expected,
+            self.session.refactor(action),
+        )
+
+    def test_get_source_from_importable_names(self):
+        action = (
+            "from libcst.metadata import *\n" "CodeRange, PositionProvider\n"
+        )
+        expected = (
+            "from libcst.metadata import CodeRange, PositionProvider\n"
+            "CodeRange, PositionProvider\n"
         )
         self.assertEqual(
             expected,
