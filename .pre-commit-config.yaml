@@ -23,7 +23,7 @@ repos:
       - id: seed-isort-config
 
   - repo: https://github.com/timothycrosley/isort
-    rev: 5.5.1
+    rev: 5.5.3
     hooks:
       - id: isort
         files: "\\.(py)$"
@@ -35,7 +35,7 @@ repos:
         args: [--no-strict-optional, --ignore-missing-imports]
 
   - repo: https://github.com/prettier/prettier
-    rev: 2.1.1
+    rev: 2.1.2
     hooks:
       - id: prettier
         args: [--prose-wrap=always, --print-width=88]
