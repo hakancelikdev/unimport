@@ -12,12 +12,11 @@ else:
 
 CONFIG_FILES = {"setup.cfg": "unimport"}
 
-if HAS_TOML is True:
+if HAS_TOML:
     CONFIG_FILES.update({"pyproject.toml": "tool.unimport"})
 
 
 class Config:
-
     sources: List[Path] = []
     include: List[str] = []
     exclude: List[str] = []
