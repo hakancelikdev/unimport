@@ -33,7 +33,7 @@ def get_source(import_name: str) -> Optional[str]:
 
 def get_spec(import_name: str) -> Optional[importlib.machinery.ModuleSpec]:
     try:
-        return importlib.util.find_spec(import_name) 
+        return importlib.util.find_spec(import_name)
     except (ImportError, AttributeError, TypeError, ValueError):
         return None
 
