@@ -69,7 +69,7 @@ def show(
 
 def actiontobool(action: str) -> bool:
     with suppress(ValueError):
-        return strbool(action)
+        return strtobool(action)
     return False
 
 
