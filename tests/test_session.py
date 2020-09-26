@@ -66,7 +66,7 @@ class TestSession(unittest.TestCase):
         with reopenable_temp_file("import os") as tmp_path:
             diff_file = self.session.diff_file(path=tmp_path)
             diff = (
-                f"--- {str(tmp_path)}\n",
+                f"--- {tmp_path.as_posix()}\n",
                 "+++ \n",
                 "@@ -1 +0,0 @@\n",
                 "-import os",
