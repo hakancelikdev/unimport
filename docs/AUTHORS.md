@@ -10,5 +10,6 @@
 
 - Furkan Önder (@furkanonder) <furkanonder@protonmail.com>
 - Hadi Alqattan (@hadialqattan) <alqattanhadizaki@gmail.com>
+- Işık Kaplan (@isik-kaplan) <isik.kaplan@outlook.com>
 - Sema Karataş (@semakaratas) <semakaratas@outlook.com.tr>
 - Sümeyye Boynukara (@sumeyyeboynukara) <sumeyyeboynukara@gmail.com>
