@@ -1,7 +1,9 @@
 import textwrap
 import unittest
 
-from unimport.color import COLORS, Color  # unimport: skip
+from unimport.color import Color  # unimport: skip
+from unimport.color import terminal_supports_color  # unimport: skip
+from unimport.color import COLORS
 
 
 class TestColor(unittest.TestCase):
@@ -12,9 +14,12 @@ class TestColor(unittest.TestCase):
         test_template = textwrap.dedent(
             f"""
             def test_{color}(self):
-                action_test = COLORS["{color}"] + self.test_content + Color.reset
+                if terminal_supports_color:
+                    action_test = COLORS["{color}"] + self.test_content + Color.reset
+                else:
+                    action_test = self.test_content
                 expected_text = Color(self.test_content).{color}
-                self.assertIn(expected_text, action_test)
+                self.assertEqual(expected_text, action_test)
             """
         )
         exec(test_template)
