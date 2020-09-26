@@ -1,4 +1,3 @@
-import tempfile
 import unittest
 
 from unimport.constants import PY38_PLUS
