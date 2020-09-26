@@ -3,6 +3,7 @@ import difflib
 import re
 import sys
 import tokenize
+from contextlib import suppress
 from distutils.util import strtobool
 from pathlib import Path
 from typing import List, Optional, Sequence, Tuple, Union
@@ -47,7 +48,6 @@ def show(
     unused_import: List[Union[Import, ImportFrom]], py_path: Path
 ) -> None:
     for imp in unused_import:
-        context = ""
         if isinstance(imp, ImportFrom) and imp.star and imp.suggestions:
             context = (
                 Color(f"from {imp.name} import *").red
@@ -68,11 +68,9 @@ def show(
 
 
 def actiontobool(action: str) -> bool:
-    try:
-        action_to_bool = strtobool(action)
-    except ValueError:
-        return False
-    return action_to_bool
+    with suppress(ValueError):
+        return strtobool(action)
+    return False
 
 
 def get_exclude_list_from_gitignore() -> List[str]:
