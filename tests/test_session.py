@@ -42,14 +42,8 @@ class TestSession(unittest.TestCase):
                 self.assertTrue(str(p).endswith(".py"))
 
     def temp_refactor(self, source: str, expected: str, apply: bool = False):
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".py", encoding="utf-8"
-        ) as tmp:
-            tmp.write(source)
-            tmp.seek(0)
-            result, _ = self.session.refactor_file(
-                path=Path(tmp.name), apply=apply
-            )
+        with reopenable_temp_file(source) as tmp_path:
+            result, _ = self.session.refactor_file(path=tmp_path, apply=apply)
             self.assertEqual(result, expected)
 
     def test_bad_encoding(self):
