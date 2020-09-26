@@ -38,7 +38,7 @@ def color_diff(sequence: Tuple[str, ...]) -> str:
     return "\n".join(lines)
 
 
-def print_if_exists(sequence: Tuple[str, ...]) -> Optional[bool]:
+def print_if_exists(sequence: Tuple[str, ...]) -> bool:
     if sequence:
         print(color_diff(sequence))
     return bool(sequence)
