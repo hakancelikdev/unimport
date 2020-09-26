@@ -3,7 +3,6 @@
 import distutils.sysconfig
 import importlib
 import importlib.machinery
-import importlib.util
 import sys
 from typing import FrozenSet, Optional
 
@@ -21,6 +20,10 @@ def get_dir(import_name: str) -> FrozenSet[str]:
 
 def get_source(import_name: str) -> Optional[str]:
     spec = get_spec(import_name)
+    # The below two can be one of several values per their previous type annotations
+    # But for our use case, we know that these are the specific classes that asserted to be
+    assert isinstance(spec.loader, importlib.machinery.SourceFileLoader)
+    assert isinstance(spec.loader.path, str)
     if spec and spec.loader.path.endswith(".py"):
         return spec.loader.get_data(spec.loader.path).decode("utf-8")
     return None
