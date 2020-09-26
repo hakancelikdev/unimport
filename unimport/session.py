@@ -96,6 +96,8 @@ class Session:
         result, _ = self.refactor_file(path, apply=False)
         return tuple(
             difflib.unified_diff(
-                source.splitlines(), result.splitlines(), fromfile=str(path)
+                source.splitlines(),
+                result.splitlines(),
+                fromfile=path.as_posix(),
             )
         )
