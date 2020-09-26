@@ -3,13 +3,13 @@ import tempfile
 import unittest
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Generator
+from typing import Iterator
 
 from unimport.session import Session
 
 
 @contextmanager
-def reopenable_temp_file(content: str) -> Generator:
+def reopenable_temp_file(content: str) -> Iterator[Path]:
     """Reopenable tempfile to support writing/reading to/from the opened
     tempfile (requiered for Windows OS).
 
