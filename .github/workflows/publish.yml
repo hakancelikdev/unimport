@@ -4,8 +4,8 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v2.3.3
+      - uses: actions/setup-python@v2.1.2
         with:
           python-version: "3.8"
           architecture: "x64"

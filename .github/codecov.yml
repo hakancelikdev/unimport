@@ -14,3 +14,4 @@ ignore:
   - "models.py"
   - "unimport/__main__.py"
   - "unimport/main.py"
+  - "tests"

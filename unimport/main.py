@@ -8,6 +8,11 @@ from distutils.util import strtobool
 from pathlib import Path
 from typing import List, Optional, Sequence, Tuple, Union
 
+from unimport import color
+from unimport import constants as C
+from unimport.session import Session
+from unimport.statement import Import, ImportFrom
+
 try:
     from pathspec.patterns.gitwildmatch import GitWildMatchPattern
 except ImportError:
@@ -15,32 +20,10 @@ except ImportError:
 else:
     HAS_PATHSPEC = True
 
-import unimport.constants as C
-from unimport.color import Color
-from unimport.session import Session
-from unimport.statement import Import, ImportFrom
-
-
-def color_diff(sequence: Tuple[str, ...]) -> str:
-    contents = "\n".join(sequence)
-    lines = contents.split("\n")
-    for i, line in enumerate(lines):
-        paint = Color(line)
-        if line.startswith("+++") or line.startswith("---"):
-            line = paint.bold_white
-        elif line.startswith("@@"):
-            line = paint.cyan
-        elif line.startswith("+"):
-            line = paint.green
-        elif line.startswith("-"):
-            line = paint.red
-        lines[i] = line
-    return "\n".join(lines)
-
 
 def print_if_exists(sequence: Tuple[str, ...]) -> bool:
     if sequence:
-        print(color_diff(sequence))
+        print(color.difference(sequence))
     return bool(sequence)
 
 
@@ -50,20 +33,21 @@ def show(
     for imp in unused_import:
         if isinstance(imp, ImportFrom) and imp.star and imp.suggestions:
             context = (
-                Color(f"from {imp.name} import *").red
+                color.paint(f"from {imp.name} import *", color.RED)
                 + " -> "
-                + Color(
-                    f"from {imp.name} import {', '.join(imp.suggestions)}"
-                ).green
+                + color.paint(
+                    f"from {imp.name} import {', '.join(imp.suggestions)}",
+                    color.GREEN,
+                )
             )
         else:
-            context = Color(imp.name).yellow
+            context = color.paint(imp.name, color.YELLOW)
         print(
             context
             + " at "
-            + Color(str(py_path)).green
+            + color.paint(py_path.as_posix(), color.GREEN)
             + ":"
-            + Color(str(imp.lineno)).green
+            + color.paint(str(imp.lineno), color.GREEN)
         )
 
 
@@ -209,19 +193,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 exists_diff = print_if_exists(session.diff_file(py_path))
             if args.permission and exists_diff:
                 action = input(
-                    f"Apply suggested changes to '{Color(str(py_path)).yellow}' [Y/n/q] ? >"
+                    f"Apply suggested changes to '{color.paint(str(py_path), color.YELLOW)}' [Y/n/q] ? >"
                 ).lower()
                 if action == "q":
                     return 1
                 elif actiontobool(action):
                     args.remove = True
             if args.remove and session.refactor_file(py_path, apply=True)[1]:
-                print(f"Refactoring '{Color(str(py_path)).green}'")
+                print(
+                    f"Refactoring '{color.paint(str(py_path), color.GREEN)}'"
+                )
     if not unused_modules and args.check:
         print(
-            Color(
-                "✨ Congratulations there is no unused import in your project. ✨"
-            ).green
+            color.paint(
+                "✨ Congratulations there is no unused import in your project. ✨",
+                color.GREEN,
+            )
         )
     requirements_path = Path("requirements.txt")
     if args.requirements and unused_modules and requirements_path.exists():
@@ -233,8 +220,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             else:
                 if args.check and requirement:
                     print(
-                        f"{Color(requirement).cyan} at "
-                        f"{Color(str(requirements_path)).cyan}:{Color(str(index + 1)).cyan}"
+                        f"{color.paint(requirement, color.CYAN)} at "
+                        f"{color.paint(str(requirements_path), color.CYAN)}:{color.paint(str(index + 1), color.CYAN)}"
                     )
         if args.diff:
             exists_diff = print_if_exists(
@@ -248,13 +235,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             )
         if args.permission and exists_diff:
             action = input(
-                f"Apply suggested changes to '{Color(str(requirements_path)).cyan}' [Y/n] ? >"
+                f"Apply suggested changes to '{color.paint(str(requirements_path), color.CYAN)}' [Y/n] ? >"
             ).lower()
             if actiontobool(action):
                 args.remove = True
         if args.remove:
             requirements_path.write_text(result)
-            print(f"Refactoring '{Color(str(requirements_path)).cyan}'")
+            print(
+                f"Refactoring '{color.paint(str(requirements_path), color.CYAN)}'"
+            )
     if unused_modules:
         return 1
     else:
