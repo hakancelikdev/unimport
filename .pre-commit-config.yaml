@@ -39,3 +39,17 @@ repos:
     hooks:
       - id: prettier
         args: [--prose-wrap=always, --print-width=88]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: requirements-txt-fixer
+      - id: trailing-whitespace
+        files: "\\.(py|.txt|.yaml|.json|.in|.md|.toml|.cfg|.html|.yml)$"
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.4.1
+    hooks:
+      - id: pyupgrade
+        args: [--py36-plus]
