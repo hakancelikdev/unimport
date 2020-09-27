@@ -4,7 +4,7 @@ import tokenize
 from pathlib import Path
 from typing import Iterable, Iterator, Optional, Tuple
 
-from unimport.color import Color
+from unimport import color
 from unimport.config import CONFIG_FILES, Config
 from unimport.refactor import refactor_string
 from unimport.scan import Scanner
@@ -39,7 +39,7 @@ class Session:
                 encoding = stream.encoding
         except (OSError, SyntaxError) as err:
             if self.show_error:
-                print(Color(str(err)).red)  # pragma: no cover
+                print(color.paint(str(err), color.RED))  # pragma: no cover
             return "", "utf-8"
         return source, encoding
 
