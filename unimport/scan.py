@@ -16,7 +16,7 @@ from typing import (
     cast,
 )
 
-from unimport.color import Color
+from unimport import color
 from unimport.constants import PY38_PLUS
 from unimport.relate import first_occurrence, get_parents, relate
 from unimport.statement import Import, ImportFrom, Name
@@ -208,7 +208,7 @@ class Scanner(ast.NodeVisitor):
                 tree = ast.parse(source, mode=mode)
         except SyntaxError as err:
             if self.show_error:
-                print(Color(str(err)).red)  # pragma: no cover
+                print(color.paint(str(err), color.RED))  # pragma: no cover
             raise err
         relate(tree, parent=parent)
         self.visit(tree)

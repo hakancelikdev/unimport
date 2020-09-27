@@ -1,25 +1,41 @@
-import textwrap
+import sys
 import unittest
 
-from unimport.color import Color  # unimport: skip
-from unimport.color import terminal_supports_color  # unimport: skip
-from unimport.color import COLORS
+from unimport.color import RED, RESET, TERMINAL_SUPPORT_COLOR, paint
 
 
 class TestColor(unittest.TestCase):
-    def setUp(self):
-        self.test_content = "Test Content"
+    maxDiff = None
 
-    for color in COLORS:
-        test_template = textwrap.dedent(
-            f"""
-            def test_{color}(self):
-                if terminal_supports_color:
-                    action_test = COLORS["{color}"] + self.test_content + Color.reset
-                else:
-                    action_test = self.test_content
-                expected_text = Color(self.test_content).{color}
-                self.assertEqual(expected_text, action_test)
-            """
-        )
-        exec(test_template)
+    def setUp(self):
+        self.content = "test content"
+
+    @unittest.skipUnless(sys.platform == "win32", "requires Windows32")
+    def test_terminal_support_color_on_win(self):
+        from unimport.color import _enable
+
+        try:
+            _enable()
+        except OSError:
+            self.assertFalse(TERMINAL_SUPPORT_COLOR)
+        else:
+            self.assertTrue(TERMINAL_SUPPORT_COLOR)
+
+    @unittest.skipUnless(sys.platform != "win32", "requires Windows32")
+    def test_terminal_support_color(self):
+        self.assertTrue(TERMINAL_SUPPORT_COLOR)
+
+    @unittest.skipUnless(sys.platform == "win32", "requires Windows32")
+    def test_red_paint_on_win(self):
+        action_content = paint(self.content, RED)
+        if TERMINAL_SUPPORT_COLOR:
+            expected_content = RED + self.content + RESET
+        else:
+            expected_content = self.content
+        self.assertEqual(expected_content, action_content)
+
+    @unittest.skipUnless(sys.platform != "win32", "requires Windows32")
+    def test_red_paint(self):
+        action_content = paint(self.content, RED)
+        expected_content = RED + self.content + RESET
+        self.assertEqual(expected_content, action_content)
