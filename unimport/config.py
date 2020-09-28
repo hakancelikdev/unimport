@@ -3,17 +3,9 @@ from ast import literal_eval
 from pathlib import Path
 from typing import List
 
-try:
-    import toml
-except ImportError:  # pragma: no cover
-    HAS_TOML = False
-else:
-    HAS_TOML = True
+import toml
 
-CONFIG_FILES = {"setup.cfg": "unimport"}
-
-if HAS_TOML:
-    CONFIG_FILES.update({"pyproject.toml": "tool.unimport"})
+CONFIG_FILES = {"setup.cfg": "unimport", "pyproject.toml": "tool.unimport"}
 
 
 class Config:
@@ -32,8 +24,6 @@ class Config:
 
     @staticmethod
     def is_available_to_parse(config_path: Path) -> bool:
-        if config_path.suffix == ".toml" and HAS_TOML is False:
-            return False
         return config_path.exists()
 
     def parse(self) -> None:
