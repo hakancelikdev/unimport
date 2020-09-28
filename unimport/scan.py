@@ -102,12 +102,14 @@ class Scanner(ast.NodeVisitor):
         if self.skip_import(node):
             return
         for alias in node.names:
+            name = alias.asname or alias.name
             self.imports.append(
                 Import(
                     lineno=node.lineno,
-                    name=alias.asname or alias.name,
+                    name=name,
                 )
             )
+            self.import_names.append(name)
 
     @recursive
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
@@ -123,14 +125,16 @@ class Scanner(ast.NodeVisitor):
                 or (is_star and not self.include_star_import)
             ):
                 return
+            name = package if is_star else alias_name
             self.imports.append(
                 ImportFrom(
                     lineno=node.lineno,
-                    name=package if is_star else alias_name,
+                    name=name,
                     star=is_star,
                     suggestions=[],
                 )
             )
+            self.import_names.append(name)
 
     @recursive
     def visit_Name(self, node: ast.Name) -> None:
@@ -182,7 +186,6 @@ class Scanner(ast.NodeVisitor):
             self.traverse(self.source)
         except SyntaxError:
             return None
-        self.import_names = [imp.name for imp in self.imports]
         self.names = list(self.get_names())
         self.unused_imports = list(self.get_unused_imports())
 
@@ -262,19 +265,20 @@ class Scanner(ast.NodeVisitor):
 
     def get_unused_imports(self) -> Iterator[ImportT]:
         for imp in self.imports:
+            # duplicate import
             if self.is_duplicate(imp.name) and not self.is_duplicate_used(imp):
                 yield imp
-            else:
-                if (
-                    isinstance(imp, ImportFrom)
-                    and imp.star
-                    and self.include_star_import
-                ):
-                    imp.suggestions.extend(self.get_suggestions(imp.name))
-                    yield imp
-                else:
-                    if not any(name.name == imp.name for name in self.names):
-                        yield imp
+            # star import
+            elif (
+                self.include_star_import
+                and isinstance(imp, ImportFrom)
+                and imp.star
+            ):
+                imp.suggestions.extend(self.get_suggestions(imp.name))
+                yield imp
+            # normal import
+            elif not any(name.name == imp.name for name in self.names):
+                yield imp
 
     def is_duplicate(self, name: str) -> bool:
         return self.import_names.count(name) > 1
