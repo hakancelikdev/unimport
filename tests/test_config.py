@@ -1,7 +1,6 @@
 from pathlib import Path
 from unittest import TestCase
 
-from unimport import config as CONFIG
 from unimport.session import Session
 
 TEST_DIR = Path(__file__).parent / "configs"
@@ -28,22 +27,6 @@ class TestConfig(TestCase):
         self.assertFalse(self.config_toml.remove)
         self.assertTrue(self.config_toml.diff)
 
-    def test_toml_is_available_to_parse(self):
-        setattr(CONFIG, "HAS_TOML", True)
-        self.assertTrue(
-            self.config_toml.is_available_to_parse(
-                self.config_toml.config_file
-            )
-        )
-
-    def test_toml_but_has_toml_false(self):
-        setattr(CONFIG, "HAS_TOML", False)
-        self.assertFalse(
-            self.config_toml.is_available_to_parse(
-                self.config_toml.config_file
-            )
-        )
-
     def test_cfg_attr(self):
         self.assertEqual(self.include, self.config_cfg.include)
         self.assertEqual(self.exclude, self.config_cfg.exclude)
@@ -52,11 +35,6 @@ class TestConfig(TestCase):
         self.assertTrue(self.config_cfg.requirements)
         self.assertFalse(self.config_cfg.remove)
         self.assertTrue(self.config_cfg.diff)
-
-    def test_cfg_is_available_to_parse(self):
-        self.assertTrue(
-            self.config_cfg.is_available_to_parse(self.config_cfg.config_file)
-        )
 
     def test_config_default_values(self):
         config = Session(config_file=None).config

@@ -26,12 +26,16 @@ setup(
     author="Hakan Çelik",
     author_email="hakancelik96@outlook.com",
     url="https://github.com/hakancelik96/unimport",
+    project_urls={
+        "Documentation": "https://unimport.hakancelik.dev/",
+        "Issues": "https://github.com/hakancelik96/unimport/issues",
+    },
     license="MIT",
     license_file="LICENSE",
     python_requires=">=3.6.0",
     packages=["unimport"],
-    install_requires=["libcst==0.3.10"],
-    extras_require={"pyproject": ["toml"], "gitignore": ["pathspec"]},
+    install_requires=["libcst==0.3.10", "pathspec==0.8.0", "toml==0.10.1"],
+    extras_require={},
     zip_safe=False,
     include_package_data=True,
     classifiers=[

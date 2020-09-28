@@ -299,9 +299,6 @@ import x
 
 It's possible to skip `.gitignore` glob patterns using `--gitignore` flag.
 
-If you want to use `--gitignore` flag, you must install it. Try this;
-`pip install pathspec==0.8.0`
-
 ## `__all__`
 
 Unimport looks at the items in the `__all__` list, if it matches the imports, marks it
@@ -378,9 +375,6 @@ Get rid of all unused imports 🥳
 
 It's possible to configure **unimport** from `pyproject.toml` or `setup.cfg` files if
 you have.
-
-If you want to use `pyproject.toml` to configure, you must to install it. Try this;
-`pip install toml==0.10.1`
 
 - `exclude` file exclude pattern.
 - `include` file include pattern.

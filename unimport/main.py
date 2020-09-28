@@ -8,17 +8,12 @@ from distutils.util import strtobool
 from pathlib import Path
 from typing import List, Optional, Sequence, Tuple, Union
 
+from pathspec.patterns.gitwildmatch import GitWildMatchPattern
+
 from unimport import color
 from unimport import constants as C
 from unimport.session import Session
 from unimport.statement import Import, ImportFrom
-
-try:
-    from pathspec.patterns.gitwildmatch import GitWildMatchPattern
-except ImportError:
-    HAS_PATHSPEC = False
-else:
-    HAS_PATHSPEC = True
 
 
 def print_if_exists(sequence: Tuple[str, ...]) -> bool:
@@ -175,7 +170,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args.sources.extend(session.config.sources)  # type: ignore
     args.include.extend(session.config.include)  # type: ignore
     args.exclude.extend(session.config.exclude)  # type: ignore
-    if HAS_PATHSPEC and args.gitignore:
+    if args.gitignore:
         args.exclude.extend(get_exclude_list_from_gitignore())
     include = re.compile("|".join(args.include)).pattern
     exclude = re.compile("|".join(args.exclude)).pattern
