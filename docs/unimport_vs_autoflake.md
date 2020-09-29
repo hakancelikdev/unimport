@@ -1,8 +1,8 @@
 #### Differences between autoflake and unimport
 
-- Autoflake doesn't always remove the duplicate imports when they are on separate lines. 
+- Autoflake doesn't always remove the duplicate imports when they are on separate lines.
 
-Example: 
+Example:
 
 ```py
 from os import walk
@@ -11,10 +11,12 @@ from os import walk
 use(walk)
 ```
 
-For this snippet, autoflake doesn't change anything, while unimport detects and removes the `first` walk import.
+For this snippet, autoflake doesn't change anything, while unimport detects and removes
+the `first` walk import.
 
-- Autoflake replaces unused imports in compound statements with `pass`, while unimport detecs and imports inside compund statemetns, 
-if it detects that you are expecting an `ImportError`, it doesn't remove that particular import. 
+- Autoflake replaces unused imports in compound statements with `pass`, while unimport
+  detecs and imports inside compund statemetns,if it detects that you are expecting an
+  `ImportError`, it doesn't remove that particular import.
 
 ```py
 try:
@@ -22,9 +24,12 @@ try:
 except ImportError:
     ...
 ```
-For this snippet autoflake replaces the import statement with `pass.`, while unimport leaves it as is.
 
-- Autoflake is not accurate when it comes to star import expansions, while unimport can detect and expand them accurately.
+For this snippet autoflake replaces the import statement with `pass.`, while unimport
+leaves it as is.
+
+- Autoflake is not accurate when it comes to star import expansions, while unimport can
+  detect and expand them accurately.
 
 ```py
 from math import *
@@ -32,7 +37,7 @@ from math import *
 use(RANDOM_VAR)
 ```
 
-Running autoflake with --expand-star-import flag on the snippet above turns it into 
+Running autoflake with --expand-star-import flag on the snippet above turns it into
 
 ```py
 from math import RANDOM_VAR
@@ -40,14 +45,14 @@ from math import RANDOM_VAR
 
 while unimport simple removes the math import because it is not used.
 
--  Autoflake doesn't work with multiple star imports, while unimport can. 
+- Autoflake doesn't work with multiple star imports, while unimport can.
 
-from math import *
-from os import *
+from math import _ from os import _
 
 use(walk, cos)
 
-Running unimport on the above snippet with --include-star-imports flag produces the correct output.
+Running unimport on the above snippet with --include-star-imports flag produces the
+correct output.
 
 ```py
 from math import cos
@@ -58,21 +63,24 @@ use(walk, cos)
 
 while autoflake simply ignores them.
 
-
 #### Reasons to choose autoflake
+
 - It is faster. When tested, autoflake is 1-4x faster on avarage.
-- It also removes unused variables which unimport doesn't support, and is not planning to. 
+- It removes unused variables which unimport doesn't support, and is not planning to.
 - Has a feature that removes duplicate keys on objects.
 
 #### Reasons to choose unimport
-- It does more static analysis to increse the accuracy of choosing the correct imports to remove.
-- Can handle star imports more accurately.(we are opening a pr on autoflake describing the issue)
+
+- It does more static analysis to increse the accuracy of choosing the correct imports
+  to remove.
+- Can handle star imports more accurately.(myint/autoflake#18 describes their approach)
 - Works with multiple star imports.
-- Removes duplicate imports. 
+- Removes duplicate imports.
 - Has skip_file feature that allows one to skip an entire file.
-- Has a feature to remove the unused imports from requirements file. 
+- Has a feature to remove the unused imports from requirements file.
 
 ### Overall
 
-Even though unimport and autoflake has features that are similar, they are not designed to do the same thing.   
-When you are including one to your project, it is a good idea to know what your needs are, and decide accordingly. 
+Even though unimport and autoflake has features that are similar, they are not designed
+to do the same thing. When you are including one to your project, it is a good idea to
+know what your needs are, and decide accordingly.
