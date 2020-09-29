@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - ././2020
 
+- [🐞 Fix same line duplicates](https://github.com/hakancelik96/unimport/pull/125)
 - [💪 Support Windows OS coloring and encoding by @hadialqattan](https://github.com/hakancelik96/unimport/pull/116)
 
 ## [0.3.0] - 22/September/2020

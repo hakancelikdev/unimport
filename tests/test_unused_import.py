@@ -67,6 +67,7 @@ class Test__All__(UnusedTestCase):
         expected_unused_imports = [
             ImportFrom(
                 lineno=1,
+                column=1,
                 suggestions=["removedirs", "walk"],
                 name="os",
                 star=True,
@@ -83,6 +84,7 @@ class Test__All__(UnusedTestCase):
         expected_unused_imports = [
             ImportFrom(
                 lineno=1,
+                column=1,
                 suggestions=["removedirs", "walk"],
                 name="os",
                 star=True,
@@ -99,6 +101,7 @@ class Test__All__(UnusedTestCase):
         expected_unused_imports = [
             ImportFrom(
                 lineno=1,
+                column=1,
                 suggestions=["removedirs", "walk"],
                 name="os",
                 star=True,
@@ -110,7 +113,9 @@ class Test__All__(UnusedTestCase):
         # in this case this import is unused
         source = "from os import *\n" "__all__ = ['test']"
         expected_unused_imports = [
-            ImportFrom(lineno=1, suggestions=[], name="os", star=True),
+            ImportFrom(
+                lineno=1, column=1, suggestions=[], name="os", star=True
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
@@ -118,7 +123,9 @@ class Test__All__(UnusedTestCase):
         # NOTE no support.
         source = "from os import *\n" "__all__ = ['w' + 'alk']"
         expected_unused_imports = [
-            ImportFrom(lineno=1, suggestions=[], name="os", star=True),
+            ImportFrom(
+                lineno=1, column=1, suggestions=[], name="os", star=True
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
@@ -129,14 +136,18 @@ class Test__All__(UnusedTestCase):
             "__all__ = [expression for item in ['os', 'walk']]"
         )
         expected_unused_imports = [
-            ImportFrom(lineno=1, suggestions=[], name="os", star=True),
+            ImportFrom(
+                lineno=1, column=1, suggestions=[], name="os", star=True
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_unknown(self):
         source = "from x import *\n" "__all__ = ['xx']"
         expected_unused_imports = [
-            ImportFrom(lineno=1, suggestions=[], name="x", star=True),
+            ImportFrom(
+                lineno=1, column=1, suggestions=[], name="x", star=True
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
@@ -147,8 +158,12 @@ class TestUnusedImport(UnusedTestCase):
     def test_comma(self):
         source = "from os import (\n" "    waitpid,\n" "    scandir,\n" ")\n"
         expected_unused_imports = [
-            ImportFrom(lineno=1, suggestions=[], name="waitpid", star=False),
-            ImportFrom(lineno=1, suggestions=[], name="scandir", star=False),
+            ImportFrom(
+                lineno=1, column=1, suggestions=[], name="waitpid", star=False
+            ),
+            ImportFrom(
+                lineno=1, column=2, suggestions=[], name="scandir", star=False
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
@@ -162,7 +177,9 @@ class TestUnusedImport(UnusedTestCase):
     def test_module_unused(self):
         source = "from pathlib import Path"
         expected_unused_imports = [
-            ImportFrom(lineno=1, suggestions=[], name="Path", star=False),
+            ImportFrom(
+                lineno=1, column=1, suggestions=[], name="Path", star=False
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
@@ -176,7 +193,7 @@ class TestUnusedImport(UnusedTestCase):
             "import x.y\n" "import d.f.a.s\n" "CURRENT_DIR = x.y('.').parent\n"
         )
         expected_unused_imports = [
-            Import(lineno=2, name="d.f.a.s"),
+            Import(lineno=2, column=1, name="d.f.a.s"),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
@@ -191,13 +208,20 @@ class TestUnusedImport(UnusedTestCase):
             "print(t)\n"
         )
         expected_unused_imports = [
-            ImportFrom(lineno=2, name="y", star=False, suggestions=[]),
-            ImportFrom(lineno=2, name="z", star=False, suggestions=[]),
+            ImportFrom(
+                lineno=2, column=1, name="y", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=2, column=2, name="z", star=False, suggestions=[]
+            ),
             Import(
                 lineno=5,
+                column=1,
                 name="x",
             ),
-            ImportFrom(lineno=7, name="ii", star=False, suggestions=[]),
+            ImportFrom(
+                lineno=7, column=2, name="ii", star=False, suggestions=[]
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
@@ -226,14 +250,18 @@ class TestStarImport(UnusedTestCase):
     def test_unused(self):
         source = "from os import *\n"
         expected_unused_imports = [
-            ImportFrom(lineno=1, name="os", star=True, suggestions=[]),
+            ImportFrom(
+                lineno=1, column=1, name="os", star=True, suggestions=[]
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_used(self):
         source = "from os import *\n" "print(walk)\n"
         expected_unused_imports = [
-            ImportFrom(lineno=1, name="os", star=True, suggestions=["walk"]),
+            ImportFrom(
+                lineno=1, column=1, name="os", star=True, suggestions=["walk"]
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
@@ -248,6 +276,7 @@ class TestStarImport(UnusedTestCase):
         expected_unused_imports = [
             ImportFrom(
                 lineno=1,
+                column=1,
                 name="lib2to3.fixer_util",
                 star=True,
                 suggestions=[
@@ -261,6 +290,7 @@ class TestStarImport(UnusedTestCase):
             ),
             ImportFrom(
                 lineno=2,
+                column=1,
                 name="lib2to3.pytree",
                 star=True,
                 suggestions=["Leaf", "Node"],
@@ -279,6 +309,7 @@ class TestStarImport(UnusedTestCase):
         expected_unused_imports = [
             ImportFrom(
                 lineno=1,
+                column=1,
                 name="lib2to3.fixer_util",
                 star=True,
                 suggestions=[
@@ -291,12 +322,14 @@ class TestStarImport(UnusedTestCase):
             ),
             ImportFrom(
                 lineno=2,
+                column=1,
                 name="lib2to3.pytree",
                 star=True,
                 suggestions=["Leaf", "Node"],
             ),
             ImportFrom(
                 lineno=3,
+                column=1,
                 name="lib2to3.pgen2.token",
                 star=True,
                 suggestions=["NAME", "STAR"],
@@ -315,6 +348,7 @@ class TestDuplicate(UnusedTestCase):
         expected_unused_imports = [
             ImportFrom(
                 lineno=1,
+                column=1,
                 suggestions=[],
                 name="compile_command",
                 star=False,
@@ -334,14 +368,22 @@ class TestDuplicate(UnusedTestCase):
             "import e\n"
         )
         expected_unused_imports = [
-            ImportFrom(lineno=1, suggestions=[], name="y", star=False),
-            ImportFrom(lineno=2, suggestions=[], name="y", star=False),
-            ImportFrom(lineno=3, suggestions=[], name="x", star=False),
-            Import(lineno=4, name="re"),
-            Import(lineno=5, name="ll"),
-            Import(lineno=6, name="ll"),
-            ImportFrom(lineno=7, suggestions=[], name="e", star=False),
-            Import(lineno=8, name="e"),
+            ImportFrom(
+                lineno=1, column=1, suggestions=[], name="y", star=False
+            ),
+            ImportFrom(
+                lineno=2, column=1, suggestions=[], name="y", star=False
+            ),
+            ImportFrom(
+                lineno=3, column=1, suggestions=[], name="x", star=False
+            ),
+            Import(lineno=4, column=1, name="re"),
+            Import(lineno=5, column=1, name="ll"),
+            Import(lineno=6, column=1, name="ll"),
+            ImportFrom(
+                lineno=7, column=1, suggestions=[], name="e", star=False
+            ),
+            Import(lineno=8, column=1, name="e"),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
@@ -360,18 +402,29 @@ class TestDuplicate(UnusedTestCase):
             "p = Path()"
         )
         expected_unused_imports = [
-            ImportFrom(lineno=1, name="y", star=False, suggestions=[]),
-            ImportFrom(lineno=2, name="y", star=False, suggestions=[]),
-            ImportFrom(lineno=3, name="x", star=False, suggestions=[]),
-            Import(lineno=4, name="re"),
-            Import(lineno=5, name="ll"),
-            Import(lineno=6, name="ll"),
-            ImportFrom(lineno=7, name="e", star=False, suggestions=[]),
+            ImportFrom(
+                lineno=1, column=1, name="y", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=2, column=1, name="y", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=3, column=1, name="x", star=False, suggestions=[]
+            ),
+            Import(lineno=4, column=1, name="re"),
+            Import(lineno=5, column=1, name="ll"),
+            Import(lineno=6, column=1, name="ll"),
+            ImportFrom(
+                lineno=7, column=1, name="e", star=False, suggestions=[]
+            ),
             Import(
                 lineno=8,
+                column=1,
                 name="e",
             ),
-            ImportFrom(lineno=9, name="Path", star=False, suggestions=[]),
+            ImportFrom(
+                lineno=9, column=1, name="Path", star=False, suggestions=[]
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
@@ -391,17 +444,28 @@ class TestDuplicate(UnusedTestCase):
             "print(ll)\n"
         )
         expected_unused_imports = [
-            ImportFrom(lineno=1, name="y", star=False, suggestions=[]),
-            ImportFrom(lineno=2, name="y", star=False, suggestions=[]),
-            ImportFrom(lineno=3, name="x", star=False, suggestions=[]),
-            Import(lineno=4, name="re"),
-            Import(lineno=5, name="ll"),
-            ImportFrom(lineno=7, name="e", star=False, suggestions=[]),
+            ImportFrom(
+                lineno=1, column=1, name="y", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=2, column=1, name="y", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=3, column=1, name="x", star=False, suggestions=[]
+            ),
+            Import(lineno=4, column=1, name="re"),
+            Import(lineno=5, column=1, name="ll"),
+            ImportFrom(
+                lineno=7, column=1, name="e", star=False, suggestions=[]
+            ),
             Import(
                 lineno=8,
+                column=1,
                 name="e",
             ),
-            ImportFrom(lineno=9, name="Path", star=False, suggestions=[]),
+            ImportFrom(
+                lineno=9, column=1, name="Path", star=False, suggestions=[]
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
@@ -422,45 +486,71 @@ class TestDuplicate(UnusedTestCase):
             "def function(e=e):pass\n"
         )
         expected_unused_imports = [
-            ImportFrom(lineno=1, name="y", star=False, suggestions=[]),
-            ImportFrom(lineno=2, name="y", star=False, suggestions=[]),
-            ImportFrom(lineno=3, name="x", star=False, suggestions=[]),
-            Import(lineno=4, name="re"),
+            ImportFrom(
+                lineno=1, column=1, name="y", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=2, column=1, name="y", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=3, column=1, name="x", star=False, suggestions=[]
+            ),
+            Import(lineno=4, column=1, name="re"),
             Import(
                 lineno=5,
+                column=1,
                 name="ll",
             ),
-            ImportFrom(lineno=7, name="e", star=False, suggestions=[]),
-            ImportFrom(lineno=9, name="Path", star=False, suggestions=[]),
+            ImportFrom(
+                lineno=7, column=1, name="e", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=9, column=1, name="Path", star=False, suggestions=[]
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_different_duplicate_unused(self):
         source = "from x import z\n" "from y import z\n"
         expected_unused_imports = [
-            ImportFrom(lineno=1, suggestions=[], name="z", star=False),
-            ImportFrom(lineno=2, suggestions=[], name="z", star=False),
+            ImportFrom(
+                lineno=1, column=1, suggestions=[], name="z", star=False
+            ),
+            ImportFrom(
+                lineno=2, column=1, suggestions=[], name="z", star=False
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_different_duplicate_used(self):
         source = "from x import z\n" "from y import z\n" "print(z)\n"
         expected_unused_imports = [
-            ImportFrom(lineno=1, suggestions=[], name="z", star=False),
+            ImportFrom(
+                lineno=1, column=1, suggestions=[], name="z", star=False
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_multi_duplicate(self):
         source = "from x import y, z, t\n" "import t\n" "from l import t\n"
         expected_unused_imports = [
-            ImportFrom(lineno=1, name="y", star=False, suggestions=[]),
-            ImportFrom(lineno=1, name="z", star=False, suggestions=[]),
-            ImportFrom(lineno=1, name="t", star=False, suggestions=[]),
+            ImportFrom(
+                lineno=1, column=1, name="y", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=1, column=2, name="z", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=1, column=3, name="t", star=False, suggestions=[]
+            ),
             Import(
                 lineno=2,
+                column=1,
                 name="t",
             ),
-            ImportFrom(lineno=3, name="t", star=False, suggestions=[]),
+            ImportFrom(
+                lineno=3, column=1, name="t", star=False, suggestions=[]
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
@@ -472,13 +562,16 @@ class TestDuplicate(UnusedTestCase):
             "print(t)\n"
         )
         expected_unused_imports = [
-            ImportFrom(lineno=1, name="y", star=False, suggestions=[]),
-            ImportFrom(lineno=1, name="z", star=False, suggestions=[]),
-            ImportFrom(lineno=1, name="t", star=False, suggestions=[]),
-            Import(
-                lineno=2,
-                name="t",
+            ImportFrom(
+                lineno=1, column=1, name="y", star=False, suggestions=[]
             ),
+            ImportFrom(
+                lineno=1, column=2, name="z", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=1, column=3, name="t", star=False, suggestions=[]
+            ),
+            Import(lineno=2, column=1, name="t"),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
@@ -490,13 +583,16 @@ class TestDuplicate(UnusedTestCase):
             "print(t)\n"
         )
         expected_unused_imports = [
-            Import(
-                lineno=1,
-                name="t",
+            Import(lineno=1, column=1, name="t"),
+            ImportFrom(
+                lineno=2, column=1, name="t", star=False, suggestions=[]
             ),
-            ImportFrom(lineno=2, name="t", star=False, suggestions=[]),
-            ImportFrom(lineno=3, name="y", star=False, suggestions=[]),
-            ImportFrom(lineno=3, name="z", star=False, suggestions=[]),
+            ImportFrom(
+                lineno=3, column=1, name="y", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=3, column=2, name="z", star=False, suggestions=[]
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
@@ -511,13 +607,24 @@ class TestDuplicate(UnusedTestCase):
         expected_unused_imports = [
             Import(
                 lineno=1,
+                column=1,
                 name="t",
             ),
-            ImportFrom(lineno=2, name="t", star=False, suggestions=[]),
-            ImportFrom(lineno=3, name="y", star=False, suggestions=[]),
-            ImportFrom(lineno=3, name="z", star=False, suggestions=[]),
-            ImportFrom(lineno=3, name="t", star=False, suggestions=[]),
-            ImportFrom(lineno=4, name="ii", star=False, suggestions=[]),
+            ImportFrom(
+                lineno=2, column=1, name="t", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=3, column=1, name="y", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=3, column=2, name="z", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=3, column=3, name="t", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=4, column=2, name="ii", star=False, suggestions=[]
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
@@ -535,16 +642,26 @@ class TestDuplicate(UnusedTestCase):
         expected_unused_imports = [
             Import(
                 lineno=1,
+                column=1,
                 name="t",
             ),
-            ImportFrom(lineno=2, name="t", star=False, suggestions=[]),
-            ImportFrom(lineno=3, name="y", star=False, suggestions=[]),
-            ImportFrom(lineno=3, name="z", star=False, suggestions=[]),
+            ImportFrom(
+                lineno=2, column=1, name="t", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=3, column=1, name="y", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=3, column=2, name="z", star=False, suggestions=[]
+            ),
             Import(
                 lineno=6,
+                column=1,
                 name="x",
             ),
-            ImportFrom(lineno=8, name="ii", star=False, suggestions=[]),
+            ImportFrom(
+                lineno=8, column=2, name="ii", star=False, suggestions=[]
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
@@ -561,14 +678,79 @@ class TestDuplicate(UnusedTestCase):
             "print(t)\n"
         )
         expected_unused_imports = [
-            ImportFrom(lineno=4, name="t", star=False, suggestions=[]),
-            ImportFrom(lineno=5, name="y", star=False, suggestions=[]),
-            ImportFrom(lineno=5, name="z", star=False, suggestions=[]),
+            ImportFrom(
+                lineno=4, column=1, name="t", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=5, column=1, name="y", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=5, column=2, name="z", star=False, suggestions=[]
+            ),
             Import(
                 lineno=8,
+                column=1,
                 name="x",
             ),
-            ImportFrom(lineno=10, name="ii", star=False, suggestions=[]),
+            ImportFrom(
+                lineno=10, column=2, name="ii", star=False, suggestions=[]
+            ),
+        ]
+        self.assertUnimportEqual(source, expected_unused_imports)
+
+    def test_same_line(self):
+        source = (
+            "import x, x, yt\n"
+            "import e, y, e\n"
+            "from z import u, u\n"
+            "from bb import c, d, c, c\n"
+            "import ff, tt, ff, ff, tt\n"
+            "from ee import (\n"
+            "   ll,\n"
+            "   el,\n"
+            "   ll,\n"
+            "   el,\n"
+            "   tl,\n"
+            "   tl,\n"
+            ")\n"
+            "import iss as si, si\n"
+            "from gu import ug,\\\n"
+            "ug"
+            "\n"
+            "x, e, u, c, ff, tt, ll, el, tl, si, ug, yt"
+        )
+        expected_unused_imports = [
+            Import(lineno=1, column=1, name="x"),
+            Import(lineno=2, column=1, name="e"),
+            Import(lineno=2, column=2, name="y"),
+            ImportFrom(
+                lineno=3, column=1, name="u", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=4, column=1, name="c", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=4, column=2, name="d", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=4, column=3, name="c", star=False, suggestions=[]
+            ),
+            Import(lineno=5, column=1, name="ff"),
+            Import(lineno=5, column=2, name="tt"),
+            Import(lineno=5, column=3, name="ff"),
+            ImportFrom(
+                lineno=6, column=1, name="ll", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=6, column=2, name="el", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=6, column=5, name="tl", star=False, suggestions=[]
+            ),
+            Import(lineno=14, column=1, name="si"),
+            ImportFrom(
+                lineno=15, column=1, name="ug", star=False, suggestions=[]
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
@@ -584,20 +766,38 @@ class TestAsImport(UnusedTestCase):
             "import le as x\n"
         )
         expected_unused_imports = [
-            ImportFrom(lineno=1, name="z", star=False, suggestions=[]),
+            ImportFrom(
+                lineno=1, column=1, name="z", star=False, suggestions=[]
+            ),
             Import(
                 lineno=2,
+                column=1,
                 name="x",
             ),
-            ImportFrom(lineno=3, name="ss", star=False, suggestions=[]),
-            ImportFrom(lineno=4, name="c", star=False, suggestions=[]),
-            ImportFrom(lineno=4, name="k", star=False, suggestions=[]),
-            ImportFrom(lineno=4, name="ii", star=False, suggestions=[]),
-            ImportFrom(lineno=5, name="bar", star=False, suggestions=[]),
-            ImportFrom(lineno=5, name="i", star=False, suggestions=[]),
-            ImportFrom(lineno=5, name="z", star=False, suggestions=[]),
+            ImportFrom(
+                lineno=3, column=1, name="ss", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=4, column=1, name="c", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=4, column=2, name="k", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=4, column=3, name="ii", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=5, column=1, name="bar", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=5, column=2, name="i", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=5, column=3, name="z", star=False, suggestions=[]
+            ),
             Import(
                 lineno=6,
+                column=1,
                 name="x",
             ),
         ]
@@ -614,17 +814,34 @@ class TestAsImport(UnusedTestCase):
             "def x(t=x):pass\n"
         )
         expected_unused_imports = [
-            ImportFrom(lineno=1, name="z", star=False, suggestions=[]),
+            ImportFrom(
+                lineno=1, column=1, name="z", star=False, suggestions=[]
+            ),
             Import(
                 lineno=2,
+                column=1,
                 name="x",
             ),
-            ImportFrom(lineno=3, name="ss", star=False, suggestions=[]),
-            ImportFrom(lineno=4, name="c", star=False, suggestions=[]),
-            ImportFrom(lineno=4, name="k", star=False, suggestions=[]),
-            ImportFrom(lineno=4, name="ii", star=False, suggestions=[]),
-            ImportFrom(lineno=5, name="bar", star=False, suggestions=[]),
-            ImportFrom(lineno=5, name="i", star=False, suggestions=[]),
-            ImportFrom(lineno=5, name="z", star=False, suggestions=[]),
+            ImportFrom(
+                lineno=3, column=1, name="ss", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=4, column=1, name="c", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=4, column=2, name="k", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=4, column=3, name="ii", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=5, column=1, name="bar", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=5, column=2, name="i", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=5, column=3, name="z", star=False, suggestions=[]
+            ),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)

@@ -101,11 +101,12 @@ class Scanner(ast.NodeVisitor):
     def visit_Import(self, node: ast.Import) -> None:
         if self.skip_import(node):
             return
-        for alias in node.names:
+        for column, alias in enumerate(node.names):
             name = alias.asname or alias.name
             self.imports.append(
                 Import(
                     lineno=node.lineno,
+                    column=column + 1,
                     name=name,
                 )
             )
@@ -116,7 +117,7 @@ class Scanner(ast.NodeVisitor):
         if self.skip_import(node):
             return
         is_star = node.names[0].name == "*"
-        for alias in node.names:
+        for column, alias in enumerate(node.names):
             package = node.module or alias.name
             alias_name = alias.asname or alias.name
             if (
@@ -129,6 +130,7 @@ class Scanner(ast.NodeVisitor):
             self.imports.append(
                 ImportFrom(
                     lineno=node.lineno,
+                    column=column + 1,
                     name=name,
                     star=is_star,
                     suggestions=[],
