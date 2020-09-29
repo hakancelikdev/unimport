@@ -458,6 +458,47 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
             self.session.refactor(action),
         )
 
+    def test_same_line(self):
+        action = (
+            "import x, x, yt\n"
+            "import e, y, e\n"
+            "from z import u, u\n"
+            "from bb import c, d, c, c\n"
+            "import ff, tt, ff, ff, tt\n"
+            "from ee import (\n"
+            "   ll,\n"
+            "   el,\n"
+            "   ll,\n"
+            "   el,\n"
+            "   tl,\n"
+            "   tl,\n"
+            ")\n"
+            "import iss as si, si\n"
+            "from gu import ug,\\\n"
+            "ug"
+            "\n"
+            "x, e, u, c, ff, tt, ll, el, tl, si, ug, yt"
+        )
+        expected = (
+            "import x, yt\n"
+            "import e\n"
+            "from z import u\n"
+            "from bb import c\n"
+            "import ff, tt\n"
+            "from ee import (\n"
+            "   ll,\n"
+            "   el,\n"
+            "   tl\n"
+            ")\n"
+            "import si\n"
+            "from gu import ug\n"
+            "x, e, u, c, ff, tt, ll, el, tl, si, ug, yt"
+        )
+        self.assertEqual(
+            expected,
+            self.session.refactor(action),
+        )
+
 
 class TestAsImport(RefactorTestCase):
     def test_as_import_all_unused_all_cases(self):
