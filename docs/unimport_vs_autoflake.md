@@ -12,10 +12,10 @@ use(walk)
 ```
 
 For this snippet, autoflake doesn't change anything, while unimport detects and removes
-the `first` walk import.
+the _first_ walk import.
 
 - Autoflake replaces unused imports in compound statements with `pass`, while unimport
-  detecs and imports inside compund statemetns,if it detects that you are expecting an
+  detects and imports inside compound statements, if it detects that you are expecting an
   `ImportError`, it doesn't remove that particular import.
 
 ```py
@@ -45,9 +45,10 @@ from math import RANDOM_VAR
 
 while unimport simple removes the math import because it is not used.
 
-- Autoflake doesn't work with multiple star imports, while unimport can.
+- Autoflake doesn't work with multiple star imports, while unimport does.
 
-from math import _ from os import _
+from math import *
+from os import *
 
 use(walk, cos)
 
@@ -65,7 +66,7 @@ while autoflake simply ignores them.
 
 #### Reasons to choose autoflake
 
-- It is faster. When tested, autoflake is 1-4x faster on avarage.
+- It is faster. When tested, autoflake is 1-4x faster on average.
 - It removes unused variables which unimport doesn't support, and is not planning to.
 - Has a feature that removes duplicate keys on objects.
 
@@ -78,6 +79,7 @@ while autoflake simply ignores them.
 - Removes duplicate imports.
 - Has skip_file feature that allows one to skip an entire file.
 - Has a feature to remove the unused imports from requirements file.
+- Allows configuration via pyproject.toml and setup.cfg files. 
 
 ### Overall
 
