@@ -1,4 +1,4 @@
-#### Differences between autoflake and unimport
+# Differences between autoflake and unimport
 
 - Autoflake doesn't always remove the duplicate imports when they are on separate lines.
 
@@ -63,13 +63,13 @@ use(walk, cos)
 
 while autoflake simply ignores them.
 
-#### Reasons to choose autoflake
+## Reasons to choose autoflake
 
 - It is faster. When tested, autoflake is 1-4x faster on average.
 - It removes unused variables which unimport doesn't support, and is not planning to.
 - Has a feature that removes duplicate keys on objects.
 
-#### Reasons to choose unimport
+## Reasons to choose unimport
 
 - It does more static analysis to increse the accuracy of choosing the correct imports
   to remove.
@@ -81,7 +81,7 @@ while autoflake simply ignores them.
 - Has a feature to remove the unused imports from requirements file.
 - Allows configuration via pyproject.toml and setup.cfg files.
 
-### Overall
+## Overall
 
 Even though unimport and autoflake has features that are similar, they are not designed
 to do the same thing. When you are including one to your project, it is a good idea to
