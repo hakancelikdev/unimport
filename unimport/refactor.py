@@ -31,11 +31,19 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
         name.reverse()
         return ".".join(name)
 
-    def is_import_used(self, import_name: str, location: CodeRange) -> bool:
-        return not any(
-            imp.name == import_name and imp.lineno == location.start.line
-            for imp in self.unused_imports
-        )
+    def is_import_used(
+        self, import_name: str, column: int, location: CodeRange
+    ) -> bool:
+        for imp in self.unused_imports:
+            if all(
+                (
+                    imp.name == import_name,
+                    imp.lineno == location.start.line,
+                    imp.column == column,
+                )
+            ):
+                return False
+        return True
 
     def get_location(
         self, node: Union[cst.Import, cst.ImportFrom]
@@ -59,10 +67,9 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
         updated_node: ImportT,
     ) -> Union[cst.RemovalSentinel, ImportT]:
         names_to_keep = []
-
         names = cast(Sequence[cst.ImportAlias], updated_node.names)
         # already handled by leave_ImportFrom
-        for import_alias in names:
+        for column, import_alias in enumerate(names):
             if isinstance(import_alias.name, cst.Attribute):
                 import_name = self.get_import_name_from_attr(
                     attr_node=import_alias.name
@@ -72,7 +79,7 @@ class RemoveUnusedImportTransformer(cst.CSTTransformer):
                 raw_import_name = cst.ensure_type(raw_import.name, cst.Name)
                 import_name = raw_import_name.value
             if self.is_import_used(
-                import_name, self.get_location(original_node)
+                import_name, column + 1, self.get_location(original_node)
             ):
                 names_to_keep.append(import_alias)
         if not names_to_keep:
