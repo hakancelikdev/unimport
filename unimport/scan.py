@@ -17,7 +17,7 @@ from typing import (
 )
 
 from unimport import color
-from unimport.constants import PY38_PLUS, TYPE_VARIABLE_SUBSCRIPT
+from unimport.constants import PY38_PLUS, SUBSCRIPT_TYPE_VARIABLE
 from unimport.relate import first_occurrence, get_parents, relate
 from unimport.statement import Import, ImportFrom, Name
 from unimport.utils import get_dir, get_source, is_std
@@ -204,7 +204,7 @@ class Scanner(ast.NodeVisitor):
             and node.value.value.id == "typing"
         ) or (
             isinstance(node.value, ast.Name)
-            and node.value.id in TYPE_VARIABLE_SUBSCRIPT
+            and node.value.id in SUBSCRIPT_TYPE_VARIABLE
         ):
             for name in visit_slice_value(node.slice.value):  # type: ignore
                 self.names.append(name)
