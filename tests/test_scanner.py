@@ -211,3 +211,88 @@ class TestImportable(unittest.TestCase):
         expected = frozenset({"xx", "NAME", "b", "A"})
         self.importable.traverse(source)
         self.assertEqual(expected, self.importable.get_suggestion())
+
+
+class TestTypeVariable(ScannerTestCase):
+    def test_type_assing_union(self):
+        source = (
+            "import typing\n"
+            "if typing.TYPE_CHECKING:\n"
+            "   from PyQt5.QtWebEngineWidgets import QWebEngineHistory\n"
+            "   from PyQt5.QtWebKit import QWebHistory\n"
+            "\n"
+            "HistoryType = typing.Union['QWebEngineHistory', 'QWebHistory']\n"
+            "\n"
+        )
+        expected_names = [
+            Name(lineno=2, name="typing.TYPE_CHECKING"),
+            Name(lineno=2, name="typing"),
+            Name(lineno=6, name="HistoryType"),
+            Name(lineno=6, name="QWebEngineHistory"),
+            Name(lineno=6, name="QWebHistory"),
+            Name(lineno=6, name="typing.Union"),
+            Name(lineno=6, name="typing"),
+        ]
+        expected_imports = [
+            Import(lineno=1, column=1, name="typing"),
+            ImportFrom(
+                lineno=3,
+                column=1,
+                name="QWebEngineHistory",
+                star=False,
+                suggestions=[],
+            ),
+            ImportFrom(
+                lineno=4,
+                column=1,
+                name="QWebHistory",
+                star=False,
+                suggestions=[],
+            ),
+        ]
+        self.assertUnimportEqual(source, expected_names, expected_imports)
+
+        source = (
+            "from typing import TYPE_CHECKING, Union\n"
+            "if TYPE_CHECKING:\n"
+            "   from PyQt5.QtWebEngineWidgets import QWebEngineHistory\n"
+            "   from PyQt5.QtWebKit import QWebHistory\n"
+            "\n"
+            "HistoryType = Union['QWebEngineHistory', 'QWebHistory']\n"
+            "\n"
+        )
+
+        expected_names = [
+            Name(lineno=2, name="TYPE_CHECKING"),
+            Name(lineno=6, name="HistoryType"),
+            Name(lineno=6, name="QWebEngineHistory"),
+            Name(lineno=6, name="QWebHistory"),
+            Name(lineno=6, name="Union"),
+        ]
+        expected_imports = [
+            ImportFrom(
+                lineno=1,
+                column=1,
+                name="TYPE_CHECKING",
+                star=False,
+                suggestions=[],
+            ),
+            ImportFrom(
+                lineno=1, column=2, name="Union", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=3,
+                column=1,
+                name="QWebEngineHistory",
+                star=False,
+                suggestions=[],
+            ),
+            ImportFrom(
+                lineno=4,
+                column=1,
+                name="QWebHistory",
+                star=False,
+                suggestions=[],
+            ),
+        ]
+        self.assertUnimportEqual(source, expected_names, expected_imports)

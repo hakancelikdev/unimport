@@ -17,7 +17,7 @@ from typing import (
 )
 
 from unimport import color
-from unimport.constants import PY38_PLUS
+from unimport.constants import PY38_PLUS, TYPE_VARIABLE_SUBSCRIPT
 from unimport.relate import first_occurrence, get_parents, relate
 from unimport.statement import Import, ImportFrom, Name
 from unimport.utils import get_dir, get_source, is_std
@@ -180,6 +180,61 @@ class Scanner(ast.NodeVisitor):
         self.generic_visit(node)
         self.any_import_error = False
 
+    @recursive
+    def visit_Subscript(self, node: ast.Subscript) -> None:
+        # type_variable
+        # type_var = List["object"], cast("type", return_value)
+
+        def visit_slice_value(value):
+            if hasattr(value, "elts"):
+                for elt in value.elts:
+                    if isinstance(elt, ast.Constant):
+                        yield Name(lineno=elt.lineno, name=str(elt.value))
+                    elif isinstance(elt, ast.Str):
+                        yield Name(lineno=elt.lineno, name=elt.s)
+            else:
+                if isinstance(value, ast.Constant):
+                    yield Name(lineno=value.lineno, name=str(value.value))
+                elif isinstance(value, ast.Str):
+                    yield Name(lineno=value.lineno, name=value.s)
+
+        if (
+            isinstance(node.value, ast.Attribute)
+            and isinstance(node.value.value, ast.Name)
+            and node.value.value.id == "typing"
+        ) or (
+            isinstance(node.value, ast.Name)
+            and node.value.id in TYPE_VARIABLE_SUBSCRIPT
+        ):
+            for name in visit_slice_value(node.slice.value):  # type: ignore
+                self.names.append(name)
+
+    @recursive
+    def visit_Call(self, node: ast.Call) -> None:
+        # type_variable
+        # cast("type", return_value)
+        if (
+            (
+                isinstance(node.func, ast.Attribute)
+                and isinstance(node.func.value, ast.Name)
+                and node.func.value.id == "typing"
+                and node.func.attr == "cast"
+            )
+            or isinstance(node.func, ast.Name)
+            and node.func.id == "cast"
+        ):
+            if isinstance(node.args[0], ast.Constant):
+                self.names.append(
+                    Name(
+                        lineno=node.args[0].lineno,
+                        name=str(node.args[0].value),
+                    )
+                )
+            elif isinstance(node.args[0], ast.Str):
+                self.names.append(
+                    Name(lineno=node.args[0].lineno, name=node.args[0].s)
+                )
+
     def scan(self, source: str) -> None:
         self.source = source
         if self.skip_file():
@@ -224,7 +279,9 @@ class Scanner(ast.NodeVisitor):
         importable_visitor.traverse(self.source)
         for node in importable_visitor.importable_nodes:
             if isinstance(node, ast.Constant):
-                self.names.append(Name(lineno=node.lineno, name=node.value))
+                self.names.append(
+                    Name(lineno=node.lineno, name=str(node.value))
+                )
             elif isinstance(node, ast.Str):
                 self.names.append(Name(lineno=node.lineno, name=node.s))
 
