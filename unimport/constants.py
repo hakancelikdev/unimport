@@ -53,6 +53,6 @@ SUBSCRIPT_TYPE_VARIABLE = [
 ]
 
 if PY38_PLUS:
-    SUBSCRIPT_TYPE_VARIABLE.append("Literal")
+    SUBSCRIPT_TYPE_VARIABLE.extend(["Literal", "OrderedDict"])
 elif PY37_PLUS:
-    SUBSCRIPT_TYPE_VARIABLE.append("OrderedDict")
+    SUBSCRIPT_TYPE_VARIABLE.append("Literal")

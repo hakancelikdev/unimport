@@ -183,20 +183,7 @@ class Scanner(ast.NodeVisitor):
     @recursive
     def visit_Subscript(self, node: ast.Subscript) -> None:
         # type_variable
-        # type_var = List["object"], cast("type", return_value)
-
-        def visit_slice_value(value):
-            if hasattr(value, "elts"):
-                for elt in value.elts:
-                    if isinstance(elt, ast.Constant):
-                        yield Name(lineno=elt.lineno, name=str(elt.value))
-                    elif isinstance(elt, ast.Str):
-                        yield Name(lineno=elt.lineno, name=elt.s)
-            else:
-                if isinstance(value, ast.Constant):
-                    yield Name(lineno=value.lineno, name=str(value.value))
-                elif isinstance(value, ast.Str):
-                    yield Name(lineno=value.lineno, name=value.s)
+        # type_var = List["object"] etc.
 
         if (
             isinstance(node.value, ast.Attribute)
@@ -206,8 +193,27 @@ class Scanner(ast.NodeVisitor):
             isinstance(node.value, ast.Name)
             and node.value.id in SUBSCRIPT_TYPE_VARIABLE
         ):
-            for name in visit_slice_value(node.slice.value):  # type: ignore
-                self.names.append(name)
+            if hasattr(node.slice.value, "elts"):
+                for elt in node.slice.value.elts:
+                    if isinstance(elt, ast.Constant) and isinstance(
+                        elt.value, str
+                    ):
+                        self.traverse(
+                            elt.value, mode="eval", parent=node.parent
+                        )
+                    elif isinstance(elt, ast.Str):
+                        self.traverse(elt.s, mode="eval", parent=node.parent)
+            else:
+                if isinstance(node.slice.value, ast.Constant) and isinstance(
+                    node.slice.value.value, str
+                ):
+                    self.traverse(
+                        node.slice.value.value, mode="eval", parent=node.parent
+                    )
+                elif isinstance(node.slice.value, ast.Str):
+                    self.traverse(
+                        node.slice.value.s, mode="eval", parent=node.parent
+                    )
 
     @recursive
     def visit_Call(self, node: ast.Call) -> None:
@@ -223,17 +229,14 @@ class Scanner(ast.NodeVisitor):
             or isinstance(node.func, ast.Name)
             and node.func.id == "cast"
         ):
-            if isinstance(node.args[0], ast.Constant):
-                self.names.append(
-                    Name(
-                        lineno=node.args[0].lineno,
-                        name=str(node.args[0].value),
-                    )
+            if isinstance(node.args[0], ast.Constant) and isinstance(
+                node.args[0], str
+            ):
+                self.traverse(
+                    node.args[0].value, mode="eval", parent=node.parent
                 )
             elif isinstance(node.args[0], ast.Str):
-                self.names.append(
-                    Name(lineno=node.args[0].lineno, name=node.args[0].s)
-                )
+                self.traverse(node.args[0].s, mode="eval", parent=node.parent)
 
     def scan(self, source: str) -> None:
         self.source = source

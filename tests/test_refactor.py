@@ -839,6 +839,15 @@ class TestTypeVariable(RefactorTestCase):
                 "HistoryType = Union['QWebEngineHistory', 'QWebHistory']\n"
                 "\n"
             ),
+            (
+                "from typing import TYPE_CHECKING, Union\n"
+                "if TYPE_CHECKING:\n"
+                "   from PyQt5 import QtWebEngineWidgets\n"
+                "   from PyQt5 import QtWebKit\n"
+                "\n"
+                "HistoryType = Union['QtWebEngineWidgets.QWebEngineHistory', 'QtWebKit.QWebHistory']\n"
+                "\n"
+            ),
         ]
         for action in actions:
             self.assertEqual(
@@ -887,6 +896,14 @@ class TestTypeVariable(RefactorTestCase):
                 "   from PyQt5.QtWebKit import QWebHistory\n"
                 "\n"
                 "HistoryType = cast('QWebHistory', return_value)\n"
+                "\n"
+            ),
+            (
+                "from typing import TYPE_CHECKING\n"
+                "if TYPE_CHECKING:\n"
+                "   from PyQt5 import QtWebKit\n"
+                "\n"
+                "HistoryType = cast('QtWebKit.QWebHistory', return_value)\n"
                 "\n"
             ),
         ]

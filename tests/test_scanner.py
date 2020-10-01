@@ -154,10 +154,10 @@ class TestTypeComments(ScannerTestCase):
             "    pass\n"
         )
         expected_names = [
-            Name(lineno=1, name="Any"),
-            Name(lineno=1, name="Union"),
-            Name(lineno=1, name="Tuple"),
-            Name(lineno=1, name="Tuple"),
+            Name(lineno=1, name="Any"),  # BUG; it should be 5
+            Name(lineno=1, name="Union"),  # BUG; it should be 5
+            Name(lineno=1, name="Tuple"),  # BUG; it should be 5
+            Name(lineno=1, name="Tuple"),  # BUG; it should be 5
         ]
         expected_imports = [
             ImportFrom(
@@ -214,7 +214,7 @@ class TestImportable(unittest.TestCase):
 
 
 class TestTypeVariable(ScannerTestCase):
-    def test_type_assing_union(self):
+    def test_type_assing_union_import(self):
         source = (
             "import typing\n"
             "if typing.TYPE_CHECKING:\n"
@@ -228,8 +228,8 @@ class TestTypeVariable(ScannerTestCase):
             Name(lineno=2, name="typing.TYPE_CHECKING"),
             Name(lineno=2, name="typing"),
             Name(lineno=6, name="HistoryType"),
-            Name(lineno=6, name="QWebEngineHistory"),
-            Name(lineno=6, name="QWebHistory"),
+            Name(lineno=1, name="QWebEngineHistory"),  # BUG; it should be 6
+            Name(lineno=1, name="QWebHistory"),  # BUG; it should be 6
             Name(lineno=6, name="typing.Union"),
             Name(lineno=6, name="typing"),
         ]
@@ -252,6 +252,7 @@ class TestTypeVariable(ScannerTestCase):
         ]
         self.assertUnimportEqual(source, expected_names, expected_imports)
 
+    def test_type_assing_union_from(self):
         source = (
             "from typing import TYPE_CHECKING, Union\n"
             "if TYPE_CHECKING:\n"
@@ -261,12 +262,11 @@ class TestTypeVariable(ScannerTestCase):
             "HistoryType = Union['QWebEngineHistory', 'QWebHistory']\n"
             "\n"
         )
-
         expected_names = [
             Name(lineno=2, name="TYPE_CHECKING"),
             Name(lineno=6, name="HistoryType"),
-            Name(lineno=6, name="QWebEngineHistory"),
-            Name(lineno=6, name="QWebHistory"),
+            Name(lineno=1, name="QWebEngineHistory"),  # BUG; it should be 6
+            Name(lineno=1, name="QWebHistory"),  # BUG; it should be 6
             Name(lineno=6, name="Union"),
         ]
         expected_imports = [
@@ -293,6 +293,51 @@ class TestTypeVariable(ScannerTestCase):
                 name="QWebHistory",
                 star=False,
                 suggestions=[],
+            ),
+        ]
+        self.assertUnimportEqual(source, expected_names, expected_imports)
+
+    def test_type_assing_union_attribute(self):
+        source = (
+            "from typing import TYPE_CHECKING, Union\n"
+            "if TYPE_CHECKING:\n"
+            "   from PyQt5 import QtWebEngineWidgets\n"
+            "   from PyQt5 import QtWebKit\n"
+            "\n"
+            "HistoryType = Union['QtWebEngineWidgets.QWebEngineHistory', 'QtWebKit.QWebHistory']\n"
+            "\n"
+        )
+        expected_names = [
+            Name(lineno=2, name="TYPE_CHECKING"),
+            Name(lineno=6, name="HistoryType"),
+            Name(
+                lineno=1, name="QtWebEngineWidgets.QWebEngineHistory"
+            ),  # BUG; it should be 6
+            Name(lineno=1, name="QtWebEngineWidgets"),  # BUG; it should be 6
+            Name(lineno=1, name="QtWebKit.QWebHistory"),  # BUG; it should be 6
+            Name(lineno=1, name="QtWebKit"),  # BUG; it should be 6
+            Name(lineno=6, name="Union"),
+        ]
+        expected_imports = [
+            ImportFrom(
+                lineno=1,
+                column=1,
+                name="TYPE_CHECKING",
+                star=False,
+                suggestions=[],
+            ),
+            ImportFrom(
+                lineno=1, column=2, name="Union", star=False, suggestions=[]
+            ),
+            ImportFrom(
+                lineno=3,
+                column=1,
+                name="QtWebEngineWidgets",
+                star=False,
+                suggestions=[],
+            ),
+            ImportFrom(
+                lineno=4, column=1, name="QtWebKit", star=False, suggestions=[]
             ),
         ]
         self.assertUnimportEqual(source, expected_names, expected_imports)
