@@ -285,10 +285,9 @@ class Scanner(ast.NodeVisitor):
     def is_duplicate(self, name: str) -> bool:
         return self.import_names.count(name) > 1
 
-    def get_duplicate_imports(self) -> Iterator[ImportT]:
-        yield from filter(
-            lambda imp: self.is_duplicate(imp.name), self.imports
-        )
+    @functools.lru_cache(maxsize=None)
+    def get_duplicate_imports(self) -> List[ImportT]:
+        return [imp for imp in self.imports if self.is_duplicate(imp.name)]
 
     def is_duplicate_used(self, imp: ImportT) -> bool:
         def find_nearest_imp(name: Name) -> ImportT:
