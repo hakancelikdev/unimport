@@ -46,7 +46,7 @@ def is_std(import_name: str) -> bool:
     if import_name in BUILTIN_MODULE_NAMES:
         return True
     spec = get_spec(import_name)
-    return spec and any(
+    return bool(spec) and any(
         (
             spec.origin.startswith(STDLIB_PATH),
             spec.origin in ["built-in", "frozen"],
