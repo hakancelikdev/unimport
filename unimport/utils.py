@@ -31,6 +31,7 @@ def get_source(import_name: str) -> Optional[str]:
             return spec.loader.get_data(spec.loader.path).decode("utf-8")
     return None
 
+
 @functools.lru_cache(maxsize=None)
 def get_spec(import_name: str) -> Optional[importlib.machinery.ModuleSpec]:
     try:
@@ -45,8 +46,10 @@ def is_std(import_name: str) -> bool:
     if import_name in BUILTIN_MODULE_NAMES:
         return True
     spec = get_spec(import_name)
-    return spec and any((
-        spec.origin.startswith(STDLIB_PATH),
-        spec.origin in ["built-in", "frozen"],
-        spec.origin.endswith(".so"),
-    ))
+    return spec and any(
+        (
+            spec.origin.startswith(STDLIB_PATH),
+            spec.origin in ["built-in", "frozen"],
+            spec.origin.endswith(".so"),
+        )
+    )
