@@ -225,7 +225,7 @@ class Scanner(ast.NodeVisitor):
             and node.func.id == "cast"
         ):
             if isinstance(node.args[0], ast.Constant) and isinstance(
-                node.args[0], str
+                node.args[0].value, str
             ):
                 self.join_visit(node.args[0], node.args[0].value)
             elif isinstance(node.args[0], ast.Str):
