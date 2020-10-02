@@ -190,9 +190,9 @@ class Scanner(ast.NodeVisitor):
             to the visit function."""
 
             if isinstance(node, ast.Constant) and isinstance(node.value, str):
-                self.join_visit(node, node.value)
+                self.join_visit(node.value, node)
             elif isinstance(node, ast.Str):
-                self.join_visit(node, node.s)
+                self.join_visit(node.s, node)
 
         if (
             isinstance(node.value, ast.Attribute)
@@ -227,9 +227,9 @@ class Scanner(ast.NodeVisitor):
             if isinstance(node.args[0], ast.Constant) and isinstance(
                 node.args[0].value, str
             ):
-                self.join_visit(node.args[0], node.args[0].value)
+                self.join_visit(node.args[0].value, node.args[0])
             elif isinstance(node.args[0], ast.Str):
-                self.join_visit(node.args[0], node.args[0].s)
+                self.join_visit(node.args[0].s, node.args[0])
 
     def scan(self, source: str) -> None:
         self.source = source
@@ -249,7 +249,7 @@ class Scanner(ast.NodeVisitor):
             mode = "eval"
         type_comment = getattr(node, "type_comment", None)
         if type_comment is not None:
-            self.traverse(type_comment, mode, node)
+            self.join_visit(type_comment, node, mode)
 
     def traverse(
         self,
@@ -281,15 +281,19 @@ class Scanner(ast.NodeVisitor):
             elif isinstance(node, ast.Str):
                 self.names.append(Name(lineno=node.lineno, name=node.s))
 
-    def join_visit(self, node: ast.AST, value: str) -> None:
+    def join_visit(
+        self, value: str, node: ast.AST, mode: str = "eval"
+    ) -> None:
         """A function that parses the value, copies locations from the node and
         includes them in self.visit."""
-
-        new_tree = ast.parse(value)
-        relate(new_tree, parent=node.parent)  # type: ignore
-        for new_node in ast.walk(new_tree):
+        if PY38_PLUS:
+            tree = ast.parse(value, mode=mode, type_comments=True)
+        else:
+            tree = ast.parse(value, mode=mode)
+        relate(tree, parent=node.parent)  # type: ignore
+        for new_node in ast.walk(tree):
             ast.copy_location(new_node, node)
-        self.visit(new_tree)
+        self.visit(tree)
 
     def clear(self) -> None:
         self.names.clear()
