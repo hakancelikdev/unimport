@@ -17,7 +17,7 @@ from typing import (
 )
 
 from unimport import color
-from unimport.constants import PY38_PLUS
+from unimport.constants import PY38_PLUS, SUBSCRIPT_TYPE_VARIABLE
 from unimport.relate import first_occurrence, get_parents, relate
 from unimport.statement import Import, ImportFrom, Name
 from unimport.utils import get_dir, get_source, is_std
@@ -180,6 +180,57 @@ class Scanner(ast.NodeVisitor):
         self.generic_visit(node)
         self.any_import_error = False
 
+    @recursive
+    def visit_Subscript(self, node: ast.Subscript) -> None:
+        # type_variable
+        # type_var = List["object"] etc.
+
+        def visit_constant_str(node: Union[ast.Constant, ast.Str]) -> None:
+            """Separates the value by node type (str or constant) and gives it
+            to the visit function."""
+
+            if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                self.join_visit(node, node.value)
+            elif isinstance(node, ast.Str):
+                self.join_visit(node, node.s)
+
+        if (
+            isinstance(node.value, ast.Attribute)
+            and isinstance(node.value.value, ast.Name)
+            and node.value.value.id == "typing"
+        ) or (
+            isinstance(node.value, ast.Name)
+            and node.value.id in SUBSCRIPT_TYPE_VARIABLE
+        ):
+            if isinstance(node.slice.value, ast.Tuple):  # type: ignore
+                for elt in node.slice.value.elts:  # type: ignore
+                    if isinstance(elt, (ast.Constant, ast.Str)):
+                        visit_constant_str(elt)
+            else:
+                if isinstance(node.slice.value, (ast.Constant, ast.Str)):  # type: ignore
+                    visit_constant_str(node.slice.value)  # type: ignore
+
+    @recursive
+    def visit_Call(self, node: ast.Call) -> None:
+        # type_variable
+        # cast("type", return_value)
+        if (
+            (
+                isinstance(node.func, ast.Attribute)
+                and isinstance(node.func.value, ast.Name)
+                and node.func.value.id == "typing"
+                and node.func.attr == "cast"
+            )
+            or isinstance(node.func, ast.Name)
+            and node.func.id == "cast"
+        ):
+            if isinstance(node.args[0], ast.Constant) and isinstance(
+                node.args[0].value, str
+            ):
+                self.join_visit(node.args[0], node.args[0].value)
+            elif isinstance(node.args[0], ast.Str):
+                self.join_visit(node.args[0], node.args[0].s)
+
     def scan(self, source: str) -> None:
         self.source = source
         if self.skip_file():
@@ -224,9 +275,21 @@ class Scanner(ast.NodeVisitor):
         importable_visitor.traverse(self.source)
         for node in importable_visitor.importable_nodes:
             if isinstance(node, ast.Constant):
-                self.names.append(Name(lineno=node.lineno, name=node.value))
+                self.names.append(
+                    Name(lineno=node.lineno, name=str(node.value))
+                )
             elif isinstance(node, ast.Str):
                 self.names.append(Name(lineno=node.lineno, name=node.s))
+
+    def join_visit(self, node: ast.AST, value: str) -> None:
+        """A function that parses the value, copies locations from the node and
+        includes them in self.visit."""
+
+        new_tree = ast.parse(value)
+        relate(new_tree, parent=node.parent)  # type: ignore
+        for new_node in ast.walk(new_tree):
+            ast.copy_location(new_node, node)
+        self.visit(new_tree)
 
     def clear(self) -> None:
         self.names.clear()

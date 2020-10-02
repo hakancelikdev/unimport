@@ -818,6 +818,102 @@ class TestTyping(RefactorTestCase):
         )
 
 
+class TestTypeVariable(RefactorTestCase):
+    def test_type_assing_union(self):
+        actions = [
+            (
+                "import typing\n"
+                "if typing.TYPE_CHECKING:\n"
+                "   from PyQt5.QtWebEngineWidgets import QWebEngineHistory\n"
+                "   from PyQt5.QtWebKit import QWebHistory\n"
+                "\n"
+                "HistoryType = typing.Union['QWebEngineHistory', 'QWebHistory']\n"
+                "\n"
+            ),
+            (
+                "from typing import TYPE_CHECKING, Union\n"
+                "if TYPE_CHECKING:\n"
+                "   from PyQt5.QtWebEngineWidgets import QWebEngineHistory\n"
+                "   from PyQt5.QtWebKit import QWebHistory\n"
+                "\n"
+                "HistoryType = Union['QWebEngineHistory', 'QWebHistory']\n"
+                "\n"
+            ),
+            (
+                "from typing import TYPE_CHECKING, Union\n"
+                "if TYPE_CHECKING:\n"
+                "   from PyQt5 import QtWebEngineWidgets\n"
+                "   from PyQt5 import QtWebKit\n"
+                "\n"
+                "HistoryType = Union['QtWebEngineWidgets.QWebEngineHistory', 'QtWebKit.QWebHistory']\n"
+                "\n"
+            ),
+        ]
+        for action in actions:
+            self.assertEqual(
+                action,
+                self.session.refactor(action),
+            )
+
+    def test_type_assing_list(self):
+        actions = [
+            (
+                "import typing\n"
+                "if typing.TYPE_CHECKING:\n"
+                "   from PyQt5.QtWebKit import QWebHistory\n"
+                "\n"
+                "HistoryType = typing.List['QWebHistory']\n"
+                "\n"
+            ),
+            (
+                "from typing import TYPE_CHECKING, List\n"
+                "if TYPE_CHECKING:\n"
+                "   from PyQt5.QtWebKit import QWebHistory\n"
+                "\n"
+                "HistoryType = List['QWebHistory']\n"
+                "\n"
+            ),
+        ]
+        for action in actions:
+            self.assertEqual(
+                action,
+                self.session.refactor(action),
+            )
+
+    def test_type_assing_cast(self):
+        actions = [
+            (
+                "import typing\n"
+                "if typing.TYPE_CHECKING:\n"
+                "   from PyQt5.QtWebKit import QWebHistory\n"
+                "\n"
+                "HistoryType = typing.cast('QWebHistory', None)\n"
+                "\n"
+            ),
+            (
+                "from typing import TYPE_CHECKING\n"
+                "if TYPE_CHECKING:\n"
+                "   from PyQt5.QtWebKit import QWebHistory\n"
+                "\n"
+                "HistoryType = cast('QWebHistory', return_value)\n"
+                "\n"
+            ),
+            (
+                "from typing import TYPE_CHECKING\n"
+                "if TYPE_CHECKING:\n"
+                "   from PyQt5 import QtWebKit\n"
+                "\n"
+                "HistoryType = cast('QtWebKit.QWebHistory', return_value)\n"
+                "\n"
+            ),
+        ]
+        for action in actions:
+            self.assertEqual(
+                action,
+                self.session.refactor(action),
+            )
+
+
 class TestStyle(RefactorTestCase):
     def test_1_vertical(self):
         action = (
