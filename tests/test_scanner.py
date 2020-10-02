@@ -214,7 +214,7 @@ class TestImportable(unittest.TestCase):
 
 
 class TestTypeVariable(ScannerTestCase):
-    def test_type_assing_union_import(self):
+    def test_union_import(self):
         source = (
             "import typing\n"
             "if typing.TYPE_CHECKING:\n"
@@ -228,8 +228,8 @@ class TestTypeVariable(ScannerTestCase):
             Name(lineno=2, name="typing.TYPE_CHECKING"),
             Name(lineno=2, name="typing"),
             Name(lineno=6, name="HistoryType"),
-            Name(lineno=1, name="QWebEngineHistory"),  # BUG; it should be 6
-            Name(lineno=1, name="QWebHistory"),  # BUG; it should be 6
+            Name(lineno=6, name="QWebEngineHistory"),
+            Name(lineno=6, name="QWebHistory"),
             Name(lineno=6, name="typing.Union"),
             Name(lineno=6, name="typing"),
         ]
@@ -252,7 +252,7 @@ class TestTypeVariable(ScannerTestCase):
         ]
         self.assertUnimportEqual(source, expected_names, expected_imports)
 
-    def test_type_assing_union_from(self):
+    def test_union_from(self):
         source = (
             "from typing import TYPE_CHECKING, Union\n"
             "if TYPE_CHECKING:\n"
@@ -265,8 +265,8 @@ class TestTypeVariable(ScannerTestCase):
         expected_names = [
             Name(lineno=2, name="TYPE_CHECKING"),
             Name(lineno=6, name="HistoryType"),
-            Name(lineno=1, name="QWebEngineHistory"),  # BUG; it should be 6
-            Name(lineno=1, name="QWebHistory"),  # BUG; it should be 6
+            Name(lineno=6, name="QWebEngineHistory"),
+            Name(lineno=6, name="QWebHistory"),
             Name(lineno=6, name="Union"),
         ]
         expected_imports = [
@@ -297,7 +297,7 @@ class TestTypeVariable(ScannerTestCase):
         ]
         self.assertUnimportEqual(source, expected_names, expected_imports)
 
-    def test_type_assing_union_attribute(self):
+    def test_union_attribute(self):
         source = (
             "from typing import TYPE_CHECKING, Union\n"
             "if TYPE_CHECKING:\n"
@@ -310,12 +310,10 @@ class TestTypeVariable(ScannerTestCase):
         expected_names = [
             Name(lineno=2, name="TYPE_CHECKING"),
             Name(lineno=6, name="HistoryType"),
-            Name(
-                lineno=1, name="QtWebEngineWidgets.QWebEngineHistory"
-            ),  # BUG; it should be 6
-            Name(lineno=1, name="QtWebEngineWidgets"),  # BUG; it should be 6
-            Name(lineno=1, name="QtWebKit.QWebHistory"),  # BUG; it should be 6
-            Name(lineno=1, name="QtWebKit"),  # BUG; it should be 6
+            Name(lineno=6, name="QtWebEngineWidgets.QWebEngineHistory"),
+            Name(lineno=6, name="QtWebEngineWidgets"),
+            Name(lineno=6, name="QtWebKit.QWebHistory"),
+            Name(lineno=6, name="QtWebKit"),
             Name(lineno=6, name="Union"),
         ]
         expected_imports = [
@@ -338,6 +336,100 @@ class TestTypeVariable(ScannerTestCase):
             ),
             ImportFrom(
                 lineno=4, column=1, name="QtWebKit", star=False, suggestions=[]
+            ),
+        ]
+        self.assertUnimportEqual(source, expected_names, expected_imports)
+
+    def test_cast_import(self):
+        source = (
+            "import typing\n"
+            "if typing.TYPE_CHECKING:\n"
+            "   from PyQt5.QtWebKit import QWebHistory\n"
+            "\n"
+            "HistoryType = typing.cast('QWebHistory', None)\n"
+            "\n"
+        )
+        expected_names = [
+            Name(lineno=2, name="typing.TYPE_CHECKING"),
+            Name(lineno=2, name="typing"),
+            Name(lineno=5, name="HistoryType"),
+            Name(lineno=5, name="QWebHistory"),
+            Name(lineno=5, name="typing.cast"),
+            Name(lineno=5, name="typing"),
+        ]
+        expected_imports = [
+            Import(lineno=1, column=1, name="typing"),
+            ImportFrom(
+                lineno=3,
+                column=1,
+                name="QWebHistory",
+                star=False,
+                suggestions=[],
+            ),
+        ]
+        self.assertUnimportEqual(source, expected_names, expected_imports)
+
+    def test_cast_from(self):
+        source = (
+            "from typing import TYPE_CHECKING\n"
+            "if TYPE_CHECKING:\n"
+            "   from PyQt5.QtWebKit import QWebHistory\n"
+            "\n"
+            "HistoryType = cast('QWebHistory', return_value)\n"
+            "\n"
+        )
+        expected_names = [
+            Name(lineno=2, name="TYPE_CHECKING"),
+            Name(lineno=5, name="HistoryType"),
+            Name(lineno=5, name="QWebHistory"),
+            Name(lineno=5, name="cast"),
+            Name(lineno=5, name="return_value"),
+        ]
+        expected_imports = [
+            ImportFrom(
+                lineno=1,
+                column=1,
+                name="TYPE_CHECKING",
+                star=False,
+                suggestions=[],
+            ),
+            ImportFrom(
+                lineno=3,
+                column=1,
+                name="QWebHistory",
+                star=False,
+                suggestions=[],
+            ),
+        ]
+        self.assertUnimportEqual(source, expected_names, expected_imports)
+
+    def test_cast_attribute(self):
+        source = (
+            "from typing import TYPE_CHECKING\n"
+            "if TYPE_CHECKING:\n"
+            "   from PyQt5 import QtWebKit\n"
+            "\n"
+            "HistoryType = cast('QtWebKit.QWebHistory', return_value)\n"
+            "\n"
+        )
+        expected_names = [
+            Name(lineno=2, name="TYPE_CHECKING"),
+            Name(lineno=5, name="HistoryType"),
+            Name(lineno=5, name="QtWebKit.QWebHistory"),
+            Name(lineno=5, name="QtWebKit"),
+            Name(lineno=5, name="cast"),
+            Name(lineno=5, name="return_value"),
+        ]
+        expected_imports = [
+            ImportFrom(
+                lineno=1,
+                column=1,
+                name="TYPE_CHECKING",
+                star=False,
+                suggestions=[],
+            ),
+            ImportFrom(
+                lineno=3, column=1, name="QtWebKit", star=False, suggestions=[]
             ),
         ]
         self.assertUnimportEqual(source, expected_names, expected_imports)
