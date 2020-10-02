@@ -154,10 +154,10 @@ class TestTypeComments(ScannerTestCase):
             "    pass\n"
         )
         expected_names = [
-            Name(lineno=1, name="Any"),  # BUG; it should be 5
-            Name(lineno=1, name="Union"),  # BUG; it should be 5
-            Name(lineno=1, name="Tuple"),  # BUG; it should be 5
-            Name(lineno=1, name="Tuple"),  # BUG; it should be 5
+            Name(lineno=4, name="Any"),
+            Name(lineno=4, name="Union"),
+            Name(lineno=4, name="Tuple"),
+            Name(lineno=4, name="Tuple"),
         ]
         expected_imports = [
             ImportFrom(
