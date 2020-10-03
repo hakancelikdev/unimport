@@ -1,6 +1,7 @@
 """It offers some utils according to the import name."""
 
 import distutils.sysconfig
+import functools
 import importlib
 import importlib.machinery
 import importlib.util
@@ -31,6 +32,7 @@ def get_source(import_name: str) -> Optional[str]:
     return None
 
 
+@functools.lru_cache(maxsize=None)
 def get_spec(import_name: str) -> Optional[importlib.machinery.ModuleSpec]:
     try:
         return importlib.util.find_spec(import_name)
@@ -44,12 +46,10 @@ def is_std(import_name: str) -> bool:
     if import_name in BUILTIN_MODULE_NAMES:
         return True
     spec = get_spec(import_name)
-    if spec:
-        return any(
-            (
-                spec.origin.startswith(STDLIB_PATH),
-                spec.origin in ["built-in", "frozen"],
-                spec.origin.endswith(".so"),
-            )
+    return bool(spec) and any(
+        (
+            spec.origin.startswith(STDLIB_PATH),
+            spec.origin in ["built-in", "frozen"],
+            spec.origin.endswith(".so"),
         )
-    return False
+    )
