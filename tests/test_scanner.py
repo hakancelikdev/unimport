@@ -139,6 +139,10 @@ class SkipImportTest(ScannerTestCase):
         source = "import x\n" "# unimport:skip_file\n"
         self.assertSkipEqual(source)
 
+    def test_skip_comment_after_any_comment(self):
+        source = "import x # any test comment unimport:skip any test comment\n"
+        self.assertSkipEqual(source)
+
 
 @unittest.skipIf(
     not PY38_PLUS, "This feature is only available for python 3.8."

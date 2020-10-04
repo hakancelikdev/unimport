@@ -50,8 +50,8 @@ def recursive(func: Function) -> Function:
 class Scanner(ast.NodeVisitor):
     ignore_modules_imports = ("__future__",)
     ignore_alias_imports = ("__all__", "__doc__")
-    skip_file_regex = "# *(unimport: {0,1}skip_file)"
-    skip_comments_regex = "# *(unimport: {0,1}skip|noqa)"
+    skip_file_regex = "#.*(unimport: {0,1}skip_file)"
+    skip_comments_regex = "#.*(unimport: {0,1}skip|noqa)"
 
     def __init__(
         self,
