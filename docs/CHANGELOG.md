@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - ././2020
 
+- [🐞 Fix: import and name matcher by @hakancelik96](https://github.com/hakancelik96/unimport/pull/133)
 - [🐞 Fix: type comment by @hakancelik96](https://github.com/hakancelik96/unimport/pull/130)
 - [💪 Support type variable by @hakancelik96](https://github.com/hakancelik96/unimport/pull/128)
 - [🐞 Fix same line duplicates by @hakancelik96](https://github.com/hakancelik96/unimport/pull/125)
