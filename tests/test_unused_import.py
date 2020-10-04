@@ -227,7 +227,7 @@ class TestUnusedImport(UnusedTestCase):
 
     def test_import_after_usage(self):
         source = "def function():\n" "    print(os)\n" "import os\n"
-        expected_unused_imports = []
+        expected_unused_imports = [Import(lineno=3, column=1, name="os")]
         self.assertUnimportEqual(source, expected_unused_imports)
 
     def test_double_underscore_builtins_names(self):

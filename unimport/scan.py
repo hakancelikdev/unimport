@@ -88,7 +88,7 @@ class Scanner(ast.NodeVisitor):
         if is_annassign_or_arg or (
             parent is not None and parent.returns is node
         ):
-            self.traverse(value, mode="eval", parent=node.parent)  # type: ignore
+            self.join_visit(value, node)
 
     def visit_Str(self, node: ast.Str) -> None:
         self.visit_str_helper(node.s, node)
@@ -250,7 +250,7 @@ class Scanner(ast.NodeVisitor):
             mode = "eval"
         type_comment = getattr(node, "type_comment", None)
         if type_comment is not None:
-            self.join_visit(type_comment, node, mode)
+            self.join_visit(type_comment, node, mode=mode)
 
     def traverse(
         self,
@@ -283,7 +283,7 @@ class Scanner(ast.NodeVisitor):
                 self.names.append(Name(lineno=node.lineno, name=node.s))
 
     def join_visit(
-        self, value: str, node: ast.AST, mode: str = "eval"
+        self, value: str, node: ast.AST, *, mode: str = "eval"
     ) -> None:
         """A function that parses the value, copies locations from the node and
         includes them in self.visit."""
@@ -356,44 +356,29 @@ class Scanner(ast.NodeVisitor):
         return self.import_names.count(name) > 1
 
     @functools.lru_cache(maxsize=None)
-    def get_duplicate_imports(self) -> List[ImportT]:
-        return [imp for imp in self.imports if self.is_duplicate(imp.name)]
+    def get_duplicate_imports(self, import_name: str) -> List[ImportT]:
+        return [
+            imp
+            for imp in self.imports
+            if import_name == imp.name and self.is_duplicate(imp.name)
+        ]
 
     def is_duplicate_import_used(self, imp: ImportT) -> bool:
         def find_nearest_imp(name: Name) -> ImportT:
             nearest = imp
-            for duplicate in self.get_duplicate_imports():
-                if duplicate.lineno < name.lineno:
-                    try:
-                        match_name = (
-                            ".".join(
-                                name.name.split(".")[
-                                    : len(duplicate.name.split("."))
-                                ]
-                            )
-                            == duplicate.name
-                        )
-                    except IndexError:
-                        continue
-                    if match_name:
-                        nearest = duplicate
+            for duplicate in self.get_duplicate_imports(imp.name):
+                if name.match(duplicate):
+                    nearest = duplicate
             return nearest
 
         for name in self.names:
-            if name.name == imp.name and imp == find_nearest_imp(name):
+            if name.match(imp) and imp == find_nearest_imp(name):
                 return True
         return False
 
     def is_import_used(self, imp: ImportT) -> bool:
         for name in self.names:
-            try:
-                match_name = (
-                    ".".join(name.name.split(".")[: len(imp.name.split("."))])
-                    == imp.name
-                )
-            except IndexError:
-                continue
-            if match_name:
+            if name.match(imp):
                 return True
         return False
 
