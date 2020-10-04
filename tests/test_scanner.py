@@ -226,12 +226,10 @@ class TestTypeVariable(ScannerTestCase):
         )
         expected_names = [
             Name(lineno=2, name="typing.TYPE_CHECKING"),
-            Name(lineno=2, name="typing"),
             Name(lineno=6, name="HistoryType"),
             Name(lineno=6, name="QWebEngineHistory"),
             Name(lineno=6, name="QWebHistory"),
             Name(lineno=6, name="typing.Union"),
-            Name(lineno=6, name="typing"),
         ]
         expected_imports = [
             Import(lineno=1, column=1, name="typing"),
@@ -311,9 +309,7 @@ class TestTypeVariable(ScannerTestCase):
             Name(lineno=2, name="TYPE_CHECKING"),
             Name(lineno=6, name="HistoryType"),
             Name(lineno=6, name="QtWebEngineWidgets.QWebEngineHistory"),
-            Name(lineno=6, name="QtWebEngineWidgets"),
             Name(lineno=6, name="QtWebKit.QWebHistory"),
-            Name(lineno=6, name="QtWebKit"),
             Name(lineno=6, name="Union"),
         ]
         expected_imports = [
@@ -351,11 +347,9 @@ class TestTypeVariable(ScannerTestCase):
         )
         expected_names = [
             Name(lineno=2, name="typing.TYPE_CHECKING"),
-            Name(lineno=2, name="typing"),
             Name(lineno=5, name="HistoryType"),
             Name(lineno=5, name="QWebHistory"),
             Name(lineno=5, name="typing.cast"),
-            Name(lineno=5, name="typing"),
         ]
         expected_imports = [
             Import(lineno=1, column=1, name="typing"),
@@ -416,7 +410,6 @@ class TestTypeVariable(ScannerTestCase):
             Name(lineno=2, name="TYPE_CHECKING"),
             Name(lineno=5, name="HistoryType"),
             Name(lineno=5, name="QtWebKit.QWebHistory"),
-            Name(lineno=5, name="QtWebKit"),
             Name(lineno=5, name="cast"),
             Name(lineno=5, name="return_value"),
         ]
