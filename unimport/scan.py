@@ -17,7 +17,11 @@ from typing import (
 )
 
 from unimport import color
-from unimport.constants import PY38_PLUS, SUBSCRIPT_TYPE_VARIABLE
+from unimport.constants import (
+    INITIAL_IMPORTS,
+    PY38_PLUS,
+    SUBSCRIPT_TYPE_VARIABLE,
+)
 from unimport.relate import first_occurrence, get_parents, relate
 from unimport.statement import Import, ImportFrom, Name
 from unimport.utils import get_dir, get_source, is_std
@@ -103,6 +107,8 @@ class Scanner(ast.NodeVisitor):
             return
         for column, alias in enumerate(node.names):
             name = alias.asname or alias.name
+            if name in INITIAL_IMPORTS:
+                name = name.split(".")[0]
             self.imports.append(
                 Import(
                     lineno=node.lineno,
