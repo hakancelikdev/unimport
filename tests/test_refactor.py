@@ -242,6 +242,18 @@ class TestUnusedRefactor(RefactorTestCase):
             self.session.refactor(action),
         )
 
+    def test_initial_imports(self):
+        from unimport.constants import INITIAL_IMPORTS
+
+        actions = [
+            (f"import {imp_name}\n{imp_name.split('.')[0]}\n")
+            for imp_name in INITIAL_IMPORTS
+        ]
+        self.assertListEqual(
+            actions,
+            [self.session.refactor(action) for action in actions],
+        )
+
 
 class TestDuplicateUnusedRefactor(RefactorTestCase):
     def test_full_unused(self):

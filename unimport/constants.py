@@ -56,3 +56,20 @@ if PY38_PLUS:
     SUBSCRIPT_TYPE_VARIABLE.extend(["Literal", "OrderedDict"])
 elif PY37_PLUS:
     SUBSCRIPT_TYPE_VARIABLE.append("Literal")
+
+INITIAL_IMPORTS = frozenset(
+    # https://docs.python.org/3/library/sys.html#sys.modules
+    # The first thing Python will do is look up the name of import in sys.modules.
+    # Initial modules are below.
+    {
+        "encodings.utf_8",
+        "encodings.aliases",
+        "encodings.latin_1",
+        "importlib._bootstrap",
+        "importlib.abc",
+        "importlib.machinery",
+        "importlib._bootstrap_external",
+        "importlib.util",
+        "os.path",
+    }
+)
