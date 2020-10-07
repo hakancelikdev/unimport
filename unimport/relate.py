@@ -2,7 +2,7 @@ import ast
 from typing import Iterator, Optional
 
 
-def relate(tree: ast.AST, parent: Optional[ast.AST] = None):
+def relate(tree: ast.AST, parent: Optional[ast.AST] = None) -> None:
     tree.parent = parent  # type: ignore
     for node in ast.walk(tree):
         for child in ast.iter_child_nodes(node):

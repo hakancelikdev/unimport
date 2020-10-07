@@ -383,10 +383,7 @@ class Scanner(ast.NodeVisitor):
         return False
 
     def is_import_used(self, imp: ImportT) -> bool:
-        for name in self.names:
-            if name.match(imp):
-                return True
-        return False
+        return any(name.match(imp) for name in self.names)
 
 
 class ImportableVisitor(ast.NodeVisitor):
