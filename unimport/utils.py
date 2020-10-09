@@ -1,12 +1,13 @@
 """It offers some utils according to the import name."""
-
+import contextlib
 import distutils.sysconfig
 import functools
 import importlib
-import importlib.machinery
-import importlib.util
+import importlib.machinery  # unimport: skip
+import importlib.util  # unimport: skip
 import sys
-from typing import FrozenSet, Optional
+import tokenize
+from typing import Dict, FrozenSet, Optional
 
 BUILTIN_MODULE_NAMES = frozenset(sys.builtin_module_names)
 STDLIB_PATH = distutils.sysconfig.get_python_lib(standard_lib=True)
@@ -53,3 +54,14 @@ def is_std(import_name: str) -> bool:
             spec.origin.endswith(".so"),
         )
     )
+
+
+@functools.lru_cache(maxsize=None)
+def recover_comments(text: str) -> Dict[int, str]:
+    comments = {}
+    with contextlib.suppress(tokenize.TokenError):
+        tokens = tokenize.generate_tokens(iter(text.splitlines()).__next__)
+        for token in tokens:
+            if token.type == tokenize.COMMENT:
+                comments[token.start[0]] = token.string
+    return comments
