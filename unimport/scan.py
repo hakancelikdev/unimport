@@ -317,17 +317,14 @@ class Scanner(ast.NodeVisitor):
         else:
             source_segment = self.source.splitlines()[node.lineno - 1]
         return (
-            self._is_match_skip_comment(source_segment)
-            or self.any_import_error
-        )
-
-    def _is_match_skip_comment(self, text: str) -> bool:
-        return bool(
-            re.search(
-                self.skip_comments_regex,
-                text,
-                re.IGNORECASE,
+            bool(
+                re.search(
+                    self.skip_comments_regex,
+                    source_segment,
+                    re.IGNORECASE,
+                )
             )
+            or self.any_import_error
         )
 
     def skip_file(self) -> bool:

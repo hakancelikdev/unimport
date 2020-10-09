@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - ././2020
 
+- [💪 Support multiline skip import only py3.8 and plus by @hakancelik96](https://github.com/hakancelik96/unimport/pull/138)
 - [🐞 Fix: Initial imports from sys.modules by @hakancelik96](https://github.com/hakancelik96/unimport/pull/136)
 - [🐞 Fix: import and name matcher by @hakancelik96](https://github.com/hakancelik96/unimport/pull/133)
 - [🐞 Fix: type comment by @hakancelik96](https://github.com/hakancelik96/unimport/pull/130)

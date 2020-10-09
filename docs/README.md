@@ -275,6 +275,25 @@ from x import ( # noqa
 )
 ```
 
+**If version of your python is 3.8+** Unimport support multiple skip like below. _It
+doesn't matter which line you put the comment on._
+
+```python
+from package import (
+    module,
+    module1,
+)  # unimport:skip
+```
+
+or
+
+```python
+from package import (
+    module, # unimport:skip
+    module1,
+)
+```
+
 ## File Wide Skips
 
 To skip a file by typing `# unimport: skip_file` anywhere in that file **for example:**
