@@ -7,6 +7,7 @@ import re
 from typing import (
     Any,
     Callable,
+    Dict,
     FrozenSet,
     Iterator,
     List,
@@ -76,6 +77,7 @@ class Scanner(ast.NodeVisitor):
         self.import_names: List[str] = []
         self.unused_imports: List[ImportT] = []
         self.any_import_error = False
+        self._comments: Dict[int, str] = {}
 
     @recursive
     def visit_FunctionDef(self, node: ASTFunctionT) -> None:
@@ -242,6 +244,8 @@ class Scanner(ast.NodeVisitor):
         self.source = source
         if self.skip_file():
             return
+        if PY38_PLUS:
+            self._comments = recover_comments(self.source)
         try:
             self.traverse(self.source)
         except SyntaxError:
@@ -307,11 +311,12 @@ class Scanner(ast.NodeVisitor):
         self.imports.clear()
         self.import_names.clear()
         self.unused_imports.clear()
+        self._comments = {}
 
     def skip_import(self, node: Union[ast.Import, ast.ImportFrom]) -> bool:
         if PY38_PLUS:
             lines = ast.get_source_segment(self.source, node).splitlines()
-            for line, comment in recover_comments(self.source).items():
+            for line, comment in self._comments.items():
                 lines.insert(line, " " + comment)
             source_segment = "".join(lines)
         else:
