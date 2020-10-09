@@ -105,7 +105,7 @@ class SkipImportTest(ScannerTestCase):
     def test_inside_try_except(self):
         source = (
             "try:\n"
-            "   import django # unimport:skip\n"
+            "   import django\n"
             "except ImportError:\n"
             "   print('install django')\n"
         )
@@ -142,6 +142,25 @@ class SkipImportTest(ScannerTestCase):
     def test_skip_comment_after_any_comment(self):
         source = "import x # any test comment unimport:skip any test comment\n"
         self.assertSkipEqual(source)
+
+    @unittest.skipIf(
+        not PY38_PLUS, "This feature is only available for python 3.8."
+    )
+    def test_skip_comment_multiline(self):
+        sources = [
+            ("from package import (\n" "    module\n" ")  # unimport: skip\n"),
+            (
+                "import os\n"
+                "import x\n"
+                "from package import (\n"
+                "    module,\n"
+                "    module,\n"
+                "    module,\n"
+                ")  # unimport: skip\n"
+            ),
+        ]
+        for source in sources:
+            self.assertSkipEqual(source)
 
 
 @unittest.skipIf(
