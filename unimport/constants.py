@@ -6,9 +6,8 @@ DESCRIPTION = (
 VERSION = "0.3.0"
 
 PY38_PLUS = sys.version_info >= (3, 8)
-PY37_PLUS = sys.version_info >= (3, 7)
 
-SUBSCRIPT_TYPE_VARIABLE = [
+SUBSCRIPT_TYPE_VARIABLE = {
     "AbstractSet",
     "AsyncContextManager",
     "AsyncGenerator",
@@ -50,12 +49,11 @@ SUBSCRIPT_TYPE_VARIABLE = [
     "Type",
     "Union",
     "ValuesView",
-]
-
-if PY38_PLUS:
-    SUBSCRIPT_TYPE_VARIABLE.extend(["Literal", "OrderedDict"])
-elif PY37_PLUS:
-    SUBSCRIPT_TYPE_VARIABLE.append("Literal")
+    # Python >= 3.7.
+    "Literal",
+    # Python >= 3.8.
+    "OrderedDict",
+}
 
 INITIAL_IMPORTS = frozenset(
     # https://docs.python.org/3/library/sys.html#sys.modules

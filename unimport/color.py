@@ -16,8 +16,7 @@ if sys.platform == "win32":  # pragma: no cover (windows)
             return args
 
         GetStdHandle = WINFUNCTYPE(HANDLE, DWORD)(
-            ("GetStdHandle", windll.kernel32),
-            ((1, "nStdHandle"),),
+            ("GetStdHandle", windll.kernel32), ((1, "nStdHandle"),),
         )
 
         GetConsoleMode = WINFUNCTYPE(BOOL, HANDLE, POINTER(DWORD))(

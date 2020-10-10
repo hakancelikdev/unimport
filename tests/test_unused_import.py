@@ -14,8 +14,7 @@ class UnusedTestCase(unittest.TestCase):
     def assertUnimportEqual(self, source, expected_unused_imports):
         self.session.scanner.scan(source)
         self.assertEqual(
-            expected_unused_imports,
-            self.session.scanner.unused_imports,
+            expected_unused_imports, self.session.scanner.unused_imports,
         )
         self.session.scanner.clear()
 
@@ -214,11 +213,7 @@ class TestUnusedImport(UnusedTestCase):
             ImportFrom(
                 lineno=2, column=2, name="z", star=False, suggestions=[]
             ),
-            Import(
-                lineno=5,
-                column=1,
-                name="x",
-            ),
+            Import(lineno=5, column=1, name="x",),
             ImportFrom(
                 lineno=7, column=2, name="ii", star=False, suggestions=[]
             ),
@@ -417,11 +412,7 @@ class TestDuplicate(UnusedTestCase):
             ImportFrom(
                 lineno=7, column=1, name="e", star=False, suggestions=[]
             ),
-            Import(
-                lineno=8,
-                column=1,
-                name="e",
-            ),
+            Import(lineno=8, column=1, name="e",),
             ImportFrom(
                 lineno=9, column=1, name="Path", star=False, suggestions=[]
             ),
@@ -458,11 +449,7 @@ class TestDuplicate(UnusedTestCase):
             ImportFrom(
                 lineno=7, column=1, name="e", star=False, suggestions=[]
             ),
-            Import(
-                lineno=8,
-                column=1,
-                name="e",
-            ),
+            Import(lineno=8, column=1, name="e",),
             ImportFrom(
                 lineno=9, column=1, name="Path", star=False, suggestions=[]
             ),
@@ -496,11 +483,7 @@ class TestDuplicate(UnusedTestCase):
                 lineno=3, column=1, name="x", star=False, suggestions=[]
             ),
             Import(lineno=4, column=1, name="re"),
-            Import(
-                lineno=5,
-                column=1,
-                name="ll",
-            ),
+            Import(lineno=5, column=1, name="ll",),
             ImportFrom(
                 lineno=7, column=1, name="e", star=False, suggestions=[]
             ),
@@ -543,11 +526,7 @@ class TestDuplicate(UnusedTestCase):
             ImportFrom(
                 lineno=1, column=3, name="t", star=False, suggestions=[]
             ),
-            Import(
-                lineno=2,
-                column=1,
-                name="t",
-            ),
+            Import(lineno=2, column=1, name="t",),
             ImportFrom(
                 lineno=3, column=1, name="t", star=False, suggestions=[]
             ),
@@ -605,11 +584,7 @@ class TestDuplicate(UnusedTestCase):
             "print(t)\n"
         )
         expected_unused_imports = [
-            Import(
-                lineno=1,
-                column=1,
-                name="t",
-            ),
+            Import(lineno=1, column=1, name="t",),
             ImportFrom(
                 lineno=2, column=1, name="t", star=False, suggestions=[]
             ),
@@ -640,11 +615,7 @@ class TestDuplicate(UnusedTestCase):
             "print(t)\n"
         )
         expected_unused_imports = [
-            Import(
-                lineno=1,
-                column=1,
-                name="t",
-            ),
+            Import(lineno=1, column=1, name="t",),
             ImportFrom(
                 lineno=2, column=1, name="t", star=False, suggestions=[]
             ),
@@ -654,11 +625,7 @@ class TestDuplicate(UnusedTestCase):
             ImportFrom(
                 lineno=3, column=2, name="z", star=False, suggestions=[]
             ),
-            Import(
-                lineno=6,
-                column=1,
-                name="x",
-            ),
+            Import(lineno=6, column=1, name="x",),
             ImportFrom(
                 lineno=8, column=2, name="ii", star=False, suggestions=[]
             ),
@@ -687,11 +654,7 @@ class TestDuplicate(UnusedTestCase):
             ImportFrom(
                 lineno=5, column=2, name="z", star=False, suggestions=[]
             ),
-            Import(
-                lineno=8,
-                column=1,
-                name="x",
-            ),
+            Import(lineno=8, column=1, name="x",),
             ImportFrom(
                 lineno=10, column=2, name="ii", star=False, suggestions=[]
             ),
@@ -769,11 +732,7 @@ class TestAsImport(UnusedTestCase):
             ImportFrom(
                 lineno=1, column=1, name="z", star=False, suggestions=[]
             ),
-            Import(
-                lineno=2,
-                column=1,
-                name="x",
-            ),
+            Import(lineno=2, column=1, name="x",),
             ImportFrom(
                 lineno=3, column=1, name="ss", star=False, suggestions=[]
             ),
@@ -795,11 +754,7 @@ class TestAsImport(UnusedTestCase):
             ImportFrom(
                 lineno=5, column=3, name="z", star=False, suggestions=[]
             ),
-            Import(
-                lineno=6,
-                column=1,
-                name="x",
-            ),
+            Import(lineno=6, column=1, name="x",),
         ]
         self.assertUnimportEqual(source, expected_unused_imports)
 
@@ -817,11 +772,7 @@ class TestAsImport(UnusedTestCase):
             ImportFrom(
                 lineno=1, column=1, name="z", star=False, suggestions=[]
             ),
-            Import(
-                lineno=2,
-                column=1,
-                name="x",
-            ),
+            Import(lineno=2, column=1, name="x",),
             ImportFrom(
                 lineno=3, column=1, name="ss", star=False, suggestions=[]
             ),
