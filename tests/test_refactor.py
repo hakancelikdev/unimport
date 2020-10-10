@@ -12,18 +12,34 @@ class RefactorTestCase(unittest.TestCase):
     def setUp(self):
         self.session = Session(include_star_import=self.include_star_import)
 
+    def assertActionAfterRefactorEqualToAction(self, action):
+        super().assertEqual(
+            textwrap.dedent(action),
+            self.session.refactor(textwrap.dedent(action)),
+        )
+
+    def assertActionAfterRefactorEqualToExpected(self, action, expected):
+        super().assertEqual(
+            textwrap.dedent(expected),
+            self.session.refactor(textwrap.dedent(action)),
+        )
+
+    def assertActionAfterRefactorEqualToEmpty(self, action):
+        self.assertActionAfterRefactorEqualToExpected(
+            action,
+            """\
+
+            """,
+        )
+
 
 class TestSyntaxErrorRefactor(RefactorTestCase):
-    def assertEqualActionToExpected(self, action):
-        action = textwrap.dedent(action)
-        return super().assertEqual(action, self.session.refactor(action))
-
     def test_syntax_error(self):
-        self.assertEqualActionToExpected("a :? = 0")
+        self.assertActionAfterRefactorEqualToAction("a :? = 0")
 
     def test_bad_syntax(self):
-        self.assertEqualActionToExpected(
-            """
+        self.assertActionAfterRefactorEqualToAction(
+            """\
             # -*- coding: utf-8 -*-
             € = 2
             """
@@ -33,8 +49,8 @@ class TestSyntaxErrorRefactor(RefactorTestCase):
         not PY38_PLUS, "This feature is only available for python 3.8."
     )
     def test_type_comments(self):
-        self.assertEqualActionToExpected(
-            """
+        self.assertActionAfterRefactorEqualToAction(
+            """\
             def function(): # type: blabla
                 pass
             """
@@ -43,206 +59,195 @@ class TestSyntaxErrorRefactor(RefactorTestCase):
 
 class TestUnusedRefactor(RefactorTestCase):
     def test_do_not_remove_augmented_imports(self):
-        action = (
-            "from django.conf.global_settings import AUTHENTICATION_BACKENDS, TEMPLATE_CONTEXT_PROCESSORS\n"
-            "AUTHENTICATION_BACKENDS += ('foo.bar.baz.EmailBackend',)\n"
-        )
-        expected = (
-            "from django.conf.global_settings import AUTHENTICATION_BACKENDS\n"
-            "AUTHENTICATION_BACKENDS += ('foo.bar.baz.EmailBackend',)\n"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            from django.conf.global_settings import AUTHENTICATION_BACKENDS, TEMPLATE_CONTEXT_PROCESSORS
+            AUTHENTICATION_BACKENDS += ('foo.bar.baz.EmailBackend',)
+            """,
+            """\
+            from django.conf.global_settings import AUTHENTICATION_BACKENDS
+            AUTHENTICATION_BACKENDS += ('foo.bar.baz.EmailBackend',)
+            """,
         )
 
     def test_multiple_imports(self):
-        action = (
-            "import x\n"
-            "import x.y\n"
-            "import x.y.z\n"
-            "import x, x.y\n"
-            "import x, x.y, x.y.z\n"
-            "import x.y, x.y.z, x.y.z\n"
-            "import x.y, x.y, x.y.z\n"
-            "from x import y\n"
-            "from x import y, z\n"
-            "from x.y import z, q\n"
-            "from x.y.z import z, q, zq\n"
-            "some()\n"
-            "calls()\n\n"
-            "# and comments\n"
-            "def maybe_functions():\n"
-            "    after()\n"
-            "from x import (\n"
-            "    y\n"
-            ")\n"
-            "from x import (\n"
-            "    y,\n"
-            "    z\n"
-            ")\n"
-            "from x import (\n"
-            "    y,\n"
-            "    z,\n"
-            ")\n"
-            "from x.y import (\n"
-            "    z,\n"
-            "    q,\n"
-            "    u,\n"
-            ")\n"
-            "from x.y import (\n"
-            "    z,\n"
-            "    q,\n"
-            "    u,\n"
-            "    z,\n"
-            "    q,\n"
-            ")\n"
-        )
-        expected = (
-            "some()\n"
-            "calls()\n\n"
-            "# and comments\n"
-            "def maybe_functions():\n"
-            "    after()\n"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            import x
+            import x.y
+            import x.y.z
+            import x, x.y
+            import x, x.y, x.y.z
+            import x.y, x.y.z, x.y.z
+            import x.y, x.y, x.y.z
+            from x import y
+            from x import y, z
+            from x.y import z, q
+            from x.y.z import z, q, zq
+            some()
+            calls()
+            # and comments
+            def maybe_functions():
+                after()
+            from x import (
+                y
+            )
+            from x import (
+                y,
+                z
+            )
+            from x import (
+                y,
+                z,
+            )
+            from x.y import (
+                z,
+                q,
+                u,
+            )
+            from x.y import (
+                z,
+                q,
+                u,
+                z,
+                q,
+            )
+            """,
+            """\
+            some()
+            calls()
+            # and comments
+            def maybe_functions():
+                after()
+            """,
         )
 
     def test_future_from_import(self):
-        action = (
-            "from __future__ import (\n"
-            "    absolute_import, division, print_function, unicode_literals\n"
-            ")\n"
-        )
-        self.assertEqual(
-            action,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToAction(
+            """\
+            from __future__ import (
+                absolute_import, division, print_function, unicode_literals
+            )
+            """
         )
 
     def test_future_import(self):
-        action = "import __future__\n" "__future__.absolute_import\n"
-        self.assertEqual(
-            action,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToAction(
+            """\
+            import __future__
+            __future__.absolute_import
+            """
         )
 
     def test_local_import(self):
-        action = (
-            "from .x import y\n"
-            "from ..z import t\n"
-            "from ...t import a\n"
-            "from .x import y, hakan\n"
-            "from ..z import u, b\n"
-            "from ...t import z, q\n\n"
-            "hakan\n"
-            "b\n"
-            "q()\n"
-        )
-        expected = (
-            "from .x import hakan\n"
-            "from ..z import b\n"
-            "from ...t import q\n\n"
-            "hakan\n"
-            "b\n"
-            "q()\n"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            from .x import y
+            from ..z import t
+            from ...t import a
+            from .x import y, hakan
+            from ..z import u, b
+            from ...t import z, q
+            hakan
+            b
+            q()
+            """,
+            """\
+            from .x import hakan
+            from ..z import b
+            from ...t import q
+            hakan
+            b
+            q()
+            """,
         )
 
     def test_remove_unused_from_imports(self):
-        action = (
-            "import datetime\n"
-            "from dateutil.relativedelta import relativedelta\n\n"
-            "print(f'The date is {datetime.datetime.now()}.')\n"
-        )
-        expected = (
-            "import datetime\n\n"
-            "print(f'The date is {datetime.datetime.now()}.')\n"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            import datetime
+            from dateutil.relativedelta import relativedelta
+            print(f'The date is {datetime.datetime.now()}.')
+            """,
+            """\
+            import datetime
+            print(f'The date is {datetime.datetime.now()}.')
+            """,
         )
 
     def test_inside_function_unused(self):
-        action = (
-            "def foo():\n"
-            "    from x import y, z\n"
-            "    try:\n"
-            "        import t\n"
-            "        print(t)\n"
-            "    except ImportError as exception:\n"
-            "        pass\n"
-            "    return math.pi\n"
-        )
-        expected = (
-            "def foo():\n"
-            "    try:\n"
-            "        import t\n"
-            "        print(t)\n"
-            "    except ImportError as exception:\n"
-            "        pass\n"
-            "    return math.pi\n"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            def foo():
+                from x import y, z
+                try:
+                    import t
+                    print(t)
+                except ImportError as exception:
+                    pass
+                return math.pi
+            """,
+            """\
+            def foo():
+                try:
+                    import t
+                    print(t)
+                except ImportError as exception:
+                    pass
+                return math.pi
+            """,
         )
 
     def test_comment(self):
-        action = (
-            "# This is not unused import, but it is unused import according to unimport.\n"
-            "# CASE 1\n"
-            "from codeop import compile_command\n\n"
-            "compile_command\n"
-        )
-        expected = (
-            "# This is not unused import, but it is unused import according to unimport.\n"
-            "# CASE 1\n"
-            "from codeop import compile_command\n\n"
-            "compile_command\n"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            # This is not unused import, but it is unused import according to unimport.
+            # CASE 1
+            from codeop import compile_command
+            compile_command
+            """,
+            """\
+            # This is not unused import, but it is unused import according to unimport.
+            # CASE 1
+            from codeop import compile_command
+            compile_command
+            """,
         )
 
     def test_star(self):
-        action = "from os import *\n" "walk\n"
-        self.assertEqual(
-            action,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToAction(
+            """\
+            from os import *
+            walk
+            """
         )
 
     def test_startswith_name(self):
-        action = "import xx\n" "xxx = 'test'\n"
-        expected = "xxx = 'test'\n"
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            import xx
+            xxx = "test"
+            """,
+            """\
+            xxx = "test"
+            """,
         )
 
     def test_get_star_imp_none(self):
-        action = (
-            "try:\n"
-            "    from x import *\n"
-            "except ImportError:\n"
-            "    pass\n"
-            "import t\n"
-        )
-        expected = (
-            "try:\n"
-            "    from x import *\n"
-            "except ImportError:\n"
-            "    pass\n"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            try:
+                from x import *
+            except ImportError:
+                pass
+            import t
+            """,
+            """\
+            try:
+                from x import *
+            except ImportError:
+                pass
+            """,
         )
 
     def test_initial_imports(self):
@@ -260,320 +265,316 @@ class TestUnusedRefactor(RefactorTestCase):
 
 class TestDuplicateUnusedRefactor(RefactorTestCase):
     def test_full_unused(self):
-        action = (
-            "from x import y\n"
-            "from x import y\n"
-            "from t import x\n"
-            "import re\n"
-            "import ll\n"
-            "import ll\n"
-            "from c import e\n"
-            "import e\n"
-        )
-        expected = "\n"
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToEmpty(
+            """\
+            from x import y
+            from x import y
+            from t import x
+            import re
+            import ll
+            import ll
+            from c import e
+            import e
+            """
         )
 
     def test_one_used(self):
-        action = (
-            "from x import y\n"
-            "from x import y\n"
-            "from t import x\n"
-            "import re\n"
-            "import ll\n"
-            "import ll\n"
-            "from c import e\n"
-            "import e\n"
-            "from pathlib import Path\n"
-            "from pathlib import Path\n"
-            "p = Path()\n"
-        )
-        expected = "from pathlib import Path\n" "p = Path()\n"
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            from x import y
+            from x import y
+            from t import x
+            import re
+            import ll
+            import ll
+            from c import e
+            import e
+            from pathlib import Path
+            from pathlib import Path
+            p = Path()
+            """,
+            """\
+            from pathlib import Path
+            p = Path()
+            """,
         )
 
     def test_two_used(self):
-        action = (
-            "from x import y\n"
-            "from x import y\n"
-            "from t import x\n"
-            "import re\n"
-            "import ll\n"
-            "import ll\n"
-            "from c import e\n"
-            "import e\n"
-            "from pathlib import Path\n"
-            "from pathlib import Path\n"
-            "p = Path()\n"
-            "print(ll)\n"
-        )
-
-        expected = (
-            "import ll\n"
-            "from pathlib import Path\n"
-            "p = Path()\n"
-            "print(ll)\n"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            from x import y
+            from x import y
+            from t import x
+            import re
+            import ll
+            import ll
+            from c import e
+            import e
+            from pathlib import Path
+            from pathlib import Path
+            p = Path()
+            print(ll)
+            """,
+            """\
+            import ll
+            from pathlib import Path
+            p = Path()
+            print(ll)
+            """,
         )
 
     def test_three_used(self):
-        action = (
-            "from x import y\n"
-            "from x import y\n"
-            "from t import x\n"
-            "import re\n"
-            "import ll\n"
-            "import ll\n"
-            "from c import e\n"
-            "import e\n"
-            "from pathlib import Path\n"
-            "from pathlib import Path\n"
-            "p = Path()\n"
-            "print(ll)\n"
-            "def function(e=e):pass\n"
-        )
-        expected = (
-            "import ll\n"
-            "import e\n"
-            "from pathlib import Path\n"
-            "p = Path()\n"
-            "print(ll)\n"
-            "def function(e=e):pass\n"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            from x import y
+            from x import y
+            from t import x
+            import re
+            import ll
+            import ll
+            from c import e
+            import e
+            from pathlib import Path
+            from pathlib import Path
+            p = Path()
+            print(ll)
+            def function(e=e):pass
+            """,
+            """\
+            import ll
+            import e
+            from pathlib import Path
+            p = Path()
+            print(ll)
+            def function(e=e):pass
+            """,
         )
 
     def test_different_duplicate_unused(self):
-        action = "from x import z\n" "from y import z\n"
-        expected = "\n"
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToEmpty(
+            """\
+            from x import z
+            from y import z
+            """,
         )
 
     def test_different_duplicate_used(self):
-        action = "from x import z\n" "from y import z\n" "print(z)\n"
-        expected = "from y import z\n" "print(z)\n"
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            from x import z
+            from y import z
+            print(z)
+            """,
+            """\
+            from y import z
+            print(z)
+            """,
         )
 
     def test_multi_duplicate(self):
-        action = "from x import y, z, t\n" "import t\n" "from l import t\n"
-        expected = "\n"
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToEmpty(
+            """\
+            from x import y, z, t
+            import t
+            from l import t
+            """,
         )
 
     def test_multi_duplicate_one_used(self):
-        action = (
-            "from x import y, z, t\n"
-            "import t\n"
-            "from l import t\n"
-            "print(t)\n"
-        )
-        expected = "from l import t\n" "print(t)\n"
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            from x import y, z, t
+            import t
+            from l import t
+            print(t)
+            """,
+            """\
+            from l import t
+            print(t)
+            """,
         )
 
     def test_one_used_bottom_multi_duplicate(self):
-        action = (
-            "import t\n"
-            "from l import t\n"
-            "from x import y, z, t\n"
-            "print(t)\n"
-        )
-        expected = "from x import t\n" "print(t)\n"
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            import t
+            from l import t
+            from x import y, z, t
+            print(t)
+            """,
+            """\
+            from x import t
+            print(t)
+            """,
         )
 
     def test_two_multi_duplicate_one_used(self):
-        action = (
-            "import t\n"
-            "from l import t\n"
-            "from x import y, z, t\n"
-            "from i import t, ii\n"
-            "print(t)\n"
-        )
-        expected = "from i import t\n" "print(t)\n"
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            import t
+            from l import t
+            from x import y, z, t
+            from i import ii, t
+            print(t)
+            """,
+            """\
+            from i import t
+            print(t)
+            """,
         )
 
     def test_import_in_function(self):
-        action = (
-            "import t\n"
-            "from l import t\n"
-            "from x import y, z, t\n\n"
-            "def function(f=t):\n"
-            "    import x\n"
-            "    return f\n"
-            "from i import t, ii\n"
-            "print(t)\n"
-        )
-        expected = (
-            "from x import t\n\n"
-            "def function(f=t):\n"
-            "    return f\n"
-            "from i import t\n"
-            "print(t)\n"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            import t
+            from l import t
+            from x import y, z, t
+            def function(f=t):
+                import x
+                return f
+            from i import ii, t
+            print(t)
+            """,
+            """\
+            from x import t
+            def function(f=t):
+                return f
+            from i import t
+            print(t)
+            """,
         )
 
     def test_import_in_function_used_two_different(self):
-        action = (
-            "import t\n"
-            "print(t)\n\n"
-            "from l import t\n"
-            "from x import y, z, t\n\n"
-            "def function(f=t):\n"
-            "    import x\n"
-            "    return f\n"
-            "from i import t, ii\n"
-            "print(t)\n"
-        )
-        expected = (
-            "import t\n"
-            "print(t)\n"
-            "from x import t\n\n"
-            "def function(f=t):\n"
-            "    return f\n"
-            "from i import t\n"
-            "print(t)\n"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            import t
+            print(t)
+            from l import t
+            from x import y, z, t
+            def function(f=t):
+                import x
+                return f
+            from i import ii, t
+            print(t)
+            """,
+            """\
+            import t
+            print(t)
+            from x import t
+            def function(f=t):
+                return f
+            from i import t
+            print(t)
+            """,
         )
 
     def test_startswith_name(self):
-        action = "import aa\n" "import aa\n" "aaa\n"
-        expected = "aaa\n"
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            import aa
+            aaa
+            """,
+            """\
+            aaa
+            """,
         )
 
     def test_same_line(self):
-        action = (
-            "import x, x, yt\n"
-            "import e, y, e\n"
-            "from z import u, u\n"
-            "from bb import c, d, c, c\n"
-            "import ff, tt, ff, ff, tt\n"
-            "from ee import (\n"
-            "   ll,\n"
-            "   el,\n"
-            "   ll,\n"
-            "   el,\n"
-            "   tl,\n"
-            "   tl,\n"
-            ")\n"
-            "import iss as si, si\n"
-            "from gu import ug,\\\n"
-            "ug"
-            "\n"
-            "x, e, u, c, ff, tt, ll, el, tl, si, ug, yt"
-        )
-        expected = (
-            "import x, yt\n"
-            "import e\n"
-            "from z import u\n"
-            "from bb import c\n"
-            "import ff, tt\n"
-            "from ee import (\n"
-            "   ll,\n"
-            "   el,\n"
-            "   tl\n"
-            ")\n"
-            "import si\n"
-            "from gu import ug\n"
-            "x, e, u, c, ff, tt, ll, el, tl, si, ug, yt"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            import x, x, yt
+            import e, y, e
+            from z import u, u
+            from bb import c, d, c, c
+            import ff, tt, ff, ff, tt
+            from ee import (
+               ll,
+               el,
+               ll,
+               el,
+               tl,
+               tl,
+            )
+            import iss as si, si
+            from gu import ug,\\
+            ug
+
+            x, e, u, c, ff, tt, ll, el, tl, si, ug, yt
+            """,
+            """\
+            import x, yt
+            import e
+            from z import u
+            from bb import c
+            import ff, tt
+            from ee import (
+               ll,
+               el,
+               tl
+            )
+            import si
+            from gu import ug
+
+            x, e, u, c, ff, tt, ll, el, tl, si, ug, yt
+            """,
         )
 
 
 class TestAsImport(RefactorTestCase):
     def test_as_import_all_unused_all_cases(self):
-        action = (
-            "from x import y as z\n"
-            "import x\n"
-            "from t import s as ss\n"
-            "import le as x\n"
-        )
-        expected = "\n"
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToEmpty(
+            """\
+            from x import y as z
+            import x
+            from t import s as ss
+            import le as x
+            """
         )
 
     def test_multiple_from_as_import(self):
-        action = (
-            "from f import a as c, l as k, i as ii\n"
-            "from fo import (bar, i, x as z)\n"
-        )
-        expected = "\n"
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToEmpty(
+            """\
+            from f import a as c, l as k, i as ii
+            from fo import (bar, i, x as z)
+            """,
         )
 
     def test_multiple_import_name_as_import(self):
-        action = "import a as c, l as k, i as ii\n" "import bar, i, x as z\n"
-        expected = "\n"
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToEmpty(
+            """\
+            import a as c, l as k, i as ii
+            import bar, i, x as z
+            """,
         )
 
     def test_multiple_import_name_as_import_duplicate(self):
-        action = (
-            "import a as c, l as k, i as ii\n"
-            "import bar, i, x as z\n"
-            "import bar, i, x as z\n"
-            "print(bar)\n"
-        )
-        expected = "import bar\n" "print(bar)\n"
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            import a as c, l as k, i as ii
+            import bar, i, x as z
+            import bar, i, x as z
+            print(bar)
+            """,
+            """\
+            import bar
+            print(bar)
+            """,
         )
 
     def test_as_import_used_all_cases(self):
-        action = (
-            "from x import y as z\n"
-            "import x\n"
-            "from t import s as ss\n"
-            "import bar, i, x as z\n"
-            "import le as x\n"
-            "print(x)\n"
-        )
-        expected = "import le as x\n" "print(x)\n"
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            from x import y as z
+            import x
+            from t import s as ss
+            import bar, i, x as z
+            import le as x
+            print(x)
+            """,
+            """\
+            import le as x
+            print(x)
+            """,
         )
 
 
@@ -581,84 +582,78 @@ class TestStarImport(RefactorTestCase):
     include_star_import = True
 
     def test_star_imports(self):
-        action = (
-            "from os import *\n"
-            "from x import y\n"
-            "from re import *\n"
-            "from t.s.d import *\n"
-            "from lib2to3.pgen2.token import *\n"
-            "from lib2to3.fixer_util import *\n\n"
-            "print(match)\n"
-            "print(search)\n"
-            "print(NAME)\n\n"
-        )
-        expected = (
-            "from re import match, search\n"
-            "from lib2to3.pgen2.token import NAME\n\n"
-            "print(match)\n"
-            "print(search)\n"
-            "print(NAME)\n\n"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            from os import *
+            from x import y
+            from re import *
+            from t.s.d import *
+            from lib2to3.pgen2.token import *
+            from lib2to3.fixer_util import *
+            print(match)
+            print(search)
+            print(NAME)
+            """,
+            """\
+            from re import match, search
+            from lib2to3.pgen2.token import NAME
+            print(match)
+            print(search)
+            print(NAME)
+            """,
         )
 
     def test_star_import_2(self):
-        action = (
-            "from typing import (\n"
-            "    Callable,\n"
-            "    Iterable,\n"
-            "    Iterator,\n"
-            "    List,\n"
-            "    Optional,\n"
-            "    Text,\n"
-            "    Tuple,\n"
-            "    Pattern,\n"
-            "    Union,\n"
-            "    cast,\n"
-            ")\n"
-            "from lib2to3.pgen2.token import *\n"
-            "from lib2to3.pgen2.grammar import *\n"
-            "print(Grammar)\n"
-        )
-        expected = (
-            "from lib2to3.pgen2.grammar import Grammar\n" "print(Grammar)\n"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            from typing import (
+                Callable,
+                Iterable,
+                Iterator,
+                List,
+                Optional,
+                Text,
+                Tuple,
+                Pattern,
+                Union,
+                cast,
+            )
+            from lib2to3.pgen2.token import *
+            from lib2to3.pgen2.grammar import *
+            print(Grammar)
+            """,
+            """\
+            from lib2to3.pgen2.grammar import Grammar
+            print(Grammar)
+            """,
         )
 
     def test_two_suggestions(self):
-        action = (
-            "from time import *\n"
-            "from os import *\n"
-            "time()  # Function from time module.\n"
-            "path.join()\n"
-        )
-        expected = (
-            "from time import time\n"
-            "from os import path\n"
-            "time()  # Function from time module.\n"
-            "path.join()\n"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            from time import *
+            from os import *
+            time()  # Function from time module.
+            path.join()
+            """,
+            """\
+            from time import time
+            from os import path
+            time()  # Function from time module.
+            path.join()
+            """,
         )
 
     def test_get_source_from_importable_names(self):
-        action = (
-            "from libcst.metadata import *\n" "CodeRange, PositionProvider\n"
-        )
-        expected = (
-            "from libcst.metadata import CodeRange, PositionProvider\n"
-            "CodeRange, PositionProvider\n"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            from libcst.metadata import *
+            CodeRange, PositionProvider
+            """,
+            """\
+            from libcst.metadata import CodeRange, PositionProvider
+            CodeRange, PositionProvider
+            """,
         )
 
 
@@ -668,61 +663,58 @@ class TestImportError(RefactorTestCase):
     include_star_import = True
 
     def test_import_else_another(self):
-        action = (
-            "try:\n"
-            "   import x\n"
-            "except ImportError:\n"
-            "    import y as x\n"
-            "print(x)\n"
-        )
-        self.assertEqual(
-            action,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToAction(
+            """\
+            try:
+               import x
+            except ImportError:
+                import y as x
+            print(x)
+            """
         )
 
     def test_as_import(self):
-        action = (
-            "try:\n"
-            "    import x\n"
-            "except ImportError as err:\n"
-            "    print('try this code `pip install x`')\n"
-        )
-        self.assertEqual(
-            action,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToAction(
+            """\
+            try:
+                import x
+            except ImportError as err:
+                print('try this code `pip install x`')
+            """
         )
 
     def test_tuple(self):
-        action = "try:\n" "    import xa\n" "except (A, ImportError): pass\n"
-        self.assertEqual(
-            action,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToAction(
+            """\
+            try:
+                import xa
+            except (A, ImportError):
+                pass
+            """
         )
 
     def test_inside_function_unused(self):
-        action = (
-            "def foo():\n"
-            "    from abc import *\n"
-            "    try:\n"
-            "        import t\n"
-            "        print(ABCMeta)\n"
-            "    except ImportError as exception:\n"
-            "        pass\n"
-            "    return math.pi\n"
-        )
-        expected = (
-            "def foo():\n"
-            "    from abc import ABCMeta\n"
-            "    try:\n"
-            "        import t\n"
-            "        print(ABCMeta)\n"
-            "    except ImportError as exception:\n"
-            "        pass\n"
-            "    return math.pi\n"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            def foo():
+                from abc import *
+                try:
+                    import t
+                    print(ABCMeta)
+                except ImportError as exception:
+                    pass
+                return math.pi
+            """,
+            """\
+            def foo():
+                from abc import ABCMeta
+                try:
+                    import t
+                    print(ABCMeta)
+                except ImportError as exception:
+                    pass
+                return math.pi
+            """,
         )
 
 
@@ -734,102 +726,89 @@ class TestTyping(RefactorTestCase):
         not PY38_PLUS, "This feature is only available for python 3.8."
     )
     def test_type_comments(self):
-        action = (
-            "from typing import Any\n"
-            "from typing import Tuple\n"
-            "from typing import Union\n"
-            "def function(a, b):\n"
-            "    # type: (Any, str) -> Union[Tuple[None, None], Tuple[str, str]]\n"
-            "    pass\n"
-        )
-        self.assertEqual(
-            action,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToAction(
+            """\
+            from typing import Any
+            from typing import Tuple
+            from typing import Union
+            def function(a, b):
+                # type: (Any, str) -> Union[Tuple[None, None], Tuple[str, str]]
+                pass
+            """
         )
 
     @unittest.skipIf(
         not PY38_PLUS, "This feature is only available for python 3.8."
     )
     def test_type_comments_with_variable(self):
-        action = (
-            "from typing import List\n"
-            "test_variable = [2] # type: List[int]\n"
-        )
-        self.assertEqual(
-            action,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToAction(
+            """\
+            from typing import List
+            test_variable = [2] # type: List[int]
+            """
         )
 
     @unittest.skipIf(
         not PY38_PLUS, "This feature is only available for python 3.8."
     )
     def test_type_comment_params(self):
-        action = (
-            "from typing import List\n"
-            "def x(\n"
-            "   f: # type:List,\n"
-            "   r: # type:str\n"
-            "):\n"
-            "   pass\n"
-        )
-        self.assertEqual(
-            action,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToAction(
+            """\
+            from typing import List
+            def x(
+               f: # type:List,
+               r: # type:str
+            ):
+               pass
+            """
         )
 
     @unittest.skipIf(
         not PY38_PLUS, "This feature is only available for python 3.8."
     )
     def test_type_comment_funcdef(self):
-        action = (
-            "from typing import List\n"
-            "def x(y):\n"
-            "   # type: (str) -> List[str]"
-            "   pass\n"
-        )
-        self.assertEqual(
-            action,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToAction(
+            """\
+            from typing import List
+            def x(y):
+               # type: (str) -> List[str]
+               pass
+            """
         )
 
     def test_variable(self):
-        action = "from typing import List, Dict\n" "test: 'List[Dict]'\n"
-        self.assertEqual(
-            action,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToAction(
+            """\
+            from typing import Dict, List
+            test: "List[Dict]"
+            """
         )
 
     def test_function_arg(self):
-        action = (
-            "from typing import List, Dict\n"
-            "def test(arg:'List[Dict]') -> None : \n"
-            "   pass\n"
-        )
-        self.assertEqual(
-            action,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToAction(
+            """\
+            from typing import Dict, List
+            def test(arg:"List[Dict]") -> None:
+               pass
+            """
         )
 
     def test_function_str_arg(self):
-        action = (
-            """from typing import Literal, Dict\n"""
-            """def test(item, when: "Literal['Dict']") -> None :\n"""
-            """   pass\n"""
-        )
-        self.assertEqual(
-            action,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToAction(
+            """\
+            from typing import Dict, Literal
+            def test(item, when: "Literal['Dict']") -> None:
+               pas
+            """
         )
 
     def test_function_return(self):
-        action = (
-            "from typing import List, Dict\n"
-            "def test(arg: list) -> 'List[Dict]': \n"
-            "   pass\n"
-        )
-        self.assertEqual(
-            action,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToAction(
+            """\
+            from typing import Dict, List
+            def test(arg: list) -> "List[Dict]":
+               pass
+            """
         )
 
 
@@ -837,187 +816,189 @@ class TestTypeVariable(RefactorTestCase):
     def test_type_assing_union(self):
         actions = [
             (
-                "import typing\n"
-                "if typing.TYPE_CHECKING:\n"
-                "   from PyQt5.QtWebEngineWidgets import QWebEngineHistory\n"
-                "   from PyQt5.QtWebKit import QWebHistory\n"
-                "\n"
-                "HistoryType = typing.Union['QWebEngineHistory', 'QWebHistory']\n"
-                "\n"
+                """\
+                import typing
+                if typing.TYPE_CHECKING:
+                   from PyQt5.QtWebEngineWidgets import QWebEngineHistory
+                   from PyQt5.QtWebKit import QWebHistory
+
+                HistoryType = typing.Union['QWebEngineHistory', 'QWebHistory']
+
+                """
             ),
             (
-                "from typing import TYPE_CHECKING, Union\n"
-                "if TYPE_CHECKING:\n"
-                "   from PyQt5.QtWebEngineWidgets import QWebEngineHistory\n"
-                "   from PyQt5.QtWebKit import QWebHistory\n"
-                "\n"
-                "HistoryType = Union['QWebEngineHistory', 'QWebHistory']\n"
-                "\n"
+                """\
+                from typing import TYPE_CHECKING, Union
+                if TYPE_CHECKING:
+                   from PyQt5.QtWebEngineWidgets import QWebEngineHistory
+                   from PyQt5.QtWebKit import QWebHistory
+
+                HistoryType = Union['QWebEngineHistory', 'QWebHistory']
+
+                """
             ),
             (
-                "from typing import TYPE_CHECKING, Union\n"
-                "if TYPE_CHECKING:\n"
-                "   from PyQt5 import QtWebEngineWidgets\n"
-                "   from PyQt5 import QtWebKit\n"
-                "\n"
-                "HistoryType = Union['QtWebEngineWidgets.QWebEngineHistory', 'QtWebKit.QWebHistory']\n"
-                "\n"
+                """\
+                from typing import TYPE_CHECKING, Union
+                if TYPE_CHECKING:
+                   from PyQt5 import QtWebEngineWidgets, QtWebKit
+
+                HistoryType = Union['QtWebEngineWidgets.QWebEngineHistory', 'QtWebKit.QWebHistory']
+
+                """
             ),
         ]
         for action in actions:
-            self.assertEqual(
-                action,
-                self.session.refactor(action),
-            )
+            self.assertActionAfterRefactorEqualToAction(action)
 
     def test_type_assing_list(self):
         actions = [
             (
-                "import typing\n"
-                "if typing.TYPE_CHECKING:\n"
-                "   from PyQt5.QtWebKit import QWebHistory\n"
-                "\n"
-                "HistoryType = typing.List['QWebHistory']\n"
-                "\n"
+                """\
+                import typing
+                if typing.TYPE_CHECKING:
+                   from PyQt5.QtWebKit import QWebHistory
+
+                HistoryType = typing.List['QWebHistory']
+
+                """
             ),
             (
-                "from typing import TYPE_CHECKING, List\n"
-                "if TYPE_CHECKING:\n"
-                "   from PyQt5.QtWebKit import QWebHistory\n"
-                "\n"
-                "HistoryType = List['QWebHistory']\n"
-                "\n"
+                """\
+                from typing import TYPE_CHECKING, List
+                if TYPE_CHECKING:
+                   from PyQt5.QtWebKit import QWebHistory
+
+                HistoryType = List['QWebHistory']
+
+                """
             ),
         ]
         for action in actions:
-            self.assertEqual(
-                action,
-                self.session.refactor(action),
-            )
+            self.assertActionAfterRefactorEqualToAction(action)
 
     def test_type_assing_cast(self):
         actions = [
             (
-                "import typing\n"
-                "if typing.TYPE_CHECKING:\n"
-                "   from PyQt5.QtWebKit import QWebHistory\n"
-                "\n"
-                "HistoryType = typing.cast('QWebHistory', None)\n"
-                "\n"
+                """\
+                import typing
+                if typing.TYPE_CHECKING:
+                   from PyQt5.QtWebKit import QWebHistory
+
+                HistoryType = typing.cast('QWebHistory', None)
+
+                """
             ),
             (
-                "from typing import TYPE_CHECKING\n"
-                "if TYPE_CHECKING:\n"
-                "   from PyQt5.QtWebKit import QWebHistory\n"
-                "\n"
-                "HistoryType = cast('QWebHistory', return_value)\n"
-                "\n"
+                """\
+                from typing import TYPE_CHECKING
+                if TYPE_CHECKING:
+                   from PyQt5.QtWebKit import QWebHistory
+
+                HistoryType = cast('QWebHistory', return_value)
+
+                """
             ),
             (
-                "from typing import TYPE_CHECKING\n"
-                "if TYPE_CHECKING:\n"
-                "   from PyQt5 import QtWebKit\n"
-                "\n"
-                "HistoryType = cast('QtWebKit.QWebHistory', return_value)\n"
-                "\n"
+                """\
+                from typing import TYPE_CHECKING
+                if TYPE_CHECKING:
+                   from PyQt5 import QtWebKit
+
+                HistoryType = cast('QtWebKit.QWebHistory', return_value)
+
+                """
             ),
         ]
         for action in actions:
-            self.assertEqual(
-                action,
-                self.session.refactor(action),
-            )
+            self.assertActionAfterRefactorEqualToAction(action)
 
 
 class TestStyle(RefactorTestCase):
     def test_1_vertical(self):
-        action = (
-            "from x import (\n"
-            "   q,\n"
-            "   e,\n"
-            "   r,\n"
-            "   t\n"
-            ")\n"
-            "import y\n"
-            "import u\n"
-            "y, q, e, r, t\n"
-        )
-        expected = (
-            "from x import (\n"
-            "   q,\n"
-            "   e,\n"
-            "   r,\n"
-            "   t\n"
-            ")\n"
-            "import y\n"
-            "y, q, e, r, t\n"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            from x import (
+               q,
+               e,
+               r,
+               t
+            )
+            import y
+            import u
+            y, q, e, r, t
+            """,
+            """\
+            from x import (
+               q,
+               e,
+               r,
+               t
+            )
+            import y
+            y, q, e, r, t
+            """,
         )
 
     def test_2_1_vertical(self):
-        action = (
-            "from x import (\n"
-            "   q,\n"
-            "   e,\n"
-            "   r,\n"
-            "   t\n"
-            ")\n"
-            "import y\n"
-            "import u\n"
-            "y, q, e, t\n"
-        )
-        expected = (
-            "from x import (\n"
-            "   q,\n"
-            "   e,\n"
-            "   t\n"
-            ")\n"
-            "import y\n"
-            "y, q, e, t\n"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            from x import (
+               q,
+               e,
+               r,
+               t
+            )
+            import y
+            import u
+            y, q, e, t
+            """,
+            """\
+            from x import (
+               q,
+               e,
+               t
+            )
+            import y
+            y, q, e, t
+            """,
         )
 
     def test_3_1_vertical(self):
-        action = (
-            "from x import (\n"
-            "   q,\n"
-            "   e,\n"
-            "   r,\n"
-            "   t,\n"
-            ")\n"
-            "import y\n"
-            "import u\n"
-            "y, q, e, r\n"
-        )
-        expected = (
-            "from x import (\n"
-            "   q,\n"
-            "   e,\n"
-            "   r\n"
-            ")\n"
-            "import y\n"
-            "y, q, e, r\n"
-        )
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            from x import (
+               q,
+               e,
+               r,
+               t,
+            )
+            import y
+            import u
+            y, q, e, r
+            """,
+            """\
+            from x import (
+               q,
+               e,
+               r
+            )
+            import y
+            y, q, e, r
+            """,
         )
 
     def test_4_1_paren_horizontal(self):
-        action = (
-            "from x import (q, e, r, t)\n"
-            "import y\n"
-            "import u\n"
-            "y, q, e, r\n"
-        )
-        expected = "from x import (q, e, r)\n" "import y\n" "y, q, e, r\n"
-        self.assertEqual(
-            expected,
-            self.session.refactor(action),
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            from x import (q, e, r, t)
+            import y
+            import u
+            y, q, e, r
+            """,
+            """\
+            from x import (q, e, r)
+            import y
+            y, q, e, r
+            """,
         )
