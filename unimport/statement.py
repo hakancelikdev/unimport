@@ -6,7 +6,7 @@ class Name(NamedTuple):
     lineno: int
     name: str
 
-    def match(self, imp: Union["Import", "ImportFrom"]) -> bool:
+    def match(self, imp: Union[Import, ImportFrom]) -> bool:
         return (
             imp.lineno < self.lineno
             and ".".join(self.name.split(".")[: len(imp)]) == imp.name
