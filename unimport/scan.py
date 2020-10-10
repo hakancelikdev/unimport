@@ -59,7 +59,10 @@ class Scanner(ast.NodeVisitor):
     skip_comments_regex = "#.*(unimport: {0,1}skip|noqa)"
 
     def __init__(
-        self, *, include_star_import: bool = False, show_error: bool = False,
+        self,
+        *,
+        include_star_import: bool = False,
+        show_error: bool = False,
     ):
         """If include_star_import is True during the analysis, it takes into
         account start imports, if it's False, it doesn't.
@@ -109,7 +112,11 @@ class Scanner(ast.NodeVisitor):
             if name in INITIAL_IMPORTS:
                 name = name.split(".")[0]
             self.imports.append(
-                Import(lineno=node.lineno, column=column + 1, name=name,)
+                Import(
+                    lineno=node.lineno,
+                    column=column + 1,
+                    name=name,
+                )
             )
             self.import_names.append(name)
 
@@ -317,7 +324,9 @@ class Scanner(ast.NodeVisitor):
         return (
             bool(
                 re.search(
-                    self.skip_comments_regex, source_segment, re.IGNORECASE,
+                    self.skip_comments_regex,
+                    source_segment,
+                    re.IGNORECASE,
                 )
             )
             or self.any_import_error

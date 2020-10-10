@@ -16,13 +16,15 @@ class TestSyntaxErrorRefactor(RefactorTestCase):
     def test_syntax_error(self):
         action = "a :? = 0\n"
         self.assertEqual(
-            action, self.session.refactor(action),
+            action,
+            self.session.refactor(action),
         )
 
     def test_bad_syntax(self):
         action = "# -*- coding: utf-8 -*-\n€ = 2\n"
         self.assertEqual(
-            action, self.session.refactor(action),
+            action,
+            self.session.refactor(action),
         )
 
     @unittest.skipIf(
@@ -31,7 +33,8 @@ class TestSyntaxErrorRefactor(RefactorTestCase):
     def test_type_comments(self):
         action = "def function(): # type: blabla\n" "    pass\n"
         self.assertEqual(
-            action, self.session.refactor(action),
+            action,
+            self.session.refactor(action),
         )
 
 
@@ -46,7 +49,8 @@ class TestUnusedRefactor(RefactorTestCase):
             "AUTHENTICATION_BACKENDS += ('foo.bar.baz.EmailBackend',)\n"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_multiple_imports(self):
@@ -99,7 +103,8 @@ class TestUnusedRefactor(RefactorTestCase):
             "    after()\n"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_future_from_import(self):
@@ -109,13 +114,15 @@ class TestUnusedRefactor(RefactorTestCase):
             ")\n"
         )
         self.assertEqual(
-            action, self.session.refactor(action),
+            action,
+            self.session.refactor(action),
         )
 
     def test_future_import(self):
         action = "import __future__\n" "__future__.absolute_import\n"
         self.assertEqual(
-            action, self.session.refactor(action),
+            action,
+            self.session.refactor(action),
         )
 
     def test_local_import(self):
@@ -139,7 +146,8 @@ class TestUnusedRefactor(RefactorTestCase):
             "q()\n"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_remove_unused_from_imports(self):
@@ -153,7 +161,8 @@ class TestUnusedRefactor(RefactorTestCase):
             "print(f'The date is {datetime.datetime.now()}.')\n"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_inside_function_unused(self):
@@ -177,7 +186,8 @@ class TestUnusedRefactor(RefactorTestCase):
             "    return math.pi\n"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_comment(self):
@@ -194,20 +204,23 @@ class TestUnusedRefactor(RefactorTestCase):
             "compile_command\n"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_star(self):
         action = "from os import *\n" "walk\n"
         self.assertEqual(
-            action, self.session.refactor(action),
+            action,
+            self.session.refactor(action),
         )
 
     def test_startswith_name(self):
         action = "import xx\n" "xxx = 'test'\n"
         expected = "xxx = 'test'\n"
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_get_star_imp_none(self):
@@ -225,7 +238,8 @@ class TestUnusedRefactor(RefactorTestCase):
             "    pass\n"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_initial_imports(self):
@@ -236,7 +250,8 @@ class TestUnusedRefactor(RefactorTestCase):
             for imp_name in INITIAL_IMPORTS
         ]
         self.assertListEqual(
-            actions, [self.session.refactor(action) for action in actions],
+            actions,
+            [self.session.refactor(action) for action in actions],
         )
 
 
@@ -254,7 +269,8 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
         )
         expected = "\n"
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_one_used(self):
@@ -273,7 +289,8 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
         )
         expected = "from pathlib import Path\n" "p = Path()\n"
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_two_used(self):
@@ -299,7 +316,8 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
             "print(ll)\n"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_three_used(self):
@@ -327,28 +345,32 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
             "def function(e=e):pass\n"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_different_duplicate_unused(self):
         action = "from x import z\n" "from y import z\n"
         expected = "\n"
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_different_duplicate_used(self):
         action = "from x import z\n" "from y import z\n" "print(z)\n"
         expected = "from y import z\n" "print(z)\n"
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_multi_duplicate(self):
         action = "from x import y, z, t\n" "import t\n" "from l import t\n"
         expected = "\n"
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_multi_duplicate_one_used(self):
@@ -360,7 +382,8 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
         )
         expected = "from l import t\n" "print(t)\n"
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_one_used_bottom_multi_duplicate(self):
@@ -372,7 +395,8 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
         )
         expected = "from x import t\n" "print(t)\n"
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_two_multi_duplicate_one_used(self):
@@ -385,7 +409,8 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
         )
         expected = "from i import t\n" "print(t)\n"
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_import_in_function(self):
@@ -407,7 +432,8 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
             "print(t)\n"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_import_in_function_used_two_different(self):
@@ -432,14 +458,16 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
             "print(t)\n"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_startswith_name(self):
         action = "import aa\n" "import aa\n" "aaa\n"
         expected = "aaa\n"
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_same_line(self):
@@ -479,7 +507,8 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
             "x, e, u, c, ff, tt, ll, el, tl, si, ug, yt"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
 
@@ -493,7 +522,8 @@ class TestAsImport(RefactorTestCase):
         )
         expected = "\n"
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_multiple_from_as_import(self):
@@ -503,14 +533,16 @@ class TestAsImport(RefactorTestCase):
         )
         expected = "\n"
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_multiple_import_name_as_import(self):
         action = "import a as c, l as k, i as ii\n" "import bar, i, x as z\n"
         expected = "\n"
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_multiple_import_name_as_import_duplicate(self):
@@ -522,7 +554,8 @@ class TestAsImport(RefactorTestCase):
         )
         expected = "import bar\n" "print(bar)\n"
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_as_import_used_all_cases(self):
@@ -536,7 +569,8 @@ class TestAsImport(RefactorTestCase):
         )
         expected = "import le as x\n" "print(x)\n"
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
 
@@ -563,7 +597,8 @@ class TestStarImport(RefactorTestCase):
             "print(NAME)\n\n"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_star_import_2(self):
@@ -588,7 +623,8 @@ class TestStarImport(RefactorTestCase):
             "from lib2to3.pgen2.grammar import Grammar\n" "print(Grammar)\n"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_two_suggestions(self):
@@ -605,7 +641,8 @@ class TestStarImport(RefactorTestCase):
             "path.join()\n"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_get_source_from_importable_names(self):
@@ -617,7 +654,8 @@ class TestStarImport(RefactorTestCase):
             "CodeRange, PositionProvider\n"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
 
@@ -635,7 +673,8 @@ class TestImportError(RefactorTestCase):
             "print(x)\n"
         )
         self.assertEqual(
-            action, self.session.refactor(action),
+            action,
+            self.session.refactor(action),
         )
 
     def test_as_import(self):
@@ -646,13 +685,15 @@ class TestImportError(RefactorTestCase):
             "    print('try this code `pip install x`')\n"
         )
         self.assertEqual(
-            action, self.session.refactor(action),
+            action,
+            self.session.refactor(action),
         )
 
     def test_tuple(self):
         action = "try:\n" "    import xa\n" "except (A, ImportError): pass\n"
         self.assertEqual(
-            action, self.session.refactor(action),
+            action,
+            self.session.refactor(action),
         )
 
     def test_inside_function_unused(self):
@@ -677,7 +718,8 @@ class TestImportError(RefactorTestCase):
             "    return math.pi\n"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
 
@@ -698,7 +740,8 @@ class TestTyping(RefactorTestCase):
             "    pass\n"
         )
         self.assertEqual(
-            action, self.session.refactor(action),
+            action,
+            self.session.refactor(action),
         )
 
     @unittest.skipIf(
@@ -710,7 +753,8 @@ class TestTyping(RefactorTestCase):
             "test_variable = [2] # type: List[int]\n"
         )
         self.assertEqual(
-            action, self.session.refactor(action),
+            action,
+            self.session.refactor(action),
         )
 
     @unittest.skipIf(
@@ -726,7 +770,8 @@ class TestTyping(RefactorTestCase):
             "   pass\n"
         )
         self.assertEqual(
-            action, self.session.refactor(action),
+            action,
+            self.session.refactor(action),
         )
 
     @unittest.skipIf(
@@ -740,13 +785,15 @@ class TestTyping(RefactorTestCase):
             "   pass\n"
         )
         self.assertEqual(
-            action, self.session.refactor(action),
+            action,
+            self.session.refactor(action),
         )
 
     def test_variable(self):
         action = "from typing import List, Dict\n" "test: 'List[Dict]'\n"
         self.assertEqual(
-            action, self.session.refactor(action),
+            action,
+            self.session.refactor(action),
         )
 
     def test_function_arg(self):
@@ -756,7 +803,8 @@ class TestTyping(RefactorTestCase):
             "   pass\n"
         )
         self.assertEqual(
-            action, self.session.refactor(action),
+            action,
+            self.session.refactor(action),
         )
 
     def test_function_str_arg(self):
@@ -766,7 +814,8 @@ class TestTyping(RefactorTestCase):
             """   pass\n"""
         )
         self.assertEqual(
-            action, self.session.refactor(action),
+            action,
+            self.session.refactor(action),
         )
 
     def test_function_return(self):
@@ -776,7 +825,8 @@ class TestTyping(RefactorTestCase):
             "   pass\n"
         )
         self.assertEqual(
-            action, self.session.refactor(action),
+            action,
+            self.session.refactor(action),
         )
 
 
@@ -813,7 +863,8 @@ class TestTypeVariable(RefactorTestCase):
         ]
         for action in actions:
             self.assertEqual(
-                action, self.session.refactor(action),
+                action,
+                self.session.refactor(action),
             )
 
     def test_type_assing_list(self):
@@ -837,7 +888,8 @@ class TestTypeVariable(RefactorTestCase):
         ]
         for action in actions:
             self.assertEqual(
-                action, self.session.refactor(action),
+                action,
+                self.session.refactor(action),
             )
 
     def test_type_assing_cast(self):
@@ -869,7 +921,8 @@ class TestTypeVariable(RefactorTestCase):
         ]
         for action in actions:
             self.assertEqual(
-                action, self.session.refactor(action),
+                action,
+                self.session.refactor(action),
             )
 
 
@@ -897,7 +950,8 @@ class TestStyle(RefactorTestCase):
             "y, q, e, r, t\n"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_2_1_vertical(self):
@@ -922,7 +976,8 @@ class TestStyle(RefactorTestCase):
             "y, q, e, t\n"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_3_1_vertical(self):
@@ -947,7 +1002,8 @@ class TestStyle(RefactorTestCase):
             "y, q, e, r\n"
         )
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
 
     def test_4_1_paren_horizontal(self):
@@ -959,5 +1015,6 @@ class TestStyle(RefactorTestCase):
         )
         expected = "from x import (q, e, r)\n" "import y\n" "y, q, e, r\n"
         self.assertEqual(
-            expected, self.session.refactor(action),
+            expected,
+            self.session.refactor(action),
         )
