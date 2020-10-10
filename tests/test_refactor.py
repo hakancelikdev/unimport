@@ -1,3 +1,4 @@
+import textwrap
 import unittest
 
 from unimport.constants import PY38_PLUS
@@ -13,28 +14,30 @@ class RefactorTestCase(unittest.TestCase):
 
 
 class TestSyntaxErrorRefactor(RefactorTestCase):
+    def assertEqualActionToExpected(self, action):
+        action = textwrap.dedent(action)
+        return super().assertEqual(action, self.session.refactor(action))
+
     def test_syntax_error(self):
-        action = "a :? = 0\n"
-        self.assertEqual(
-            action,
-            self.session.refactor(action),
-        )
+        self.assertEqualActionToExpected("a :? = 0")
 
     def test_bad_syntax(self):
-        action = "# -*- coding: utf-8 -*-\n€ = 2\n"
-        self.assertEqual(
-            action,
-            self.session.refactor(action),
+        self.assertEqualActionToExpected(
+            """
+            # -*- coding: utf-8 -*-
+            € = 2
+            """
         )
 
     @unittest.skipIf(
         not PY38_PLUS, "This feature is only available for python 3.8."
     )
     def test_type_comments(self):
-        action = "def function(): # type: blabla\n" "    pass\n"
-        self.assertEqual(
-            action,
-            self.session.refactor(action),
+        self.assertEqualActionToExpected(
+            """
+            def function(): # type: blabla
+                pass
+            """
         )
 
 
