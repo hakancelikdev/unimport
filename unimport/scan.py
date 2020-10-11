@@ -2,6 +2,7 @@
 given as a string and reports its findings."""
 import ast
 import builtins
+import contextlib
 import functools
 import re
 from typing import (
@@ -316,8 +317,9 @@ class Scanner(ast.NodeVisitor):
     def skip_import(self, node: Union[ast.Import, ast.ImportFrom]) -> bool:
         if PY38_PLUS:
             lines = ast.get_source_segment(self.source, node).splitlines()
-            for line, comment in self._comments.items():
-                lines.insert(line, " " + comment)
+            for lineno, comment in self._comments.items():
+                with contextlib.suppress(IndexError):
+                    lines[lineno - node.lineno] += " " + comment
             source_segment = "".join(lines)
         else:
             source_segment = self.source.splitlines()[node.lineno - 1]
