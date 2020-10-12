@@ -231,7 +231,8 @@ class Scanner(ast.NodeVisitor):
         ):
             type_ = node.args[0]
             value = getattr(type_, "value", "") or getattr(type_, "s", "")
-            self.join_visit(value, type_)
+            if value:
+                self.join_visit(value, type_)
 
     def scan(self, source: str) -> None:
         self.source = source
