@@ -70,13 +70,13 @@ def get_used_packages(
     imports: List[C.ImportT], unused_imports: List[C.ImportT]
 ) -> Set[str]:
     packages = set()
-    used_packages = set(map(lambda imp: imp.package, imports)) - set(
-        map(lambda imp: imp.package, unused_imports)
-    )
+    used_packages = set(
+        map(lambda imp: imp.package.split(".")[0], imports)
+    ) - set(map(lambda imp: imp.package.split(".")[0], unused_imports))
     for package in used_packages:
         name = package_name_from_metadata(package)
         if name:
-            packages.add(package)
+            packages.add(name)
     return packages
 
 

@@ -3,7 +3,7 @@ import difflib
 import re
 import sys
 from pathlib import Path
-from typing import List, Optional, Sequence, Tuple
+from typing import List, Optional, Sequence, Set, Tuple
 
 from unimport import color
 from unimport import constants as C
@@ -155,7 +155,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     include = re.compile("|".join(args.include)).pattern
     exclude = re.compile("|".join(args.exclude)).pattern
     unused_modules = set()
-    packages = set()
+    packages: Set[str] = set()
     for source_path in args.sources:
         for py_path in session.list_paths(source_path, include, exclude):
             session.scanner.scan(source=session.read(py_path)[0])
@@ -198,7 +198,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 module_name = package_name_from_metadata(
                     requirement.split("==")[0]
                 )
-                if not module_name:
+                if module_name is None:
                     if args.show_error:
                         print(
                             color.paint(
