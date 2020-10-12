@@ -324,9 +324,9 @@ class Scanner(ast.NodeVisitor):
             ):
                 yield name
 
-    def get_suggestions(self, import_name: str) -> List[str]:
+    def get_suggestions(self, package: str) -> List[str]:
         names = {to_cfv.name.split(".")[0] for to_cfv in self.names}
-        from_names = ImportableVisitor().get_names(import_name)
+        from_names = ImportableVisitor().get_names(package)
         return sorted(from_names & names)
 
     def get_unused_imports(self) -> Iterator[C.ImportT]:
@@ -437,11 +437,11 @@ class ImportableVisitor(ast.NodeVisitor):
                             if isinstance(item, (ast.Constant, ast.Str)):
                                 self.importable_nodes.append(item)
 
-    def get_names(self, import_name: str) -> FrozenSet[str]:
-        if is_std(import_name):
-            return get_dir(import_name)
+    def get_names(self, package: str) -> FrozenSet[str]:
+        if is_std(package):
+            return get_dir(package)
         visitor = self.__class__()
-        source = get_source(import_name)
+        source = get_source(package)
         if source:
             visitor.traverse(source)
             return visitor.get_all() or visitor.get_suggestion()
