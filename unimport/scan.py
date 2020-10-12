@@ -224,22 +224,14 @@ class Scanner(ast.NodeVisitor):
     def visit_Call(self, node: ast.Call) -> None:
         # type_variable
         # cast("type", return_value)
-        if (
-            (
-                isinstance(node.func, ast.Attribute)
-                and isinstance(node.func.value, ast.Name)
-                and node.func.value.id == "typing"
-                and node.func.attr == "cast"
-            )
-            or isinstance(node.func, ast.Name)
-            and node.func.id == "cast"
+        func = node.func
+        if getattr(func, "id", "") == "cast" or (
+            getattr(func, "attr", "") == "cast"
+            and getattr(func.value, "id", "") == "typing"  # type: ignore
         ):
-            if isinstance(node.args[0], ast.Constant) and isinstance(
-                node.args[0].value, str
-            ):
-                self.join_visit(node.args[0].value, node.args[0])
-            elif isinstance(node.args[0], ast.Str):
-                self.join_visit(node.args[0].s, node.args[0])
+            type_ = node.args[0]
+            value = getattr(type_, "value", "") or getattr(type_, "s", "")
+            self.join_visit(value, type_)
 
     def scan(self, source: str) -> None:
         self.source = source
