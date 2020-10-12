@@ -18,6 +18,8 @@ from typing import (
     cast,
 )
 
+from importlib_metadata import PackageNotFoundError, metadata
+
 from unimport import color
 from unimport.constants import (
     INITIAL_IMPORTS,
@@ -112,11 +114,16 @@ class Scanner(ast.NodeVisitor):
             name = alias.asname or alias.name
             if name in INITIAL_IMPORTS:
                 name = name.split(".")[0]
+            try:
+                module_name = metadata(alias.name.split(".")[0])["name"]
+            except PackageNotFoundError:
+                module_name = None
             self.imports.append(
                 Import(
                     lineno=node.lineno,
                     column=column + 1,
                     name=name,
+                    module_name=module_name,
                 )
             )
             self.import_names.append(name)
@@ -127,7 +134,10 @@ class Scanner(ast.NodeVisitor):
             return
         is_star = node.names[0].name == "*"
         for column, alias in enumerate(node.names):
-            package = node.module or alias.name
+            if not node.level:
+                package = node.module
+            else:
+                package = "." * node.level
             alias_name = alias.asname or alias.name
             if (
                 (package in self.ignore_modules_imports)
@@ -136,6 +146,10 @@ class Scanner(ast.NodeVisitor):
             ):
                 return
             name = package if is_star else alias_name
+            try:
+                module_name = metadata(package.split(".")[0])["name"]
+            except PackageNotFoundError:
+                module_name = None
             self.imports.append(
                 ImportFrom(
                     lineno=node.lineno,
@@ -143,6 +157,7 @@ class Scanner(ast.NodeVisitor):
                     name=name,
                     star=is_star,
                     suggestions=[],
+                    module_name=module_name,
                 )
             )
             self.import_names.append(name)

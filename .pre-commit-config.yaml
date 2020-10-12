@@ -3,7 +3,7 @@ repos:
     rev: stable
     hooks:
       - id: unimport
-        args: [-r]
+        args: [--remove, --include-star-import, --requirements]
 
   - repo: https://github.com/myint/docformatter
     rev: v1.3.1

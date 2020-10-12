@@ -1,11 +1,12 @@
 import operator
-from typing import List, NamedTuple, Union
+from typing import List, NamedTuple, Optional, Union
 
 
 class Import(NamedTuple):
     lineno: int
     column: int
     name: str
+    module_name: Optional[str] = None
 
     def __len__(self) -> int:
         return operator.length_hint(self.name.split("."))
@@ -17,6 +18,7 @@ class ImportFrom(NamedTuple):
     name: str
     star: bool
     suggestions: List[str]
+    module_name: Optional[str] = None
 
     def __len__(self) -> int:
         return operator.length_hint(self.name.split("."))
