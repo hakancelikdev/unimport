@@ -34,7 +34,12 @@ setup(
     license_file="LICENSE",
     python_requires=">=3.6.0",
     packages=["unimport"],
-    install_requires=["libcst==0.3.10", "pathspec==0.8.0", "toml==0.10.1"],
+    install_requires=[
+        "libcst==0.3.10",
+        "pathspec==0.8.0",
+        "toml==0.10.1",
+        "importlib_metadata==2.0.0",
+    ],
     extras_require={},
     zip_safe=False,
     include_package_data=True,

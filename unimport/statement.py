@@ -6,6 +6,7 @@ class Import(NamedTuple):
     lineno: int
     column: int
     name: str
+    package: str
 
     def __len__(self) -> int:
         return operator.length_hint(self.name.split("."))
@@ -15,6 +16,7 @@ class ImportFrom(NamedTuple):
     lineno: int
     column: int
     name: str
+    package: str
     star: bool
     suggestions: List[str]
 

@@ -2,18 +2,19 @@ import argparse
 import difflib
 import re
 import sys
-import tokenize
-from contextlib import suppress
-from distutils.util import strtobool
 from pathlib import Path
-from typing import List, Optional, Sequence, Tuple, Union
-
-from pathspec.patterns.gitwildmatch import GitWildMatchPattern
+from typing import List, Optional, Sequence, Set, Tuple
 
 from unimport import color
 from unimport import constants as C
 from unimport.session import Session
-from unimport.statement import Import, ImportFrom
+from unimport.statement import ImportFrom
+from unimport.utils import (
+    actiontobool,
+    get_exclude_list_from_gitignore,
+    get_used_packages,
+    package_name_from_metadata,
+)
 
 
 def print_if_exists(sequence: Tuple[str, ...]) -> bool:
@@ -22,9 +23,7 @@ def print_if_exists(sequence: Tuple[str, ...]) -> bool:
     return bool(sequence)
 
 
-def show(
-    unused_import: List[Union[Import, ImportFrom]], py_path: Path
-) -> None:
+def show(unused_import: List[C.ImportT], py_path: Path) -> None:
     for imp in unused_import:
         if isinstance(imp, ImportFrom) and imp.star and imp.suggestions:
             context = (
@@ -44,25 +43,6 @@ def show(
             + ":"
             + color.paint(str(imp.lineno), color.GREEN)
         )
-
-
-def actiontobool(action: str) -> bool:
-    with suppress(ValueError):
-        return strtobool(action)
-    return False
-
-
-def get_exclude_list_from_gitignore() -> List[str]:
-    """Converts .gitignore patterns to regex and return this exclude regex
-    list."""
-    path = Path(".gitignore")
-    gitignore_regex: List[str] = []
-    if path.is_file():
-        for line in tokenize.open(path).readlines():
-            regex = GitWildMatchPattern.pattern_to_regex(line)[0]
-            if regex:
-                gitignore_regex.append(regex)
-    return gitignore_regex
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -175,12 +155,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     include = re.compile("|".join(args.include)).pattern
     exclude = re.compile("|".join(args.exclude)).pattern
     unused_modules = set()
+    packages: Set[str] = set()
     for source_path in args.sources:
         for py_path in session.list_paths(source_path, include, exclude):
             session.scanner.scan(source=session.read(py_path)[0])
             unused_imports = session.scanner.unused_imports
-            if unused_imports:
-                unused_modules.update({imp.name for imp in unused_imports})
+            unused_modules.update({imp.name for imp in unused_imports})
+            packages.update(
+                get_used_packages(
+                    session.scanner.imports, session.scanner.unused_imports
+                )
+            )
             if args.check:
                 show(unused_imports, py_path)
             session.scanner.clear()
@@ -205,40 +190,50 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 color.GREEN,
             )
         )
-    requirements_path = Path("requirements.txt")
-    if args.requirements and unused_modules and requirements_path.exists():
-        result = ""
-        source = requirements_path.read_text()
-        for index, requirement in enumerate(source.splitlines()):
-            if requirement.split("==")[0] not in unused_modules:
-                result += f"{requirement}\n"
-            else:
-                if args.check and requirement:
-                    print(
-                        f"{color.paint(requirement, color.CYAN)} at "
-                        f"{color.paint(str(requirements_path), color.CYAN)}:{color.paint(str(index + 1), color.CYAN)}"
-                    )
-        if args.diff:
-            exists_diff = print_if_exists(
-                tuple(
-                    difflib.unified_diff(
-                        source.splitlines(),
-                        result.splitlines(),
-                        fromfile=str(requirements_path),
+    if args.requirements and packages:
+        for requirements in Path(".").glob("requirements*.txt"):
+            result = ""
+            splitlines_requirements = requirements.read_text().splitlines()
+            for index, requirement in enumerate(splitlines_requirements):
+                module_name = package_name_from_metadata(
+                    requirement.split("==")[0]
+                )
+                if module_name is None:
+                    if args.show_error:
+                        print(
+                            color.paint(
+                                "package not found; " + requirement, color.RED
+                            )
+                        )
+                    continue
+                if module_name not in packages:
+                    result += f"{requirement}\n"
+                    if args.check:
+                        print(
+                            f"{color.paint(requirement, color.CYAN)} at "
+                            f"{color.paint(requirements.as_posix(), color.CYAN)}:{color.paint(str(index + 1), color.CYAN)}"
+                        )
+            if args.diff:
+                exists_diff = print_if_exists(
+                    tuple(
+                        difflib.unified_diff(
+                            splitlines_requirements,
+                            result.splitlines(),
+                            fromfile=requirements.as_posix(),
+                        )
                     )
                 )
-            )
-        if args.permission and exists_diff:
-            action = input(
-                f"Apply suggested changes to '{color.paint(str(requirements_path), color.CYAN)}' [Y/n] ? >"
-            ).lower()
-            if actiontobool(action):
-                args.remove = True
-        if args.remove:
-            requirements_path.write_text(result)
-            print(
-                f"Refactoring '{color.paint(str(requirements_path), color.CYAN)}'"
-            )
+            if args.permission and exists_diff:
+                action = input(
+                    f"Apply suggested changes to '{color.paint(requirements.as_posix(), color.CYAN)}' [Y/n] ? >"
+                ).lower()
+                if actiontobool(action):
+                    args.remove = True
+            if args.remove:
+                requirements.write_text(result)
+                print(
+                    f"Refactoring '{color.paint(requirements.as_posix(), color.CYAN)}'"
+                )
     if unused_modules:
         return 1
     else:
