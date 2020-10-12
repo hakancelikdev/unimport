@@ -57,7 +57,9 @@ class TestNames(ScannerTestCase):
                pass
             """,
             expected_names=[Name(lineno=1, name="variable")],
-            expected_imports=[Import(lineno=2, column=1, name="os")],
+            expected_imports=[
+                Import(lineno=2, column=1, name="os", package="os")
+            ],
         )
 
     def test_names_with_function(self):
@@ -174,8 +176,8 @@ class SkipImportTest(ScannerTestCase):
             )  # unimport: skip
             """,
             expected_imports=[
-                Import(lineno=1, column=1, name="x"),
-                Import(lineno=2, column=1, name="y"),
+                Import(lineno=1, column=1, name="x", package="x"),
+                Import(lineno=2, column=1, name="y", package="y"),
             ],
         )
 
@@ -202,12 +204,18 @@ class TestTypeComments(ScannerTestCase):
             ],
             expected_imports=[
                 ImportFrom(
-                    lineno=1, column=1, name="Any", star=False, suggestions=[]
+                    lineno=1,
+                    column=1,
+                    name="Any",
+                    package="typing",
+                    star=False,
+                    suggestions=[],
                 ),
                 ImportFrom(
                     lineno=2,
                     column=1,
                     name="Tuple",
+                    package="typing",
                     star=False,
                     suggestions=[],
                 ),
@@ -215,6 +223,7 @@ class TestTypeComments(ScannerTestCase):
                     lineno=3,
                     column=1,
                     name="Union",
+                    package="typing",
                     star=False,
                     suggestions=[],
                 ),
@@ -278,11 +287,17 @@ class TestTypeVariable(ScannerTestCase):
                 Name(lineno=6, name="typing.Union"),
             ],
             expected_imports=[
-                Import(lineno=1, column=1, name="typing"),
+                Import(
+                    lineno=1,
+                    column=1,
+                    name="typing",
+                    package="typing",
+                ),
                 ImportFrom(
                     lineno=3,
                     column=1,
                     name="QWebEngineHistory",
+                    package="PyQt5.QtWebEngineWidgets",
                     star=False,
                     suggestions=[],
                 ),
@@ -290,6 +305,7 @@ class TestTypeVariable(ScannerTestCase):
                     lineno=4,
                     column=1,
                     name="QWebHistory",
+                    package="PyQt5.QtWebKit",
                     star=False,
                     suggestions=[],
                 ),
@@ -318,6 +334,7 @@ class TestTypeVariable(ScannerTestCase):
                     lineno=1,
                     column=1,
                     name="TYPE_CHECKING",
+                    package="typing",
                     star=False,
                     suggestions=[],
                 ),
@@ -325,6 +342,7 @@ class TestTypeVariable(ScannerTestCase):
                     lineno=1,
                     column=2,
                     name="Union",
+                    package="typing",
                     star=False,
                     suggestions=[],
                 ),
@@ -332,6 +350,7 @@ class TestTypeVariable(ScannerTestCase):
                     lineno=3,
                     column=1,
                     name="QWebEngineHistory",
+                    package="PyQt5.QtWebEngineWidgets",
                     star=False,
                     suggestions=[],
                 ),
@@ -339,6 +358,7 @@ class TestTypeVariable(ScannerTestCase):
                     lineno=4,
                     column=1,
                     name="QWebHistory",
+                    package="PyQt5.QtWebKit",
                     star=False,
                     suggestions=[],
                 ),
@@ -368,6 +388,7 @@ class TestTypeVariable(ScannerTestCase):
                     lineno=1,
                     column=1,
                     name="TYPE_CHECKING",
+                    package="typing",
                     star=False,
                     suggestions=[],
                 ),
@@ -375,6 +396,7 @@ class TestTypeVariable(ScannerTestCase):
                     lineno=1,
                     column=2,
                     name="Union",
+                    package="typing",
                     star=False,
                     suggestions=[],
                 ),
@@ -382,6 +404,7 @@ class TestTypeVariable(ScannerTestCase):
                     lineno=3,
                     column=1,
                     name="QtWebEngineWidgets",
+                    package="PyQt5",
                     star=False,
                     suggestions=[],
                 ),
@@ -389,6 +412,7 @@ class TestTypeVariable(ScannerTestCase):
                     lineno=4,
                     column=1,
                     name="QtWebKit",
+                    package="PyQt5",
                     star=False,
                     suggestions=[],
                 ),
@@ -412,11 +436,17 @@ class TestTypeVariable(ScannerTestCase):
                 Name(lineno=5, name="typing.cast"),
             ],
             expected_imports=[
-                Import(lineno=1, column=1, name="typing"),
+                Import(
+                    lineno=1,
+                    column=1,
+                    name="typing",
+                    package="typing",
+                ),
                 ImportFrom(
                     lineno=3,
                     column=1,
                     name="QWebHistory",
+                    package="PyQt5.QtWebKit",
                     star=False,
                     suggestions=[],
                 ),
@@ -445,6 +475,7 @@ class TestTypeVariable(ScannerTestCase):
                     lineno=1,
                     column=1,
                     name="TYPE_CHECKING",
+                    package="typing",
                     star=False,
                     suggestions=[],
                 ),
@@ -452,6 +483,7 @@ class TestTypeVariable(ScannerTestCase):
                     lineno=3,
                     column=1,
                     name="QWebHistory",
+                    package="PyQt5.QtWebKit",
                     star=False,
                     suggestions=[],
                 ),
@@ -480,6 +512,7 @@ class TestTypeVariable(ScannerTestCase):
                     lineno=1,
                     column=1,
                     name="TYPE_CHECKING",
+                    package="typing",
                     star=False,
                     suggestions=[],
                 ),
@@ -487,6 +520,7 @@ class TestTypeVariable(ScannerTestCase):
                     lineno=3,
                     column=1,
                     name="QtWebKit",
+                    package="PyQt5",
                     star=False,
                     suggestions=[],
                 ),

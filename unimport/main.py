@@ -2,19 +2,19 @@ import argparse
 import difflib
 import re
 import sys
-import tokenize
-from contextlib import suppress
-from distutils.util import strtobool
 from pathlib import Path
-from typing import List, Optional, Sequence, Tuple, Union
-
-from importlib_metadata import PackageNotFoundError, metadata
-from pathspec.patterns.gitwildmatch import GitWildMatchPattern
+from typing import List, Optional, Sequence, Tuple
 
 from unimport import color
 from unimport import constants as C
 from unimport.session import Session
-from unimport.statement import Import, ImportFrom
+from unimport.statement import ImportFrom
+from unimport.utils import (
+    actiontobool,
+    get_exclude_list_from_gitignore,
+    get_used_packages,
+    package_name_from_metadata,
+)
 
 
 def print_if_exists(sequence: Tuple[str, ...]) -> bool:
@@ -23,9 +23,7 @@ def print_if_exists(sequence: Tuple[str, ...]) -> bool:
     return bool(sequence)
 
 
-def show(
-    unused_import: List[Union[Import, ImportFrom]], py_path: Path
-) -> None:
+def show(unused_import: List[C.ImportT], py_path: Path) -> None:
     for imp in unused_import:
         if isinstance(imp, ImportFrom) and imp.star and imp.suggestions:
             context = (
@@ -45,25 +43,6 @@ def show(
             + ":"
             + color.paint(str(imp.lineno), color.GREEN)
         )
-
-
-def actiontobool(action: str) -> bool:
-    with suppress(ValueError):
-        return strtobool(action)
-    return False
-
-
-def get_exclude_list_from_gitignore() -> List[str]:
-    """Converts .gitignore patterns to regex and return this exclude regex
-    list."""
-    path = Path(".gitignore")
-    gitignore_regex: List[str] = []
-    if path.is_file():
-        for line in tokenize.open(path).readlines():
-            regex = GitWildMatchPattern.pattern_to_regex(line)[0]
-            if regex:
-                gitignore_regex.append(regex)
-    return gitignore_regex
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -176,23 +155,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     include = re.compile("|".join(args.include)).pattern
     exclude = re.compile("|".join(args.exclude)).pattern
     unused_modules = set()
-    used_modules = set()
+    packages = set()
     for source_path in args.sources:
         for py_path in session.list_paths(source_path, include, exclude):
             session.scanner.scan(source=session.read(py_path)[0])
             unused_imports = session.scanner.unused_imports
             unused_modules.update({imp.name for imp in unused_imports})
-            used_modules.update(
-                {
-                    imp.module_name
-                    for imp in session.scanner.imports
-                    if imp.module_name
-                }
-                - {
-                    imp.module_name
-                    for imp in session.scanner.unused_imports
-                    if imp.module_name
-                }
+            packages.update(
+                get_used_packages(
+                    session.scanner.imports, session.scanner.unused_imports
+                )
             )
             if args.check:
                 show(unused_imports, py_path)
@@ -218,14 +190,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 color.GREEN,
             )
         )
-    if args.requirements and used_modules:
+    if args.requirements and packages:
         for requirements in Path(".").glob("requirements*.txt"):
             result = ""
             splitlines_requirements = requirements.read_text().splitlines()
             for index, requirement in enumerate(splitlines_requirements):
-                try:
-                    module_name = metadata(requirement.split("==")[0])["name"]
-                except PackageNotFoundError:
+                module_name = package_name_from_metadata(
+                    requirement.split("==")[0]
+                )
+                if not module_name:
                     if args.show_error:
                         print(
                             color.paint(
@@ -233,7 +206,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                             )
                         )
                     continue
-                if module_name not in used_modules:
+                if module_name not in packages:
                     result += f"{requirement}\n"
                     if args.check:
                         print(

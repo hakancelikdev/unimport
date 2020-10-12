@@ -1,50 +1,19 @@
 """This module performs static analysis using AST on the python code that's
 given as a string and reports its findings."""
 import ast
-import builtins
 import contextlib
 import functools
 import re
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    FrozenSet,
-    Iterator,
-    List,
-    Optional,
-    TypeVar,
-    Union,
-    cast,
-)
-
-from importlib_metadata import PackageNotFoundError, metadata
+from typing import Dict, FrozenSet, Iterator, List, Optional, Union, cast
 
 from unimport import color
-from unimport.constants import (
-    INITIAL_IMPORTS,
-    PY38_PLUS,
-    SUBSCRIPT_TYPE_VARIABLE,
-)
+from unimport import constants as C
 from unimport.relate import first_occurrence, get_parents, relate
 from unimport.statement import Import, ImportFrom, Name
 from unimport.utils import get_dir, get_source, is_std, recover_comments
 
-IGNORE_IMPORT_NAMES = frozenset({"__all__", "__doc__", "__name__"})
-BUILTINS = frozenset(dir(builtins))
 
-Function = TypeVar("Function", bound=Callable[..., Any])
-ASTImportableT = Union[
-    ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Name, ast.alias
-]
-ASTFunctionT = Union[ast.FunctionDef, ast.AsyncFunctionDef]
-ImportT = Union[Import, ImportFrom]
-CFNT = Union[ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Name]
-DefTuple = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
-ASTFunctionTuple = (ast.FunctionDef, ast.AsyncFunctionDef)
-
-
-def recursive(func: Function) -> Function:
+def recursive(func: C.Function) -> C.Function:
     """decorator to make visitor work recursive."""
 
     @functools.wraps(func)
@@ -52,7 +21,7 @@ def recursive(func: Function) -> Function:
         func(self, *args, **kwargs)
         self.generic_visit(*args)
 
-    return cast(Function, wrapper)
+    return cast(C.Function, wrapper)
 
 
 class Scanner(ast.NodeVisitor):
@@ -75,21 +44,21 @@ class Scanner(ast.NodeVisitor):
         """
         self.include_star_import = include_star_import
         self.show_error = show_error
-        self.imports: List[ImportT] = []
+        self.imports: List[C.ImportT] = []
         self.names: List[Name] = []
         self.import_names: List[str] = []
-        self.unused_imports: List[ImportT] = []
+        self.unused_imports: List[C.ImportT] = []
         self.any_import_error = False
         self._comments: Dict[int, str] = {}
 
     @recursive
-    def visit_FunctionDef(self, node: ASTFunctionT) -> None:
+    def visit_FunctionDef(self, node: C.ASTFunctionT) -> None:
         self._type_comment(node)
 
     visit_AsyncFunctionDef = visit_FunctionDef
 
     def visit_str_helper(self, value: str, node: ast.AST) -> None:
-        parent = first_occurrence(node, *ASTFunctionTuple)
+        parent = first_occurrence(node, *C.ASTFunctionTuple)
         is_annassign_or_arg = any(
             isinstance(parent, (ast.AnnAssign, ast.arg))
             for parent in get_parents(node)
@@ -112,18 +81,14 @@ class Scanner(ast.NodeVisitor):
             return
         for column, alias in enumerate(node.names):
             name = alias.asname or alias.name
-            if name in INITIAL_IMPORTS:
+            if name in C.INITIAL_IMPORTS:
                 name = name.split(".")[0]
-            try:
-                module_name = metadata(alias.name.split(".")[0])["name"]
-            except PackageNotFoundError:
-                module_name = None
             self.imports.append(
                 Import(
                     lineno=node.lineno,
                     column=column + 1,
                     name=name,
-                    module_name=module_name,
+                    package=alias.name,
                 )
             )
             self.import_names.append(name)
@@ -146,10 +111,6 @@ class Scanner(ast.NodeVisitor):
             ):
                 return
             name = package if is_star else alias_name
-            try:
-                module_name = metadata(package.split(".")[0])["name"]
-            except PackageNotFoundError:
-                module_name = None
             self.imports.append(
                 ImportFrom(
                     lineno=node.lineno,
@@ -157,7 +118,7 @@ class Scanner(ast.NodeVisitor):
                     name=name,
                     star=is_star,
                     suggestions=[],
-                    module_name=module_name,
+                    package=package,
                 )
             )
             self.import_names.append(name)
@@ -225,7 +186,7 @@ class Scanner(ast.NodeVisitor):
             and node.value.value.id == "typing"
         ) or (
             isinstance(node.value, ast.Name)
-            and node.value.id in SUBSCRIPT_TYPE_VARIABLE
+            and node.value.id in C.SUBSCRIPT_TYPE_VARIABLE
         ):
             if isinstance(node.slice.value, ast.Tuple):  # type: ignore
                 for elt in node.slice.value.elts:  # type: ignore
@@ -260,7 +221,7 @@ class Scanner(ast.NodeVisitor):
         self.source = source
         if self.skip_file():
             return
-        if PY38_PLUS:
+        if C.PY38_PLUS:
             self._comments = recover_comments(self.source)
         try:
             self.traverse(self.source)
@@ -270,7 +231,7 @@ class Scanner(ast.NodeVisitor):
         self.unused_imports = list(self.get_unused_imports())
 
     def _type_comment(self, node: ast.AST) -> None:
-        if isinstance(node, ASTFunctionTuple):
+        if isinstance(node, C.ASTFunctionTuple):
             mode = "func_type"
         else:
             mode = "eval"
@@ -285,7 +246,7 @@ class Scanner(ast.NodeVisitor):
         parent: Optional[ast.AST] = None,
     ) -> None:
         try:
-            if PY38_PLUS:
+            if C.PY38_PLUS:
                 tree = ast.parse(source, mode=mode, type_comments=True)
             else:
                 tree = ast.parse(source, mode=mode)
@@ -313,7 +274,7 @@ class Scanner(ast.NodeVisitor):
     ) -> None:
         """A function that parses the value, copies locations from the node and
         includes them in self.visit."""
-        if PY38_PLUS:
+        if C.PY38_PLUS:
             tree = ast.parse(value, mode=mode, type_comments=True)
         else:
             tree = ast.parse(value, mode=mode)
@@ -330,7 +291,7 @@ class Scanner(ast.NodeVisitor):
         self._comments = {}
 
     def skip_import(self, node: Union[ast.Import, ast.ImportFrom]) -> bool:
-        if PY38_PLUS:
+        if C.PY38_PLUS:
             lines = ast.get_source_segment(self.source, node).splitlines()
             for lineno, comment in self._comments.items():
                 with contextlib.suppress(IndexError):
@@ -355,11 +316,11 @@ class Scanner(ast.NodeVisitor):
         )
 
     def get_names(self) -> Iterator[Name]:
-        imp_match_built_in = BUILTINS & set(self.import_names)
+        imp_match_built_in = C.BUILTINS & set(self.import_names)
         for name in self.names:
             if [imp_name == name.name for imp_name in imp_match_built_in] or (
-                name.name.split(".")[0] not in IGNORE_IMPORT_NAMES
-                and name.name.split(".")[0] not in BUILTINS
+                name.name.split(".")[0] not in C.IGNORE_IMPORT_NAMES
+                and name.name.split(".")[0] not in C.BUILTINS
             ):
                 yield name
 
@@ -368,7 +329,7 @@ class Scanner(ast.NodeVisitor):
         from_names = ImportableVisitor().get_names(import_name)
         return sorted(from_names & names)
 
-    def get_unused_imports(self) -> Iterator[ImportT]:
+    def get_unused_imports(self) -> Iterator[C.ImportT]:
         for imp in self.imports:
             # duplicate import
             if self.is_duplicate(
@@ -381,7 +342,7 @@ class Scanner(ast.NodeVisitor):
                 and isinstance(imp, ImportFrom)
                 and imp.star
             ):
-                imp.suggestions.extend(self.get_suggestions(imp.name))
+                imp.suggestions.extend(self.get_suggestions(imp.package))
                 yield imp
             # normal import
             elif not self.is_import_used(imp):
@@ -391,15 +352,15 @@ class Scanner(ast.NodeVisitor):
         return self.import_names.count(name) > 1
 
     @functools.lru_cache(maxsize=None)
-    def get_duplicate_imports(self, import_name: str) -> List[ImportT]:
+    def get_duplicate_imports(self, import_name: str) -> List[C.ImportT]:
         return [
             imp
             for imp in self.imports
             if import_name == imp.name and self.is_duplicate(imp.name)
         ]
 
-    def is_duplicate_import_used(self, imp: ImportT) -> bool:
-        def find_nearest_imp(name: Name) -> ImportT:
+    def is_duplicate_import_used(self, imp: C.ImportT) -> bool:
+        def find_nearest_imp(name: Name) -> C.ImportT:
             nearest = imp
             for duplicate in self.get_duplicate_imports(imp.name):
                 if name.match(duplicate):
@@ -411,7 +372,7 @@ class Scanner(ast.NodeVisitor):
                 return True
         return False
 
-    def is_import_used(self, imp: ImportT) -> bool:
+    def is_import_used(self, imp: C.ImportT) -> bool:
         return any(name.match(imp) for name in self.names)
 
 
@@ -420,7 +381,7 @@ class ImportableVisitor(ast.NodeVisitor):
         self.importable_nodes: List[
             Union[ast.Str, ast.Constant]
         ] = []  # nodes on the __all__ list
-        self.suggestions_nodes: List[ASTImportableT] = []  # nodes on the CFN
+        self.suggestions_nodes: List[C.ASTImportableT] = []  # nodes on the CFN
 
     def traverse(self, source: str) -> None:
         tree = ast.parse(source)
@@ -428,8 +389,8 @@ class ImportableVisitor(ast.NodeVisitor):
         self.visit(tree)
 
     @recursive
-    def visit_CFN(self, node: CFNT) -> None:
-        if not first_occurrence(node, DefTuple):
+    def visit_CFN(self, node: C.CFNT) -> None:
+        if not first_occurrence(node, C.DefTuple):
             self.suggestions_nodes.append(node)
 
     visit_ClassDef = visit_CFN
@@ -502,6 +463,6 @@ class ImportableVisitor(ast.NodeVisitor):
                 names.add(node.id)
             elif isinstance(node, ast.alias):
                 names.add(node.asname or node.name)
-            elif isinstance(node, DefTuple):
+            elif isinstance(node, C.DefTuple):
                 names.add(node.name)
         return frozenset(names)
