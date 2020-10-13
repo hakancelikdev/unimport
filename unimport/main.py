@@ -192,8 +192,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
     if args.requirements and packages:
         for requirements in Path(".").glob("requirements*.txt"):
-            result = ""
             splitlines_requirements = requirements.read_text().splitlines()
+            result = splitlines_requirements.copy()
             for index, requirement in enumerate(splitlines_requirements):
                 module_name = package_name_from_metadata(
                     requirement.split("==")[0]
@@ -201,13 +201,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 if module_name is None:
                     if args.show_error:
                         print(
-                            color.paint(
-                                "package not found; " + requirement, color.RED
-                            )
+                            color.paint(requirement + " not found", color.RED)
                         )
                     continue
                 if module_name not in packages:
-                    result += f"{requirement}\n"
+                    result.remove(requirement)
                     if args.check:
                         print(
                             f"{color.paint(requirement, color.CYAN)} at "
@@ -218,19 +216,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     tuple(
                         difflib.unified_diff(
                             splitlines_requirements,
-                            result.splitlines(),
+                            result,
                             fromfile=requirements.as_posix(),
                         )
                     )
                 )
             if args.permission and exists_diff:
                 action = input(
-                    f"Apply suggested changes to '{color.paint(requirements.as_posix(), color.CYAN)}' [Y/n] ? >"
+                    f"Apply suggested changes to '{color.paint(requirements.as_posix(), color.CYAN)}' [Y/n/q] ? >"
                 ).lower()
+                if action == "q":
+                    return 1
                 if actiontobool(action):
                     args.remove = True
             if args.remove:
-                requirements.write_text(result)
+                requirements.write_text("".join(result))
                 print(
                     f"Refactoring '{color.paint(requirements.as_posix(), color.CYAN)}'"
                 )

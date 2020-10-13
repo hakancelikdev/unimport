@@ -81,6 +81,8 @@ def get_used_packages(
 
 
 def actiontobool(action: str) -> bool:
+    if action == "":
+        return True
     with contextlib.suppress(ValueError):
         return strtobool(action)
     return False
