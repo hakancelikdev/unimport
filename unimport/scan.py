@@ -125,20 +125,21 @@ class Scanner(ast.NodeVisitor):
 
     @recursive
     def visit_Name(self, node: ast.Name) -> None:
-        if not first_occurrence(node, ast.Attribute):
+        if not isinstance(node.parent, ast.Attribute):  # type: ignore
             self.names.append(Name(lineno=node.lineno, name=node.id))
 
     @recursive
     def visit_Attribute(self, node: ast.Attribute) -> None:
-        names = []
-        for sub_node in ast.walk(node):
-            if isinstance(sub_node, ast.Attribute):
-                names.append(sub_node.attr)
-            elif isinstance(sub_node, ast.Name):
-                names.append(sub_node.id)
-        names.reverse()
-        name = ".".join(names)
-        self.names.append(Name(lineno=node.lineno, name=name))
+        if not isinstance(node.value, ast.Call):
+            names = []
+            for sub_node in ast.walk(node):
+                if isinstance(sub_node, ast.Attribute):
+                    names.append(sub_node.attr)
+                elif isinstance(sub_node, ast.Name):
+                    names.append(sub_node.id)
+            names.reverse()
+            name = ".".join(names)
+            self.names.append(Name(lineno=node.lineno, name=name))
 
     @recursive
     def visit_Assign(self, node: ast.Assign) -> None:

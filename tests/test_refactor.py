@@ -262,14 +262,6 @@ class TestUnusedRefactor(RefactorTestCase):
             [self.session.refactor(action) for action in actions],
         )
 
-    def test_attribute_name(self):
-        self.assertActionAfterRefactorEqualToAction(
-            """\
-            from pathlib import Path
-            CURRENT_DIR = Path(__file__).parent
-            """
-        )
-
 
 class TestDuplicateUnusedRefactor(RefactorTestCase):
     def test_full_unused(self):
