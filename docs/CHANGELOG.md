@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - ././2020
+## [0.6.6] - 24/October/2020
 
 - [🐞 Fix: call attribute scanner by @hakancelik96](https://github.com/hakancelik96/unimport/pull/145)
 - [🐞 Fix: requirements feature & star import suggestion by @hakancelik96](https://github.com/hakancelik96/unimport/pull/142)

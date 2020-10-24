@@ -9,7 +9,7 @@ from unimport.statement import Import, ImportFrom
 DESCRIPTION = (
     "A linter, formatter for finding and removing unused import statements."
 )
-VERSION = "0.3.0"
+VERSION = "0.6.6"
 
 PY38_PLUS = sys.version_info >= (3, 8)
 
