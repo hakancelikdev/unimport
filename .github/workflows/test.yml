@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v2.3.3
 
       - name: Set up Python${{ matrix.python-version }}
-        uses: actions/setup-python@v2.1.2
+        uses: actions/setup-python@v2.1.4
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -20,7 +20,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements-dev.txt
-          python -m pip install pytest==6.1.0 pytest-cov==2.10.1
+          python -m pip install pytest==6.1.1 pytest-cov==2.10.1
 
       - name: Test with pytest
         run: |
@@ -30,6 +30,6 @@ jobs:
         run: |
           pytest --cov=./ --cov-report=xml
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1.0.13
+        uses: codecov/codecov-action@v1.0.14
         with:
           token: ${{secrets.CODECOV_TOKEN }}

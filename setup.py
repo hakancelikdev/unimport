@@ -35,7 +35,7 @@ setup(
     python_requires=">=3.6.0",
     packages=["unimport"],
     install_requires=[
-        "libcst==0.3.10",
+        "libcst==0.3.13",
         "pathspec==0.8.0",
         "toml==0.10.1",
         "importlib_metadata==2.0.0",
