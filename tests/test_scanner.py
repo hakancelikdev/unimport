@@ -181,6 +181,20 @@ class SkipImportTest(ScannerTestCase):
             ],
         )
 
+    def test_space_between(self):
+        """https://github.com/hakancelik96/unimport/issues/146."""
+        self.assertUnimportEqual(
+            source="""\
+            import math
+
+            import collections  # noqa
+
+            """,
+            expected_imports=[
+                Import(lineno=1, column=1, name="math", package="math"),
+            ],
+        )
+
 
 @unittest.skipIf(
     not PY38_PLUS, "This feature is only available for python 3.8."
