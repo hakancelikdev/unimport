@@ -188,7 +188,6 @@ class SkipImportTest(ScannerTestCase):
             import math
 
             import collections  # noqa
-
             """,
             expected_imports=[
                 Import(lineno=1, column=1, name="math", package="math"),
