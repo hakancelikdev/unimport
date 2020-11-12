@@ -4,6 +4,7 @@ import functools
 import importlib
 import importlib.machinery  # unimport: skip
 import importlib.util  # unimport: skip
+import io
 import tokenize
 from distutils.util import strtobool
 from pathlib import Path
@@ -105,7 +106,7 @@ def get_exclude_list_from_gitignore() -> List[str]:
 def recover_comments(text: str) -> Dict[int, str]:
     comments = {}
     with contextlib.suppress(tokenize.TokenError):
-        tokens = tokenize.generate_tokens(iter(text.splitlines()).__next__)
+        tokens = tokenize.generate_tokens(io.StringIO(text).readline)
         for token in tokens:
             if token.type == tokenize.COMMENT:
                 comments[token.start[0]] = token.string

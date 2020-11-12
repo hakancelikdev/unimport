@@ -298,7 +298,7 @@ class Scanner(ast.NodeVisitor):
             for lineno, comment in self._comments.items():
                 with contextlib.suppress(IndexError):
                     lines[lineno - node.lineno] += " " + comment
-            source_segment = "".join(lines)
+            source_segment = "".join(lines)  # NOTE "\n".join(lines)
         else:
             source_segment = self.source.splitlines()[node.lineno - 1]
         return (
