@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - ././2021
+
+- [🐞 Fix: import skip by @hakancelik96](https://github.com/hakancelik96/unimport/issues/146)
+
 ## [0.6.6] - 24/October/2020
 
 - [🐞 Fix: call attribute scanner by @hakancelik96](https://github.com/hakancelik96/unimport/pull/145)
