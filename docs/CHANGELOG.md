@@ -2,8 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - ././2021
+## [0.6.8] - 2/December/2020
 
+- [🐞 Fix: Extra type check on `utils.is_std`, #148 (#149) by @isik-kaplan](https://github.com/hakancelik96/unimport/commit/b9e226ef18984189b4154b739b9b186a2c7a2418)
 - [🐞 Fix: import skip by @hakancelik96](https://github.com/hakancelik96/unimport/issues/146)
 
 ## [0.6.6] - 24/October/2020
