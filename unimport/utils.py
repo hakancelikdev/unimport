@@ -50,13 +50,16 @@ def is_std(package: str) -> bool:
     if package in C.BUILTIN_MODULE_NAMES:
         return True
     spec = get_spec(package)
-    return bool(spec) and any(
-        (
-            spec.origin.startswith(C.STDLIB_PATH),
-            spec.origin in ["built-in", "frozen"],
-            spec.origin.endswith(".so"),
+    if spec and isinstance(spec.origin, str):
+        return any(
+            (
+                spec.origin.startswith(C.STDLIB_PATH),
+                spec.origin in ["built-in", "frozen"],
+                spec.origin.endswith(".so"),
+            )
         )
-    )
+    else:
+        return False
 
 
 @functools.lru_cache(maxsize=None)
