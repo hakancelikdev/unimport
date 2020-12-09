@@ -18,6 +18,6 @@
 [![Contributors](https://img.shields.io/github/contributors/hakancelik96/unimport)](https://github.com/hakancelik96/unimport/graphs/contributors)
 [![Last Commit](https://img.shields.io/github/last-commit/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/commits/master)
 
-[![Pepy](https://pepy.tech/badge/unimport)](https://pepy.tech/badge/unimport)
+[![Downloads](https://static.pepy.tech/personalized-badge/unimport?period=total&units=none&left_color=grey&right_color=red&left_text=downloads)](https://pepy.tech/project/unimport)
 
 For more information see: https://unimport.hakancelik.dev/
