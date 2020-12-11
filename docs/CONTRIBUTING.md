@@ -25,14 +25,6 @@ $ cd unimport
 git checkout -b i{your issue number}
 ```
 
-## Install pre-commit hooks
-
-```shell
-$ pip3 install --upgrade pip # optional, if you have an old system version of pip
-$ pip3 instal pre-commit
-$ pre-commit install # to pre-commit will run automatically on git commit!
-```
-
 ## How to Update My Local Repository
 
 ```shell
