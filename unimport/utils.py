@@ -8,7 +8,7 @@ import io
 import tokenize
 from distutils.util import strtobool
 from pathlib import Path
-from typing import Dict, FrozenSet, List, Optional, Set
+from typing import FrozenSet, List, Optional, Set
 
 from importlib_metadata import PackageNotFoundError, metadata
 from pathspec.patterns.gitwildmatch import GitWildMatchPattern
@@ -103,14 +103,3 @@ def get_exclude_list_from_gitignore() -> List[str]:
             if regex:
                 gitignore_regex.append(regex)
     return gitignore_regex
-
-
-@functools.lru_cache(maxsize=None)
-def recover_comments(text: str) -> Dict[int, str]:
-    comments = {}
-    with contextlib.suppress(tokenize.TokenError):
-        tokens = tokenize.generate_tokens(io.StringIO(text).readline)
-        for token in tokens:
-            if token.type == tokenize.COMMENT:
-                comments[token.start[0]] = token.string
-    return comments

@@ -1,16 +1,15 @@
 """This module performs static analysis using AST on the python code that's
 given as a string and reports its findings."""
 import ast
-import contextlib
 import functools
 import re
-from typing import Dict, FrozenSet, Iterator, List, Optional, Union, cast
+from typing import FrozenSet, Iterator, List, Optional, Union, cast
 
 from unimport import color
 from unimport import constants as C
 from unimport.relate import first_occurrence, get_parents, relate
 from unimport.statement import Import, ImportFrom, Name
-from unimport.utils import get_dir, get_source, is_std, recover_comments
+from unimport.utils import get_dir, get_source, is_std
 
 
 def recursive(func: C.Function) -> C.Function:
@@ -49,7 +48,6 @@ class Scanner(ast.NodeVisitor):
         self.import_names: List[str] = []
         self.unused_imports: List[C.ImportT] = []
         self.any_import_error = False
-        self._comments: Dict[int, str] = {}
 
     @recursive
     def visit_FunctionDef(self, node: C.ASTFunctionT) -> None:
@@ -223,8 +221,6 @@ class Scanner(ast.NodeVisitor):
         self.source = source
         if self.skip_file():
             return
-        if C.PY38_PLUS:
-            self._comments = recover_comments(self.source)
         try:
             self.traverse(self.source)
         except SyntaxError:
@@ -290,15 +286,12 @@ class Scanner(ast.NodeVisitor):
         self.imports.clear()
         self.import_names.clear()
         self.unused_imports.clear()
-        self._comments = {}
 
     def skip_import(self, node: Union[ast.Import, ast.ImportFrom]) -> bool:
         if C.PY38_PLUS:
-            lines = ast.get_source_segment(self.source, node).splitlines()
-            for lineno, comment in self._comments.items():
-                with contextlib.suppress(IndexError):
-                    lines[lineno - node.lineno] += " " + comment
-            source_segment = "".join(lines)  # NOTE "\n".join(lines)
+            source_segment = "\n".join(
+                self.source.splitlines()[node.lineno - 1 : node.end_lineno]
+            )
         else:
             source_segment = self.source.splitlines()[node.lineno - 1]
         return (
