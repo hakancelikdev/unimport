@@ -2,6 +2,7 @@
 
 **A linter & formatter for finding & removing unused import statements.**
 
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/hakancelik96/unimport/master.svg)](https://results.pre-commit.ci/latest/github/hakancelik96/unimport/master)
 ![test](https://github.com/hakancelik96/unimport/workflows/Test/badge.svg)
 
 [![Forks](https://img.shields.io/github/forks/hakancelik96/unimport)](https://github.com/hakancelik96/unimport/fork)
