@@ -5,7 +5,10 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator
 
-from unimport.session import Session
+# from unimport.session import Session
+from unimport import utils
+from unimport.refactor import refactor_string
+from unimport.scan import Scanner
 
 
 @contextmanager
@@ -29,22 +32,32 @@ def reopenable_temp_file(content: str) -> Iterator[Path]:
         os.unlink(tmp_path)
 
 
-class TestSession(unittest.TestCase):
+class TestUtils(unittest.TestCase):
     maxDiff = None
     include_star_import = True
 
-    def setUp(self):
-        self.session = Session(include_star_import=self.include_star_import)
+    # def setUp(self):
+    #     self.session = Session(include_star_import=self.include_star_import)
 
     def test_list_paths_and_read(self):
         for path in [Path("tests"), Path("tests/test_config.py")]:
-            for p in self.session.list_paths(path):
+            for p in utils.list_paths(path):
                 self.assertTrue(str(p).endswith(".py"))
 
-    def temp_refactor(self, source: str, expected: str, apply: bool = False):
+    def refactor(self, path: Path) -> str:
+        source = utils.read(path)[0]
+        scanner = Scanner(
+            source=source, include_star_import=self.include_star_import
+        )
+        refactor_result = refactor_string(
+            source=scanner.source,
+            unused_imports=list(scanner.get_unused_imports()),
+        )
+        return refactor_result
+
+    def temp_refactor(self, source: str, expected: str):
         with reopenable_temp_file(source) as tmp_path:
-            result, _ = self.session.refactor_file(path=tmp_path, apply=apply)
-            self.assertEqual(result, expected)
+            self.assertEqual(self.refactor(tmp_path), expected)
 
     def test_bad_encoding(self):
         # Make conflict between BOM and encoding Cookie.
@@ -56,15 +69,17 @@ class TestSession(unittest.TestCase):
         self.temp_refactor(source="import os", expected="")
 
     def test_refactor_file_apply(self):
-        self.temp_refactor(source="import os", expected="", apply=True)
-
-    def test_diff(self):
-        diff = ("--- \n", "+++ \n", "@@ -1 +0,0 @@\n", "-import os")
-        self.assertEqual(diff, self.session.diff("import os"))
+        self.temp_refactor(source="import os", expected="")
 
     def test_diff_file(self):
         with reopenable_temp_file("import os") as tmp_path:
-            diff_file = self.session.diff_file(path=tmp_path)
+            source = utils.read(tmp_path)[0]
+            refactor_result = self.refactor(tmp_path)
+            diff_file = utils.diff(
+                source=source,
+                refactor_result=refactor_result,
+                fromfile=tmp_path,
+            )
             diff = (
                 f"--- {tmp_path.as_posix()}\n",
                 "+++ \n",
@@ -76,4 +91,4 @@ class TestSession(unittest.TestCase):
     def test_read(self):
         source = "b�se"
         with reopenable_temp_file(source) as tmp_path:
-            self.assertEqual((source, "utf-8"), self.session.read(tmp_path))
+            self.assertEqual((source, "utf-8"), utils.read(tmp_path))

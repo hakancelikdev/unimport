@@ -2,8 +2,7 @@ import textwrap
 import unittest
 
 from unimport.constants import PY38_PLUS
-from unimport.scan import ImportableVisitor
-from unimport.session import Session
+from unimport.scan import ImportableVisitor, Scanner
 from unimport.statement import Import, ImportFrom, Name
 
 
@@ -11,21 +10,24 @@ class ScannerTestCase(unittest.TestCase):
     maxDiff = None
     include_star_import = False
 
-    def setUp(self):
-        self.scanner = Session(
-            include_star_import=self.include_star_import
-        ).scanner
-
     def assertUnimportEqual(
         self,
         source,
         expected_names=[],
         expected_imports=[],
     ):
-        self.scanner.scan(textwrap.dedent(source))
-        self.assertEqual(expected_names, self.scanner.names)
-        self.assertEqual(expected_imports, self.scanner.imports)
-        self.scanner.clear()
+        scanner = Scanner(
+            source=textwrap.dedent(source),
+            include_star_import=self.include_star_import,
+        )
+        self.assertEqual(expected_names, scanner.names)
+        if self.include_star_import:
+            self.assertEqual(
+                expected_imports, list(scanner.get_unused_imports())
+            )
+        else:
+            self.assertEqual(expected_imports, scanner.imports)
+        scanner.clear()
 
 
 class TestNames(ScannerTestCase):
@@ -39,10 +41,6 @@ class TestNames(ScannerTestCase):
             def function():
                pass
             """,
-            expected_names=[
-                Name(lineno=1, name="variable"),
-                Name(lineno=2, name="variable1"),
-            ],
         )
 
     def test_names_with_import(self):
@@ -56,7 +54,6 @@ class TestNames(ScannerTestCase):
             def test_function():
                pass
             """,
-            expected_names=[Name(lineno=1, name="variable")],
             expected_imports=[
                 Import(lineno=2, column=1, name="os", package="os")
             ],
@@ -69,7 +66,6 @@ class TestNames(ScannerTestCase):
             def test():
                pass
             """,
-            expected_names=[Name(lineno=1, name="variable")],
         )
 
     def test_names_with_class(self):
@@ -82,7 +78,6 @@ class TestNames(ScannerTestCase):
                def test_function():
                    pass
             """,
-            expected_names=[Name(lineno=1, name="variable")],
         )
 
     def test_decator_in_class(self):
@@ -98,6 +93,113 @@ class TestNames(ScannerTestCase):
         )
 
 
+class TestStarImport(ScannerTestCase):
+    include_star_import = True
+
+    def test_all_assing_after_attribute_usage(self):
+        self.assertUnimportEqual(
+            source="""\
+            from os import *
+
+            __all__ = []
+            __all__.append("walk")
+            """,
+            expected_names=[Name(lineno=4, name="walk")],
+            expected_imports=[
+                ImportFrom(
+                    lineno=1,
+                    column=1,
+                    name="os",
+                    package="os",
+                    star=True,
+                    suggestions=["walk"],
+                )
+            ],
+        )
+
+    def test_assing_after_attribute_usage(self):
+        self.assertUnimportEqual(
+            source="""\
+            from ast import *
+
+            NodeVisitor.s = 0
+            NodeVisitor()
+            """,
+            expected_names=[Name(lineno=4, name="NodeVisitor")],
+            expected_imports=[
+                ImportFrom(
+                    lineno=1,
+                    column=1,
+                    name="ast",
+                    package="ast",
+                    star=True,
+                    suggestions=["NodeVisitor"],
+                )
+            ],
+        )
+
+
+class TestAssing(ScannerTestCase):
+    include_star_import = True
+
+    def test_star_import_attribute(self):
+        self.assertUnimportEqual(
+            source="""\
+            from os import *
+
+            walk.a = 0
+            """,
+            expected_imports=[
+                ImportFrom(
+                    lineno=1,
+                    column=1,
+                    name="os",
+                    package="os",
+                    star=True,
+                    suggestions=[],
+                )
+            ],
+        )
+
+    def test_star_import_name(self):
+        self.assertUnimportEqual(
+            source="""\
+            from os import *
+
+            __all__ = []
+            """,
+            expected_imports=[
+                ImportFrom(
+                    lineno=1,
+                    column=1,
+                    name="os",
+                    package="os",
+                    star=True,
+                    suggestions=[],
+                )
+            ],
+        )
+
+    def test_i120(self):
+        # https://github.com/hakancelik96/unimport/issues/120
+
+        self.assertUnimportEqual(
+            source="""\
+            import datetime
+            datetime = None
+            import datetime
+            """,
+            expected_imports=[
+                Import(
+                    lineno=1, column=1, name="datetime", package="datetime"
+                ),
+                Import(
+                    lineno=3, column=1, name="datetime", package="datetime"
+                ),
+            ],
+        )
+
+
 class SkipImportTest(ScannerTestCase):
     def test_inside_try_except(self):
         self.assertUnimportEqual(
@@ -106,7 +208,11 @@ class SkipImportTest(ScannerTestCase):
                import django
             except ImportError:
                print('install django')
-            """
+            """,
+            expected_names=[
+                Name(lineno=3, name="ImportError"),
+                Name(lineno=4, name="print"),
+            ],
         )
 
     def test_as_import(self):
@@ -211,9 +317,12 @@ class TestTypeComments(ScannerTestCase):
             """,
             expected_names=[
                 Name(lineno=4, name="Any"),
+                Name(lineno=4, name="str"),
                 Name(lineno=4, name="Union"),
                 Name(lineno=4, name="Tuple"),
                 Name(lineno=4, name="Tuple"),
+                Name(lineno=4, name="str"),
+                Name(lineno=4, name="str"),
             ],
             expected_imports=[
                 ImportFrom(
@@ -277,7 +386,7 @@ class TestImportable(unittest.TestCase):
                 """
             )
         )
-        expected = frozenset({"xx", "NAME", "b", "A"})
+        expected = frozenset({"xx", "A", "b", "FUNCNAME", "NAME"})
         self.assertEqual(expected, self.importable.get_suggestion())
 
 
@@ -294,7 +403,6 @@ class TestTypeVariable(ScannerTestCase):
             """,
             expected_names=[
                 Name(lineno=2, name="typing.TYPE_CHECKING"),
-                Name(lineno=6, name="HistoryType"),
                 Name(lineno=6, name="QWebEngineHistory"),
                 Name(lineno=6, name="QWebHistory"),
                 Name(lineno=6, name="typing.Union"),
@@ -337,7 +445,6 @@ class TestTypeVariable(ScannerTestCase):
             """,
             expected_names=[
                 Name(lineno=2, name="TYPE_CHECKING"),
-                Name(lineno=6, name="HistoryType"),
                 Name(lineno=6, name="QWebEngineHistory"),
                 Name(lineno=6, name="QWebHistory"),
                 Name(lineno=6, name="Union"),
@@ -391,7 +498,6 @@ class TestTypeVariable(ScannerTestCase):
             """,
             expected_names=[
                 Name(lineno=2, name="TYPE_CHECKING"),
-                Name(lineno=6, name="HistoryType"),
                 Name(lineno=6, name="QtWebEngineWidgets.QWebEngineHistory"),
                 Name(lineno=6, name="QtWebKit.QWebHistory"),
                 Name(lineno=6, name="Union"),
@@ -444,7 +550,6 @@ class TestTypeVariable(ScannerTestCase):
             """,
             expected_names=[
                 Name(lineno=2, name="typing.TYPE_CHECKING"),
-                Name(lineno=5, name="HistoryType"),
                 Name(lineno=5, name="QWebHistory"),
                 Name(lineno=5, name="typing.cast"),
             ],
@@ -478,7 +583,6 @@ class TestTypeVariable(ScannerTestCase):
             """,
             expected_names=[
                 Name(lineno=2, name="TYPE_CHECKING"),
-                Name(lineno=5, name="HistoryType"),
                 Name(lineno=5, name="QWebHistory"),
                 Name(lineno=5, name="cast"),
                 Name(lineno=5, name="return_value"),
@@ -515,7 +619,6 @@ class TestTypeVariable(ScannerTestCase):
             """,
             expected_names=[
                 Name(lineno=2, name="TYPE_CHECKING"),
-                Name(lineno=5, name="HistoryType"),
                 Name(lineno=5, name="QtWebKit.QWebHistory"),
                 Name(lineno=5, name="cast"),
                 Name(lineno=5, name="return_value"),
@@ -549,7 +652,6 @@ class TestCall(ScannerTestCase):
             CURRENT_DIR = Path(__file__).parent
             """,
             expected_names=[
-                Name(lineno=2, name="CURRENT_DIR"),
                 Name(lineno=2, name="Path"),
                 Name(lineno=2, name="__file__"),
             ],

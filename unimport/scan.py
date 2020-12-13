@@ -3,13 +3,13 @@ given as a string and reports its findings."""
 import ast
 import functools
 import re
-from typing import FrozenSet, Iterator, List, Optional, Union, cast
+from typing import Dict, FrozenSet, Iterator, List, Union, cast
 
 from unimport import color
 from unimport import constants as C
+from unimport import utils
 from unimport.relate import first_occurrence, get_parents, relate
 from unimport.statement import Import, ImportFrom, Name
-from unimport.utils import get_dir, get_source, is_std
 
 
 def recursive(func: C.Function) -> C.Function:
@@ -23,31 +23,130 @@ def recursive(func: C.Function) -> C.Function:
     return cast(C.Function, wrapper)
 
 
-class Scanner(ast.NodeVisitor):
+class ImportScanner(ast.NodeVisitor):
     ignore_modules_imports = ("__future__",)
-    ignore_alias_imports = ("__all__", "__doc__")
-    skip_file_regex = "#.*(unimport: {0,1}skip_file)"
-    skip_comments_regex = "#.*(unimport: {0,1}skip|noqa)"
+    skip_import_comments_regex = "#.*(unimport: {0,1}skip|noqa)"
 
     def __init__(
         self,
         *,
+        source: str,
+        names: List[Name] = [],
         include_star_import: bool = False,
-        show_error: bool = False,
+        show_error: bool = False
     ):
-        """If include_star_import is True during the analysis, it takes into
-        account start imports, if it's False, it doesn't.
-
-        E.g.: from x import * is a star import.
-        If show_error is True during the analysis, errors are displayed.
-        """
+        self.source = source
+        self.names = names
         self.include_star_import = include_star_import
         self.show_error = show_error
+
         self.imports: List[C.ImportT] = []
-        self.names: List[Name] = []
-        self.import_names: List[str] = []
-        self.unused_imports: List[C.ImportT] = []
         self.any_import_error = False
+
+    def traverse(self) -> None:
+        try:
+            tree = ast.parse(self.source, mode="exec")
+        except SyntaxError as err:
+            if self.show_error:
+                print(color.paint(str(err), color.RED))  # pragma: no cover
+            raise err
+        self.visit(tree)
+
+    @recursive
+    def visit_Import(self, node: ast.Import) -> None:
+        if self.skip_import(node):
+            return
+        for column, alias in enumerate(node.names):
+            name = alias.asname or alias.name
+            if name in C.INITIAL_IMPORTS:
+                name = name.split(".")[0]
+            self.imports.append(
+                Import(
+                    lineno=node.lineno,
+                    column=column + 1,
+                    name=name,
+                    package=alias.name,
+                )
+            )
+
+    @recursive
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
+        if self.skip_import(node):
+            return
+        is_star = node.names[0].name == "*"
+        for column, alias in enumerate(node.names):
+            if not node.level:
+                package = node.module
+            else:
+                package = "." * node.level + str(node.module) or ""
+            alias_name = alias.asname or alias.name
+            if (package in self.ignore_modules_imports) or (
+                is_star and not self.include_star_import
+            ):
+                return
+            name = package if is_star else alias_name
+            suggestions = self.get_suggestions(package) if is_star else []
+            self.imports.append(
+                ImportFrom(
+                    lineno=node.lineno,
+                    column=column + 1,
+                    name=name,
+                    star=is_star,
+                    suggestions=suggestions,
+                    package=package,
+                )
+            )
+
+    def visit_Try(self, node: ast.Try) -> None:
+        def any_import_error(items) -> bool:
+            for item in items:
+                if (
+                    isinstance(item, ast.Name)
+                    and item.id in {"ModuleNotFoundError", "ImportError"}
+                ) or (
+                    isinstance(item, ast.Tuple) and any_import_error(item.elts)
+                ):
+                    return True
+            else:
+                return False
+
+        self.any_import_error = any_import_error(
+            handle.type for handle in node.handlers
+        )
+        self.generic_visit(node)
+        self.any_import_error = False
+
+    def skip_import(self, node: Union[ast.Import, ast.ImportFrom]) -> bool:
+        if C.PY38_PLUS:
+            source_segment = "\n".join(
+                self.source.splitlines()[node.lineno - 1 : node.end_lineno]
+            )
+        else:
+            source_segment = self.source.splitlines()[node.lineno - 1]
+        return (
+            bool(
+                re.search(
+                    self.skip_import_comments_regex,
+                    source_segment,
+                    re.IGNORECASE,
+                )
+            )
+            or self.any_import_error
+        )
+
+    def get_suggestions(self, package: str) -> List[str]:
+        names = {name.name.split(".")[0] for name in self.names}
+        from_names = ImportableVisitor().get_names(package)
+        return sorted(from_names & names)
+
+
+class NameScanner(ast.NodeVisitor):
+    def __init__(self, *, source: str, show_error: bool = False):
+        self.source = source
+        self.show_error = show_error
+        self.names: List[Name] = []
+
+        self.assing: Dict[str, int] = {}
 
     @recursive
     def visit_FunctionDef(self, node: C.ASTFunctionT) -> None:
@@ -74,60 +173,19 @@ class Scanner(ast.NodeVisitor):
             self.visit_str_helper(node.value, node)
 
     @recursive
-    def visit_Import(self, node: ast.Import) -> None:
-        if self.skip_import(node):
-            return
-        for column, alias in enumerate(node.names):
-            name = alias.asname or alias.name
-            if name in C.INITIAL_IMPORTS:
-                name = name.split(".")[0]
-            self.imports.append(
-                Import(
-                    lineno=node.lineno,
-                    column=column + 1,
-                    name=name,
-                    package=alias.name,
-                )
-            )
-            self.import_names.append(name)
-
-    @recursive
-    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
-        if self.skip_import(node):
-            return
-        is_star = node.names[0].name == "*"
-        for column, alias in enumerate(node.names):
-            if not node.level:
-                package = node.module
-            else:
-                package = "." * node.level
-            alias_name = alias.asname or alias.name
-            if (
-                (package in self.ignore_modules_imports)
-                or (alias_name in self.ignore_alias_imports)
-                or (is_star and not self.include_star_import)
-            ):
-                return
-            name = package if is_star else alias_name
-            self.imports.append(
-                ImportFrom(
-                    lineno=node.lineno,
-                    column=column + 1,
-                    name=name,
-                    star=is_star,
-                    suggestions=[],
-                    package=package,
-                )
-            )
-            self.import_names.append(name)
-
-    @recursive
-    def visit_Name(self, node: ast.Name) -> None:
+    def visit_Name(self, node: ast.Name, assing: bool = False) -> None:
         if not isinstance(node.parent, ast.Attribute):  # type: ignore
-            self.names.append(Name(lineno=node.lineno, name=node.id))
+            if isinstance(node.parent, ast.Assign):  # type: ignore
+                self.assing[node.id] = node.lineno
+            else:
+                before_assing = self.assing.get(node.id, False)
+                if not before_assing or before_assing >= node.lineno:
+                    self.names.append(Name(lineno=node.lineno, name=node.id))
 
     @recursive
-    def visit_Attribute(self, node: ast.Attribute) -> None:
+    def visit_Attribute(
+        self, node: ast.Attribute, assing: bool = False
+    ) -> None:
         if not isinstance(node.value, ast.Call):
             names = []
             for sub_node in ast.walk(node):
@@ -136,8 +194,19 @@ class Scanner(ast.NodeVisitor):
                 elif isinstance(sub_node, ast.Name):
                     names.append(sub_node.id)
             names.reverse()
-            name = ".".join(names)
-            self.names.append(Name(lineno=node.lineno, name=name))
+            if isinstance(node.parent, ast.Assign):  # type: ignore
+                self.assing[".".join(names)] = node.lineno
+            else:
+                for name in [
+                    ".".join(names[: index + 1]) for index in range(len(names))
+                ]:
+                    before_assing = self.assing.get(name, False)
+                    if before_assing and before_assing < node.lineno:
+                        break
+                else:
+                    self.names.append(
+                        Name(lineno=node.lineno, name=".".join(names))
+                    )
 
     @recursive
     def visit_Assign(self, node: ast.Assign) -> None:
@@ -146,25 +215,6 @@ class Scanner(ast.NodeVisitor):
     @recursive
     def visit_arg(self, node: ast.arg) -> None:
         self._type_comment(node)
-
-    def visit_Try(self, node: ast.Try) -> None:
-        def any_import_error(items) -> bool:
-            for item in items:
-                if (
-                    isinstance(item, ast.Name)
-                    and item.id in {"ModuleNotFoundError", "ImportError"}
-                ) or (
-                    isinstance(item, ast.Tuple) and any_import_error(item.elts)
-                ):
-                    return True
-            else:
-                return False
-
-        self.any_import_error = any_import_error(
-            handle.type for handle in node.handlers
-        )
-        self.generic_visit(node)
-        self.any_import_error = False
 
     @recursive
     def visit_Subscript(self, node: ast.Subscript) -> None:
@@ -217,17 +267,6 @@ class Scanner(ast.NodeVisitor):
             elif isinstance(node.args[0], ast.Str):
                 self.join_visit(node.args[0].s, node.args[0])
 
-    def scan(self, source: str) -> None:
-        self.source = source
-        if self.skip_file():
-            return
-        try:
-            self.traverse(self.source)
-        except SyntaxError:
-            return None
-        self.names = list(self.get_names())
-        self.unused_imports = list(self.get_unused_imports())
-
     def _type_comment(self, node: ast.AST) -> None:
         if isinstance(node, C.ASTFunctionTuple):
             mode = "func_type"
@@ -237,22 +276,17 @@ class Scanner(ast.NodeVisitor):
         if type_comment is not None:
             self.join_visit(type_comment, node, mode=mode)
 
-    def traverse(
-        self,
-        source: Union[str, bytes],
-        mode: str = "exec",
-        parent: Optional[ast.AST] = None,
-    ) -> None:
+    def traverse(self) -> None:
         try:
             if C.PY38_PLUS:
-                tree = ast.parse(source, mode=mode, type_comments=True)
+                tree = ast.parse(self.source, mode="exec", type_comments=True)
             else:
-                tree = ast.parse(source, mode=mode)
+                tree = ast.parse(self.source, mode="exec")
         except SyntaxError as err:
             if self.show_error:
                 print(color.paint(str(err), color.RED))  # pragma: no cover
             raise err
-        relate(tree, parent=parent)
+        relate(tree)
         self.visit(tree)
         """
         Receive items on the __all__ list
@@ -281,48 +315,27 @@ class Scanner(ast.NodeVisitor):
             ast.copy_location(new_node, node)
         self.visit(tree)
 
-    def clear(self) -> None:
-        self.names.clear()
-        self.imports.clear()
-        self.import_names.clear()
-        self.unused_imports.clear()
 
-    def skip_import(self, node: Union[ast.Import, ast.ImportFrom]) -> bool:
-        if C.PY38_PLUS:
-            source_segment = "\n".join(
-                self.source.splitlines()[node.lineno - 1 : node.end_lineno]
-            )
-        else:
-            source_segment = self.source.splitlines()[node.lineno - 1]
-        return (
-            bool(
-                re.search(
-                    self.skip_comments_regex,
-                    source_segment,
-                    re.IGNORECASE,
-                )
-            )
-            or self.any_import_error
+class Scanner(ast.NodeVisitor):
+    skip_file_regex = "#.*(unimport: {0,1}skip_file)"
+
+    def __init__(
+        self,
+        *,
+        source: str,
+        include_star_import: bool = False,
+        show_error: bool = False
+    ):
+        self.source = source
+        self.include_star_import = include_star_import
+        self.show_error = show_error
+
+        skip_file = self.skip_file()
+        self.names: List[Name] = self.get_names() if not skip_file else []
+        self.imports: List[C.ImportT] = (
+            self.get_imports() if not skip_file else []
         )
-
-    def skip_file(self) -> bool:
-        return bool(
-            re.search(self.skip_file_regex, self.source, re.IGNORECASE)
-        )
-
-    def get_names(self) -> Iterator[Name]:
-        imp_match_built_in = C.BUILTINS & set(self.import_names)
-        for name in self.names:
-            if [imp_name == name.name for imp_name in imp_match_built_in] or (
-                name.name.split(".")[0] not in C.IGNORE_IMPORT_NAMES
-                and name.name.split(".")[0] not in C.BUILTINS
-            ):
-                yield name
-
-    def get_suggestions(self, package: str) -> List[str]:
-        names = {to_cfv.name.split(".")[0] for to_cfv in self.names}
-        from_names = ImportableVisitor().get_names(package)
-        return sorted(from_names & names)
+        self.import_names: List[str] = [imp.name for imp in self.imports]
 
     def get_unused_imports(self) -> Iterator[C.ImportT]:
         for imp in self.imports:
@@ -337,38 +350,71 @@ class Scanner(ast.NodeVisitor):
                 and isinstance(imp, ImportFrom)
                 and imp.star
             ):
-                imp.suggestions.extend(self.get_suggestions(imp.package))
                 yield imp
             # normal import
             elif not self.is_import_used(imp):
                 yield imp
 
-    def is_duplicate(self, name: str) -> bool:
-        return self.import_names.count(name) > 1
-
-    @functools.lru_cache(maxsize=None)
-    def get_duplicate_imports(self, import_name: str) -> List[C.ImportT]:
-        return [
-            imp
-            for imp in self.imports
-            if import_name == imp.name and self.is_duplicate(imp.name)
-        ]
-
     def is_duplicate_import_used(self, imp: C.ImportT) -> bool:
-        def find_nearest_imp(name: Name) -> C.ImportT:
-            nearest = imp
-            for duplicate in self.get_duplicate_imports(imp.name):
-                if name.match(duplicate):
-                    nearest = duplicate
-            return nearest
-
         for name in self.names:
-            if name.match(imp) and imp == find_nearest_imp(name):
+            if name.match(imp) and imp == self.get_nearest_duplicate_imports(
+                imp.name, name.lineno
+            ):
                 return True
         return False
 
     def is_import_used(self, imp: C.ImportT) -> bool:
         return any(name.match(imp) for name in self.names)
+
+    @functools.lru_cache(maxsize=None)
+    def get_nearest_duplicate_imports(
+        self, import_name: str, name_lineno: int
+    ) -> C.ImportT:
+        return [
+            imp
+            for imp in self.imports
+            if import_name == imp.name
+            if self.is_duplicate(imp.name)
+            if imp.lineno < name_lineno
+        ][-1]
+
+    def clear(self):
+        self.names.clear()
+        self.imports.clear()
+        self.import_names.clear()
+
+    def is_duplicate(self, name: str) -> bool:
+        return self.import_names.count(name) > 1
+
+    def get_imports(self):
+        import_scanner = ImportScanner(
+            source=self.source,
+            names=self.names,
+            include_star_import=self.include_star_import,
+            show_error=self.show_error,
+        )
+        try:
+            import_scanner.traverse()
+        except SyntaxError:
+            return []
+        imports = import_scanner.imports
+        return imports
+
+    def get_names(self):
+        name_scanner = NameScanner(
+            source=self.source, show_error=self.show_error
+        )
+        try:
+            name_scanner.traverse()
+        except SyntaxError:
+            return []
+        names = name_scanner.names
+        return names
+
+    def skip_file(self) -> bool:
+        return bool(
+            re.search(self.skip_file_regex, self.source, re.IGNORECASE)
+        )
 
 
 class ImportableVisitor(ast.NodeVisitor):
@@ -391,7 +437,6 @@ class ImportableVisitor(ast.NodeVisitor):
     visit_ClassDef = visit_CFN
     visit_FunctionDef = visit_CFN
     visit_AsyncFunctionDef = visit_CFN
-    visit_Name = visit_CFN
 
     @recursive
     def visit_Import(self, node: ast.Import) -> None:
@@ -413,6 +458,10 @@ class ImportableVisitor(ast.NodeVisitor):
                 if isinstance(item, (ast.Constant, ast.Str)):
                     self.importable_nodes.append(item)
 
+        for target in node.targets:  # we only get assigned names
+            if isinstance(target, (ast.Name, ast.Attribute)):
+                self.suggestions_nodes.append(target)
+
     @recursive
     def visit_Expr(self, node: ast.Expr) -> None:
         if (
@@ -433,10 +482,10 @@ class ImportableVisitor(ast.NodeVisitor):
                                 self.importable_nodes.append(item)
 
     def get_names(self, package: str) -> FrozenSet[str]:
-        if is_std(package):
-            return get_dir(package)
+        if utils.is_std(package):
+            return utils.get_dir(package)
         visitor = self.__class__()
-        source = get_source(package)
+        source = utils.get_source(package)
         if source:
             visitor.traverse(source)
             return visitor.get_all() or visitor.get_suggestion()
