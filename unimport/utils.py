@@ -100,7 +100,8 @@ def get_exclude_list_from_gitignore() -> List[str]:
     path = Path(".gitignore")
     gitignore_regex: List[str] = []
     if path.is_file():
-        for line in tokenize.open(path).readlines():
+        source, _ = read(path)
+        for line in source.splitlines():
             regex = GitWildMatchPattern.pattern_to_regex(line)[0]
             if regex:
                 gitignore_regex.append(regex)

@@ -26,14 +26,11 @@ class DefaultConfig(NamedTuple):
 
     def merge(self, **kwargs):
         diff_dict = set(kwargs) - set(self._asdict())
-        for invalid_key in diff_dict:  # delete keys that are not available.
+        # delete keys that are not available.
+        for invalid_key in diff_dict:
             del kwargs[invalid_key]
-        for (
-            key,
-            value,
-        ) in (
-            kwargs.copy().items()
-        ):  # delete items if they are the same as default values
+        # delete items if they are the same as default values
+        for key, value in kwargs.copy().items():
             if getattr(self, key) == value:
                 del kwargs[key]
         config = self._replace(**kwargs)
@@ -45,11 +42,9 @@ class DefaultConfig(NamedTuple):
             check=kwargs.get("check") or not any((config.diff, config.remove))
         )
         if config.gitignore:
-            config = config._replace(
-                exclude="|".join(
-                    [config.exclude, utils.get_exclude_list_from_gitignore()]
-                )
-            )
+            gitignore_exclude = utils.get_exclude_list_from_gitignore()
+            gitignore_exclude.extend(config.exclude)
+            config = config._replace(exclude="|".join(gitignore_exclude))
         return config
 
 
@@ -60,10 +55,6 @@ class Config:
     def __init__(self, config_file: Path) -> None:
         self.config_file = config_file
         self.section = CONFIG_FILES[config_file.name]
-
-    @staticmethod
-    def is_available_to_parse(config_path: Path) -> bool:
-        return config_path.exists()
 
     def parse(self) -> DefaultConfig:
         return getattr(self, f"parse_{self.config_file.suffix.strip('.')}")()
@@ -94,8 +85,6 @@ class Config:
                     cfg_context[key] = [  # type: ignore
                         Path(p) for p in get_config_as_list(key)
                     ]
-                elif key_type == List[str]:
-                    cfg_context[key] = get_config_as_list(key)  # type: ignore
             return self.default_config._replace(**cfg_context)  # type: ignore
         else:
             return self.default_config
