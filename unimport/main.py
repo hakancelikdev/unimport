@@ -149,7 +149,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             source_path, config.include, config.exclude
         ):
             source, encoding = utils.read(py_path)
-            scanner = Scanner(source=source)
+            scanner = Scanner(
+                source=source,
+                include_star_import=config.include_star_import,
+                show_error=config.show_error,
+            )
             unused_imports = list(scanner.get_unused_imports())
             unused_modules.update({imp.name for imp in unused_imports})
             packages.update(
