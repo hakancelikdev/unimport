@@ -125,7 +125,10 @@ class TestStarImport(ScannerTestCase):
             NodeVisitor.s = 0
             NodeVisitor()
             """,
-            expected_names=[Name(lineno=4, name="NodeVisitor")],
+            expected_names=[
+                Name(lineno=3, name="NodeVisitor.s"),
+                Name(lineno=4, name="NodeVisitor"),
+            ],
             expected_imports=[
                 ImportFrom(
                     lineno=1,
@@ -149,6 +152,7 @@ class TestAssing(ScannerTestCase):
 
             walk.a = 0
             """,
+            expected_names=[Name(lineno=3, name="walk.a")],
             expected_imports=[
                 ImportFrom(
                     lineno=1,
@@ -156,7 +160,7 @@ class TestAssing(ScannerTestCase):
                     name="os",
                     package="os",
                     star=True,
-                    suggestions=[],
+                    suggestions=["walk"],
                 )
             ],
         )
@@ -195,6 +199,23 @@ class TestAssing(ScannerTestCase):
                 ),
                 Import(
                     lineno=3, column=1, name="datetime", package="datetime"
+                ),
+            ],
+        )
+
+    def test_assing_after_import_again(self):
+
+        self.assertUnimportEqual(
+            source="""\
+            import datetime
+            datetime = None
+            import datetime
+            datetime
+            """,
+            expected_names=[Name(lineno=4, name="datetime")],
+            expected_imports=[
+                Import(
+                    lineno=1, column=1, name="datetime", package="datetime"
                 ),
             ],
         )

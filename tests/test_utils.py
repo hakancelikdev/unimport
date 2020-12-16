@@ -5,7 +5,6 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator
 
-# from unimport.session import Session
 from unimport import utils
 from unimport.refactor import refactor_string
 from unimport.scan import Scanner
@@ -35,9 +34,6 @@ def reopenable_temp_file(content: str) -> Iterator[Path]:
 class TestUtils(unittest.TestCase):
     maxDiff = None
     include_star_import = True
-
-    # def setUp(self):
-    #     self.session = Session(include_star_import=self.include_star_import)
 
     def test_list_paths_and_read(self):
         for path in [Path("tests"), Path("tests/test_config.py")]:

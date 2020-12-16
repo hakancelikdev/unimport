@@ -145,7 +145,6 @@ class NameScanner(ast.NodeVisitor):
         self.source = source
         self.show_error = show_error
         self.names: List[Name] = []
-
         self.assing: Dict[str, int] = {}
 
     @recursive
@@ -173,19 +172,15 @@ class NameScanner(ast.NodeVisitor):
             self.visit_str_helper(node.value, node)
 
     @recursive
-    def visit_Name(self, node: ast.Name, assing: bool = False) -> None:
+    def visit_Name(self, node: ast.Name) -> None:
         if not isinstance(node.parent, ast.Attribute):  # type: ignore
             if isinstance(node.parent, ast.Assign):  # type: ignore
                 self.assing[node.id] = node.lineno
             else:
-                before_assing = self.assing.get(node.id, False)
-                if not before_assing or before_assing >= node.lineno:
-                    self.names.append(Name(lineno=node.lineno, name=node.id))
+                self.names.append(Name(lineno=node.lineno, name=node.id))
 
     @recursive
-    def visit_Attribute(
-        self, node: ast.Attribute, assing: bool = False
-    ) -> None:
+    def visit_Attribute(self, node: ast.Attribute) -> None:
         if not isinstance(node.value, ast.Call):
             names = []
             for sub_node in ast.walk(node):
@@ -194,19 +189,11 @@ class NameScanner(ast.NodeVisitor):
                 elif isinstance(sub_node, ast.Name):
                     names.append(sub_node.id)
             names.reverse()
-            if isinstance(node.parent, ast.Assign):  # type: ignore
-                self.assing[".".join(names)] = node.lineno
-            else:
-                for name in [
-                    ".".join(names[: index + 1]) for index in range(len(names))
-                ]:
-                    before_assing = self.assing.get(name, False)
-                    if before_assing and before_assing < node.lineno:
-                        break
-                else:
-                    self.names.append(
-                        Name(lineno=node.lineno, name=".".join(names))
-                    )
+            before_assing = self.assing.get(names[0], False)
+            if not before_assing or before_assing >= node.lineno:
+                self.names.append(
+                    Name(lineno=node.lineno, name=".".join(names))
+                )
 
     @recursive
     def visit_Assign(self, node: ast.Assign) -> None:
@@ -386,7 +373,7 @@ class Scanner(ast.NodeVisitor):
     def is_duplicate(self, name: str) -> bool:
         return self.import_names.count(name) > 1
 
-    def get_imports(self):
+    def get_imports(self) -> List[C.ImportT]:
         import_scanner = ImportScanner(
             source=self.source,
             names=self.names,
@@ -400,7 +387,7 @@ class Scanner(ast.NodeVisitor):
         imports = import_scanner.imports
         return imports
 
-    def get_names(self):
+    def get_names(self) -> List[Name]:
         name_scanner = NameScanner(
             source=self.source, show_error=self.show_error
         )
