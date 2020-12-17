@@ -143,7 +143,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     config = config.merge(**vars(args))
     unused_modules = set()
-    packages: Set[str] = set()
+    used_packages: Set[str] = set()
     for source_path in config.sources:
         for py_path in utils.list_paths(
             source_path, config.include, config.exclude
@@ -154,9 +154,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 include_star_import=config.include_star_import,
                 show_error=config.show_error,
             )
+            scanner.traverse()
             unused_imports = list(scanner.get_unused_imports())
             unused_modules.update({imp.name for imp in unused_imports})
-            packages.update(
+            used_packages.update(
                 utils.get_used_packages(scanner.imports, unused_imports)
             )
             if config.check:
@@ -196,7 +197,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 color.GREEN,
             )
         )
-    if config.requirements and packages:
+    if config.requirements:
         for requirements in Path(".").glob("requirements*.txt"):
             source = requirements.read_text()
             copy_source = source.splitlines().copy()
@@ -210,7 +211,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                             color.paint(requirement + " not found", color.RED)
                         )
                     continue
-                if module_name not in packages:
+                if module_name not in used_packages:
                     copy_source.remove(requirement)
                     if config.check:
                         print(

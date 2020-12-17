@@ -45,7 +45,7 @@ class ImportScanner(ast.NodeVisitor):
 
     def traverse(self) -> None:
         try:
-            tree = ast.parse(self.source, mode="exec")
+            tree = ast.parse(self.source)
         except SyntaxError as err:
             if self.show_error:
                 print(color.paint(str(err), color.RED))  # pragma: no cover
@@ -266,9 +266,9 @@ class NameScanner(ast.NodeVisitor):
     def traverse(self) -> None:
         try:
             if C.PY38_PLUS:
-                tree = ast.parse(self.source, mode="exec", type_comments=True)
+                tree = ast.parse(self.source, type_comments=True)
             else:
-                tree = ast.parse(self.source, mode="exec")
+                tree = ast.parse(self.source)
         except SyntaxError as err:
             if self.show_error:
                 print(color.paint(str(err), color.RED))  # pragma: no cover
@@ -317,12 +317,19 @@ class Scanner(ast.NodeVisitor):
         self.include_star_import = include_star_import
         self.show_error = show_error
 
-        skip_file = self.skip_file()
-        self.names: List[Name] = self.get_names() if not skip_file else []
-        self.imports: List[C.ImportT] = (
-            self.get_imports() if not skip_file else []
-        )
-        self.import_names: List[str] = [imp.name for imp in self.imports]
+        self.names: List[Name] = []
+        self.imports: List[C.ImportT] = []
+        self.import_names: List[str] = []
+
+    def traverse(self) -> None:
+        if not self.skip_file():
+            try:
+                self.names.extend(self.get_names())
+                self.imports.extend(self.get_imports())
+            except SyntaxError:
+                pass
+            else:
+                self.import_names.extend([imp.name for imp in self.imports])
 
     def get_unused_imports(self) -> Iterator[C.ImportT]:
         for imp in self.imports:
@@ -373,6 +380,13 @@ class Scanner(ast.NodeVisitor):
     def is_duplicate(self, name: str) -> bool:
         return self.import_names.count(name) > 1
 
+    def get_names(self) -> List[Name]:
+        name_scanner = NameScanner(
+            source=self.source, show_error=self.show_error
+        )
+        name_scanner.traverse()
+        return name_scanner.names
+
     def get_imports(self) -> List[C.ImportT]:
         import_scanner = ImportScanner(
             source=self.source,
@@ -380,23 +394,8 @@ class Scanner(ast.NodeVisitor):
             include_star_import=self.include_star_import,
             show_error=self.show_error,
         )
-        try:
-            import_scanner.traverse()
-        except SyntaxError:
-            return []
-        imports = import_scanner.imports
-        return imports
-
-    def get_names(self) -> List[Name]:
-        name_scanner = NameScanner(
-            source=self.source, show_error=self.show_error
-        )
-        try:
-            name_scanner.traverse()
-        except SyntaxError:
-            return []
-        names = name_scanner.names
-        return names
+        import_scanner.traverse()
+        return import_scanner.imports
 
     def skip_file(self) -> bool:
         return bool(

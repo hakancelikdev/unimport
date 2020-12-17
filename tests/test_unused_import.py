@@ -16,6 +16,7 @@ class UnusedTestCase(unittest.TestCase):
             source=textwrap.dedent(source),
             include_star_import=self.include_star_import,
         )
+        scanner.traverse()
         super().assertEqual(
             list(scanner.get_unused_imports()),
             expected_unused_imports,

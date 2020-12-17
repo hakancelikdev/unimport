@@ -20,6 +20,7 @@ class ScannerTestCase(unittest.TestCase):
             source=textwrap.dedent(source),
             include_star_import=self.include_star_import,
         )
+        scanner.traverse()
         self.assertEqual(expected_names, scanner.names)
         if self.include_star_import:
             self.assertEqual(
