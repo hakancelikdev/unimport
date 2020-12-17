@@ -145,7 +145,7 @@ class NameScanner(ast.NodeVisitor):
         self.source = source
         self.show_error = show_error
         self.names: List[Name] = []
-        self.assing: Dict[str, int] = {}
+        self.assign: Dict[str, int] = {}
 
     @recursive
     def visit_FunctionDef(self, node: C.ASTFunctionT) -> None:
@@ -174,8 +174,8 @@ class NameScanner(ast.NodeVisitor):
     @recursive
     def visit_Name(self, node: ast.Name) -> None:
         if not isinstance(node.parent, ast.Attribute):  # type: ignore
-            if isinstance(node.parent, ast.Assign):  # type: ignore
-                self.assing[node.id] = node.lineno
+            if isinstance(node.parent, ast.Assign) and isinstance(node.ctx, ast.Store):  # type: ignore
+                self.assign[node.id] = node.lineno
             else:
                 self.names.append(Name(lineno=node.lineno, name=node.id))
 
@@ -189,7 +189,7 @@ class NameScanner(ast.NodeVisitor):
                 elif isinstance(sub_node, ast.Name):
                     names.append(sub_node.id)
             names.reverse()
-            before_assing = self.assing.get(names[0], False)
+            before_assing = self.assign.get(names[0], False)
             if not before_assing or before_assing >= node.lineno:
                 self.names.append(
                     Name(lineno=node.lineno, name=".".join(names))

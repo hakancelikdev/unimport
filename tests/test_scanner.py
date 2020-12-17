@@ -220,6 +220,16 @@ class TestAssing(ScannerTestCase):
             ],
         )
 
+    def test_assing_after_import_again_used(self):
+
+        self.assertUnimportEqual(
+            source="""\
+            import datetime
+            x = datetime
+            """,
+            expected_names=[Name(lineno=2, name="datetime")],
+        )
+
 
 class SkipImportTest(ScannerTestCase):
     def test_inside_try_except(self):
