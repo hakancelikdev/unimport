@@ -1,65 +1,97 @@
 import configparser
 from ast import literal_eval
 from pathlib import Path
-from typing import List
+from typing import List, NamedTuple
 
 import toml
+
+from unimport import constants as C
+from unimport import utils
 
 CONFIG_FILES = {"setup.cfg": "unimport", "pyproject.toml": "tool.unimport"}
 
 
+class DefaultConfig(NamedTuple):
+    sources: List[Path] = [Path(".")]
+    include: str = C.INCLUDE_REGEX_PATTERN
+    exclude: str = C.EXCLUDE_REGEX_PATTERN
+    requirements: bool = False
+    gitignore: bool = False
+    remove: bool = False
+    diff: bool = False
+    include_star_import: bool = False
+    show_error: bool = False
+    permission: bool = False
+    check: bool = False
+
+    def merge(self, **kwargs):
+        diff_dict = set(kwargs) - set(self._asdict())
+        # delete keys that are not available.
+        for invalid_key in diff_dict:
+            del kwargs[invalid_key]
+        # delete items if they are the same as default values
+        for key, value in kwargs.copy().items():
+            if getattr(self, key) == value:
+                del kwargs[key]
+        config = self._replace(**kwargs)
+        diff = kwargs.get("diff") or kwargs.get("permission")
+        config = config._replace(
+            diff=diff or any((config.diff, config.permission))
+        )
+        config = config._replace(
+            check=kwargs.get("check") or not any((config.diff, config.remove))
+        )
+        if config.gitignore:
+            gitignore_exclude = utils.get_exclude_list_from_gitignore()
+            gitignore_exclude.extend(config.exclude)
+            config = config._replace(exclude="|".join(gitignore_exclude))
+        return config
+
+
 class Config:
-    sources: List[Path] = []
-    include: List[str] = []
-    exclude: List[str] = []
-    requirements = False
-    gitignore = False
-    remove = False
-    diff = False
+
+    default_config = DefaultConfig()
 
     def __init__(self, config_file: Path) -> None:
         self.config_file = config_file
         self.section = CONFIG_FILES[config_file.name]
-        self.parse()
 
-    @staticmethod
-    def is_available_to_parse(config_path: Path) -> bool:
-        return config_path.exists()
+    def parse(self) -> DefaultConfig:
+        return getattr(self, f"parse_{self.config_file.suffix.strip('.')}")()
 
-    def parse(self) -> None:
-        getattr(self, f"parse_{self.config_file.suffix.strip('.')}")()
-
-    def parse_cfg(self) -> None:
+    def parse_cfg(self) -> DefaultConfig:
         parser = configparser.ConfigParser(allow_no_value=True)
         parser.read(self.config_file)
         if parser.has_section(self.section):
-            sources = literal_eval(
-                parser.get(
-                    self.section, "sources", fallback=[]  # type: ignore
-                )
-            )
-            self.sources = [Path(path) for path in sources]
-            self.include = [parser.get(self.section, "include", fallback="")]  # type: ignore
-            self.exclude = [parser.get(self.section, "exclude", fallback="")]  # type: ignore
-            self.requirements = parser.getboolean(
-                self.section, "requirements", fallback=False
-            )
-            self.gitignore = parser.getboolean(
-                self.section, "gitignore", fallback=False
-            )
-            self.remove = parser.getboolean(
-                self.section, "remove", fallback=False
-            )
-            self.diff = parser.getboolean(self.section, "diff", fallback=False)
 
-    def parse_toml(self) -> None:
+            def get_config_as_list(name: str) -> List[str]:
+                return literal_eval(
+                    parser.get(
+                        self.section,
+                        name,
+                        fallback=getattr(self.default_config, name),
+                    )
+                )
+
+            cfg_context = {}
+            config_annotations = self.default_config.__annotations__
+            for key, value in parser[self.section].items():
+                key_type = config_annotations[key]
+                if key_type == bool:
+                    cfg_context[key] = parser.getboolean(self.section, key)
+                elif key_type == str:
+                    cfg_context[key] = value  # type: ignore
+                elif key_type == List[Path]:
+                    cfg_context[key] = [  # type: ignore
+                        Path(p) for p in get_config_as_list(key)
+                    ]
+            return self.default_config._replace(**cfg_context)  # type: ignore
+        else:
+            return self.default_config
+
+    def parse_toml(self) -> DefaultConfig:
         parsed_toml = toml.loads(self.config_file.read_text())
         config = parsed_toml.get("tool", {}).get("unimport", {})
-        sources = config.get("sources", [])
-        self.sources = [Path(path) for path in sources]
-        self.include = [config.get("include", "")]
-        self.exclude = [config.get("exclude", "")]
-        self.requirements = config.get("requirements", False)
-        self.gitignore = config.get("gitignore", False)
-        self.remove = config.get("remove", False)
-        self.diff = config.get("diff", False)
+        sources = config.get("sources", self.default_config.sources)
+        config["sources"] = [Path(path) for path in sources]
+        return self.default_config._replace(**config)

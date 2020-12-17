@@ -1,7 +1,7 @@
 import textwrap
 import unittest
 
-from unimport.session import Session
+from unimport.scan import Scanner
 from unimport.statement import Import, ImportFrom
 
 
@@ -9,18 +9,18 @@ class UnusedTestCase(unittest.TestCase):
     maxDiff = None
     include_star_import = False
 
-    def setUp(self):
-        self.session = Session(include_star_import=self.include_star_import)
-
     def assertSourceAfterScanningEqualToExpected(
         self, source, expected_unused_imports=[]
     ):
-        self.session.scanner.scan(textwrap.dedent(source))
+        scanner = Scanner(
+            source=textwrap.dedent(source),
+            include_star_import=self.include_star_import,
+        )
         super().assertEqual(
-            self.session.scanner.unused_imports,
+            list(scanner.get_unused_imports()),
             expected_unused_imports,
         )
-        self.session.scanner.clear()
+        scanner.clear()
 
 
 class TestBuiltin(UnusedTestCase):
