@@ -62,7 +62,7 @@ WHITE = "\033[97m"
 BOLD_WHITE = "\033[1;37m"
 
 
-def paint(content: str, color: str):
+def paint(content: str, color: str) -> str:
     if TERMINAL_SUPPORT_COLOR:
         return color + content + RESET
     else:

@@ -15,6 +15,7 @@ class RefactorTestCase(unittest.TestCase):
             source=textwrap.dedent(action),
             include_star_import=self.include_star_import,
         )
+        scanner.traverse()
         refactor_result = refactor_string(
             source=scanner.source,
             unused_imports=list(scanner.get_unused_imports()),
