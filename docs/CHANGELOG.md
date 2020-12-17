@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unrelased - ./././
+
+- [🐞 & 💪 & 💊 Fix: #120 & #150 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/155)
+
+  - Configuration Bug Fix ( Configuration priority, reading and merge )
+  - %136 - %150 performance increase
+  - More accurate result.
+
 ## [0.6.8] - 2/December/2020
 
 - [🐞 Fix: Extra type check on `utils.is_std`, #148 (#149) by @isik-kaplan](https://github.com/hakancelik96/unimport/commit/b9e226ef18984189b4154b739b9b186a2c7a2418)

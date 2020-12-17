@@ -85,8 +85,14 @@ BUILTINS = frozenset(dir(builtins))
 
 Function = TypeVar("Function", bound=Callable[..., Any])
 ASTImportableT = Union[
-    ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Name, ast.alias
+    ast.AsyncFunctionDef,
+    ast.Attribute,
+    ast.ClassDef,
+    ast.FunctionDef,
+    ast.Name,
+    ast.alias,
 ]
+
 ASTFunctionT = Union[ast.FunctionDef, ast.AsyncFunctionDef]
 ImportT = Union[Import, ImportFrom]
 CFNT = Union[ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Name]
@@ -94,3 +100,6 @@ DefTuple = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
 ASTFunctionTuple = (ast.FunctionDef, ast.AsyncFunctionDef)
 BUILTIN_MODULE_NAMES = frozenset(sys.builtin_module_names)
 STDLIB_PATH = distutils.sysconfig.get_python_lib(standard_lib=True)
+GLOB_PATTERN = "**/*.py"
+INCLUDE_REGEX_PATTERN = "\\.(py)$"
+EXCLUDE_REGEX_PATTERN = "^$"

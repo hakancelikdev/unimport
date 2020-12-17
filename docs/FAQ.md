@@ -1,4 +1,6 @@
-# Differences between autoflake and unimport
+# FAQ
+
+## Differences between Autoflake and Unimport
 
 - Autoflake doesn't always remove the duplicate imports when they are on separate lines.
 
@@ -63,9 +65,48 @@ use(walk, cos)
 
 while autoflake simply ignores them.
 
+- Our outputs are more useful, try using our --check, --diff or --permission commands.
+
+## Below are some examples that show Unimport works better.
+
+_example.py_
+
+```python
+import datetime # unused import
+datetime = None
+import datetime # unused import
+```
+
+The command is run and the results are written below.
+
+### Autoflake
+
+command; `autoflake --in-place --remove-all-unused-imports example.py`
+
+```python
+import datetime # unused import
+datetime = None
+```
+
+> As you can see the wrong result
+
+### Unimport
+
+command; `unimport example.py -r`
+
+```python
+datetime = None
+```
+
+## Performance
+
+Unimport < 0.6.8 was much slower than Autoflake == 1.4 (current latest version as of
+writing this) but Unimport > 0.6.8 is slightly faster.
+
 ## Reasons to choose autoflake
 
-- It is faster. When tested, autoflake is 1-4x faster on average.
+- ~~It is faster. When tested, autoflake is 1-4x faster on average.~~ (Unimport is
+  slightly faster now)
 - It removes unused variables which unimport doesn't support, and is not planning to.
 - Has a feature that removes duplicate keys on objects.
 

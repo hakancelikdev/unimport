@@ -1,14 +1,16 @@
 """It offers some utils."""
 import contextlib
+import difflib
 import functools
 import importlib
 import importlib.machinery  # unimport: skip
 import importlib.util  # unimport: skip
 import io
+import re
 import tokenize
 from distutils.util import strtobool
 from pathlib import Path
-from typing import Dict, FrozenSet, List, Optional, Set
+from typing import FrozenSet, Iterable, Iterator, List, Optional, Set, Tuple
 
 from importlib_metadata import PackageNotFoundError, metadata
 from pathspec.patterns.gitwildmatch import GitWildMatchPattern
@@ -98,19 +100,49 @@ def get_exclude_list_from_gitignore() -> List[str]:
     path = Path(".gitignore")
     gitignore_regex: List[str] = []
     if path.is_file():
-        for line in tokenize.open(path).readlines():
+        source, _ = read(path)
+        for line in source.splitlines():
             regex = GitWildMatchPattern.pattern_to_regex(line)[0]
             if regex:
                 gitignore_regex.append(regex)
     return gitignore_regex
 
 
-@functools.lru_cache(maxsize=None)
-def recover_comments(text: str) -> Dict[int, str]:
-    comments = {}
-    with contextlib.suppress(tokenize.TokenError):
-        tokens = tokenize.generate_tokens(io.StringIO(text).readline)
-        for token in tokens:
-            if token.type == tokenize.COMMENT:
-                comments[token.start[0]] = token.string
-    return comments
+def read(path: Path) -> Tuple[str, str]:
+    try:
+        with tokenize.open(path) as stream:
+            source = stream.read()
+            encoding = stream.encoding
+    except (OSError, SyntaxError) as err:
+        return "", "utf-8"
+    return source, encoding
+
+
+def list_paths(
+    start: Path,
+    include: str = C.INCLUDE_REGEX_PATTERN,
+    exclude: str = C.EXCLUDE_REGEX_PATTERN,
+) -> Iterator[Path]:
+    include_regex, exclude_regex = re.compile(include), re.compile(exclude)
+    file_names: Iterable[Path]
+    if start.is_dir():
+        file_names = start.glob(C.GLOB_PATTERN)
+    else:
+        file_names = [start]
+    yield from filter(
+        lambda filename: include_regex.search(str(filename))
+        and not exclude_regex.search(str(filename)),
+        file_names,
+    )
+
+
+def diff(
+    *, source: str, refactor_result: str, fromfile: Path = None
+) -> Tuple[str, ...]:
+    return tuple(
+        difflib.unified_diff(
+            source.splitlines(),
+            refactor_result.splitlines(),
+            fromfile=fromfile.as_posix() if fromfile else "",
+        )
+    )

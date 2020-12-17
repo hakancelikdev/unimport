@@ -44,6 +44,7 @@ setup(
     zip_safe=False,
     include_package_data=True,
     classifiers=[
+        "Development Status :: 4 - Beta",
         "License :: OSI Approved :: MIT License",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Environment :: Console",

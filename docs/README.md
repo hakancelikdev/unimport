@@ -4,7 +4,7 @@
 
 **A linter & formatter for finding & removing unused import statements.**
 
-![pre-commit](https://github.com/hakancelik96/unimport/workflows/pre-commit/badge.svg)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/hakancelik96/unimport/master.svg)](https://results.pre-commit.ci/latest/github/hakancelik96/unimport/master)
 ![test](https://github.com/hakancelik96/unimport/workflows/Test/badge.svg)
 
 [![Forks](https://img.shields.io/github/forks/hakancelik96/unimport)](https://github.com/hakancelik96/unimport/fork)
@@ -412,6 +412,8 @@ gitignore = true
 requirements = true
 remove = false
 diff = true
+include_star_import = true
+show_error = false
 ```
 
 **setup.cfg**
@@ -425,7 +427,12 @@ gitignore = true
 requirements = true
 remove = false
 diff = true
+include_star_import = true
+show_error = false
 ```
+
+**When reading your configurations, it gives priority to the configurations you enter
+from the console.**
 
 ## Adding pre-commit plugins to your project
 
