@@ -40,7 +40,7 @@ class Name(NamedTuple):
             return self.__name_match(imp)
 
     def __attribute_match(self, imp: Union[Import, ImportFrom]) -> bool:
-        """if name is attribute."""
+        """if the name is a attribute."""
         match = ".".join(self.name.split(".")[: len(imp)]) == imp.name
         if self.is_all:
             return match

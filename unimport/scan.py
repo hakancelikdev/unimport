@@ -287,7 +287,7 @@ class NameScanner(ast.NodeVisitor):
                 )
             elif isinstance(node, ast.Str):
                 self.names.append(
-                    Name(lineno=node.lineno, name=node.s), is_all=True
+                    Name(lineno=node.lineno, name=node.s, is_all=True)
                 )
 
     def join_visit(
