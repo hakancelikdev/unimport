@@ -42,10 +42,7 @@ class Name(NamedTuple):
     def __attribute_match(self, imp: Union[Import, ImportFrom]) -> bool:
         """if the name is a attribute."""
         match = ".".join(self.name.split(".")[: len(imp)]) == imp.name
-        if self.is_all:
-            return match
-        else:
-            return imp.lineno < self.lineno and match
+        return imp.lineno < self.lineno and match
 
     def __name_match(self, imp: Union[Import, ImportFrom]) -> bool:
         """if the name is a normal name."""

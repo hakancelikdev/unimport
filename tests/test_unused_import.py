@@ -210,14 +210,6 @@ class Test__All__(UnusedTestCase):
             """,
         )
 
-    def test_attribute_name_all_defined_top(self):
-        self.assertSourceAfterScanningEqualToExpected(
-            source="""\
-            __all__ = ["a.b.c"]
-            import a.b.c
-            """,
-        )
-
 
 class TestUnusedImport(UnusedTestCase):
     include_star_import = True

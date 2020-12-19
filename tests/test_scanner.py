@@ -100,18 +100,6 @@ class TestNames(ScannerTestCase):
             ],
         )
 
-    def test_attribute_name_all_defined_top(self):
-        self.assertUnimportEqual(
-            source="""\
-            __all__ = ["a.b.c"]
-            import a.b.c
-            """,
-            expected_names=[Name(lineno=1, name="a.b.c", is_all=True)],
-            expected_imports=[
-                Import(lineno=2, column=1, name="a.b.c", package="a.b.c")
-            ],
-        )
-
 
 class TestStarImport(ScannerTestCase):
     include_star_import = True
