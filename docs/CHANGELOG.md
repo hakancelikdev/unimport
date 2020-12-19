@@ -7,9 +7,7 @@ All notable changes to this project will be documented in this file.
 - [🐞 Fix: scanner by @hakancelik96](https://github.com/hakancelik96/unimport/pull/157)
   **CASE**
 
-  - Normal name
-
-    ```python
+  - ```python
       __all__ = ['x']
       import x
     ```
