@@ -283,10 +283,12 @@ class NameScanner(ast.NodeVisitor):
         for node in importable_visitor.importable_nodes:
             if isinstance(node, ast.Constant):
                 self.names.append(
-                    Name(lineno=node.lineno, name=str(node.value))
+                    Name(lineno=node.lineno, name=str(node.value), is_all=True)
                 )
             elif isinstance(node, ast.Str):
-                self.names.append(Name(lineno=node.lineno, name=node.s))
+                self.names.append(
+                    Name(lineno=node.lineno, name=node.s), is_all=True
+                )
 
     def join_visit(
         self, value: str, node: ast.AST, *, mode: str = "eval"

@@ -27,9 +27,30 @@ class ImportFrom(NamedTuple):
 class Name(NamedTuple):
     lineno: int
     name: str
+    is_all: bool = False
+
+    @property
+    def is_attribute(self):
+        return "." in self.name
 
     def match(self, imp: Union[Import, ImportFrom]) -> bool:
-        return (
-            imp.lineno < self.lineno
-            and ".".join(self.name.split(".")[: len(imp)]) == imp.name
-        )
+        if self.is_attribute:
+            return self.__attribute_match(imp)
+        else:
+            return self.__name_match(imp)
+
+    def __attribute_match(self, imp: Union[Import, ImportFrom]) -> bool:
+        """if name is attribute."""
+        match = ".".join(self.name.split(".")[: len(imp)]) == imp.name
+        if self.is_all:
+            return match
+        else:
+            return imp.lineno < self.lineno and match
+
+    def __name_match(self, imp: Union[Import, ImportFrom]) -> bool:
+        """if the name is a normal name."""
+        match = self.name == imp.name
+        if self.is_all:
+            return match
+        else:
+            return imp.lineno < self.lineno and match

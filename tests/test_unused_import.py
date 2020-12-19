@@ -18,8 +18,8 @@ class UnusedTestCase(unittest.TestCase):
         )
         scanner.traverse()
         super().assertEqual(
-            list(scanner.get_unused_imports()),
             expected_unused_imports,
+            list(scanner.get_unused_imports()),
         )
         scanner.clear()
 
@@ -200,6 +200,22 @@ class Test__All__(UnusedTestCase):
                     star=True,
                 ),
             ],
+        )
+
+    def test_normal_name_all_defined_top(self):
+        self.assertSourceAfterScanningEqualToExpected(
+            source="""\
+            __all__ = ["x"]
+            import x
+            """,
+        )
+
+    def test_attribute_name_all_defined_top(self):
+        self.assertSourceAfterScanningEqualToExpected(
+            source="""\
+            __all__ = ["a.b.c"]
+            import a.b.c
+            """,
         )
 
 
@@ -469,6 +485,46 @@ class TestStarImport(UnusedTestCase):
                     star=True,
                     suggestions=["NAME", "STAR"],
                 ),
+            ],
+        )
+
+    def test_all_assing_after_attribute_usage(self):
+        self.assertSourceAfterScanningEqualToExpected(
+            source="""\
+            from os import *
+
+            __all__ = []
+            __all__.append("walk")
+            """,
+            expected_unused_imports=[
+                ImportFrom(
+                    lineno=1,
+                    column=1,
+                    name="os",
+                    package="os",
+                    star=True,
+                    suggestions=["walk"],
+                )
+            ],
+        )
+
+    def test_assing_after_attribute_usage(self):
+        self.assertSourceAfterScanningEqualToExpected(
+            source="""\
+            from ast import *
+
+            NodeVisitor.s = 0
+            NodeVisitor()
+            """,
+            expected_unused_imports=[
+                ImportFrom(
+                    lineno=1,
+                    column=1,
+                    name="ast",
+                    package="ast",
+                    star=True,
+                    suggestions=["NodeVisitor"],
+                )
             ],
         )
 
@@ -1436,4 +1492,88 @@ class TestAsImport(UnusedTestCase):
                     suggestions=[],
                 ),
             ],
+        )
+
+
+class TestAssing(UnusedTestCase):
+    include_star_import = True
+
+    def test_star_import_attribute(self):
+        self.assertSourceAfterScanningEqualToExpected(
+            source="""\
+            from os import *
+
+            walk.a = 0
+            """,
+            expected_unused_imports=[
+                ImportFrom(
+                    lineno=1,
+                    column=1,
+                    name="os",
+                    package="os",
+                    star=True,
+                    suggestions=["walk"],
+                )
+            ],
+        )
+
+    def test_star_import_name(self):
+        self.assertSourceAfterScanningEqualToExpected(
+            source="""\
+            from os import *
+
+            __all__ = []
+            """,
+            expected_unused_imports=[
+                ImportFrom(
+                    lineno=1,
+                    column=1,
+                    name="os",
+                    package="os",
+                    star=True,
+                    suggestions=[],
+                )
+            ],
+        )
+
+    def test_i120(self):
+        # https://github.com/hakancelik96/unimport/issues/120
+
+        self.assertSourceAfterScanningEqualToExpected(
+            source="""\
+            import datetime
+            datetime = None
+            import datetime
+            """,
+            expected_unused_imports=[
+                Import(
+                    lineno=1, column=1, name="datetime", package="datetime"
+                ),
+                Import(
+                    lineno=3, column=1, name="datetime", package="datetime"
+                ),
+            ],
+        )
+
+    def test_assing_after_import_again(self):
+
+        self.assertSourceAfterScanningEqualToExpected(
+            source="""\
+            import datetime
+            datetime = None
+            import datetime
+            datetime
+            """,
+            expected_unused_imports=[
+                Import(lineno=1, column=1, name="datetime", package="datetime")
+            ],
+        )
+
+    def test_assing_after_import_again_used(self):
+
+        self.assertSourceAfterScanningEqualToExpected(
+            source="""\
+            import datetime
+            x = datetime
+            """,
         )

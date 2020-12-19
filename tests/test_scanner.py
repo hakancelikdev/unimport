@@ -22,12 +22,7 @@ class ScannerTestCase(unittest.TestCase):
         )
         scanner.traverse()
         self.assertEqual(expected_names, scanner.names)
-        if self.include_star_import:
-            self.assertEqual(
-                expected_imports, list(scanner.get_unused_imports())
-            )
-        else:
-            self.assertEqual(expected_imports, scanner.imports)
+        self.assertEqual(expected_imports, scanner.imports)
         scanner.clear()
 
 
@@ -93,6 +88,30 @@ class TestNames(ScannerTestCase):
             expected_names=[Name(lineno=5, name="test2")],
         )
 
+    def test_normal_name_all_defined_top(self):
+        self.assertUnimportEqual(
+            source="""\
+            __all__ = ["x"]
+            import x
+            """,
+            expected_names=[Name(lineno=1, name="x", is_all=True)],
+            expected_imports=[
+                Import(lineno=2, column=1, name="x", package="x")
+            ],
+        )
+
+    def test_attribute_name_all_defined_top(self):
+        self.assertUnimportEqual(
+            source="""\
+            __all__ = ["a.b.c"]
+            import a.b.c
+            """,
+            expected_names=[Name(lineno=1, name="a.b.c", is_all=True)],
+            expected_imports=[
+                Import(lineno=2, column=1, name="a.b.c", package="a.b.c")
+            ],
+        )
+
 
 class TestStarImport(ScannerTestCase):
     include_star_import = True
@@ -105,7 +124,7 @@ class TestStarImport(ScannerTestCase):
             __all__ = []
             __all__.append("walk")
             """,
-            expected_names=[Name(lineno=4, name="walk")],
+            expected_names=[Name(lineno=4, name="walk", is_all=True)],
             expected_imports=[
                 ImportFrom(
                     lineno=1,
@@ -218,6 +237,9 @@ class TestAssing(ScannerTestCase):
                 Import(
                     lineno=1, column=1, name="datetime", package="datetime"
                 ),
+                Import(
+                    lineno=3, column=1, name="datetime", package="datetime"
+                ),
             ],
         )
 
@@ -229,6 +251,9 @@ class TestAssing(ScannerTestCase):
             x = datetime
             """,
             expected_names=[Name(lineno=2, name="datetime")],
+            expected_imports=[
+                Import(lineno=1, column=1, name="datetime", package="datetime")
+            ],
         )
 
 
