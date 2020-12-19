@@ -36,7 +36,7 @@ repos:
         args: [--prose-wrap=always, --print-width=88]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.3.0
+    rev: v3.4.0
     hooks:
       - id: end-of-file-fixer
       - id: requirements-txt-fixer
@@ -48,3 +48,8 @@ repos:
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
+
+  - repo: https://github.com/isidentical/teyit
+    rev: 2eaaabed645b33822de0e310851c0c7abfaa500b
+    hooks:
+      - id: teyit

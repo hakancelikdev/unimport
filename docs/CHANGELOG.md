@@ -9,13 +9,6 @@ All notable changes to this project will be documented in this file.
   - #120 removed to implement it more accurately, later.
 
 - [🐞 Fix: scanner by @hakancelik96](https://github.com/hakancelik96/unimport/pull/157)
-  **CASE**
-
-  - ```python
-      __all__ = ['x']
-      import x
-    ```
-
 - [🐞 & 💪 & 💊 Fix: #150 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/155)
 
   - Configuration Bug Fix ( Configuration priority, reading and merge )
