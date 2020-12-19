@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## Unrelased - ./././
 
+- [🐞 Fix: scanner by @hakancelik96](https://github.com/hakancelik96/unimport/pull/157)
+  **CASE**
+
+  - ```python
+      __all__ = ['x']
+      import x
+    ```
+
 - [🐞 & 💪 & 💊 Fix: #120 & #150 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/155)
 
   - Configuration Bug Fix ( Configuration priority, reading and merge )
