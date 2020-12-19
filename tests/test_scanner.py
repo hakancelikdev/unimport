@@ -9,6 +9,7 @@ from unimport.statement import Import, ImportFrom, Name
 class ScannerTestCase(unittest.TestCase):
     maxDiff = None
     include_star_import = False
+    show_error = False
 
     def assertUnimportEqual(
         self,
@@ -19,6 +20,7 @@ class ScannerTestCase(unittest.TestCase):
         scanner = Scanner(
             source=textwrap.dedent(source),
             include_star_import=self.include_star_import,
+            show_error=self.show_error,
         )
         scanner.traverse()
         self.assertEqual(expected_names, scanner.names)
@@ -37,6 +39,10 @@ class TestNames(ScannerTestCase):
             def function():
                pass
             """,
+            expected_names=[
+                Name(lineno=1, name="variable"),
+                Name(lineno=2, name="variable1"),
+            ],
         )
 
     def test_names_with_import(self):
@@ -50,6 +56,7 @@ class TestNames(ScannerTestCase):
             def test_function():
                pass
             """,
+            expected_names=[Name(lineno=1, name="variable")],
             expected_imports=[
                 Import(lineno=2, column=1, name="os", package="os")
             ],
@@ -62,6 +69,7 @@ class TestNames(ScannerTestCase):
             def test():
                pass
             """,
+            expected_names=[Name(lineno=1, name="variable")],
         )
 
     def test_names_with_class(self):
@@ -74,6 +82,7 @@ class TestNames(ScannerTestCase):
                def test_function():
                    pass
             """,
+            expected_names=[Name(lineno=1, name="variable")],
         )
 
     def test_decator_in_class(self):
@@ -94,7 +103,10 @@ class TestNames(ScannerTestCase):
             __all__ = ["x"]
             import x
             """,
-            expected_names=[Name(lineno=1, name="x", is_all=True)],
+            expected_names=[
+                Name(lineno=1, name="__all__"),
+                Name(lineno=1, name="x", is_all=True),
+            ],
             expected_imports=[
                 Import(lineno=2, column=1, name="x", package="x")
             ],
@@ -103,64 +115,19 @@ class TestNames(ScannerTestCase):
 
 class TestStarImport(ScannerTestCase):
     include_star_import = True
+    show_error = True
 
-    def test_all_assing_after_attribute_usage(self):
+    def test_star(self):
         self.assertUnimportEqual(
-            source="""\
+            """\
             from os import *
-
-            __all__ = []
-            __all__.append("walk")
-            """,
-            expected_names=[Name(lineno=4, name="walk", is_all=True)],
-            expected_imports=[
-                ImportFrom(
-                    lineno=1,
-                    column=1,
-                    name="os",
-                    package="os",
-                    star=True,
-                    suggestions=["walk"],
-                )
-            ],
-        )
-
-    def test_assing_after_attribute_usage(self):
-        self.assertUnimportEqual(
-            source="""\
-            from ast import *
-
-            NodeVisitor.s = 0
-            NodeVisitor()
+            __all__ = ["walk", "removedirs"]
             """,
             expected_names=[
-                Name(lineno=3, name="NodeVisitor.s"),
-                Name(lineno=4, name="NodeVisitor"),
+                Name(lineno=2, name="__all__"),
+                Name(lineno=2, name="walk", is_all=True),
+                Name(lineno=2, name="removedirs", is_all=True),
             ],
-            expected_imports=[
-                ImportFrom(
-                    lineno=1,
-                    column=1,
-                    name="ast",
-                    package="ast",
-                    star=True,
-                    suggestions=["NodeVisitor"],
-                )
-            ],
-        )
-
-
-class TestAssing(ScannerTestCase):
-    include_star_import = True
-
-    def test_star_import_attribute(self):
-        self.assertUnimportEqual(
-            source="""\
-            from os import *
-
-            walk.a = 0
-            """,
-            expected_names=[Name(lineno=3, name="walk.a")],
             expected_imports=[
                 ImportFrom(
                     lineno=1,
@@ -168,17 +135,109 @@ class TestAssing(ScannerTestCase):
                     name="os",
                     package="os",
                     star=True,
-                    suggestions=["walk"],
+                    suggestions=["removedirs", "walk"],
                 )
             ],
         )
 
-    def test_star_import_name(self):
+    def test_append(self):
         self.assertUnimportEqual(
-            source="""\
+            """\
             from os import *
+            __all__ = ["walk"]
+            __all__.append("removedirs")
+            """,
+            expected_names=[
+                Name(lineno=2, name="__all__"),
+                Name(lineno=3, name="__all__.append"),
+                Name(lineno=2, name="walk", is_all=True),
+                Name(lineno=3, name="removedirs", is_all=True),
+            ],
+            expected_imports=[
+                ImportFrom(
+                    lineno=1,
+                    column=1,
+                    name="os",
+                    package="os",
+                    star=True,
+                    suggestions=["removedirs", "walk"],
+                )
+            ],
+        )
 
-            __all__ = []
+    def test_extend(self):
+        self.assertUnimportEqual(
+            """\
+            from os import *
+            __all__ = ["walk"]
+            __all__.extend(["removedirs"])
+            """,
+            expected_names=[
+                Name(lineno=2, name="__all__"),
+                Name(lineno=3, name="__all__.extend"),
+                Name(lineno=2, name="walk", is_all=True),
+                Name(lineno=3, name="removedirs", is_all=True),
+            ],
+            expected_imports=[
+                ImportFrom(
+                    lineno=1,
+                    column=1,
+                    name="os",
+                    package="os",
+                    star=True,
+                    suggestions=["removedirs", "walk"],
+                )
+            ],
+        )
+
+    def test_star_unused(self):
+        self.assertUnimportEqual(
+            """\
+            from os import *
+            __all__ = ["test"]
+            """,
+            expected_names=[
+                Name(lineno=2, name="__all__"),
+                Name(lineno=2, name="test", is_all=True),
+            ],
+            expected_imports=[
+                ImportFrom(
+                    lineno=1,
+                    column=1,
+                    name="os",
+                    package="os",
+                    star=True,
+                    suggestions=[],
+                )
+            ],
+        )
+
+    def test_unknown(self):
+        self.assertUnimportEqual(
+            """\
+            from x import *
+            __all__ = ["xx"]
+            """,
+            expected_names=[
+                Name(lineno=2, name="__all__"),
+                Name(lineno=2, name="xx", is_all=True),
+            ],
+            expected_imports=[
+                ImportFrom(
+                    lineno=1,
+                    column=1,
+                    name="x",
+                    package="x",
+                    star=True,
+                    suggestions=[],
+                )
+            ],
+        )
+
+    def test_unused(self):
+        self.assertUnimportEqual(
+            """\
+            from os import *
             """,
             expected_imports=[
                 ImportFrom(
@@ -192,55 +251,214 @@ class TestAssing(ScannerTestCase):
             ],
         )
 
-    def test_i120(self):
-        # https://github.com/hakancelik96/unimport/issues/120
-
+    def test_used(self):
         self.assertUnimportEqual(
-            source="""\
-            import datetime
-            datetime = None
-            import datetime
+            """\
+            from os import *
+            print(walk)
             """,
+            expected_names=[
+                Name(lineno=2, name="print"),
+                Name(lineno=2, name="walk"),
+            ],
             expected_imports=[
-                Import(
-                    lineno=1, column=1, name="datetime", package="datetime"
+                ImportFrom(
+                    lineno=1,
+                    column=1,
+                    name="os",
+                    package="os",
+                    star=True,
+                    suggestions=["walk"],
+                )
+            ],
+        )
+
+    def test_used_and_unused(self):
+        self.assertUnimportEqual(
+            """\
+            from lib2to3.fixer_util import *
+            from lib2to3.pytree import *
+            from lib2to3.pgen2 import token
+            BlankLine, FromImport, Leaf, Newline, Node
+            token.NAME, token.STAR
+            """,
+            expected_names=[
+                Name(lineno=4, name="BlankLine"),
+                Name(lineno=4, name="FromImport"),
+                Name(lineno=4, name="Leaf"),
+                Name(lineno=4, name="Newline"),
+                Name(lineno=4, name="Node"),
+                Name(lineno=5, name="token.NAME"),
+                Name(lineno=5, name="token.STAR"),
+            ],
+            expected_imports=[
+                ImportFrom(
+                    lineno=1,
+                    column=1,
+                    name="lib2to3.fixer_util",
+                    package="lib2to3.fixer_util",
+                    star=True,
+                    suggestions=[
+                        "BlankLine",
+                        "FromImport",
+                        "Leaf",
+                        "Newline",
+                        "Node",
+                        "token",
+                    ],
                 ),
-                Import(
-                    lineno=3, column=1, name="datetime", package="datetime"
+                ImportFrom(
+                    lineno=2,
+                    column=1,
+                    name="lib2to3.pytree",
+                    package="lib2to3.pytree",
+                    star=True,
+                    suggestions=["Leaf", "Node"],
+                ),
+                ImportFrom(
+                    lineno=3,
+                    column=1,
+                    name="token",
+                    package="lib2to3.pgen2",
+                    star=False,
+                    suggestions=[],
                 ),
             ],
         )
 
-    def test_assing_after_import_again(self):
-
+    def test_used_and_unused_2(self):
         self.assertUnimportEqual(
-            source="""\
-            import datetime
-            datetime = None
-            import datetime
-            datetime
+            """\
+            from lib2to3.fixer_util import *
+            from lib2to3.pytree import *
+            from lib2to3.pgen2.token import *
+            BlankLine, FromImport, Leaf, Newline, Node
+            NAME, STAR
             """,
-            expected_names=[Name(lineno=4, name="datetime")],
+            expected_names=[
+                Name(lineno=4, name="BlankLine"),
+                Name(lineno=4, name="FromImport"),
+                Name(lineno=4, name="Leaf"),
+                Name(lineno=4, name="Newline"),
+                Name(lineno=4, name="Node"),
+                Name(lineno=5, name="NAME"),
+                Name(lineno=5, name="STAR"),
+            ],
             expected_imports=[
-                Import(
-                    lineno=1, column=1, name="datetime", package="datetime"
+                ImportFrom(
+                    lineno=1,
+                    column=1,
+                    name="lib2to3.fixer_util",
+                    package="lib2to3.fixer_util",
+                    star=True,
+                    suggestions=[
+                        "BlankLine",
+                        "FromImport",
+                        "Leaf",
+                        "Newline",
+                        "Node",
+                    ],
                 ),
-                Import(
-                    lineno=3, column=1, name="datetime", package="datetime"
+                ImportFrom(
+                    lineno=2,
+                    column=1,
+                    name="lib2to3.pytree",
+                    package="lib2to3.pytree",
+                    star=True,
+                    suggestions=["Leaf", "Node"],
+                ),
+                ImportFrom(
+                    lineno=3,
+                    column=1,
+                    name="lib2to3.pgen2.token",
+                    package="lib2to3.pgen2.token",
+                    star=True,
+                    suggestions=["NAME", "STAR"],
                 ),
             ],
         )
 
-    def test_assing_after_import_again_used(self):
-
+    def test_defined_all(self):
         self.assertUnimportEqual(
             source="""\
-            import datetime
-            x = datetime
+            from ast import *
+
+            __all__ = []
+            __all__.append("x")
             """,
-            expected_names=[Name(lineno=2, name="datetime")],
+            expected_names=[
+                Name(lineno=3, name="__all__"),
+                Name(lineno=4, name="__all__.append"),
+                Name(lineno=4, name="x", is_all=True),
+            ],
             expected_imports=[
-                Import(lineno=1, column=1, name="datetime", package="datetime")
+                ImportFrom(
+                    lineno=1,
+                    column=1,
+                    name="ast",
+                    package="ast",
+                    star=True,
+                    suggestions=[],
+                )
+            ],
+        )
+
+    def test_defined_class(self):
+        self.assertUnimportEqual(
+            source="""\
+            __all__ = ["NodeVisitor", "parse"]
+
+            from ast import *
+
+            class NodeVisitor:
+                ...
+
+            literal_eval
+
+            """,
+            expected_names=[
+                Name(lineno=1, name="__all__"),
+                Name(lineno=8, name="literal_eval"),
+                Name(lineno=1, name="NodeVisitor", is_all=True),
+                Name(lineno=1, name="parse", is_all=True),
+            ],
+            expected_imports=[
+                ImportFrom(
+                    lineno=3,
+                    column=1,
+                    name="ast",
+                    package="ast",
+                    star=True,
+                    suggestions=["literal_eval", "parse"],
+                )
+            ],
+        )
+
+    def test_defined_function(self):
+        self.assertUnimportEqual(
+            source="""\
+            from ast import *
+
+            __all__.extend(["NodeVisitor", "parse"])
+
+            def literal_eval():
+                ...
+
+            """,
+            expected_names=[
+                Name(lineno=3, name="__all__.extend"),
+                Name(lineno=3, name="NodeVisitor", is_all=True),
+                Name(lineno=3, name="parse", is_all=True),
+            ],
+            expected_imports=[
+                ImportFrom(
+                    lineno=1,
+                    column=1,
+                    name="ast",
+                    package="ast",
+                    star=True,
+                    suggestions=["NodeVisitor", "parse"],
+                )
             ],
         )
 
@@ -448,6 +666,7 @@ class TestTypeVariable(ScannerTestCase):
             """,
             expected_names=[
                 Name(lineno=2, name="typing.TYPE_CHECKING"),
+                Name(lineno=6, name="HistoryType"),
                 Name(lineno=6, name="QWebEngineHistory"),
                 Name(lineno=6, name="QWebHistory"),
                 Name(lineno=6, name="typing.Union"),
@@ -490,6 +709,7 @@ class TestTypeVariable(ScannerTestCase):
             """,
             expected_names=[
                 Name(lineno=2, name="TYPE_CHECKING"),
+                Name(lineno=6, name="HistoryType"),
                 Name(lineno=6, name="QWebEngineHistory"),
                 Name(lineno=6, name="QWebHistory"),
                 Name(lineno=6, name="Union"),
@@ -543,6 +763,7 @@ class TestTypeVariable(ScannerTestCase):
             """,
             expected_names=[
                 Name(lineno=2, name="TYPE_CHECKING"),
+                Name(lineno=6, name="HistoryType"),
                 Name(lineno=6, name="QtWebEngineWidgets.QWebEngineHistory"),
                 Name(lineno=6, name="QtWebKit.QWebHistory"),
                 Name(lineno=6, name="Union"),
@@ -595,6 +816,7 @@ class TestTypeVariable(ScannerTestCase):
             """,
             expected_names=[
                 Name(lineno=2, name="typing.TYPE_CHECKING"),
+                Name(lineno=5, name="HistoryType"),
                 Name(lineno=5, name="QWebHistory"),
                 Name(lineno=5, name="typing.cast"),
             ],
@@ -628,6 +850,7 @@ class TestTypeVariable(ScannerTestCase):
             """,
             expected_names=[
                 Name(lineno=2, name="TYPE_CHECKING"),
+                Name(lineno=5, name="HistoryType"),
                 Name(lineno=5, name="QWebHistory"),
                 Name(lineno=5, name="cast"),
                 Name(lineno=5, name="return_value"),
@@ -664,6 +887,7 @@ class TestTypeVariable(ScannerTestCase):
             """,
             expected_names=[
                 Name(lineno=2, name="TYPE_CHECKING"),
+                Name(lineno=5, name="HistoryType"),
                 Name(lineno=5, name="QtWebKit.QWebHistory"),
                 Name(lineno=5, name="cast"),
                 Name(lineno=5, name="return_value"),
@@ -697,6 +921,7 @@ class TestCall(ScannerTestCase):
             CURRENT_DIR = Path(__file__).parent
             """,
             expected_names=[
+                Name(lineno=2, name="CURRENT_DIR"),
                 Name(lineno=2, name="Path"),
                 Name(lineno=2, name="__file__"),
             ],

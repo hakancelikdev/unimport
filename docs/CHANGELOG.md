@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## Unrelased - ./././
 
+- [💪 Star import more accurate suggestion by @hakancelik96](https://github.com/hakancelik96/unimport/pull/158)
+
+  - #120 removed to implement it more accurately, later.
+
 - [🐞 Fix: scanner by @hakancelik96](https://github.com/hakancelik96/unimport/pull/157)
   **CASE**
 
@@ -12,11 +16,10 @@ All notable changes to this project will be documented in this file.
       import x
     ```
 
-- [🐞 & 💪 & 💊 Fix: #120 & #150 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/155)
+- [🐞 & 💪 & 💊 Fix: #150 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/155)
 
   - Configuration Bug Fix ( Configuration priority, reading and merge )
   - %136 - %150 performance increase
-  - More accurate result.
 
 ## [0.6.8] - 2/December/2020
 
