@@ -3,7 +3,7 @@ given as a string and reports its findings."""
 import ast
 import functools
 import re
-from typing import Dict, FrozenSet, Iterator, List, Union, cast
+from typing import FrozenSet, Iterator, List, Set, Union, cast
 
 from unimport import color
 from unimport import constants as C
@@ -21,6 +21,26 @@ def recursive(func: C.Function) -> C.Function:
         self.generic_visit(*args)
 
     return cast(C.Function, wrapper)
+
+
+class _DefinedNameScanner(ast.NodeVisitor):
+    def __init__(self):
+        self.defined_names: Set[str] = set()
+
+    @recursive
+    def visit_FunctionDef(self, node: C.ASTFunctionT) -> None:
+        self.defined_names.add(node.name)
+
+    visit_AsyncFunctionDef = visit_FunctionDef
+
+    @recursive
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
+        self.defined_names.add(node.name)
+
+    @recursive
+    def visit_Name(self, node: ast.Name) -> None:
+        if isinstance(node.ctx, ast.Store):
+            self.defined_names.add(node.id)
 
 
 class ImportScanner(ast.NodeVisitor):
@@ -42,6 +62,7 @@ class ImportScanner(ast.NodeVisitor):
 
         self.imports: List[C.ImportT] = []
         self.any_import_error = False
+        self.defined_names: Set[str] = set()
 
     def traverse(self) -> None:
         try:
@@ -50,6 +71,9 @@ class ImportScanner(ast.NodeVisitor):
             if self.show_error:
                 print(color.paint(str(err), color.RED))  # pragma: no cover
             raise err
+        defined_name_scanner = _DefinedNameScanner()
+        defined_name_scanner.visit(tree)
+        self.defined_names = defined_name_scanner.defined_names
         self.visit(tree)
 
     @recursive
@@ -137,7 +161,7 @@ class ImportScanner(ast.NodeVisitor):
     def get_suggestions(self, package: str) -> List[str]:
         names = {name.name.split(".")[0] for name in self.names}
         from_names = ImportableVisitor().get_names(package)
-        return sorted(from_names & names)
+        return sorted(from_names & (names - self.defined_names))
 
 
 class NameScanner(ast.NodeVisitor):
@@ -145,7 +169,6 @@ class NameScanner(ast.NodeVisitor):
         self.source = source
         self.show_error = show_error
         self.names: List[Name] = []
-        self.assign: Dict[str, int] = {}
 
     @recursive
     def visit_FunctionDef(self, node: C.ASTFunctionT) -> None:
@@ -174,10 +197,7 @@ class NameScanner(ast.NodeVisitor):
     @recursive
     def visit_Name(self, node: ast.Name) -> None:
         if not isinstance(node.parent, ast.Attribute):  # type: ignore
-            if isinstance(node.parent, ast.Assign) and isinstance(node.ctx, ast.Store):  # type: ignore
-                self.assign[node.id] = node.lineno
-            else:
-                self.names.append(Name(lineno=node.lineno, name=node.id))
+            self.names.append(Name(lineno=node.lineno, name=node.id))
 
     @recursive
     def visit_Attribute(self, node: ast.Attribute) -> None:
@@ -189,11 +209,7 @@ class NameScanner(ast.NodeVisitor):
                 elif isinstance(sub_node, ast.Name):
                     names.append(sub_node.id)
             names.reverse()
-            before_assing = self.assign.get(names[0], False)
-            if not before_assing or before_assing >= node.lineno:
-                self.names.append(
-                    Name(lineno=node.lineno, name=".".join(names))
-                )
+            self.names.append(Name(lineno=node.lineno, name=".".join(names)))
 
     @recursive
     def visit_Assign(self, node: ast.Assign) -> None:

@@ -12,11 +12,10 @@ All notable changes to this project will be documented in this file.
       import x
     ```
 
-- [🐞 & 💪 & 💊 Fix: #120 & #150 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/155)
+- [🐞 & 💪 & 💊 Fix: #150 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/155)
 
   - Configuration Bug Fix ( Configuration priority, reading and merge )
   - %136 - %150 performance increase
-  - More accurate result.
 
 ## [0.6.8] - 2/December/2020
 
