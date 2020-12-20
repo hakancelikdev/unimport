@@ -2,7 +2,7 @@ import textwrap
 import unittest
 
 from unimport.constants import PY38_PLUS
-from unimport.scan import ImportableVisitor, Scanner
+from unimport.scan import Scanner
 from unimport.statement import Import, ImportFrom, Name
 
 
@@ -614,43 +614,6 @@ class TestTypeComments(ScannerTestCase):
                 ),
             ],
         )
-
-
-class TestImportable(unittest.TestCase):
-    maxDiff = None
-
-    def setUp(self):
-        self.importable = ImportableVisitor()
-
-    def test_get_names_from_all(self):
-        self.importable.traverse(
-            textwrap.dedent(
-                """\
-                __all__ = ["test"]
-                __all__.append("test2")
-                __all__.extend(["test3"])
-                """
-            )
-        )
-        expected = frozenset({"test3", "test", "test2"})
-        self.assertEqual(expected, self.importable.get_all())
-
-    def test_get_names_from_suggestion(self):
-
-        self.importable.traverse(
-            textwrap.dedent(
-                """\
-                import xx
-                class A:
-                   pass
-                def b():
-                   FUNCNAME = "test"
-                NAME="NAME"
-                """
-            )
-        )
-        expected = frozenset({"xx", "A", "b", "FUNCNAME", "NAME"})
-        self.assertEqual(expected, self.importable.get_suggestion())
 
 
 class TestTypeVariable(ScannerTestCase):

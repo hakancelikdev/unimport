@@ -6,10 +6,12 @@ from libcst.metadata import CodeRange, PositionProvider
 
 from unimport.statement import Import, ImportFrom
 
+__all__ = ["refactor_string"]
+
 ImportT = TypeVar("ImportT", bound=Union[cst.Import, cst.ImportFrom])
 
 
-class RemoveUnusedImportTransformer(cst.CSTTransformer):
+class _RemoveUnusedImportTransformer(cst.CSTTransformer):
     METADATA_DEPENDENCIES = (PositionProvider,)
 
     def __init__(
@@ -155,7 +157,7 @@ def refactor_string(
     if unused_imports:
         wrapper = cst.MetadataWrapper(cst.parse_module(source))
         fixed_module = wrapper.visit(
-            RemoveUnusedImportTransformer(unused_imports)
+            _RemoveUnusedImportTransformer(unused_imports)
         )
         return fixed_module.code
     return source

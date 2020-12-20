@@ -6,6 +6,28 @@ from typing import Any, Callable, TypeVar, Union
 
 from unimport.statement import Import, ImportFrom
 
+__all__ = [
+    "DESCRIPTION",
+    "VERSION",
+    "PY38_PLUS",
+    "SUBSCRIPT_TYPE_VARIABLE",
+    "INITIAL_IMPORTS",
+    "IGNORE_IMPORT_NAMES",
+    "BUILTINS",
+    "Function",
+    "ASTImportableT",
+    "ASTFunctionT",
+    "ImportT",
+    "CFNT",
+    "DefTuple",
+    "ASTFunctionTuple",
+    "BUILTIN_MODULE_NAMES",
+    "STDLIB_PATH",
+    "GLOB_PATTERN",
+    "INCLUDE_REGEX_PATTERN",
+    "EXCLUDE_REGEX_PATTERN",
+]
+
 DESCRIPTION = (
     "A linter, formatter for finding and removing unused import statements."
 )
