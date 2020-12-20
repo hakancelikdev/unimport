@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unrelased - ./././
 
+- [%15 performance increase & remove show-error flag by @hakancelik96](https://github.com/hakancelik96/unimport/pull/159)
+
 - [💪 Star import more accurate suggestion by @hakancelik96](https://github.com/hakancelik96/unimport/pull/158)
 
   - #120 removed to implement it more accurately, later.

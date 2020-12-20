@@ -9,7 +9,6 @@ from unimport.statement import Import, ImportFrom, Name
 class ScannerTestCase(unittest.TestCase):
     maxDiff = None
     include_star_import = False
-    show_error = False
 
     def assertUnimportEqual(
         self,
@@ -20,7 +19,6 @@ class ScannerTestCase(unittest.TestCase):
         scanner = Scanner(
             source=textwrap.dedent(source),
             include_star_import=self.include_star_import,
-            show_error=self.show_error,
         )
         scanner.traverse()
         self.assertEqual(expected_names, scanner.names)
@@ -115,7 +113,6 @@ class TestNames(ScannerTestCase):
 
 class TestStarImport(ScannerTestCase):
     include_star_import = True
-    show_error = True
 
     def test_star(self):
         self.assertUnimportEqual(

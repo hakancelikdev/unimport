@@ -89,12 +89,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         default=default_config.include_star_import,
     )
     parser.add_argument(
-        "--show-error",
-        action="store_true",
-        help="Show or don't show errors captured during static analysis.",
-        default=default_config.show_error,
-    )
-    parser.add_argument(
         "-d",
         "--diff",
         action="store_true",
@@ -152,7 +146,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             scanner = Scanner(
                 source=source,
                 include_star_import=config.include_star_import,
-                show_error=config.show_error,
             )
             scanner.traverse()
             unused_imports = list(scanner.get_unused_imports())
@@ -206,10 +199,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     requirement.split("==")[0]
                 )
                 if module_name is None:
-                    if config.show_error:
-                        print(
-                            color.paint(requirement + " not found", color.RED)
-                        )
+                    print(color.paint(requirement + " not found", color.RED))
                     continue
                 if module_name not in used_packages:
                     copy_source.remove(requirement)
