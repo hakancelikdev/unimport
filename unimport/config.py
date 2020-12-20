@@ -22,7 +22,6 @@ class DefaultConfig(NamedTuple):
     remove: bool = False
     diff: bool = False
     include_star_import: bool = False
-    show_error: bool = False
     permission: bool = False
     check: bool = False
 

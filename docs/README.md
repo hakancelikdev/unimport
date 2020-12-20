@@ -168,16 +168,6 @@ from i import t
 print(t)
 ```
 
-## `--show-error` flag
-
-> Show or don't show errors captured during static analysis.
-
-Use this flag if you want to see errors ( like `SyntaxError` ) during analysis.
-
-### Usage
-
-- `$ unimport example.py --show-error`
-
 ## `--include-star-import` flag
 
 > Include star imports during scanning and refactor.
@@ -359,8 +349,8 @@ You can automatically delete unused modules from the requirements.txt file
 You can list many options by running unimport --help
 
 ```
-usage: unimport [-h] [-c PATH] [--include include] [--exclude exclude] [--gitignore] [--include-star-import] [--show-error]
-                [-d] [-r | -p] [--requirements] [--check] [-v]
+usage: unimport [-h] [-c PATH] [--include include] [--exclude exclude] [--gitignore] [--include-star-import] [-d] [-r | -p]
+                [--requirements] [--check] [-v]
                 [sources [sources ...]]
 
 A linter, formatter for finding and removing unused import statements.
@@ -377,7 +367,6 @@ optional arguments:
   --gitignore           exclude .gitignore patterns. if present.
   --include-star-import
                         Include star imports during scanning and refactor.
-  --show-error          Show or don't show errors captured during static analysis.
   -d, --diff            Prints a diff of all the changes unimport would make to a file.
   -r, --remove          remove unused imports automatically.
   -p, --permission      Refactor permission after see diff.
@@ -411,7 +400,6 @@ requirements = true
 remove = false
 diff = true
 include_star_import = true
-show_error = false
 ```
 
 **setup.cfg**
@@ -426,7 +414,6 @@ requirements = true
 remove = false
 diff = true
 include_star_import = true
-show_error = false
 ```
 
 **When reading your configurations, it gives priority to the configurations you enter
