@@ -5,7 +5,6 @@ import functools
 import re
 from typing import FrozenSet, Iterator, List, Set, Union, cast
 
-from unimport import color
 from unimport import constants as C
 from unimport import utils
 from unimport.relate import first_occurrence, get_parents, relate
@@ -55,24 +54,16 @@ class _ImportScanner(ast.NodeVisitor):
         source: str,
         names: List[Name] = [],
         include_star_import: bool = False,
-        show_error: bool = False
     ):
         self.source = source
         self.names = names
         self.include_star_import = include_star_import
-        self.show_error = show_error
 
         self.imports: List[C.ImportT] = []
         self.any_import_error = False
         self.defined_names: Set[str] = set()
 
-    def traverse(self) -> None:
-        try:
-            tree = ast.parse(self.source)
-        except SyntaxError as err:
-            if self.show_error:
-                print(color.paint(str(err), color.RED))  # pragma: no cover
-            raise err
+    def traverse(self, tree) -> None:
         defined_name_scanner = _DefinedNameScanner()
         defined_name_scanner.visit(tree)
         self.defined_names = defined_name_scanner.defined_names
@@ -167,9 +158,7 @@ class _ImportScanner(ast.NodeVisitor):
 
 
 class _NameScanner(ast.NodeVisitor):
-    def __init__(self, *, source: str, show_error: bool = False):
-        self.source = source
-        self.show_error = show_error
+    def __init__(self):
         self.names: List[Name] = []
 
     @recursive
@@ -281,23 +270,13 @@ class _NameScanner(ast.NodeVisitor):
         if type_comment is not None:
             self.join_visit(type_comment, node, mode=mode)
 
-    def traverse(self) -> None:
-        try:
-            if C.PY38_PLUS:
-                tree = ast.parse(self.source, type_comments=True)
-            else:
-                tree = ast.parse(self.source)
-        except SyntaxError as err:
-            if self.show_error:
-                print(color.paint(str(err), color.RED))  # pragma: no cover
-            raise err
-        relate(tree)
+    def traverse(self, tree) -> None:
         self.visit(tree)
         """
         Receive items on the __all__ list
         """
         importable_visitor = _ImportableScanner()
-        importable_visitor.traverse(self.source)
+        importable_visitor.traverse(tree)
         for node in importable_visitor.importable_nodes:
             if isinstance(node, ast.Constant):
                 self.names.append(
@@ -313,14 +292,18 @@ class _NameScanner(ast.NodeVisitor):
     ) -> None:
         """A function that parses the value, copies locations from the node and
         includes them in self.visit."""
-        if C.PY38_PLUS:
-            tree = ast.parse(value, mode=mode, type_comments=True)
+        try:
+            if C.PY38_PLUS:
+                tree = ast.parse(value, mode=mode, type_comments=True)
+            else:
+                tree = ast.parse(value, mode=mode)
+        except SyntaxError:
+            return None
         else:
-            tree = ast.parse(value, mode=mode)
-        relate(tree, parent=node.parent)  # type: ignore
-        for new_node in ast.walk(tree):
-            ast.copy_location(new_node, node)
-        self.visit(tree)
+            relate(tree, parent=node.parent)  # type: ignore
+            for new_node in ast.walk(tree):
+                ast.copy_location(new_node, node)
+            self.visit(tree)
 
 
 class _ImportableScanner(ast.NodeVisitor):
@@ -330,8 +313,7 @@ class _ImportableScanner(ast.NodeVisitor):
         ] = []  # nodes on the __all__ list
         self.suggestions_nodes: List[C.ASTImportableT] = []  # nodes on the CFN
 
-    def traverse(self, source: str) -> None:
-        tree = ast.parse(source)
+    def traverse(self, tree) -> None:
         relate(tree)
         self.visit(tree)
 
@@ -390,11 +372,16 @@ class _ImportableScanner(ast.NodeVisitor):
     def get_names(self, package: str) -> FrozenSet[str]:
         if utils.is_std(package):
             return utils.get_dir(package)
-        visitor = self.__class__()
         source = utils.get_source(package)
         if source:
-            visitor.traverse(source)
-            return visitor.get_all() or visitor.get_suggestion()
+            try:
+                tree = ast.parse(source)
+            except SyntaxError:
+                return frozenset()
+            else:
+                visitor = self.__class__()
+                visitor.traverse(tree)
+                return visitor.get_all() or visitor.get_suggestion()
         return frozenset()
 
     def get_all(self) -> FrozenSet[str]:
@@ -426,11 +413,9 @@ class Scanner(ast.NodeVisitor):
         *,
         source: str,
         include_star_import: bool = False,
-        show_error: bool = False
     ):
         self.source = source
         self.include_star_import = include_star_import
-        self.show_error = show_error
 
         self.names: List[Name] = []
         self.imports: List[C.ImportT] = []
@@ -439,11 +424,24 @@ class Scanner(ast.NodeVisitor):
     def traverse(self) -> None:
         if not self.skip_file():
             try:
-                self.names.extend(self.get_names())
-                self.imports.extend(self.get_imports())
+                if C.PY38_PLUS:
+                    tree = ast.parse(self.source, type_comments=True)
+                else:
+                    tree = ast.parse(self.source)
             except SyntaxError:
-                pass
+                return None
             else:
+                relate(tree)
+                name_scanner = _NameScanner()
+                name_scanner.traverse(tree)
+                self.names.extend(name_scanner.names)
+                import_scanner = _ImportScanner(
+                    source=self.source,
+                    names=self.names,
+                    include_star_import=self.include_star_import,
+                )
+                import_scanner.traverse(tree)
+                self.imports.extend(import_scanner.imports)
                 self.import_names.extend([imp.name for imp in self.imports])
 
     def get_unused_imports(self) -> Iterator[C.ImportT]:
@@ -494,23 +492,6 @@ class Scanner(ast.NodeVisitor):
 
     def is_duplicate(self, name: str) -> bool:
         return self.import_names.count(name) > 1
-
-    def get_names(self) -> List[Name]:
-        name_scanner = _NameScanner(
-            source=self.source, show_error=self.show_error
-        )
-        name_scanner.traverse()
-        return name_scanner.names
-
-    def get_imports(self) -> List[C.ImportT]:
-        import_scanner = _ImportScanner(
-            source=self.source,
-            names=self.names,
-            include_star_import=self.include_star_import,
-            show_error=self.show_error,
-        )
-        import_scanner.traverse()
-        return import_scanner.imports
 
     def skip_file(self) -> bool:
         return bool(
