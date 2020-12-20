@@ -8,6 +8,8 @@ import toml
 from unimport import constants as C
 from unimport import utils
 
+__all__ = ["DefaultConfig", "Config"]
+
 CONFIG_FILES = {"setup.cfg": "unimport", "pyproject.toml": "tool.unimport"}
 
 

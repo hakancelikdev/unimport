@@ -11,6 +11,8 @@ from unimport import utils
 from unimport.relate import first_occurrence, get_parents, relate
 from unimport.statement import Import, ImportFrom, Name
 
+__all__ = ["Scanner"]
+
 
 def recursive(func: C.Function) -> C.Function:
     """decorator to make visitor work recursive."""
@@ -43,7 +45,7 @@ class _DefinedNameScanner(ast.NodeVisitor):
             self.defined_names.add(node.id)
 
 
-class ImportScanner(ast.NodeVisitor):
+class _ImportScanner(ast.NodeVisitor):
     ignore_modules_imports = ("__future__",)
     skip_import_comments_regex = "#.*(unimport: {0,1}skip|noqa)"
 
@@ -160,11 +162,11 @@ class ImportScanner(ast.NodeVisitor):
 
     def get_suggestions(self, package: str) -> List[str]:
         names = {name.name.split(".")[0] for name in self.names}
-        from_names = ImportableVisitor().get_names(package)
+        from_names = _ImportableScanner().get_names(package)
         return sorted(from_names & (names - self.defined_names))
 
 
-class NameScanner(ast.NodeVisitor):
+class _NameScanner(ast.NodeVisitor):
     def __init__(self, *, source: str, show_error: bool = False):
         self.source = source
         self.show_error = show_error
@@ -294,7 +296,7 @@ class NameScanner(ast.NodeVisitor):
         """
         Receive items on the __all__ list
         """
-        importable_visitor = ImportableVisitor()
+        importable_visitor = _ImportableScanner()
         importable_visitor.traverse(self.source)
         for node in importable_visitor.importable_nodes:
             if isinstance(node, ast.Constant):
@@ -321,107 +323,7 @@ class NameScanner(ast.NodeVisitor):
         self.visit(tree)
 
 
-class Scanner(ast.NodeVisitor):
-    skip_file_regex = "#.*(unimport: {0,1}skip_file)"
-
-    def __init__(
-        self,
-        *,
-        source: str,
-        include_star_import: bool = False,
-        show_error: bool = False
-    ):
-        self.source = source
-        self.include_star_import = include_star_import
-        self.show_error = show_error
-
-        self.names: List[Name] = []
-        self.imports: List[C.ImportT] = []
-        self.import_names: List[str] = []
-
-    def traverse(self) -> None:
-        if not self.skip_file():
-            try:
-                self.names.extend(self.get_names())
-                self.imports.extend(self.get_imports())
-            except SyntaxError:
-                pass
-            else:
-                self.import_names.extend([imp.name for imp in self.imports])
-
-    def get_unused_imports(self) -> Iterator[C.ImportT]:
-        for imp in self.imports:
-            # duplicate import
-            if self.is_duplicate(
-                imp.name
-            ) and not self.is_duplicate_import_used(imp):
-                yield imp
-            # star import
-            elif (
-                self.include_star_import
-                and isinstance(imp, ImportFrom)
-                and imp.star
-            ):
-                yield imp
-            # normal import
-            elif not self.is_import_used(imp):
-                yield imp
-
-    def is_duplicate_import_used(self, imp: C.ImportT) -> bool:
-        for name in self.names:
-            if name.match(imp) and imp == self.get_nearest_duplicate_imports(
-                imp.name, name.lineno
-            ):
-                return True
-        return False
-
-    def is_import_used(self, imp: C.ImportT) -> bool:
-        return any(name.match(imp) for name in self.names)
-
-    @functools.lru_cache(maxsize=None)
-    def get_nearest_duplicate_imports(
-        self, import_name: str, name_lineno: int
-    ) -> C.ImportT:
-        return [
-            imp
-            for imp in self.imports
-            if import_name == imp.name
-            if self.is_duplicate(imp.name)
-            if imp.lineno < name_lineno
-        ][-1]
-
-    def clear(self):
-        self.names.clear()
-        self.imports.clear()
-        self.import_names.clear()
-
-    def is_duplicate(self, name: str) -> bool:
-        return self.import_names.count(name) > 1
-
-    def get_names(self) -> List[Name]:
-        name_scanner = NameScanner(
-            source=self.source, show_error=self.show_error
-        )
-        name_scanner.traverse()
-        return name_scanner.names
-
-    def get_imports(self) -> List[C.ImportT]:
-        import_scanner = ImportScanner(
-            source=self.source,
-            names=self.names,
-            include_star_import=self.include_star_import,
-            show_error=self.show_error,
-        )
-        import_scanner.traverse()
-        return import_scanner.imports
-
-    def skip_file(self) -> bool:
-        return bool(
-            re.search(self.skip_file_regex, self.source, re.IGNORECASE)
-        )
-
-
-class ImportableVisitor(ast.NodeVisitor):
+class _ImportableScanner(ast.NodeVisitor):
     def __init__(self) -> None:
         self.importable_nodes: List[
             Union[ast.Str, ast.Constant]
@@ -514,3 +416,103 @@ class ImportableVisitor(ast.NodeVisitor):
             elif isinstance(node, C.DefTuple):
                 names.add(node.name)
         return frozenset(names)
+
+
+class Scanner(ast.NodeVisitor):
+    skip_file_regex = "#.*(unimport: {0,1}skip_file)"
+
+    def __init__(
+        self,
+        *,
+        source: str,
+        include_star_import: bool = False,
+        show_error: bool = False
+    ):
+        self.source = source
+        self.include_star_import = include_star_import
+        self.show_error = show_error
+
+        self.names: List[Name] = []
+        self.imports: List[C.ImportT] = []
+        self.import_names: List[str] = []
+
+    def traverse(self) -> None:
+        if not self.skip_file():
+            try:
+                self.names.extend(self.get_names())
+                self.imports.extend(self.get_imports())
+            except SyntaxError:
+                pass
+            else:
+                self.import_names.extend([imp.name for imp in self.imports])
+
+    def get_unused_imports(self) -> Iterator[C.ImportT]:
+        for imp in self.imports:
+            # duplicate import
+            if self.is_duplicate(
+                imp.name
+            ) and not self.is_duplicate_import_used(imp):
+                yield imp
+            # star import
+            elif (
+                self.include_star_import
+                and isinstance(imp, ImportFrom)
+                and imp.star
+            ):
+                yield imp
+            # normal import
+            elif not self.is_import_used(imp):
+                yield imp
+
+    def is_duplicate_import_used(self, imp: C.ImportT) -> bool:
+        for name in self.names:
+            if name.match(imp) and imp == self.get_nearest_duplicate_imports(
+                imp.name, name.lineno
+            ):
+                return True
+        return False
+
+    def is_import_used(self, imp: C.ImportT) -> bool:
+        return any(name.match(imp) for name in self.names)
+
+    @functools.lru_cache(maxsize=None)
+    def get_nearest_duplicate_imports(
+        self, import_name: str, name_lineno: int
+    ) -> C.ImportT:
+        return [
+            imp
+            for imp in self.imports
+            if import_name == imp.name
+            if self.is_duplicate(imp.name)
+            if imp.lineno < name_lineno
+        ][-1]
+
+    def clear(self):
+        self.names.clear()
+        self.imports.clear()
+        self.import_names.clear()
+
+    def is_duplicate(self, name: str) -> bool:
+        return self.import_names.count(name) > 1
+
+    def get_names(self) -> List[Name]:
+        name_scanner = _NameScanner(
+            source=self.source, show_error=self.show_error
+        )
+        name_scanner.traverse()
+        return name_scanner.names
+
+    def get_imports(self) -> List[C.ImportT]:
+        import_scanner = _ImportScanner(
+            source=self.source,
+            names=self.names,
+            include_star_import=self.include_star_import,
+            show_error=self.show_error,
+        )
+        import_scanner.traverse()
+        return import_scanner.imports
+
+    def skip_file(self) -> bool:
+        return bool(
+            re.search(self.skip_file_regex, self.source, re.IGNORECASE)
+        )

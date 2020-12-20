@@ -1,6 +1,8 @@
 import operator
 from typing import List, NamedTuple, Union
 
+__all__ = ["Import", "ImportFrom", "Name"]
+
 
 class Import(NamedTuple):
     lineno: int

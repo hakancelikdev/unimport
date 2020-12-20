@@ -16,6 +16,20 @@ from pathspec.patterns.gitwildmatch import GitWildMatchPattern
 
 from unimport import constants as C
 
+__all__ = [
+    "get_dir",
+    "get_source",
+    "get_spec",
+    "is_std",
+    "package_name_from_metadata",
+    "get_used_packages",
+    "actiontobool",
+    "get_exclude_list_from_gitignore",
+    "read",
+    "list_paths",
+    "diff",
+]
+
 
 def get_dir(package: str) -> FrozenSet[str]:
     try:
