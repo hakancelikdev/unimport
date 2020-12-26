@@ -1,5 +1,6 @@
 importlib_metadata==2.0.0
 libcst==0.3.13
 pathspec==0.8.0
+pytest
 semantic-version==2.8.5
 toml==0.10.1
