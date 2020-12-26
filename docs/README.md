@@ -44,7 +44,7 @@ You can give as many file or directory paths as you want.
 - `$ unimport example`
 - `$ unimport example example1 example2 example/example.py`
 
-## `--check` flag
+## Check
 
 > (optional: default `True`) Prints which file the unused imports are in.
 
@@ -58,7 +58,7 @@ as `False` If you still want to see the results, use the `--check` flag.
 - `$ unimport example.py --diff --check`
 - `$ unimport example.py --check --diff --remove`
 
-## `-d, --diff` flag
+## Diff
 
 > (optional: default `False`) Prints a diff of all the changes unimport would make to a
 > file.
@@ -68,7 +68,7 @@ as `False` If you still want to see the results, use the `--check` flag.
 - `$ unimport example.py -d`
 - `$ unimport example.py --diff`
 
-## `-p, --permission` flag
+## Permission
 
 > (optional: default `False`) Refactor permission after seeing the diff.
 
@@ -77,7 +77,7 @@ as `False` If you still want to see the results, use the `--check` flag.
 - `$ unimport example.py -p`
 - `$ unimport example.py --permission`
 
-## `-r, --remove` flag
+## Remove flag
 
 > (optional: default `False`) remove unused imports automatically.
 
@@ -86,17 +86,17 @@ as `False` If you still want to see the results, use the `--check` flag.
 - `$ unimport example.py -r`
 - `$ unimport example.py --remove`
 
-## `--include-star-import` flag
+## Include star import
 
 > (optional: default `False`) Include star imports during scanning and refactor.
 
-## `--gitignore flag`
+## Gitignore
 
 > (optional: default `False`)
 
 It's possible to skip `.gitignore` glob patterns using `--gitignore` flag.
 
-## `--requirements flag`
+## Requirements
 
 > (optional: default `False`)
 
@@ -105,7 +105,7 @@ You can automatically delete unused modules from the requirements.txt file
 `unimport --requirements --diff`), delete it by requesting permission (
 `unimport --requirements --permission`), or just check ( `unimport --requirements`).
 
-## `--include flag`
+## Include
 
 > (optional: default '\\.(py)$') file include pattern
 
@@ -114,7 +114,7 @@ You can automatically delete unused modules from the requirements.txt file
 - `$ unimport --include mypackage`
 - `$ unimport --include "mypackage|tests`
 
-## `--exclude flag`
+## Exclude
 
 > (optional: default '^$') file exclude pattern
 
