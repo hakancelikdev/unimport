@@ -32,33 +32,21 @@ packaging tools. We recommend installing the latest stable release from PyPI wit
 $ pip install unimport
 ```
 
+## `sources`
+
+> (optional: default `the file directory you are in`) -> `Path(".")`
+
+You can give as many file or directory paths as you want.
+
 ### Usage
 
-```shell
-$ unimport [sources [sources ...]]
-```
-
-#### Let's start with a simple Python code
-
-**example.py**
-
-```python
-import t
-from l import t
-from x import y, z, t
-
-def function(f=t):
-    import x
-    return f
-
-from i import t, ii
-
-print(t)
-```
+- `$ unimport`
+- `$ unimport example`
+- `$ unimport example example1 example2 example/example.py`
 
 ## `--check` flag
 
-> Prints which file the unused imports are in.
+> (optional: default `True`) Prints which file the unused imports are in.
 
 When the `--diff`, `--permission` and `--remove` flags are used, the `--check` flag set
 as `False` If you still want to see the results, use the `--check` flag.
@@ -70,137 +58,70 @@ as `False` If you still want to see the results, use the `--check` flag.
 - `$ unimport example.py --diff --check`
 - `$ unimport example.py --check --diff --remove`
 
-```shell
-$ unimport example.py
-
-t at example.py:1
-t at example.py:2
-y at example.py:3
-z at example.py:3
-x at example.py:6
-ii at example.py:9
-```
-
 ## `-d, --diff` flag
 
-> Prints a diff of all the changes unimport would make to a file.
+> (optional: default `False`) Prints a diff of all the changes unimport would make to a
+> file.
 
 ### Usage
 
 - `$ unimport example.py -d`
 - `$ unimport example.py --diff`
 
-```python
-$ unimport example.py -d
---- example.py
-
-+++
-
-@@ -1,11 +1,8 @@
-
--import t
--from l import t
--from x import y, z, t
-+from x import t
-
- def function(f=t):
--    import x
-     return f
-
--from i import t, ii
-+from i import t
-
-print(t)
-```
-
 ## `-p, --permission` flag
 
-> Refactor permission after see diff.
+> (optional: default `False`) Refactor permission after seeing the diff.
 
 ### Usage
 
 - `$ unimport example.py -p`
 - `$ unimport example.py --permission`
 
-```python
-$ unimport example.py -p
---- example.py
-
-+++
-
-@@ -1,11 +1,8 @@
-
--import t
--from l import t
--from x import y, z, t
-+from x import t
-
- def function(f=t):
--    import x
-     return f
-
--from i import t, ii
-+from i import t
-
- print(t)
-Apply suggested changes to 'example.py' [Y/n/q] ? >
-```
-
 ## `-r, --remove` flag
 
-> remove unused imports automatically.
+> (optional: default `False`) remove unused imports automatically.
 
 #### Usage
 
 - `$ unimport example.py -r`
 - `$ unimport example.py --remove`
 
-`$ unimport example.py -r`
-
-```python
-from x import t
-
-def function(f=t):
-    return f
-
-from i import t
-
-print(t)
-```
-
 ## `--include-star-import` flag
 
-> Include star imports during scanning and refactor.
+> (optional: default `False`) Include star imports during scanning and refactor.
 
-**/example.py**
+## `--gitignore flag`
 
-```python
-from os import *
+> (optional: default `False`)
 
-for i in walk("."):
-  print(i)
-```
+It's possible to skip `.gitignore` glob patterns using `--gitignore` flag.
 
-```shell
-$ unimport example.py --include-star-import
+## `--requirements flag`
 
-os at example.py:1 from os import walk
-```
+> (optional: default `False`)
 
-```shell
-$ unimport example.py --include-star-import --diff
---- example.py
+You can automatically delete unused modules from the requirements.txt file
+(`unimport --requirements --remove`), see the difference (
+`unimport --requirements --diff`), delete it by requesting permission (
+`unimport --requirements --permission`), or just check ( `unimport --requirements`).
 
-+++
+## `--include flag`
 
-@@ -1,4 +1,4 @@
+> (optional: default '\\.(py)$') file include pattern
 
--from os import *
-+from os import walk
+### Usage
 
- for i in walk("."):
-   print(i)
-```
+- `$ unimport --include mypackage`
+- `$ unimport --include "mypackage|tests`
+
+## `--exclude flag`
+
+> (optional: default '^$') file exclude pattern
+
+### Usage
+
+- `$ unimport --exclude __init__.py`
+- `$ unimport --exclude "__init__.py|tests|.tox`
 
 ## Typing
 
@@ -302,10 +223,6 @@ import x
 
 ```
 
-## `--gitignore`
-
-It's possible to skip `.gitignore` glob patterns using `--gitignore` flag.
-
 ## `__all__`
 
 Unimport looks at the items in the `__all__` list, if it matches the imports, marks it
@@ -336,13 +253,6 @@ __all__ = []
 __all__.append("removedirs")
 __all__.extend(["walk"])
 ```
-
-## Requirements.txt
-
-You can automatically delete unused modules from the requirements.txt file
-(`unimport --requirements --remove`), see the difference (
-`unimport --requirements --diff`), delete it by requesting permission (
-`unimport --requirements --permission`), or just check ( `unimport --requirements`).
 
 ## Command line options
 
