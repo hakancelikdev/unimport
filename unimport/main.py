@@ -145,6 +145,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             source, encoding = utils.read(py_path)
             scanner = Scanner(
                 source=source,
+                path=py_path,
                 include_star_import=config.include_star_import,
             )
             scanner.traverse()

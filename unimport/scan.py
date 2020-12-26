@@ -3,8 +3,10 @@ given as a string and reports its findings."""
 import ast
 import functools
 import re
+from pathlib import Path
 from typing import FrozenSet, Iterator, List, Set, Union, cast
 
+from unimport import color
 from unimport import constants as C
 from unimport import utils
 from unimport.relate import first_occurrence, get_parents, relate
@@ -412,9 +414,11 @@ class Scanner(ast.NodeVisitor):
         self,
         *,
         source: str,
+        path: Path = Path("<unknown file>"),
         include_star_import: bool = False,
     ):
         self.source = source
+        self.path = path
         self.include_star_import = include_star_import
 
         self.names: List[Name] = []
@@ -428,7 +432,12 @@ class Scanner(ast.NodeVisitor):
                     tree = ast.parse(self.source, type_comments=True)
                 else:
                     tree = ast.parse(self.source)
-            except SyntaxError:
+            except SyntaxError as e:
+                print(
+                    color.paint(str(e), color.RED)
+                    + " at "
+                    + color.paint(self.path.as_posix(), color.GREEN)
+                )
                 return None
             else:
                 relate(tree)
