@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unrelased - ./././
+## [0.7.0] - 26/December/2020
 
 - [%15 performance increase & remove show-error flag by @hakancelik96](https://github.com/hakancelik96/unimport/pull/159)
 
