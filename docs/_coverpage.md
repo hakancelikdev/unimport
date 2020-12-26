@@ -1,6 +1,6 @@
 <!-- _coverpage.md -->
 
-# ![logo](_media/icon.png ":size=30%") <small>0.6.8</small>
+# ![logo](_media/icon.png ":size=30%") <small>0.7.0</small>
 
 > A linter, formatter for finding and removing unused import statements.
 
