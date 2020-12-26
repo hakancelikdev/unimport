@@ -21,9 +21,7 @@
 [![Contributors](https://img.shields.io/github/contributors/hakancelik96/unimport)](https://github.com/hakancelik96/unimport/graphs/contributors)
 [![Last Commit](https://img.shields.io/github/last-commit/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/commits/master)
 
-## Installation and Usage
-
-### Installation
+## Installation
 
 Unimport requires Python 3.6+ and can be easily installed using most common Python
 packaging tools. We recommend installing the latest stable release from PyPI with pip:
@@ -32,13 +30,13 @@ packaging tools. We recommend installing the latest stable release from PyPI wit
 $ pip install unimport
 ```
 
-## `sources`
+## Sources
 
 > (optional: default `the file directory you are in`) -> `Path(".")`
 
 You can give as many file or directory paths as you want.
 
-### Usage
+**Usage**
 
 - `$ unimport`
 - `$ unimport example`
@@ -51,65 +49,78 @@ You can give as many file or directory paths as you want.
 When the `--diff`, `--permission` and `--remove` flags are used, the `--check` flag set
 as `False` If you still want to see the results, use the `--check` flag.
 
-### Usage
+**Usage**
 
-- `$ unimport example.py`
-- `$ unimport example.py --check`
-- `$ unimport example.py --diff --check`
-- `$ unimport example.py --check --diff --remove`
+- `$ unimport`
+- `$ unimport --check`
+- `$ unimport --check --diff`
+- `$ unimport --check --remove`
 
 ## Diff
 
 > (optional: default `False`) Prints a diff of all the changes unimport would make to a
 > file.
 
-### Usage
+**Usage**
 
-- `$ unimport example.py -d`
-- `$ unimport example.py --diff`
+- `$ unimport -d`
+- `$ unimport --diff`
 
 ## Permission
 
 > (optional: default `False`) Refactor permission after seeing the diff.
 
-### Usage
+**Usage**
 
-- `$ unimport example.py -p`
-- `$ unimport example.py --permission`
+- `$ unimport -p`
+- `$ unimport --permission`
 
-## Remove flag
+## Remove
 
 > (optional: default `False`) remove unused imports automatically.
 
-#### Usage
+**Usage**
 
-- `$ unimport example.py -r`
-- `$ unimport example.py --remove`
+- `$ unimport -r`
+- `$ unimport --remove`
 
 ## Include star import
 
 > (optional: default `False`) Include star imports during scanning and refactor.
 
+**Usage**
+
+- `$ unimport --include-star-import`
+
 ## Gitignore
 
 > (optional: default `False`)
 
-It's possible to skip `.gitignore` glob patterns using `--gitignore` flag.
+It's possible to skip `.gitignore` glob patterns.
+
+**Usage**
+
+- `--gitignore`
 
 ## Requirements
 
 > (optional: default `False`)
 
 You can automatically delete unused modules from the requirements.txt file
-(`unimport --requirements --remove`), see the difference (
-`unimport --requirements --diff`), delete it by requesting permission (
-`unimport --requirements --permission`), or just check ( `unimport --requirements`).
+
+**Usage**
+
+- `unimport --requirements` to check
+- `unimport --check --requirements` to check
+- `unimport --requirements --diff` to check and seeing diff
+- `unimport --requirements --permission` to refactor permission after seeing the diff.
+- `unimport --requirements --remove` to remove automatically.
 
 ## Include
 
 > (optional: default '\\.(py)$') file include pattern
 
-### Usage
+**Usage**
 
 - `$ unimport --include mypackage`
 - `$ unimport --include "mypackage|tests`
@@ -118,7 +129,7 @@ You can automatically delete unused modules from the requirements.txt file
 
 > (optional: default '^$') file exclude pattern
 
-### Usage
+**Usage**
 
 - `$ unimport --exclude __init__.py`
 - `$ unimport --exclude "__init__.py|tests|.tox`
@@ -133,7 +144,7 @@ def test(arg: List[Dict]) -> None:
    pass
 ```
 
-### String
+#### String
 
 Unimport supports the following cases
 
@@ -149,7 +160,7 @@ def test(arg: "List['Dict']") -> None:
    pass
 ```
 
-### Comments
+#### Comments
 
 **This feature is only available for python 3.8.**
 
@@ -223,7 +234,7 @@ import x
 
 ```
 
-## `__all__`
+## All
 
 Unimport looks at the items in the `__all__` list, if it matches the imports, marks it
 as being used.
@@ -292,9 +303,8 @@ Get rid of all unused imports 🥳
 It's possible to configure **unimport** from `pyproject.toml` or `setup.cfg` files if
 you have.
 
-- `exclude` file exclude pattern.
-- `include` file include pattern.
-- `gitignore` glob exclude patterns.
+**When reading your configurations, it gives priority to the configurations you enter
+from the console.**
 
 For example:
 
@@ -325,9 +335,6 @@ remove = false
 diff = true
 include_star_import = true
 ```
-
-**When reading your configurations, it gives priority to the configurations you enter
-from the console.**
 
 ## Adding pre-commit plugins to your project
 
