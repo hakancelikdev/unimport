@@ -11,13 +11,13 @@ repos:
       - id: isort
 
   - repo: https://github.com/hakancelik96/unimport
-    rev: 0.6.8
+    rev: 0.7.0
     hooks:
       - id: unimport
         args: [--remove, --include-star-import]
 
   - repo: https://github.com/myint/docformatter
-    rev: v1.3.1
+    rev: v1.4
     hooks:
       - id: docformatter
         args: [--in-place]
