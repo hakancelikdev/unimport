@@ -25,6 +25,8 @@ class UnusedTestCase(unittest.TestCase):
 
 
 class TestBuiltin(UnusedTestCase):
+    # https://github.com/hakancelik96/unimport/issues/45
+
     def test_ConnectionError(self):
         self.assertSourceAfterScanningEqualToExpected(
             """\
@@ -1186,4 +1188,17 @@ class TestAsImport(UnusedTestCase):
                     suggestions=[],
                 ),
             ],
+        )
+
+
+class TestDealingImplicitImportsSubPackages(UnusedTestCase):
+    # https://github.com/hakancelik96/unimport/issues/127
+
+    def test(self):
+        self.assertSourceAfterScanningEqualToExpected(
+            """\
+            import x.y
+
+            x
+            """,
         )
