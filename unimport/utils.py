@@ -2,7 +2,6 @@
 import contextlib
 import difflib
 import functools
-import importlib
 import importlib.machinery
 import importlib.util
 import re
