@@ -77,8 +77,6 @@ class _ImportScanner(ast.NodeVisitor):
             return
         for column, alias in enumerate(node.names):
             name = alias.asname or alias.name
-            if name in C.INITIAL_IMPORTS:
-                name = name.split(".")[0]
             self.imports.append(
                 Import(
                     lineno=node.lineno,

@@ -2,9 +2,8 @@
 import contextlib
 import difflib
 import functools
-import importlib
-import importlib.machinery  # unimport: skip
-import importlib.util  # unimport: skip
+import importlib.machinery
+import importlib.util
 import re
 import tokenize
 from distutils.util import strtobool
