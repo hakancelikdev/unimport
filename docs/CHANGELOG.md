@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - /././
+## [0.7.1] - 1/January/2021/
 
 - [Fix by @hakancelik96 #127](https://github.com/hakancelik96/unimport/pull/161)
 
