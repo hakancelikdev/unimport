@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.2] - 31/January/2021
+
+- [Python3.9 Support](https://github.com/hakancelik96/unimport/pull/166)
+
 ## [0.7.1] - 1/January/2021/
 
 - [Fix by @hakancelik96 #127](https://github.com/hakancelik96/unimport/pull/161)
