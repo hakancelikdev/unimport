@@ -4,10 +4,7 @@ coverage:
     patch: yes
     changes: yes
 
-comment:
-  layout: "reach, diff, files"
-  behavior: default
-  require_changes: no
+comment: false
 
 ignore:
   - "setup.py"
