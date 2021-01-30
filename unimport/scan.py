@@ -232,13 +232,19 @@ class _NameScanner(ast.NodeVisitor):
             isinstance(node.value, ast.Name)
             and node.value.id in C.SUBSCRIPT_TYPE_VARIABLE
         ):
-            if isinstance(node.slice.value, ast.Tuple):  # type: ignore
-                for elt in node.slice.value.elts:  # type: ignore
+
+            if C.PY39_PLUS:
+                _slice = node.slice
+            else:
+                _slice = node.slice.value  # type: ignore
+
+            if isinstance(_slice, ast.Tuple):  # type: ignore
+                for elt in _slice.elts:  # type: ignore
                     if isinstance(elt, (ast.Constant, ast.Str)):
                         visit_constant_str(elt)
             else:
-                if isinstance(node.slice.value, (ast.Constant, ast.Str)):  # type: ignore
-                    visit_constant_str(node.slice.value)  # type: ignore
+                if isinstance(_slice, (ast.Constant, ast.Str)):  # type: ignore
+                    visit_constant_str(_slice)  # type: ignore
 
     @recursive
     def visit_Call(self, node: ast.Call) -> None:
