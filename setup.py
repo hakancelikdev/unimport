@@ -5,7 +5,7 @@ from setuptools import setup
 
 import unimport.constants as C
 
-assert sys.version_info >= (3, 6, 0), "unimport requires Python 3.6+"
+assert sys.version_info >= (3, 6), "unimport requires Python 3.6+"
 
 CURRENT_DIR = Path(__file__).parent
 
@@ -32,13 +32,13 @@ setup(
     },
     license="MIT",
     license_file="LICENSE",
-    python_requires=">=3.6.0",
+    python_requires=">=3.6",
     packages=["unimport"],
     install_requires=[
-        "libcst==0.3.13",
-        "pathspec==0.8.0",
-        "toml==0.10.1",
-        "importlib_metadata==2.0.0",
+        "libcst==0.3.16",
+        "pathspec==0.8.1",
+        "toml==0.10.2",
+        "importlib_metadata==3.4.0",
     ],
     extras_require={},
     zip_safe=False,
@@ -53,6 +53,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: Implementation :: CPython",
     ],
     entry_points={"console_scripts": ["unimport = unimport.__main__:main"]},
