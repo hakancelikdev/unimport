@@ -14,9 +14,6 @@ from importlib_metadata import PackageNotFoundError, metadata
 from pathspec.patterns.gitwildmatch import GitWildMatchPattern
 
 from unimport import constants as C
-from unimport.config import DefaultConfig
-
-default_config = DefaultConfig()
 
 __all__ = [
     "get_dir",
