@@ -1,6 +1,8 @@
+import re
 from pathlib import Path
 from unittest import TestCase
 
+from unimport import constants as C
 from unimport import utils
 from unimport.config import Config, DefaultConfig
 
@@ -27,6 +29,7 @@ class TestConfig(TestCase):
         self.assertTrue(config.requirements)
         self.assertFalse(config.remove)
         self.assertTrue(config.diff)
+        self.assertTrue(config.ignore_init)
 
     def test_cfg_parse(self):
         config = Config(config_file=setup_cfg).parse()
@@ -37,6 +40,7 @@ class TestConfig(TestCase):
         self.assertTrue(config.requirements)
         self.assertFalse(config.remove)
         self.assertTrue(config.diff)
+        self.assertTrue(config.ignore_init)
 
     def test_cfg_merge(self):
         config = Config(config_file=setup_cfg).parse()
@@ -47,8 +51,9 @@ class TestConfig(TestCase):
             "include_star_import": True,
         }
         gitignore_exclude = utils.get_exclude_list_from_gitignore()
-        gitignore_exclude.extend(config.exclude)
-        exclude = "|".join(gitignore_exclude)
+        exclude = "|".join(
+            [config.exclude] + gitignore_exclude + [C.INIT_FILE_IGNORE_REGEX]
+        )
         config = config.merge(**console_configuration)
         self.assertEqual("tests|env", config.include)
         self.assertEqual(exclude, config.exclude)
@@ -57,6 +62,7 @@ class TestConfig(TestCase):
         self.assertTrue(config.requirements)
         self.assertTrue(config.remove)
         self.assertFalse(config.diff)
+        self.assertTrue(config.ignore_init)
 
 
 class TestDefaultCommand(TestCase):
@@ -65,7 +71,7 @@ class TestDefaultCommand(TestCase):
 
     def test_there_is_no_command(self):
         self.assertEqual(
-            self.config.merge(ther_is_no_command=True), self.config.merge()
+            self.config.merge(there_is_no_command=True), self.config.merge()
         )
 
     def test_same_with_default_config(self):
@@ -127,6 +133,7 @@ class TestNoUnimportSectionTest(TestCase):
         self.assertFalse(config.requirements)
         self.assertFalse(config.remove)
         self.assertFalse(config.diff)
+        self.assertFalse(config.ignore_init)
 
     def test_cfg_parse(self):
         config = Config(config_file=no_unimport_setup_cfg).parse()
@@ -137,6 +144,7 @@ class TestNoUnimportSectionTest(TestCase):
         self.assertFalse(config.requirements)
         self.assertFalse(config.remove)
         self.assertFalse(config.diff)
+        self.assertFalse(config.ignore_init)
 
     def test_cfg_merge(self):
         config = Config(config_file=no_unimport_setup_cfg).parse()
@@ -157,3 +165,19 @@ class TestNoUnimportSectionTest(TestCase):
         self.assertFalse(config.gitignore)
         self.assertFalse(config.requirements)
         self.assertFalse(config.diff)
+
+
+class TestInitFileIgnoreRegex(TestCase):
+    exclude_regex = re.compile(C.INIT_FILE_IGNORE_REGEX)
+
+    def test_match(self):
+        self.assertIsNotNone(self.exclude_regex.search("path/to/__init__.py"))
+        self.assertIsNotNone(self.exclude_regex.search("to/__init__.py"))
+        self.assertIsNotNone(self.exclude_regex.search("__init__.py"))
+
+    def test_not_match(self):
+        self.assertIsNone(self.exclude_regex.search("path/to/_init_.py"))
+        self.assertIsNone(
+            self.exclude_regex.search("path/to/__init__/test.py")
+        )
+        self.assertIsNone(self.exclude_regex.search("__init__"))

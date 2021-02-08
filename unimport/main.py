@@ -116,6 +116,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         default=default_config.requirements,
     )
     parser.add_argument(
+        "--ignore-init",
+        action="store_true",
+        help="Ignore the __init__.py file.",
+        default=default_config.ignore_init,
+    )
+    parser.add_argument(
         "--check",
         action="store_true",
         help="Prints which file the unused imports are in.",

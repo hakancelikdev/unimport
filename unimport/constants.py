@@ -25,6 +25,7 @@ __all__ = [
     "GLOB_PATTERN",
     "INCLUDE_REGEX_PATTERN",
     "EXCLUDE_REGEX_PATTERN",
+    "INIT_FILE_IGNORE_REGEX",
 ]
 
 DESCRIPTION = (
@@ -108,3 +109,4 @@ STDLIB_PATH = distutils.sysconfig.get_python_lib(standard_lib=True)
 GLOB_PATTERN = "**/*.py"
 INCLUDE_REGEX_PATTERN = "\\.(py)$"
 EXCLUDE_REGEX_PATTERN = "^$"
+INIT_FILE_IGNORE_REGEX = r"\__init__.py$"
