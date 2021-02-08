@@ -2,9 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - ././2021
+
+- [Add `--ignore-init` flag by @hakancelik96](https://github.com/hakancelik96/unimport/pull/169)
+
 ## [0.7.2] - 31/January/2021
 
-- [Python3.9 Support](https://github.com/hakancelik96/unimport/pull/166)
+- [Python3.9 Support by @hakancelik96](https://github.com/hakancelik96/unimport/pull/166)
 
 ## [0.7.1] - 1/January/2021/
 
