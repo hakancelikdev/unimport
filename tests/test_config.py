@@ -181,3 +181,5 @@ class TestInitFileIgnoreRegex(TestCase):
             self.exclude_regex.search("path/to/__init__/test.py")
         )
         self.assertIsNone(self.exclude_regex.search("__init__"))
+        self.assertIsNone(self.exclude_regex.search("__init__py"))
+        self.assertIsNone(self.exclude_regex.search("__init__bpy"))
