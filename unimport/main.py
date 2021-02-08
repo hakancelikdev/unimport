@@ -47,22 +47,28 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "sources",
         default=default_config.sources,
         nargs="*",
-        help="files and folders to find the unused imports.",
+        help="Files and folders to find the unused imports.",
         action="store",
         type=Path,
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Prints which file the unused imports are in.",
+        default=default_config.check,
     )
     parser.add_argument(
         "-c",
         "--config",
         default=".",
-        help="read configuration from PATH.",
+        help="Read configuration from PATH.",
         metavar="PATH",
         action="store",
         type=Path,
     )
     parser.add_argument(
         "--include",
-        help="file include pattern.",
+        help="File include pattern.",
         metavar="include",
         action="store",
         default=default_config.include,
@@ -70,7 +76,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     parser.add_argument(
         "--exclude",
-        help="file exclude pattern.",
+        help="File exclude pattern.",
         metavar="exclude",
         action="store",
         default=default_config.exclude,
@@ -79,8 +85,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument(
         "--gitignore",
         action="store_true",
-        help="exclude .gitignore patterns. if present.",
+        help="Exclude .gitignore patterns. if present.",
         default=default_config.gitignore,
+    )
+    parser.add_argument(
+        "--ignore-init",
+        action="store_true",
+        help="Ignore the __init__.py file.",
+        default=default_config.ignore_init,
     )
     parser.add_argument(
         "--include-star-import",
@@ -99,7 +111,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "-r",
         "--remove",
         action="store_true",
-        help="remove unused imports automatically.",
+        help="Remove unused imports automatically.",
         default=default_config.remove,
     )
     exclusive_group.add_argument(
@@ -114,12 +126,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         action="store_true",
         help="Include requirements.txt file, You can use it with all other arguments",
         default=default_config.requirements,
-    )
-    parser.add_argument(
-        "--check",
-        action="store_true",
-        help="Prints which file the unused imports are in.",
-        default=default_config.check,
     )
     parser.add_argument(
         "-v",
