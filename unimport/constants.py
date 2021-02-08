@@ -25,6 +25,7 @@ __all__ = [
     "GLOB_PATTERN",
     "INCLUDE_REGEX_PATTERN",
     "EXCLUDE_REGEX_PATTERN",
+    "INIT_FILE_IGNORE_REGEX",
 ]
 
 DESCRIPTION = (
@@ -105,6 +106,7 @@ DefTuple = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
 ASTFunctionTuple = (ast.FunctionDef, ast.AsyncFunctionDef)
 BUILTIN_MODULE_NAMES = frozenset(sys.builtin_module_names)
 STDLIB_PATH = distutils.sysconfig.get_python_lib(standard_lib=True)
-GLOB_PATTERN = "**/*.py"
-INCLUDE_REGEX_PATTERN = "\\.(py)$"
-EXCLUDE_REGEX_PATTERN = "^$"
+GLOB_PATTERN = r"**/*.py"
+INCLUDE_REGEX_PATTERN = r"\\.(py)$"
+EXCLUDE_REGEX_PATTERN = r"^$"
+INIT_FILE_IGNORE_REGEX = r"__init__\.py"

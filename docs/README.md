@@ -56,65 +56,15 @@ as `False` If you still want to see the results, use the `--check` flag.
 - `$ unimport --check --diff`
 - `$ unimport --check --remove`
 
-## Diff
+## Config
 
-> (optional: default `False`) Prints a diff of all the changes unimport would make to a
-> file.
+> (optional: default `the file directory you are in`) -> `Path(".")`
 
-**Usage**
-
-- `$ unimport -d`
-- `$ unimport --diff`
-
-## Permission
-
-> (optional: default `False`) Refactor permission after seeing the diff.
+Read configuration from PATH
 
 **Usage**
 
-- `$ unimport -p`
-- `$ unimport --permission`
-
-## Remove
-
-> (optional: default `False`) remove unused imports automatically.
-
-**Usage**
-
-- `$ unimport -r`
-- `$ unimport --remove`
-
-## Include star import
-
-> (optional: default `False`) Include star imports during scanning and refactor.
-
-**Usage**
-
-- `$ unimport --include-star-import`
-
-## Gitignore
-
-> (optional: default `False`)
-
-It's possible to skip `.gitignore` glob patterns.
-
-**Usage**
-
-- `--gitignore`
-
-## Requirements
-
-> (optional: default `False`)
-
-You can automatically delete unused modules from the requirements.txt file
-
-**Usage**
-
-- `unimport --requirements` to check
-- `unimport --check --requirements` to check
-- `unimport --requirements --diff` to check and seeing diff
-- `unimport --requirements --permission` to refactor permission after seeing the diff.
-- `unimport --requirements --remove` to remove automatically.
+- `$ unimport --config path/to/pyproject.toml`
 
 ## Include
 
@@ -133,6 +83,76 @@ You can automatically delete unused modules from the requirements.txt file
 
 - `$ unimport --exclude __init__.py`
 - `$ unimport --exclude "__init__.py|tests|.tox`
+
+## Gitignore
+
+> (optional: default `False`)
+
+It's possible to skip `.gitignore` glob patterns.
+
+**Usage**
+
+- `$ unimport --gitignore`
+
+## Ignore init
+
+> (optional: default `False`)
+
+Ignore the **init**.py file.
+
+**Usage**
+
+- `$ unimport --ignore-init`
+
+## Include star import
+
+> (optional: default `False`) Include star imports during scanning and refactor.
+
+**Usage**
+
+- `$ unimport --include-star-import`
+
+## Diff
+
+> (optional: default `False`) Prints a diff of all the changes unimport would make to a
+> file.
+
+**Usage**
+
+- `$ unimport -d`
+- `$ unimport --diff`
+
+## Remove
+
+> (optional: default `False`) remove unused imports automatically.
+
+**Usage**
+
+- `$ unimport -r`
+- `$ unimport --remove`
+
+## Permission
+
+> (optional: default `False`) Refactor permission after seeing the diff.
+
+**Usage**
+
+- `$ unimport -p`
+- `$ unimport --permission`
+
+## Requirements
+
+> (optional: default `False`)
+
+You can automatically delete unused modules from the requirements.txt file
+
+**Usage**
+
+- `unimport --requirements` to check
+- `unimport --check --requirements` to check
+- `unimport --requirements --diff` to check and seeing diff
+- `unimport --requirements --permission` to refactor permission after seeing the diff.
+- `unimport --requirements --remove` to remove automatically.
 
 ## Typing
 
@@ -270,29 +290,30 @@ __all__.extend(["walk"])
 You can list many options by running unimport --help
 
 ```
-usage: unimport [-h] [-c PATH] [--include include] [--exclude exclude] [--gitignore] [--include-star-import] [-d] [-r | -p]
-                [--requirements] [--check] [-v]
+usage: unimport [-h] [--check] [-c PATH] [--include include] [--exclude exclude] [--gitignore]
+                [--ignore-init] [--include-star-import] [-d] [-r | -p] [--requirements] [-v]
                 [sources [sources ...]]
 
 A linter, formatter for finding and removing unused import statements.
 
 positional arguments:
-  sources               files and folders to find the unused imports.
+  sources               Files and folders to find the unused imports.
 
 optional arguments:
   -h, --help            show this help message and exit
+  --check               Prints which file the unused imports are in.
   -c PATH, --config PATH
-                        read configuration from PATH.
-  --include include     file include pattern.
-  --exclude exclude     file exclude pattern.
-  --gitignore           exclude .gitignore patterns. if present.
+                        Read configuration from PATH.
+  --include include     File include pattern.
+  --exclude exclude     File exclude pattern.
+  --gitignore           Exclude .gitignore patterns. if present.
+  --ignore-init         Ignore the __init__.py file.
   --include-star-import
                         Include star imports during scanning and refactor.
   -d, --diff            Prints a diff of all the changes unimport would make to a file.
-  -r, --remove          remove unused imports automatically.
+  -r, --remove          Remove unused imports automatically.
   -p, --permission      Refactor permission after see diff.
   --requirements        Include requirements.txt file, You can use it with all other arguments
-  --check               Prints which file the unused imports are in.
   -v, --version         Prints version of unimport
 
 Get rid of all unused imports 🥳
@@ -320,6 +341,7 @@ requirements = true
 remove = false
 diff = true
 include_star_import = true
+ignore_init = true
 ```
 
 **setup.cfg**
@@ -334,6 +356,7 @@ requirements = true
 remove = false
 diff = true
 include_star_import = true
+ignore_init = true
 ```
 
 ## Adding pre-commit plugins to your project
@@ -351,5 +374,6 @@ repos:
     rev: stable
     hooks:
       - id: unimport
-        args: [--remove, --requirements, --include-star-import]
+        args:
+          [--remove, --requirements, --include-star-import, --ignore-init, --gitignore]
 ```

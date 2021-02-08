@@ -24,6 +24,7 @@ class DefaultConfig(NamedTuple):
     include_star_import: bool = False
     permission: bool = False
     check: bool = False
+    ignore_init: bool = False
 
     def merge(self, **kwargs):
         diff_dict = set(kwargs) - set(self._asdict())
@@ -44,8 +45,13 @@ class DefaultConfig(NamedTuple):
         )
         if config.gitignore:
             gitignore_exclude = utils.get_exclude_list_from_gitignore()
-            gitignore_exclude.extend(config.exclude)
-            config = config._replace(exclude="|".join(gitignore_exclude))
+            config = config._replace(
+                exclude="|".join([config.exclude] + gitignore_exclude)
+            )
+        if config.ignore_init:
+            config = config._replace(
+                exclude="|".join([config.exclude, C.INIT_FILE_IGNORE_REGEX])
+            )
         return config
 
 
