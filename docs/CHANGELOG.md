@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - ././2021
+## [0.7.3] - 14/02/2021
 
 - [Add `--ignore-init` flag by @hakancelik96](https://github.com/hakancelik96/unimport/pull/169)
 
