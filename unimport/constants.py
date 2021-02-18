@@ -31,7 +31,7 @@ __all__ = [
 DESCRIPTION = (
     "A linter, formatter for finding and removing unused import statements."
 )
-VERSION = "0.7.3"
+VERSION = "0.7.4"
 
 PY38_PLUS = sys.version_info >= (3, 8)
 PY39_PLUS = sys.version_info >= (3, 9)
