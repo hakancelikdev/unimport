@@ -37,7 +37,9 @@ class TestUtils(unittest.TestCase):
 
     def test_list_paths(self):
         self.assertEqual(len(list(utils.list_paths(Path("tests")))), 8)
-        self.assertEqual(len(list(utils.list_paths(Path("tests/test_config.py")))), 1)
+        self.assertEqual(
+            len(list(utils.list_paths(Path("tests/test_config.py")))), 1
+        )
 
     def refactor(self, path: Path) -> str:
         source = utils.read(path)[0]
