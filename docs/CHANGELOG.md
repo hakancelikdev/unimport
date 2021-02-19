@@ -2,21 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.4] - 19/02/2021
+
+- [🐞 Fix list_paths in utils by @hakancelik96](https://github.com/hakancelik96/unimport/pull/172)
+
 ## [0.7.3] - 14/02/2021
 
-- [Add `--ignore-init` flag by @hakancelik96](https://github.com/hakancelik96/unimport/pull/169)
+- [💪 Add `--ignore-init` flag by @hakancelik96](https://github.com/hakancelik96/unimport/pull/169)
 
 ## [0.7.2] - 31/January/2021
 
-- [Python3.9 Support by @hakancelik96](https://github.com/hakancelik96/unimport/pull/166)
+- [💪 Python3.9 Support by @hakancelik96](https://github.com/hakancelik96/unimport/pull/166)
 
 ## [0.7.1] - 1/January/2021/
 
-- [Fix by @hakancelik96 #127](https://github.com/hakancelik96/unimport/pull/161)
+- [🐞 Fix by @hakancelik96 #127](https://github.com/hakancelik96/unimport/pull/161)
 
 ## [0.7.0] - 26/December/2020
 
-- [%15 performance increase & remove show-error flag by @hakancelik96](https://github.com/hakancelik96/unimport/pull/159)
+- [💊 %15 performance increase & remove show-error flag by @hakancelik96](https://github.com/hakancelik96/unimport/pull/159)
 
 - [💪 Star import more accurate suggestion by @hakancelik96](https://github.com/hakancelik96/unimport/pull/158)
 

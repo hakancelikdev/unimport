@@ -35,10 +35,11 @@ class TestUtils(unittest.TestCase):
     maxDiff = None
     include_star_import = True
 
-    def test_list_paths_and_read(self):
-        for path in [Path("tests"), Path("tests/test_config.py")]:
-            for p in utils.list_paths(path):
-                self.assertTrue(str(p).endswith(".py"))
+    def test_list_paths(self):
+        self.assertEqual(len(list(utils.list_paths(Path("tests")))), 8)
+        self.assertEqual(
+            len(list(utils.list_paths(Path("tests/test_config.py")))), 1
+        )
 
     def refactor(self, path: Path) -> str:
         source = utils.read(path)[0]
