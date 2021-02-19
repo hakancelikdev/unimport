@@ -31,7 +31,7 @@ __all__ = [
 DESCRIPTION = (
     "A linter, formatter for finding and removing unused import statements."
 )
-VERSION = "0.7.3"
+VERSION = "0.7.4"
 
 PY38_PLUS = sys.version_info >= (3, 8)
 PY39_PLUS = sys.version_info >= (3, 9)
@@ -107,6 +107,6 @@ ASTFunctionTuple = (ast.FunctionDef, ast.AsyncFunctionDef)
 BUILTIN_MODULE_NAMES = frozenset(sys.builtin_module_names)
 STDLIB_PATH = distutils.sysconfig.get_python_lib(standard_lib=True)
 GLOB_PATTERN = r"**/*.py"
-INCLUDE_REGEX_PATTERN = r"\\.(py)$"
+INCLUDE_REGEX_PATTERN = r"\.(py)$"
 EXCLUDE_REGEX_PATTERN = r"^$"
 INIT_FILE_IGNORE_REGEX = r"__init__\.py"
