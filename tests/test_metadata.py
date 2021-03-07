@@ -5,7 +5,7 @@ import semantic_version
 from unimport.constants import DESCRIPTION, VERSION
 
 
-class TestMetadata(unittest.TestCase):
+class MetadataTestCase(unittest.TestCase):
     def test_description(self):
         self.assertIsInstance(DESCRIPTION, str)
         self.assertGreater(len(DESCRIPTION), 0, "Too short description.")
