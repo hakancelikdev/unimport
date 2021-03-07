@@ -31,7 +31,7 @@ def reopenable_temp_file(content: str) -> Iterator[Path]:
         os.unlink(tmp_path)
 
 
-class TestUtils(unittest.TestCase):
+class UtilsTestCase(unittest.TestCase):
     maxDiff = None
     include_star_import = True
 

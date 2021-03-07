@@ -24,7 +24,7 @@ class UnusedTestCase(unittest.TestCase):
         scanner.clear()
 
 
-class TestBuiltin(UnusedTestCase):
+class BuiltinTestCase(UnusedTestCase):
     # https://github.com/hakancelik96/unimport/issues/45
 
     def test_ConnectionError(self):
@@ -57,7 +57,7 @@ class TestBuiltin(UnusedTestCase):
         )
 
 
-class Test__All__(UnusedTestCase):
+class AllTestCase(UnusedTestCase):
     def test_from_import(self):
         self.assertSourceAfterScanningEqualToExpected(
             """\
@@ -75,7 +75,7 @@ class Test__All__(UnusedTestCase):
         )
 
 
-class TestUnusedImport(UnusedTestCase):
+class UnusedImportTestCase(UnusedTestCase):
     def test_comma(self):
         self.assertSourceAfterScanningEqualToExpected(
             """\
@@ -225,7 +225,7 @@ class TestUnusedImport(UnusedTestCase):
         )
 
 
-class TestDuplicate(UnusedTestCase):
+class DuplicateTestCase(UnusedTestCase):
     def test__all__(self):
         self.assertSourceAfterScanningEqualToExpected(
             """\
@@ -1014,7 +1014,7 @@ class TestDuplicate(UnusedTestCase):
         )
 
 
-class TestAsImport(UnusedTestCase):
+class AsImportTestCase(UnusedTestCase):
     def test_as_import_all_unused_all_cases(self):
         self.assertSourceAfterScanningEqualToExpected(
             """\
@@ -1191,7 +1191,7 @@ class TestAsImport(UnusedTestCase):
         )
 
 
-class TestDealingImplicitImportsSubPackages(UnusedTestCase):
+class DealingImplicitImportsSubPackagesTestCase(UnusedTestCase):
     # https://github.com/hakancelik96/unimport/issues/127
 
     def test(self):

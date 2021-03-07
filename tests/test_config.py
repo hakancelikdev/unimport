@@ -15,7 +15,7 @@ no_unimport_pyproject = TEST_DIR / "no_unimport" / "pyproject.toml"
 no_unimport_setup_cfg = TEST_DIR / "no_unimport" / "setup.cfg"
 
 
-class TestConfig(TestCase):
+class ConfigTestCase(TestCase):
     include = "test|test2|tests.py"
     exclude = "__init__.py|tests/"
     sources = [Path("path1"), Path("path2")]
@@ -65,7 +65,7 @@ class TestConfig(TestCase):
         self.assertTrue(config.ignore_init)
 
 
-class TestDefaultCommand(TestCase):
+class DefaultCommandTestCase(TestCase):
     def setUp(self):
         self.config = DefaultConfig()
 
@@ -97,7 +97,7 @@ class TestDefaultCommand(TestCase):
         self.assertTrue(self.config.merge(permission=True).diff)
 
 
-class TestTomlCommand(TestCase):
+class TomlCommandTestCase(TestCase):
     def setUp(self):
         self.config = Config(pyproject).parse()
         self.exclude = "__init__.py|tests/"
@@ -120,7 +120,7 @@ class TestTomlCommand(TestCase):
         self.assertFalse(self.config.merge(permission=True).check)
 
 
-class TestNoUnimportSectionTest(TestCase):
+class NoUnimportSectionTestCase(TestCase):
     def setUp(self):
         self.default_config = DefaultConfig()
 
@@ -167,7 +167,7 @@ class TestNoUnimportSectionTest(TestCase):
         self.assertFalse(config.diff)
 
 
-class TestInitFileIgnoreRegex(TestCase):
+class InitFileIgnoreRegexTestCase(TestCase):
     exclude_regex = re.compile(C.INIT_FILE_IGNORE_REGEX)
 
     def test_match(self):

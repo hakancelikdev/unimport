@@ -4,7 +4,7 @@ import unittest
 from unimport.color import RED, RESET, TERMINAL_SUPPORT_COLOR, paint
 
 
-class TestColor(unittest.TestCase):
+class ColorTestCase(unittest.TestCase):
     maxDiff = None
 
     def setUp(self):

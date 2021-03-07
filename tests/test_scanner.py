@@ -26,7 +26,7 @@ class ScannerTestCase(unittest.TestCase):
         scanner.clear()
 
 
-class TestNames(ScannerTestCase):
+class NamesTestCase(ScannerTestCase):
     def test_names(self):
         self.assertUnimportEqual(
             source="""\
@@ -111,7 +111,7 @@ class TestNames(ScannerTestCase):
         )
 
 
-class TestStarImport(ScannerTestCase):
+class StarImportTestCase(ScannerTestCase):
     include_star_import = True
 
     def test_star(self):
@@ -460,7 +460,7 @@ class TestStarImport(ScannerTestCase):
         )
 
 
-class SkipImportTest(ScannerTestCase):
+class SkipImportTestCase(ScannerTestCase):
     def test_inside_try_except(self):
         self.assertUnimportEqual(
             source="""\
@@ -564,7 +564,7 @@ class SkipImportTest(ScannerTestCase):
 @unittest.skipIf(
     not PY38_PLUS, "This feature is only available for python 3.8."
 )
-class TestTypeComments(ScannerTestCase):
+class TypeCommentsTestCase(ScannerTestCase):
     def test_type_comments(self):
         self.assertUnimportEqual(
             source="""\
@@ -613,7 +613,7 @@ class TestTypeComments(ScannerTestCase):
         )
 
 
-class TestTypeVariable(ScannerTestCase):
+class TypeVariableTestCase(ScannerTestCase):
     def test_union_import(self):
         self.assertUnimportEqual(
             source="""\
@@ -873,7 +873,7 @@ class TestTypeVariable(ScannerTestCase):
         )
 
 
-class TestCall(ScannerTestCase):
+class CallTestCase(ScannerTestCase):
     def test_call_in_name(self):
         self.assertUnimportEqual(
             source="""\

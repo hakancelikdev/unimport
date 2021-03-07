@@ -37,7 +37,7 @@ class RefactorTestCase(unittest.TestCase):
         )
 
 
-class TestSyntaxErrorRefactor(RefactorTestCase):
+class SyntaxErrorRefactorTestCase(RefactorTestCase):
     def test_syntax_error(self):
         self.assertActionAfterRefactorEqualToAction("a :? = 0")
 
@@ -61,7 +61,7 @@ class TestSyntaxErrorRefactor(RefactorTestCase):
         )
 
 
-class TestUnusedRefactor(RefactorTestCase):
+class UnusedRefactorTestCase(RefactorTestCase):
     def test_do_not_remove_augmented_imports(self):
         self.assertActionAfterRefactorEqualToExpected(
             """\
@@ -255,7 +255,7 @@ class TestUnusedRefactor(RefactorTestCase):
         )
 
 
-class TestDuplicateUnusedRefactor(RefactorTestCase):
+class DuplicateUnusedRefactorTestCase(RefactorTestCase):
     def test_full_unused(self):
         self.assertActionAfterRefactorEqualToEmpty(
             """\
@@ -512,7 +512,7 @@ class TestDuplicateUnusedRefactor(RefactorTestCase):
         )
 
 
-class TestAsImport(RefactorTestCase):
+class AsImportTestCase(RefactorTestCase):
     def test_as_import_all_unused_all_cases(self):
         self.assertActionAfterRefactorEqualToEmpty(
             """\
@@ -570,7 +570,7 @@ class TestAsImport(RefactorTestCase):
         )
 
 
-class TestStarImport(RefactorTestCase):
+class StarImportTestCase(RefactorTestCase):
     include_star_import = True
 
     def test_star_imports(self):
@@ -649,7 +649,7 @@ class TestStarImport(RefactorTestCase):
         )
 
 
-class TestImportError(RefactorTestCase):
+class ImportErrorTestCase(RefactorTestCase):
     """Unimport skip imports controlled by ImportError."""
 
     include_star_import = True
@@ -710,7 +710,7 @@ class TestImportError(RefactorTestCase):
         )
 
 
-class TestTyping(RefactorTestCase):
+class TypingTestCase(RefactorTestCase):
 
     include_star_import = True
 
@@ -804,7 +804,7 @@ class TestTyping(RefactorTestCase):
         )
 
 
-class TestTypeVariable(RefactorTestCase):
+class TypeVariableTestCase(RefactorTestCase):
     def test_type_assing_union(self):
         actions = [
             (
@@ -906,7 +906,7 @@ class TestTypeVariable(RefactorTestCase):
             self.assertActionAfterRefactorEqualToAction(action)
 
 
-class TestStyle(RefactorTestCase):
+class StyleTestCase(RefactorTestCase):
     def test_1_vertical(self):
         self.assertActionAfterRefactorEqualToExpected(
             """\
