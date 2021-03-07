@@ -1,7 +1,7 @@
 import textwrap
 import unittest
 
-from unimport.scan import Scanner
+from unimport.analyzer import Analyzer
 from unimport.statement import Import, ImportFrom
 
 
@@ -12,16 +12,16 @@ class UnusedTestCase(unittest.TestCase):
     def assertSourceAfterScanningEqualToExpected(
         self, source, expected_unused_imports=[]
     ):
-        scanner = Scanner(
+        analyzer = Analyzer(
             source=textwrap.dedent(source),
             include_star_import=self.include_star_import,
         )
-        scanner.traverse()
+        analyzer.traverse()
         super().assertEqual(
             expected_unused_imports,
-            list(scanner.get_unused_imports()),
+            list(analyzer.get_unused_imports()),
         )
-        scanner.clear()
+        analyzer.clear()
 
 
 class BuiltinTestCase(UnusedTestCase):

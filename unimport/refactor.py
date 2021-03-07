@@ -4,11 +4,10 @@ import libcst as cst
 import libcst.matchers as m
 from libcst.metadata import CodeRange, PositionProvider
 
+from unimport import constants as C
 from unimport.statement import Import, ImportFrom
 
 __all__ = ["refactor_string"]
-
-ImportT = TypeVar("ImportT", bound=Union[cst.Import, cst.ImportFrom])
 
 
 class _RemoveUnusedImportTransformer(cst.CSTTransformer):
@@ -65,9 +64,9 @@ class _RemoveUnusedImportTransformer(cst.CSTTransformer):
 
     def leave_import_alike(
         self,
-        original_node: ImportT,
-        updated_node: ImportT,
-    ) -> Union[cst.RemovalSentinel, ImportT]:
+        original_node: C.CSTImportT,
+        updated_node: C.CSTImportT,
+    ) -> Union[cst.RemovalSentinel, C.CSTImportT]:
         names_to_keep = []
         names = cast(Sequence[cst.ImportAlias], updated_node.names)
         # already handled by leave_ImportFrom
@@ -93,7 +92,7 @@ class _RemoveUnusedImportTransformer(cst.CSTTransformer):
                 comma=cst.MaybeSentinel.DEFAULT
             )
             return cast(
-                ImportT, updated_node.with_changes(names=names_to_keep)
+                C.CSTImportT, updated_node.with_changes(names=names_to_keep)
             )
 
     @staticmethod
