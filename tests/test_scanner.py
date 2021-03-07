@@ -1,12 +1,12 @@
 import textwrap
 import unittest
 
+from unimport.analyzer import Analyzer
 from unimport.constants import PY38_PLUS
-from unimport.scan import Scanner
 from unimport.statement import Import, ImportFrom, Name
 
 
-class ScannerTestCase(unittest.TestCase):
+class AnalyzerTestCase(unittest.TestCase):
     maxDiff = None
     include_star_import = False
 
@@ -16,17 +16,17 @@ class ScannerTestCase(unittest.TestCase):
         expected_names=[],
         expected_imports=[],
     ):
-        scanner = Scanner(
+        analyzer = Analyzer(
             source=textwrap.dedent(source),
             include_star_import=self.include_star_import,
         )
-        scanner.traverse()
-        self.assertEqual(expected_names, scanner.names)
-        self.assertEqual(expected_imports, scanner.imports)
-        scanner.clear()
+        analyzer.traverse()
+        self.assertEqual(expected_names, analyzer.names)
+        self.assertEqual(expected_imports, analyzer.imports)
+        analyzer.clear()
 
 
-class NamesTestCase(ScannerTestCase):
+class NamesTestCase(AnalyzerTestCase):
     def test_names(self):
         self.assertUnimportEqual(
             source="""\
@@ -111,7 +111,7 @@ class NamesTestCase(ScannerTestCase):
         )
 
 
-class StarImportTestCase(ScannerTestCase):
+class StarImportTestCase(AnalyzerTestCase):
     include_star_import = True
 
     def test_star(self):
@@ -460,7 +460,7 @@ class StarImportTestCase(ScannerTestCase):
         )
 
 
-class SkipImportTestCase(ScannerTestCase):
+class SkipImportTestCase(AnalyzerTestCase):
     def test_inside_try_except(self):
         self.assertUnimportEqual(
             source="""\
@@ -564,7 +564,7 @@ class SkipImportTestCase(ScannerTestCase):
 @unittest.skipIf(
     not PY38_PLUS, "This feature is only available for python 3.8."
 )
-class TypeCommentsTestCase(ScannerTestCase):
+class TypeCommentsTestCase(AnalyzerTestCase):
     def test_type_comments(self):
         self.assertUnimportEqual(
             source="""\
@@ -613,7 +613,7 @@ class TypeCommentsTestCase(ScannerTestCase):
         )
 
 
-class TypeVariableTestCase(ScannerTestCase):
+class TypeVariableTestCase(AnalyzerTestCase):
     def test_union_import(self):
         self.assertUnimportEqual(
             source="""\
@@ -873,7 +873,7 @@ class TypeVariableTestCase(ScannerTestCase):
         )
 
 
-class CallTestCase(ScannerTestCase):
+class CallTestCase(AnalyzerTestCase):
     def test_call_in_name(self):
         self.assertUnimportEqual(
             source="""\

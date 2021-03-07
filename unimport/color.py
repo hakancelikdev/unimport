@@ -2,18 +2,19 @@ import sys
 from typing import Tuple
 
 __all__ = [
-    "paint",
-    "difference",
-    "RESET",
     "BLACK",
-    "RED",
-    "GREEN",
-    "YELLOW",
     "BLUE",
-    "MAGENTA",
-    "CYAN",
-    "WHITE",
     "BOLD_WHITE",
+    "CYAN",
+    "GREEN",
+    "MAGENTA",
+    "RED",
+    "RESET",
+    "TERMINAL_SUPPORT_COLOR",
+    "WHITE",
+    "YELLOW",
+    "difference",
+    "paint",
 ]
 
 if sys.platform == "win32":  # pragma: no cover (windows)

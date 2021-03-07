@@ -6,34 +6,14 @@ from typing import List, Optional, Sequence, Set
 from unimport import color
 from unimport import constants as C
 from unimport import utils
+from unimport.analyzer import Analyzer
 from unimport.config import CONFIG_FILES, Config, DefaultConfig
 from unimport.refactor import refactor_string
-from unimport.scan import Scanner
 from unimport.statement import ImportFrom
 
+__all__ = ["main"]
+
 default_config = DefaultConfig()
-
-
-def show(unused_import: List[C.ImportT], py_path: Path) -> None:
-    for imp in unused_import:
-        if isinstance(imp, ImportFrom) and imp.star and imp.suggestions:
-            context = (
-                color.paint(f"from {imp.name} import *", color.RED)
-                + " -> "
-                + color.paint(
-                    f"from {imp.name} import {', '.join(imp.suggestions)}",
-                    color.GREEN,
-                )
-            )
-        else:
-            context = color.paint(imp.name, color.YELLOW)
-        print(
-            context
-            + " at "
-            + color.paint(py_path.as_posix(), color.GREEN)
-            + ":"
-            + color.paint(str(imp.lineno), color.GREEN)
-        )
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -149,19 +129,41 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             source_path, config.include, config.exclude
         ):
             source, encoding = utils.read(py_path)
-            scanner = Scanner(
+            analyzer = Analyzer(
                 source=source,
                 path=py_path,
                 include_star_import=config.include_star_import,
             )
-            scanner.traverse()
-            unused_imports = list(scanner.get_unused_imports())
+            analyzer.traverse()
+            unused_imports = list(analyzer.get_unused_imports())
             unused_modules.update({imp.name for imp in unused_imports})
             used_packages.update(
-                utils.get_used_packages(scanner.imports, unused_imports)
+                utils.get_used_packages(analyzer.imports, unused_imports)
             )
             if config.check:
-                show(unused_imports, py_path)
+                for imp in unused_imports:
+                    if (
+                        isinstance(imp, ImportFrom)
+                        and imp.star
+                        and imp.suggestions
+                    ):
+                        context = (
+                            color.paint(f"from {imp.name} import *", color.RED)
+                            + " -> "
+                            + color.paint(
+                                f"from {imp.name} import {', '.join(imp.suggestions)}",
+                                color.GREEN,
+                            )
+                        )
+                    else:
+                        context = color.paint(imp.name, color.YELLOW)
+                    print(
+                        context
+                        + " at "
+                        + color.paint(py_path.as_posix(), color.GREEN)
+                        + ":"
+                        + color.paint(str(imp.lineno), color.GREEN)
+                    )
             if any((config.diff, config.remove)):
                 refactor_result = refactor_string(
                     source=source,
@@ -189,7 +191,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 print(
                     f"Refactoring '{color.paint(str(py_path), color.GREEN)}'"
                 )
-            scanner.clear()
+            analyzer.clear()
     if not unused_modules and config.check:
         print(
             color.paint(

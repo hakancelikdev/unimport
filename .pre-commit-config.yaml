@@ -52,3 +52,11 @@ repos:
     rev: 2eaaabed645b33822de0e310851c0c7abfaa500b
     hooks:
       - id: teyit
+
+  - repo: https://github.com/hakancelik96/pyall
+    rev: v0.1.0
+    hooks:
+      - id: pyall
+        args:
+          - --refactor
+          - --exclude=tests|setup.py

@@ -4,7 +4,7 @@ import ast
 import functools
 import re
 from pathlib import Path
-from typing import FrozenSet, Iterator, List, Set, Union, cast
+from typing import FrozenSet, Generic, Iterator, List, Set, Union, cast
 
 from unimport import color
 from unimport import constants as C
@@ -12,41 +12,43 @@ from unimport import utils
 from unimport.relate import first_occurrence, get_parents, relate
 from unimport.statement import Import, ImportFrom, Name
 
-__all__ = ["Scanner"]
+__all__ = ["Analyzer"]
 
 
-def recursive(func: C.Function) -> C.Function:
-    """decorator to make visitor work recursive."""
+def _generic_visit(func: C.FunctionT) -> C.FunctionT:
+    """decorator to make visitor work _generic_visit."""
 
     @functools.wraps(func)
-    def wrapper(self, *args, **kwargs):
-        func(self, *args, **kwargs)
-        self.generic_visit(*args)
+    def wrapper(*args, **kwargs):
+        func(*args, **kwargs)
+        obj = args[0]
+        node = args[1]
+        obj.generic_visit(node)
 
-    return cast(C.Function, wrapper)
+    return cast(C.FunctionT, wrapper)
 
 
-class _DefinedNameScanner(ast.NodeVisitor):
+class _DefinedNameAnalyzer(ast.NodeVisitor):
     def __init__(self):
         self.defined_names: Set[str] = set()
 
-    @recursive
+    @_generic_visit
     def visit_FunctionDef(self, node: C.ASTFunctionT) -> None:
         self.defined_names.add(node.name)
 
     visit_AsyncFunctionDef = visit_FunctionDef
 
-    @recursive
+    @_generic_visit
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         self.defined_names.add(node.name)
 
-    @recursive
+    @_generic_visit
     def visit_Name(self, node: ast.Name) -> None:
         if isinstance(node.ctx, ast.Store):
             self.defined_names.add(node.id)
 
 
-class _ImportScanner(ast.NodeVisitor):
+class _ImportAnalyzer(ast.NodeVisitor):
     ignore_modules_imports = ("__future__",)
     skip_import_comments_regex = "#.*(unimport: {0,1}skip|noqa)"
 
@@ -66,12 +68,12 @@ class _ImportScanner(ast.NodeVisitor):
         self.defined_names: Set[str] = set()
 
     def traverse(self, tree) -> None:
-        defined_name_scanner = _DefinedNameScanner()
+        defined_name_scanner = _DefinedNameAnalyzer()
         defined_name_scanner.visit(tree)
         self.defined_names = defined_name_scanner.defined_names
         self.visit(tree)
 
-    @recursive
+    @_generic_visit
     def visit_Import(self, node: ast.Import) -> None:
         if self.skip_import(node):
             return
@@ -86,7 +88,7 @@ class _ImportScanner(ast.NodeVisitor):
                 )
             )
 
-    @recursive
+    @_generic_visit
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
         if self.skip_import(node):
             return
@@ -153,15 +155,15 @@ class _ImportScanner(ast.NodeVisitor):
 
     def get_suggestions(self, package: str) -> List[str]:
         names = {name.name.split(".")[0] for name in self.names}
-        from_names = _ImportableScanner().get_names(package)
+        from_names = _ImportableAnalyzer().get_names(package)
         return sorted(from_names & (names - self.defined_names))
 
 
-class _NameScanner(ast.NodeVisitor):
+class _NameAnalyzer(ast.NodeVisitor):
     def __init__(self):
         self.names: List[Name] = []
 
-    @recursive
+    @_generic_visit
     def visit_FunctionDef(self, node: C.ASTFunctionT) -> None:
         self._type_comment(node)
 
@@ -185,12 +187,12 @@ class _NameScanner(ast.NodeVisitor):
         if isinstance(node.value, str):
             self.visit_str_helper(node.value, node)
 
-    @recursive
+    @_generic_visit
     def visit_Name(self, node: ast.Name) -> None:
         if not isinstance(node.parent, ast.Attribute):  # type: ignore
             self.names.append(Name(lineno=node.lineno, name=node.id))
 
-    @recursive
+    @_generic_visit
     def visit_Attribute(self, node: ast.Attribute) -> None:
         if not isinstance(node.value, ast.Call):
             names = []
@@ -202,15 +204,15 @@ class _NameScanner(ast.NodeVisitor):
             names.reverse()
             self.names.append(Name(lineno=node.lineno, name=".".join(names)))
 
-    @recursive
+    @_generic_visit
     def visit_Assign(self, node: ast.Assign) -> None:
         self._type_comment(node)
 
-    @recursive
+    @_generic_visit
     def visit_arg(self, node: ast.arg) -> None:
         self._type_comment(node)
 
-    @recursive
+    @_generic_visit
     def visit_Subscript(self, node: ast.Subscript) -> None:
         # type_variable
         # type_var = List["object"] etc.
@@ -246,7 +248,7 @@ class _NameScanner(ast.NodeVisitor):
                 if isinstance(_slice, (ast.Constant, ast.Str)):  # type: ignore
                     visit_constant_str(_slice)  # type: ignore
 
-    @recursive
+    @_generic_visit
     def visit_Call(self, node: ast.Call) -> None:
         # type_variable
         # cast("type", return_value)
@@ -281,7 +283,7 @@ class _NameScanner(ast.NodeVisitor):
         """
         Receive items on the __all__ list
         """
-        importable_visitor = _ImportableScanner()
+        importable_visitor = _ImportableAnalyzer()
         importable_visitor.traverse(tree)
         for node in importable_visitor.importable_nodes:
             if isinstance(node, ast.Constant):
@@ -312,7 +314,7 @@ class _NameScanner(ast.NodeVisitor):
             self.visit(tree)
 
 
-class _ImportableScanner(ast.NodeVisitor):
+class _ImportableAnalyzer(ast.NodeVisitor):
     def __init__(self) -> None:
         self.importable_nodes: List[
             Union[ast.Str, ast.Constant]
@@ -323,7 +325,7 @@ class _ImportableScanner(ast.NodeVisitor):
         relate(tree)
         self.visit(tree)
 
-    @recursive
+    @_generic_visit
     def visit_CFN(self, node: C.CFNT) -> None:
         if not first_occurrence(node, C.DefTuple):
             self.suggestions_nodes.append(node)
@@ -332,18 +334,18 @@ class _ImportableScanner(ast.NodeVisitor):
     visit_FunctionDef = visit_CFN
     visit_AsyncFunctionDef = visit_CFN
 
-    @recursive
+    @_generic_visit
     def visit_Import(self, node: ast.Import) -> None:
         for alias in node.names:
             self.suggestions_nodes.append(alias)
 
-    @recursive
+    @_generic_visit
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
         if not node.names[0].name == "*":
             for alias in node.names:
                 self.suggestions_nodes.append(alias)
 
-    @recursive
+    @_generic_visit
     def visit_Assign(self, node: ast.Assign) -> None:
         if getattr(node.targets[0], "id", None) == "__all__" and isinstance(
             node.value, (ast.List, ast.Tuple, ast.Set)
@@ -356,7 +358,7 @@ class _ImportableScanner(ast.NodeVisitor):
             if isinstance(target, (ast.Name, ast.Attribute)):
                 self.suggestions_nodes.append(target)
 
-    @recursive
+    @_generic_visit
     def visit_Expr(self, node: ast.Expr) -> None:
         if (
             isinstance(node.value, ast.Call)
@@ -411,7 +413,7 @@ class _ImportableScanner(ast.NodeVisitor):
         return frozenset(names)
 
 
-class Scanner(ast.NodeVisitor):
+class Analyzer(ast.NodeVisitor):
     skip_file_regex = "#.*(unimport: {0,1}skip_file)"
 
     def __init__(
@@ -445,10 +447,10 @@ class Scanner(ast.NodeVisitor):
                 return None
             else:
                 relate(tree)
-                name_scanner = _NameScanner()
+                name_scanner = _NameAnalyzer()
                 name_scanner.traverse(tree)
                 self.names.extend(name_scanner.names)
-                import_scanner = _ImportScanner(
+                import_scanner = _ImportAnalyzer(
                     source=self.source,
                     names=self.names,
                     include_star_import=self.include_star_import,

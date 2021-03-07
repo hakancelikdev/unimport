@@ -1,9 +1,9 @@
 import textwrap
 import unittest
 
+from unimport.analyzer import Analyzer
 from unimport.constants import PY38_PLUS
 from unimport.refactor import refactor_string
-from unimport.scan import Scanner
 
 
 class RefactorTestCase(unittest.TestCase):
@@ -11,14 +11,14 @@ class RefactorTestCase(unittest.TestCase):
     include_star_import = False
 
     def refactor(self, action: str) -> str:
-        scanner = Scanner(
+        analyzer = Analyzer(
             source=textwrap.dedent(action),
             include_star_import=self.include_star_import,
         )
-        scanner.traverse()
+        analyzer.traverse()
         refactor_result = refactor_string(
-            source=scanner.source,
-            unused_imports=list(scanner.get_unused_imports()),
+            source=analyzer.source,
+            unused_imports=list(analyzer.get_unused_imports()),
         )
         return refactor_result
 
