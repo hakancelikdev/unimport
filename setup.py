@@ -3,8 +3,6 @@ from pathlib import Path
 
 from setuptools import setup
 
-import unimport.constants as C
-
 assert sys.version_info >= (3, 6), "unimport requires Python 3.6+"
 
 CURRENT_DIR = Path(__file__).parent
@@ -18,7 +16,7 @@ def get_long_description():
 DESCRIPTION = (
     "A linter, formatter for finding and removing unused import statements."
 )
-VERSION = "0.8.1"
+VERSION = "0.8.2"
 
 
 setup(
