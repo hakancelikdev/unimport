@@ -15,11 +15,16 @@ def get_long_description():
     with open(readme_md, encoding="utf8") as ld_file:
         return ld_file.read()
 
+DESCRIPTION = (
+    "A linter, formatter for finding and removing unused import statements."
+)
+VERSION = "0.8.1"
+
 
 setup(
     name="unimport",
-    version=C.VERSION,
-    description=C.DESCRIPTION,
+    version=VERSION,
+    description=DESCRIPTION,
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     keywords=["unused", "import"],

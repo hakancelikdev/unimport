@@ -32,11 +32,6 @@ __all__ = [
     "VERSION",
 ]
 
-DESCRIPTION = (
-    "A linter, formatter for finding and removing unused import statements."
-)
-VERSION = "0.8.0"
-
 #  TYPE
 FunctionT = TypeVar("FunctionT", bound=Callable[..., Any])
 ASTImportableT = Union[
