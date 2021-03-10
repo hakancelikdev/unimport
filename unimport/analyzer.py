@@ -461,13 +461,8 @@ class Analyzer(ast.NodeVisitor):
 
     def get_unused_imports(self) -> Iterator[C.ImportT]:
         for imp in self.imports:
-            # duplicate import
-            if self.is_duplicate(
-                imp.name
-            ) and not self.is_duplicate_import_used(imp):
-                yield imp
             # star import
-            elif (
+            if (
                 self.include_star_import
                 and isinstance(imp, ImportFrom)
                 and imp.star
