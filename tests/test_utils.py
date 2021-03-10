@@ -36,7 +36,7 @@ class UtilsTestCase(unittest.TestCase):
     include_star_import = True
 
     def test_list_paths(self):
-        self.assertEqual(len(list(utils.list_paths(Path("tests")))), 8)
+        self.assertEqual(len(list(utils.list_paths(Path("tests")))), 7)
         self.assertEqual(
             len(list(utils.list_paths(Path("tests/test_config.py")))), 1
         )
