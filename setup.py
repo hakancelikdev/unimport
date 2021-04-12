@@ -13,6 +13,7 @@ def get_long_description():
     with open(readme_md, encoding="utf8") as ld_file:
         return ld_file.read()
 
+
 DESCRIPTION = (
     "A linter, formatter for finding and removing unused import statements."
 )

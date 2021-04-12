@@ -2,7 +2,7 @@ import ast
 import builtins
 import distutils.sysconfig
 import sys
-from typing import Any, Callable, Type, TypeVar, Union
+from typing import Any, Callable, TypeVar, Union
 
 import libcst as cst
 
