@@ -254,6 +254,7 @@ class UnusedRefactorTestCase(RefactorTestCase):
             """,
         )
 
+
 @unittest.skip
 class DuplicateUnusedRefactorTestCase(RefactorTestCase):
     def test_full_unused(self):
