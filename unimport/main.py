@@ -1,7 +1,7 @@
 import argparse
 import sys
 from pathlib import Path
-from typing import List, Optional, Sequence, Set
+from typing import Optional, Sequence, Set
 
 from unimport import color
 from unimport import constants as C

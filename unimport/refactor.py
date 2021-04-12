@@ -1,4 +1,4 @@
-from typing import List, Optional, Sequence, TypeVar, Union, cast
+from typing import List, Optional, Sequence, Union, cast
 
 import libcst as cst
 import libcst.matchers as m

@@ -224,7 +224,8 @@ class UnusedImportTestCase(UnusedTestCase):
             """
         )
 
-@unittest.skip
+
+@unittest.skip("Temporarily removed.")
 class DuplicateTestCase(UnusedTestCase):
     def test__all__(self):
         self.assertSourceAfterScanningEqualToExpected(
@@ -1105,7 +1106,7 @@ class AsImportTestCase(UnusedTestCase):
             ],
         )
 
-    @unittest.skip
+    @unittest.skip("Temporarily removed.")
     def test_as_import_one_used_in_function_all_cases(self):
         self.assertSourceAfterScanningEqualToExpected(
             """\

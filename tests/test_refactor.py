@@ -254,7 +254,8 @@ class UnusedRefactorTestCase(RefactorTestCase):
             """,
         )
 
-@unittest.skip
+
+@unittest.skip("Temporarily removed.")
 class DuplicateUnusedRefactorTestCase(RefactorTestCase):
     def test_full_unused(self):
         self.assertActionAfterRefactorEqualToEmpty(
@@ -539,7 +540,7 @@ class AsImportTestCase(RefactorTestCase):
             """,
         )
 
-    @unittest.skip
+    @unittest.skip("Temporarily removed.")
     def test_multiple_import_name_as_import_duplicate(self):
         self.assertActionAfterRefactorEqualToExpected(
             """\
@@ -554,7 +555,7 @@ class AsImportTestCase(RefactorTestCase):
             """,
         )
 
-    @unittest.skip
+    @unittest.skip("Temporarily removed.")
     def test_as_import_used_all_cases(self):
         self.assertActionAfterRefactorEqualToExpected(
             """\

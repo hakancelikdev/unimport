@@ -4,7 +4,7 @@ import ast
 import functools
 import re
 from pathlib import Path
-from typing import FrozenSet, Generic, Iterator, List, Set, Union, cast
+from typing import FrozenSet, Iterator, List, Set, Union, cast
 
 from unimport import color
 from unimport import constants as C
