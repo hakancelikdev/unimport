@@ -195,7 +195,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if not unused_modules and config.check:
         print(
             color.paint(
-                "✨ Congratulations there is no unused import in your project. ✨",
+                "Congratulations there is no unused import in your project.",
                 color.GREEN,
             )
         )
