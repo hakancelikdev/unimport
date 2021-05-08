@@ -2,9 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased - ././
+
+- [Fix emoji issues by @hakancelik96](https://github.com/hakancelik96/unimport/pull/185)
+
 ## [0.8.0] - 09/02/2021
 
-- Temporarily drop support for duplicate imports.
+- Temporarily drop support for duplicate imports. by @isidentical
 
 ## [0.7.4] - 19/02/2021
 
