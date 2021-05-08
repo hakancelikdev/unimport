@@ -5,7 +5,7 @@ from typing import Optional, Sequence, Set
 
 from unimport import color
 from unimport import constants as C
-from unimport import utils
+from unimport import emoji, utils
 from unimport.analyzer import Analyzer
 from unimport.config import CONFIG_FILES, Config, DefaultConfig
 from unimport.refactor import refactor_string
@@ -20,7 +20,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(
         prog="unimport",
         description=C.DESCRIPTION,
-        epilog="Get rid of all unused imports 🥳",
+        epilog=f"Get rid of all unused imports {emoji.PARTYING_FACE}",
     )
     exclusive_group = parser.add_mutually_exclusive_group(required=False)
     parser.add_argument(
@@ -195,7 +195,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if not unused_modules and config.check:
         print(
             color.paint(
-                "✨ Congratulations there is no unused import in your project. ✨",
+                f"{emoji.STAR} Congratulations there is no unused import in your project. {emoji.STAR}",
                 color.GREEN,
             )
         )
