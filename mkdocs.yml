@@ -1,0 +1,89 @@
+site_name: Unimport
+site_description: A linter, formatter for finding and removing unused import statements.
+site_url: https://unimport.hakancelik.dev
+
+markdown_extensions:
+  - toc:
+      permalink: true
+      toc_depth: 3
+
+plugins:
+  - search:
+      separator: '[\s\-\.]+'
+      prebuild_index: true
+
+  - git-revision-date-localized:
+      type: date
+      enable_creation_date: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/telegram
+      link: https://t.me/unimport
+
+    - icon: fontawesome/brands/discord
+      link: https://discord.com/invite/6z8YXy4
+
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/hakancelik96
+
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/hakancelik96
+
+    - icon: fontawesome/solid/globe
+      link: https://hakancelik.dev
+
+  analytics:
+    provider: google
+    property: G-X2KBT06ZP2
+
+  homepage: https://unimport.hakancelik.dev
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.indexes
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - search.share
+    - header.autohide
+
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+
+  font:
+    text: Noto Sans
+    code: Roboto Mono
+
+  icon:
+    repo: fontawesome/brands/github
+
+copyright: Copyright &copy; 2020 - 2020 Hakan Çelik
+repo_url: https://github.com/hakancelik96/unimport
+repo_name: hakancelik96/unimport
+edit_uri: https://github.com/hakancelik96/unimport/tree/master/docs
+
+nav:
+  - Unimport: index.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
+  - Authors: authors.md
+  - FAQ: faq.md

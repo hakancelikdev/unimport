@@ -39,12 +39,29 @@ setup(
     python_requires=">=3.6",
     packages=["unimport"],
     install_requires=[
-        "libcst==0.3.16",
+        "libcst==0.3.19",
         "pathspec==0.8.1",
         "toml==0.10.2",
-        "importlib_metadata==3.4.0",
+        "importlib_metadata==4.5.0",
     ],
-    extras_require={},
+    extras_require={
+        "docs": [
+            "mkdocs==1.2.1",
+            "mkdocs-material==7.1.9",
+            "mkdocs-markdownextradata-plugin==0.2.4",
+            "mkdocs-minify-plugin==0.4.0",
+            "mkdocs-git-revision-date-localized-plugin==0.9.2",
+        ],
+        "dev": [
+            "importlib_metadata==4.5.0",
+            "libcst==0.3.19",
+            "pathspec==0.8.1",
+            "pytest==6.2.4",
+            "pytest-cov==2.12.1",
+            "semantic-version==2.8.5",
+            "toml==0.10.2",
+        ],
+    },
     zip_safe=False,
     include_package_data=True,
     classifiers=[
