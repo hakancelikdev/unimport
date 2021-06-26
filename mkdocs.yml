@@ -56,6 +56,10 @@ plugins:
       minify_html: true
 
 extra:
+  version:
+    provider: mike
+    default: stable
+
   social:
     - icon: fontawesome/brands/telegram
       link: https://t.me/unimport
@@ -80,6 +84,7 @@ extra:
 
 theme:
   name: material
+  custom_dir: docs/overrides
   language: en
   features:
     - navigation.instant

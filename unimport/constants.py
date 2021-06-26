@@ -11,7 +11,7 @@ from unimport.statement import Import, ImportFrom
 DESCRIPTION = (
     "A linter, formatter for finding and removing unused import statements."
 )
-VERSION = "0.8.3"
+VERSION = "0.8.4"
 
 __all__ = [
     "ASTFunctionT",
