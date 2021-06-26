@@ -1,6 +1,6 @@
 ## Get Started
 
-![unimport](https://raw.githubusercontent.com/hakancelik96/unimport/master/images/logo/Unimport.png ":size=60%")
+![unimport](assets/logo/unimport.png ":size=60%")
 
 **A linter, formatter for finding and removing unused import statements.**
 

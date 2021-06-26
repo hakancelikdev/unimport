@@ -3,9 +3,45 @@ site_description: A linter, formatter for finding and removing unused import sta
 site_url: https://unimport.hakancelik.dev
 
 markdown_extensions:
+  - fenced_code
+  - footnotes
+  - tables
+  - codehilite
+  - legacy_em
+  - meta
+  - sane_lists
+  - smarty
   - toc:
       permalink: true
-      toc_depth: 3
+      baselevel: 3
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: squidfunk
+      repo: mkdocs-material
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid-experimental
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
 
 plugins:
   - search:
@@ -15,6 +51,9 @@ plugins:
   - git-revision-date-localized:
       type: date
       enable_creation_date: true
+
+  - minify:
+      minify_html: true
 
 extra:
   social:
@@ -55,18 +94,18 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: teal
+      primary: red
       accent: amber
       toggle:
-        icon: material/toggle-switch-off-outline
+        icon: material/weather-sunny
         name: Switch to dark mode
 
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: teal
+      primary: red
       accent: amber
       toggle:
-        icon: material/toggle-switch
+        icon: material/weather-night
         name: Switch to light mode
 
   font:
@@ -82,7 +121,7 @@ repo_name: hakancelik96/unimport
 edit_uri: https://github.com/hakancelik96/unimport/tree/master/docs
 
 nav:
-  - Unimport: index.md
+  - Home: index.md
   - Contributing: contributing.md
   - Changelog: changelog.md
   - Authors: authors.md
