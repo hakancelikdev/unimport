@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased - ././
+## 0.8.4 - 06/26/2021
 
 - [Fix emoji issues by @hakancelik96](https://github.com/hakancelik96/unimport/pull/185)
 

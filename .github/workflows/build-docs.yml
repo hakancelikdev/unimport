@@ -19,4 +19,6 @@ jobs:
           python -m pip install -e .[docs]
 
       - name: Build Docs
-        run: mkdocs gh-deploy --force
+        run: |
+          git fetch --all 
+          mkdocs gh-deploy -m "Update Docs" --remote-branch gh-pages
