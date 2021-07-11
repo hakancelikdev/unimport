@@ -1,14 +1,24 @@
+from __future__ import annotations
+
+import ast
 import operator
-from typing import List, NamedTuple, Union
+from dataclasses import dataclass, field
+from typing import ClassVar, Iterator, Literal
 
-__all__ = ["Import", "ImportFrom", "Name"]
+from unimport import constants as C
+
+__all__ = ["Import", "ImportFrom", "Name", "Scope"]
 
 
-class Import(NamedTuple):
+@dataclass
+class Import:
+    imports: ClassVar[list[Import | ImportFrom]] = []
+
     lineno: int
     column: int
     name: str
     package: str
+    node: ast.AST = field(init=False, repr=False, compare=False)
 
     def __len__(self) -> int:
         return operator.length_hint(self.name.split("."))
@@ -16,40 +26,270 @@ class Import(NamedTuple):
     def is_match_sub_packages(self, name_name) -> bool:
         return self.name.split(".")[0] == name_name
 
+    @property
+    def scope(self):
+        return Scope.get_scope_by_current_node(self)
 
-class ImportFrom(NamedTuple):
-    lineno: int
-    column: int
-    name: str
-    package: str
+    def is_used(self) -> bool:
+        for name in self.scope.names:
+            if name is None:
+                continue
+
+            if name.match_import:
+                if name.match_import == self:
+                    return True
+            elif name.match(self):
+                return True
+
+        return False
+
+    def match_nearest_duplicate_import(self, name: Name) -> bool:
+        nearest_import = None
+
+        scope = name.scope
+        while scope:
+            imports = [
+                _import
+                for _import in scope.imports
+                if _import.name == name.name and name.lineno > _import.lineno
+            ]
+            scope = scope.parent
+
+            if imports:
+                nearest_import = max(
+                    filter(
+                        lambda _import: _import.lineno
+                        == max(
+                            imports, key=lambda _import: _import.lineno
+                        ).lineno,
+                        imports,
+                    ),
+                    key=lambda _import: _import.column,
+                )
+
+            if nearest_import == self:
+                return True
+
+        return False
+
+    @property
+    def is_duplicate(self) -> bool:
+        return [_import.name for _import in self.imports].count(self.name) > 1
+
+    @classmethod
+    def get_unused_imports(
+        cls, include_star_import: bool
+    ) -> Iterator[C.ImportT]:
+        for imp in reversed(Import.imports):
+            if (
+                include_star_import
+                and isinstance(imp, ImportFrom)
+                and imp.star
+            ):
+                yield imp
+            elif not imp.is_used():
+                yield imp
+
+    @classmethod
+    def register(
+        cls, lineno: int, column: int, name: str, package: str, node: ast.AST
+    ) -> None:
+        _import = cls(lineno, column, name, package)
+        _import.node = node
+        cls.imports.append(_import)
+
+        Scope.register(_import)
+
+    @classmethod
+    def clear(cls):
+        cls.imports.clear()
+
+
+@dataclass
+class ImportFrom(Import):
     star: bool
-    suggestions: List[str]
-
-    def __len__(self) -> int:
-        return operator.length_hint(self.name.split("."))
+    suggestions: list[str]
 
     def is_match_sub_packages(self, name_name):
         return False
 
+    @classmethod
+    def register(  # type: ignore
+        cls,
+        lineno: int,
+        column: int,
+        name: str,
+        package: str,
+        node: ast.AST,
+        star: bool,
+        suggestions: list[str],
+    ) -> None:
+        _import = cls(lineno, column, name, package, star, suggestions)
+        _import.node = node
+        cls.imports.append(_import)
 
-class Name(NamedTuple):
+        Scope.register(_import)
+
+
+@dataclass
+class Name:
+    names: ClassVar[list[Name]] = []
+
     lineno: int
     name: str
+    node: ast.AST = field(init=False, repr=False, compare=False)
     is_all: bool = False
+    match_import: Import | Literal[False] = field(
+        init=False, repr=False, compare=False, default=False
+    )
 
     @property
     def is_attribute(self):
         return "." in self.name
 
-    def match(self, imp: Union[Import, ImportFrom]) -> bool:
+    def match(self, imp: Import | ImportFrom) -> bool:
         if self.is_all:
-            return self.name == imp.name
+            is_match = self.name == imp.name
         elif self.is_attribute:
-            return imp.lineno < self.lineno and (
+            is_match = imp.lineno < self.lineno and (
                 ".".join(self.name.split(".")[: len(imp)]) == imp.name
                 or imp.is_match_sub_packages(self.name)
             )
         else:
-            return (imp.lineno < self.lineno) and (
+            is_match = (imp.lineno < self.lineno) and (
                 self.name == imp.name or imp.is_match_sub_packages(self.name)
             )
+
+        if is_match:
+            if imp.is_duplicate:
+                if imp.match_nearest_duplicate_import(self):
+                    is_match = True
+                else:
+                    is_match = False
+
+        if is_match:
+            self.match_import = imp
+
+        return is_match
+
+    @property
+    def scope(self):
+        return Scope.get_scope_by_current_node(self)
+
+    @classmethod
+    def register(
+        cls, lineno: int, name: str, node: ast.AST, is_all: bool = False
+    ) -> None:
+        _name = cls(lineno, name, is_all)
+        _name.node = node
+        cls.names.append(_name)
+
+        Scope.register(_name, is_global=is_all)
+
+    @classmethod
+    def clear(cls) -> None:
+        cls.names.clear()
+
+
+@dataclass
+class Scope:
+    scopes: ClassVar[list[Scope]] = []
+    current_scope: ClassVar[list[Scope]] = []
+
+    node: ast.AST
+    parent: Scope = None
+    child_scopes: list[Scope] = field(
+        init=False, repr=False, compare=False, default_factory=list
+    )
+    current_nodes: list[Import | ImportFrom | Name] = field(
+        init=False, repr=False, compare=False, default_factory=list
+    )
+
+    @classmethod
+    def get_curent_scope(cls) -> Scope:
+        return cls.current_scope[-1]
+
+    @classmethod
+    def get_global_scope(cls) -> Scope:
+        global_scope = cls.scopes[0]
+        assert global_scope.parent is None
+        return global_scope
+
+    @classmethod
+    def add_global_scope(cls, tree: ast.AST) -> None:
+        parent = None
+        scope = Scope(tree, parent)
+        cls.current_scope.append(scope)
+        cls.scopes.append(scope)  # global scope added to cls.scopes
+
+    @classmethod
+    def add_current_scope(cls, node: ast.AST) -> None:
+        parent = cls.get_curent_scope()
+        scope = Scope(node, parent)
+        cls.current_scope.append(scope)
+
+    @classmethod
+    def remove_current_scope(cls):
+        cls.current_scope.pop()
+
+    @classmethod
+    def register(
+        cls, current_node: Import | ImportFrom | Name, *, is_global=False
+    ) -> None:
+        if not is_global:
+            scope = cls.get_curent_scope()
+        else:
+            scope = cls.get_global_scope()
+
+        previous_scope = cls.get_previous_scope(scope)
+        if previous_scope:
+            previous_scope.current_nodes.append(current_node)
+        else:
+            scope.current_nodes.append(current_node)
+            cls.scopes.append(scope)
+
+    @classmethod
+    def get_scope_by_current_node(
+        cls, current_node: Import | ImportFrom | Name
+    ) -> Scope:
+        for scope in cls.scopes:
+            if current_node in scope.current_nodes:
+                return scope
+        return None
+
+    @property
+    def names(self) -> Iterator[Name]:
+        yield from filter(  # type: ignore
+            lambda node: isinstance(node, Name), self.current_nodes
+        )
+
+        for child_scope in self.child_scopes:
+            yield from child_scope.names
+
+    @property
+    def imports(self) -> Iterator[Import]:
+        yield from filter(  # type: ignore
+            lambda node: isinstance(node, Import), self.current_nodes
+        )
+
+    @classmethod
+    def get_previous_scope(cls, scope: Scope) -> Scope | Literal[False]:
+        for _scope in cls.scopes:
+            if _scope == scope:
+                return _scope
+        return False
+
+    @classmethod
+    def set_child_scopes(cls) -> None:
+        for _scope in cls.scopes:
+            parent = _scope.parent
+            child_scope = _scope
+            while parent:
+                if child_scope not in parent.child_scopes:
+                    parent.child_scopes.append(child_scope)
+                child_scope = parent
+                parent = parent.parent
+
+    @classmethod
+    def clear(cls):
+        cls.scopes.clear()

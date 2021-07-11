@@ -1,9 +1,6 @@
-import unittest
-
 from tests.refactor.utils import RefactorTestCase
 
 
-@unittest.skip("Temporarily removed.")
 class DuplicateImportTestCase(RefactorTestCase):
     def test_full_unused(self):
         self.assertActionAfterRefactorEqualToEmpty(

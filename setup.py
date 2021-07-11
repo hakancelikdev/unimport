@@ -43,6 +43,7 @@ setup(
         "pathspec==0.8.1",
         "toml==0.10.2",
         "importlib_metadata==4.5.0",
+        "dataclasses==0.8",
     ],
     extras_require={
         "docs": [
@@ -60,6 +61,7 @@ setup(
             "pytest-cov==2.12.1",
             "semantic-version==2.8.5",
             "toml==0.10.2",
+            "dataclasses==0.8",
         ],
     },
     zip_safe=False,

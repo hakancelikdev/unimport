@@ -1,16 +1,19 @@
 """This module performs static analysis using AST on the python code that's
 given as a string and reports its findings."""
+
+from __future__ import annotations
+
 import ast
 import functools
 import re
 from pathlib import Path
-from typing import FrozenSet, Iterator, List, Set, Union, cast
+from typing import cast
 
 from unimport import color
 from unimport import constants as C
 from unimport import utils
 from unimport.relate import first_occurrence, get_parents, relate
-from unimport.statement import Import, ImportFrom, Name
+from unimport.statement import Import, ImportFrom, Name, Scope
 
 __all__ = ["Analyzer"]
 
@@ -29,8 +32,10 @@ def _generic_visit(func: C.FunctionT) -> C.FunctionT:
 
 
 class _DefinedNameAnalyzer(ast.NodeVisitor):
+    __slots__ = ["defined_names"]
+
     def __init__(self):
-        self.defined_names: Set[str] = set()
+        self.defined_names: set[str] = set()
 
     @_generic_visit
     def visit_FunctionDef(self, node: C.ASTFunctionT) -> None:
@@ -49,6 +54,8 @@ class _DefinedNameAnalyzer(ast.NodeVisitor):
 
 
 class _ImportAnalyzer(ast.NodeVisitor):
+    __slots__ = ["source", "include_star_import"]
+
     ignore_modules_imports = ("__future__",)
     skip_import_comments_regex = "#.*(unimport: {0,1}skip|noqa)"
 
@@ -56,42 +63,58 @@ class _ImportAnalyzer(ast.NodeVisitor):
         self,
         *,
         source: str,
-        names: List[Name] = [],
         include_star_import: bool = False,
     ):
         self.source = source
-        self.names = names
         self.include_star_import = include_star_import
 
-        self.imports: List[C.ImportT] = []
         self.any_import_error = False
-        self.defined_names: Set[str] = set()
+        self.defined_names: set[str] = set()
 
     def traverse(self, tree) -> None:
         defined_name_scanner = _DefinedNameAnalyzer()
         defined_name_scanner.visit(tree)
         self.defined_names = defined_name_scanner.defined_names
+
         self.visit(tree)
+
+    def visit_ClassDef(self, node) -> None:
+        Scope.add_current_scope(node)
+
+        self.generic_visit(node)
+
+        Scope.remove_current_scope()
+
+    def visit_FunctionDef(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef
+    ) -> None:
+        Scope.add_current_scope(node)
+
+        self.generic_visit(node)
+
+        Scope.remove_current_scope()
+
+    visit_AsyncFunctionDef = visit_FunctionDef
 
     @_generic_visit
     def visit_Import(self, node: ast.Import) -> None:
         if self.skip_import(node):
-            return
+            return None
+
         for column, alias in enumerate(node.names):
-            name = alias.asname or alias.name
-            self.imports.append(
-                Import(
-                    lineno=node.lineno,
-                    column=column + 1,
-                    name=name,
-                    package=alias.name,
-                )
+            Import.register(
+                lineno=node.lineno,
+                column=column + 1,
+                name=(alias.asname or alias.name),
+                package=alias.name,
+                node=node,
             )
 
     @_generic_visit
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
         if self.skip_import(node):
-            return
+            return None
+
         is_star = node.names[0].name == "*"
         for column, alias in enumerate(node.names):
             if not node.level:
@@ -103,17 +126,14 @@ class _ImportAnalyzer(ast.NodeVisitor):
                 is_star and not self.include_star_import
             ):
                 return
-            name = package if is_star else alias_name
-            suggestions = self.get_suggestions(package) if is_star else []
-            self.imports.append(
-                ImportFrom(
-                    lineno=node.lineno,
-                    column=column + 1,
-                    name=name,
-                    star=is_star,
-                    suggestions=suggestions,
-                    package=package,
-                )
+            ImportFrom.register(
+                lineno=node.lineno,
+                column=column + 1,
+                name=package if is_star else alias_name,
+                star=is_star,
+                suggestions=self.get_suggestions(package) if is_star else [],
+                package=package,
+                node=node,
             )
 
     def visit_Try(self, node: ast.Try) -> None:
@@ -135,7 +155,7 @@ class _ImportAnalyzer(ast.NodeVisitor):
         self.generic_visit(node)
         self.any_import_error = False
 
-    def skip_import(self, node: Union[ast.Import, ast.ImportFrom]) -> bool:
+    def skip_import(self, node: ast.Import | ast.ImportFrom) -> bool:
         if C.PY38_PLUS:
             source_segment = "\n".join(
                 self.source.splitlines()[node.lineno - 1 : node.end_lineno]
@@ -153,19 +173,27 @@ class _ImportAnalyzer(ast.NodeVisitor):
             or self.any_import_error
         )
 
-    def get_suggestions(self, package: str) -> List[str]:
-        names = {name.name.split(".")[0] for name in self.names}
+    def get_suggestions(self, package: str) -> list[str]:
+        names = {name.name.split(".")[0] for name in Name.names}
         from_names = _ImportableAnalyzer().get_names(package)
         return sorted(from_names & (names - self.defined_names))
 
 
 class _NameAnalyzer(ast.NodeVisitor):
-    def __init__(self):
-        self.names: List[Name] = []
+    def visit_ClassDef(self, node) -> None:
+        Scope.add_current_scope(node)
 
-    @_generic_visit
+        self.generic_visit(node)
+
+        Scope.remove_current_scope()
+
     def visit_FunctionDef(self, node: C.ASTFunctionT) -> None:
+        Scope.add_current_scope(node)
+
         self._type_comment(node)
+        self.generic_visit(node)
+
+        Scope.remove_current_scope()
 
     visit_AsyncFunctionDef = visit_FunctionDef
 
@@ -190,7 +218,7 @@ class _NameAnalyzer(ast.NodeVisitor):
     @_generic_visit
     def visit_Name(self, node: ast.Name) -> None:
         if not isinstance(node.parent, ast.Attribute):  # type: ignore
-            self.names.append(Name(lineno=node.lineno, name=node.id))
+            Name.register(lineno=node.lineno, name=node.id, node=node)
 
     @_generic_visit
     def visit_Attribute(self, node: ast.Attribute) -> None:
@@ -202,7 +230,7 @@ class _NameAnalyzer(ast.NodeVisitor):
                 elif isinstance(sub_node, ast.Name):
                     names.append(sub_node.id)
             names.reverse()
-            self.names.append(Name(lineno=node.lineno, name=".".join(names)))
+            Name.register(lineno=node.lineno, name=".".join(names), node=node)
 
     @_generic_visit
     def visit_Assign(self, node: ast.Assign) -> None:
@@ -217,7 +245,7 @@ class _NameAnalyzer(ast.NodeVisitor):
         # type_variable
         # type_var = List["object"] etc.
 
-        def visit_constant_str(node: Union[ast.Constant, ast.Str]) -> None:
+        def visit_constant_str(node: ast.Constant | ast.Str) -> None:
             """Separates the value by node type (str or constant) and gives it
             to the visit function."""
 
@@ -278,23 +306,6 @@ class _NameAnalyzer(ast.NodeVisitor):
         if type_comment is not None:
             self.join_visit(type_comment, node, mode=mode)
 
-    def traverse(self, tree) -> None:
-        self.visit(tree)
-        """
-        Receive items on the __all__ list
-        """
-        importable_visitor = _ImportableAnalyzer()
-        importable_visitor.traverse(tree)
-        for node in importable_visitor.importable_nodes:
-            if isinstance(node, ast.Constant):
-                self.names.append(
-                    Name(lineno=node.lineno, name=str(node.value), is_all=True)
-                )
-            elif isinstance(node, ast.Str):
-                self.names.append(
-                    Name(lineno=node.lineno, name=node.s, is_all=True)
-                )
-
     def join_visit(
         self, value: str, node: ast.AST, *, mode: str = "eval"
     ) -> None:
@@ -315,20 +326,25 @@ class _NameAnalyzer(ast.NodeVisitor):
 
 
 class _ImportableAnalyzer(ast.NodeVisitor):
-    def __init__(self) -> None:
-        self.importable_nodes: List[
-            Union[ast.Str, ast.Constant]
+    __slots__ = ["importable_nodes", "suggestions_nodes"]
+
+    def __init__(self, register_name: bool = True) -> None:
+        self.register_name = register_name
+
+        self.importable_nodes: list[
+            ast.Str | ast.Constant
         ] = []  # nodes on the __all__ list
-        self.suggestions_nodes: List[C.ASTImportableT] = []  # nodes on the CFN
+        self.suggestions_nodes: list[C.ASTImportableT] = []  # nodes on the CFN
 
-    def traverse(self, tree) -> None:
-        relate(tree)
-        self.visit(tree)
-
-    @_generic_visit
     def visit_CFN(self, node: C.CFNT) -> None:
+        Scope.add_current_scope(node)
+
         if not first_occurrence(node, C.DefTuple):
             self.suggestions_nodes.append(node)
+
+        self.generic_visit(node)
+
+        Scope.remove_current_scope()
 
     visit_ClassDef = visit_CFN
     visit_FunctionDef = visit_CFN
@@ -353,6 +369,17 @@ class _ImportableAnalyzer(ast.NodeVisitor):
             for item in node.value.elts:
                 if isinstance(item, (ast.Constant, ast.Str)):
                     self.importable_nodes.append(item)
+                if self.register_name and isinstance(item, ast.Constant):
+                    Name.register(
+                        lineno=item.lineno,
+                        name=str(item.value),
+                        node=item,
+                        is_all=True,
+                    )
+                elif self.register_name and isinstance(item, ast.Str):
+                    Name.register(
+                        lineno=item.lineno, name=item.s, node=item, is_all=True
+                    )
 
         for target in node.targets:  # we only get assigned names
             if isinstance(target, (ast.Name, ast.Attribute)):
@@ -370,16 +397,49 @@ class _ImportableAnalyzer(ast.NodeVisitor):
                 for arg in node.value.args:
                     if isinstance(arg, (ast.Constant, ast.Str)):
                         self.importable_nodes.append(arg)
+                    if self.register_name and isinstance(arg, ast.Constant):
+                        Name.register(
+                            lineno=arg.lineno,
+                            name=str(arg.value),
+                            node=arg,
+                            is_all=True,
+                        )
+                    elif self.register_name and isinstance(node, ast.Str):
+                        Name.register(
+                            lineno=arg.lineno,
+                            name=arg.s,
+                            node=arg,
+                            is_all=True,
+                        )
             elif node.value.func.attr == "extend":
                 for arg in node.value.args:
                     if isinstance(arg, ast.List):
                         for item in arg.elts:
                             if isinstance(item, (ast.Constant, ast.Str)):
                                 self.importable_nodes.append(item)
+                            if self.register_name and isinstance(
+                                item, ast.Constant
+                            ):
+                                Name.register(
+                                    lineno=item.lineno,
+                                    name=str(item.value),
+                                    node=item,
+                                    is_all=True,
+                                )
+                            elif self.register_name and isinstance(
+                                item, ast.Str
+                            ):
+                                Name.register(
+                                    lineno=item.lineno,
+                                    name=item.s,
+                                    node=item,
+                                    is_all=True,
+                                )
 
-    def get_names(self, package: str) -> FrozenSet[str]:
+    def get_names(self, package: str) -> frozenset[str]:
         if utils.is_std(package):
             return utils.get_dir(package)
+
         source = utils.get_source(package)
         if source:
             try:
@@ -387,12 +447,13 @@ class _ImportableAnalyzer(ast.NodeVisitor):
             except SyntaxError:
                 return frozenset()
             else:
-                visitor = self.__class__()
-                visitor.traverse(tree)
+                visitor = self.__class__(register_name=False)
+                relate(tree)
+                visitor.visit(tree)
                 return visitor.get_all() or visitor.get_suggestion()
         return frozenset()
 
-    def get_all(self) -> FrozenSet[str]:
+    def get_all(self) -> frozenset[str]:
         names = set()
         for node in self.importable_nodes:
             if isinstance(node, ast.Constant):
@@ -401,7 +462,7 @@ class _ImportableAnalyzer(ast.NodeVisitor):
                 names.add(node.s)
         return frozenset(names)
 
-    def get_suggestion(self) -> FrozenSet[str]:
+    def get_suggestion(self) -> frozenset[str]:
         names = set()
         for node in self.suggestions_nodes:  # type: ignore
             if isinstance(node, ast.Name):
@@ -414,6 +475,8 @@ class _ImportableAnalyzer(ast.NodeVisitor):
 
 
 class Analyzer(ast.NodeVisitor):
+    __slots__ = ["source", "path", "include_star_import"]
+
     skip_file_regex = "#.*(unimport: {0,1}skip_file)"
 
     def __init__(
@@ -427,83 +490,58 @@ class Analyzer(ast.NodeVisitor):
         self.path = path
         self.include_star_import = include_star_import
 
-        self.names: List[Name] = []
-        self.imports: List[C.ImportT] = []
-        self.import_names: List[str] = []
-
     def traverse(self) -> None:
-        if not self.skip_file():
-            try:
-                if C.PY38_PLUS:
-                    tree = ast.parse(self.source, type_comments=True)
-                else:
-                    tree = ast.parse(self.source)
-            except SyntaxError as e:
-                print(
-                    color.paint(str(e), color.RED)
-                    + " at "
-                    + color.paint(self.path.as_posix(), color.GREEN)
-                )
-                return None
+        if self.skip_file():
+            return None
+
+        try:
+            if C.PY38_PLUS:
+                tree = ast.parse(self.source, type_comments=True)
             else:
-                relate(tree)
-                name_scanner = _NameAnalyzer()
-                name_scanner.traverse(tree)
-                self.names.extend(name_scanner.names)
-                import_scanner = _ImportAnalyzer(
-                    source=self.source,
-                    names=self.names,
-                    include_star_import=self.include_star_import,
-                )
-                import_scanner.traverse(tree)
-                self.imports.extend(import_scanner.imports)
-                self.import_names.extend([imp.name for imp in self.imports])
+                tree = ast.parse(self.source)
+        except SyntaxError as e:
+            print(
+                color.paint(str(e), color.RED)
+                + " at "
+                + color.paint(self.path.as_posix(), color.GREEN)
+            )
+            return None
 
-    def get_unused_imports(self) -> Iterator[C.ImportT]:
-        for imp in self.imports:
-            # star import
-            if (
-                self.include_star_import
-                and isinstance(imp, ImportFrom)
-                and imp.star
-            ):
-                yield imp
-            # normal import
-            elif not self.is_import_used(imp):
-                yield imp
+        """
+        Set parent
+        """
+        relate(tree)
 
-    def is_duplicate_import_used(self, imp: C.ImportT) -> bool:
-        for name in self.names:
-            if name.match(imp) and imp == self.get_nearest_duplicate_imports(
-                imp.name, name.lineno
-            ):
-                return True
-        return False
+        Scope.add_global_scope(tree)
 
-    def is_import_used(self, imp: C.ImportT) -> bool:
-        return any(name.match(imp) for name in self.names)
+        """
+        Name analyzer
+        """
+        _NameAnalyzer().visit(tree)
+        """
+        Receive items on the __all__ list
+        """
+        _ImportableAnalyzer().visit(tree)
+        """
+        Import analyzer
+        """
+        _ImportAnalyzer(
+            source=self.source,
+            include_star_import=self.include_star_import,
+        ).traverse(tree)
 
-    @functools.lru_cache(maxsize=None)
-    def get_nearest_duplicate_imports(
-        self, import_name: str, name_lineno: int
-    ) -> C.ImportT:
-        return [
-            imp
-            for imp in self.imports
-            if import_name == imp.name
-            if self.is_duplicate(imp.name)
-            if imp.lineno < name_lineno
-        ][-1]
+        Scope.remove_current_scope()
 
-    def clear(self):
-        self.names.clear()
-        self.imports.clear()
-        self.import_names.clear()
-
-    def is_duplicate(self, name: str) -> bool:
-        return self.import_names.count(name) > 1
+        Scope.set_child_scopes()
 
     def skip_file(self) -> bool:
         return bool(
             re.search(self.skip_file_regex, self.source, re.IGNORECASE)
         )
+
+    @staticmethod
+    def clear():
+        Name.clear()
+        Import.clear()
+        ImportFrom.clear()
+        Scope.clear()

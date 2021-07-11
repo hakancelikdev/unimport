@@ -9,7 +9,7 @@ from unimport import emoji, utils
 from unimport.analyzer import Analyzer
 from unimport.config import CONFIG_FILES, Config, DefaultConfig
 from unimport.refactor import refactor_string
-from unimport.statement import ImportFrom
+from unimport.statement import Import, ImportFrom
 
 __all__ = ["main"]
 
@@ -135,10 +135,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 include_star_import=config.include_star_import,
             )
             analyzer.traverse()
-            unused_imports = list(analyzer.get_unused_imports())
+            unused_imports = list(
+                Import.get_unused_imports(config.include_star_import)
+            )
             unused_modules.update({imp.name for imp in unused_imports})
             used_packages.update(
-                utils.get_used_packages(analyzer.imports, unused_imports)
+                utils.get_used_packages(Import.imports, unused_imports)
             )
             if config.check:
                 for imp in unused_imports:
