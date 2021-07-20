@@ -51,7 +51,7 @@ class Import:
             imports = [
                 _import
                 for _import in scope.imports
-                if _import.name == name.name and name.lineno > _import.lineno
+                if name.match_2(_import) and name.lineno > _import.lineno
             ]
             scope = scope.parent
 
@@ -147,6 +147,21 @@ class Name:
     def is_attribute(self):
         return "." in self.name
 
+    def match_2(self, imp: Import | ImportFrom) -> bool:
+        if self.is_all:
+            is_match = self.name == imp.name
+        elif self.is_attribute:
+            is_match = imp.lineno < self.lineno and (
+                ".".join(self.name.split(".")[: len(imp)]) == imp.name
+                or imp.is_match_sub_packages(self.name)
+            )
+        else:
+            is_match = (imp.lineno < self.lineno) and (
+                self.name == imp.name or imp.is_match_sub_packages(self.name)
+            )
+
+        return is_match
+
     def match(self, imp: Import | ImportFrom) -> bool:
         if self.is_all:
             is_match = self.name == imp.name
@@ -160,12 +175,8 @@ class Name:
                 self.name == imp.name or imp.is_match_sub_packages(self.name)
             )
 
-        if is_match:
-            if imp.is_duplicate:
-                if imp.match_nearest_duplicate_import(self):
-                    is_match = True
-                else:
-                    is_match = False
+        if is_match and imp.is_duplicate:
+            is_match = imp.match_nearest_duplicate_import(self)
 
         if is_match:
             self.match_import = imp

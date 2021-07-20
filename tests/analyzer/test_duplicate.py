@@ -803,3 +803,19 @@ class DuplicateTestCase(UnusedTestCase):
                 ),
             ],
         )
+
+    def test_function_scope_same(self):
+        self.assertSourceAfterScanningEqualToExpected(
+            """\
+            def c():
+                import x
+
+                x.s
+
+
+            def d():
+                import x
+
+                x.s
+            """
+        )
