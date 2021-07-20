@@ -2,10 +2,17 @@ from __future__ import annotations
 
 import ast
 import operator
+import sys
 from dataclasses import dataclass, field
-from typing import ClassVar, Iterator, Literal
+from typing import ClassVar, Iterator
 
 from unimport import constants as C
+
+if sys.version_info >= (3, 8):
+    from typing import Literal  # unimport: skip
+else:
+    from typing_extensions import Literal
+
 
 __all__ = ["Import", "ImportFrom", "Name", "Scope"]
 
@@ -163,17 +170,7 @@ class Name:
         return is_match
 
     def match(self, imp: Import | ImportFrom) -> bool:
-        if self.is_all:
-            is_match = self.name == imp.name
-        elif self.is_attribute:
-            is_match = imp.lineno < self.lineno and (
-                ".".join(self.name.split(".")[: len(imp)]) == imp.name
-                or imp.is_match_sub_packages(self.name)
-            )
-        else:
-            is_match = (imp.lineno < self.lineno) and (
-                self.name == imp.name or imp.is_match_sub_packages(self.name)
-            )
+        is_match = self.match_2(imp)
 
         if is_match and imp.is_duplicate:
             is_match = imp.match_nearest_duplicate_import(self)
