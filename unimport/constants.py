@@ -6,7 +6,7 @@ from typing import Any, Callable, TypeVar, Union
 
 import libcst as cst
 
-from unimport.statement import Import, ImportFrom
+from unimport.statement import Import, ImportFrom, Name
 
 DESCRIPTION = (
     "A linter, formatter for finding and removing unused import statements."
@@ -16,7 +16,9 @@ VERSION = "0.8.4"
 __all__ = [
     "ASTFunctionT",
     "ASTFunctionTuple",
+    "ASTImport",
     "ASTImportableT",
+    "ASTNameType",
     "BUILTINS",
     "BUILTIN_MODULE_NAMES",
     "CFNT",
@@ -34,6 +36,7 @@ __all__ = [
     "PY39_PLUS",
     "STDLIB_PATH",
     "SUBSCRIPT_TYPE_VARIABLE",
+    "StatementT",
     "VERSION",
 ]
 
@@ -50,6 +53,9 @@ ASTImportableT = Union[
 
 ASTFunctionT = TypeVar("ASTFunctionT", ast.FunctionDef, ast.AsyncFunctionDef)
 ImportT = Union[Import, ImportFrom]
+StatementT = Union[Import, ImportFrom, Name]
+ASTImport = Union[ast.Import, ast.ImportFrom]
+ASTNameType = Union[ast.Name, ast.Constant]
 CFNT = TypeVar(
     "CFNT",
     ast.ClassDef,

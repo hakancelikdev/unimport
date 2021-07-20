@@ -1,12 +1,8 @@
-from __future__ import annotations
-
 import ast
 import operator
 import sys
 from dataclasses import dataclass, field
-from typing import ClassVar, Iterator
-
-from unimport import constants as C
+from typing import ClassVar, Iterator, List, Union
 
 if sys.version_info >= (3, 8):
     from typing import Literal  # unimport: skip
@@ -19,7 +15,7 @@ __all__ = ["Import", "ImportFrom", "Name", "Scope"]
 
 @dataclass
 class Import:
-    imports: ClassVar[list[Import | ImportFrom]] = []
+    imports: ClassVar[List[Union["Import", "ImportFrom"]]] = []
 
     lineno: int
     column: int
@@ -50,7 +46,7 @@ class Import:
 
         return False
 
-    def match_nearest_duplicate_import(self, name: Name) -> bool:
+    def match_nearest_duplicate_import(self, name: "Name") -> bool:
         nearest_import = None
 
         scope = name.scope
@@ -86,7 +82,7 @@ class Import:
     @classmethod
     def get_unused_imports(
         cls, include_star_import: bool
-    ) -> Iterator[C.ImportT]:
+    ) -> Iterator[Union["Import", "ImportFrom"]]:
         for imp in reversed(Import.imports):
             if (
                 include_star_import
@@ -115,7 +111,7 @@ class Import:
 @dataclass
 class ImportFrom(Import):
     star: bool
-    suggestions: list[str]
+    suggestions: List[str]
 
     def is_match_sub_packages(self, name_name):
         return False
@@ -129,7 +125,7 @@ class ImportFrom(Import):
         package: str,
         node: ast.AST,
         star: bool,
-        suggestions: list[str],
+        suggestions: List[str],
     ) -> None:
         _import = cls(lineno, column, name, package, star, suggestions)
         _import.node = node
@@ -140,13 +136,13 @@ class ImportFrom(Import):
 
 @dataclass
 class Name:
-    names: ClassVar[list[Name]] = []
+    names: ClassVar[List["Name"]] = []
 
     lineno: int
     name: str
     node: ast.AST = field(init=False, repr=False, compare=False)
     is_all: bool = False
-    match_import: Import | Literal[False] = field(
+    match_import: Union[Import, Literal[False]] = field(
         init=False, repr=False, compare=False, default=False
     )
 
@@ -154,7 +150,7 @@ class Name:
     def is_attribute(self):
         return "." in self.name
 
-    def match_2(self, imp: Import | ImportFrom) -> bool:
+    def match_2(self, imp: Union[Import, ImportFrom]) -> bool:
         if self.is_all:
             is_match = self.name == imp.name
         elif self.is_attribute:
@@ -169,7 +165,7 @@ class Name:
 
         return is_match
 
-    def match(self, imp: Import | ImportFrom) -> bool:
+    def match(self, imp: Union[Import, ImportFrom]) -> bool:
         is_match = self.match_2(imp)
 
         if is_match and imp.is_duplicate:
@@ -201,24 +197,24 @@ class Name:
 
 @dataclass
 class Scope:
-    scopes: ClassVar[list[Scope]] = []
-    current_scope: ClassVar[list[Scope]] = []
+    scopes: ClassVar[List["Scope"]] = []
+    current_scope: ClassVar[List["Scope"]] = []
 
     node: ast.AST
-    parent: Scope = None
-    child_scopes: list[Scope] = field(
+    parent: "Scope" = None
+    child_scopes: List["Scope"] = field(
         init=False, repr=False, compare=False, default_factory=list
     )
-    current_nodes: list[Import | ImportFrom | Name] = field(
+    current_nodes: List[Union[Import, ImportFrom, Name]] = field(
         init=False, repr=False, compare=False, default_factory=list
     )
 
     @classmethod
-    def get_curent_scope(cls) -> Scope:
+    def get_curent_scope(cls) -> "Scope":
         return cls.current_scope[-1]
 
     @classmethod
-    def get_global_scope(cls) -> Scope:
+    def get_global_scope(cls) -> "Scope":
         global_scope = cls.scopes[0]
         assert global_scope.parent is None
         return global_scope
@@ -242,7 +238,7 @@ class Scope:
 
     @classmethod
     def register(
-        cls, current_node: Import | ImportFrom | Name, *, is_global=False
+        cls, current_node: Union[Import, ImportFrom, Name], *, is_global=False
     ) -> None:
         if not is_global:
             scope = cls.get_curent_scope()
@@ -258,8 +254,8 @@ class Scope:
 
     @classmethod
     def get_scope_by_current_node(
-        cls, current_node: Import | ImportFrom | Name
-    ) -> Scope:
+        cls, current_node: Union[Import, ImportFrom, Name]
+    ) -> "Scope":
         for scope in cls.scopes:
             if current_node in scope.current_nodes:
                 return scope
@@ -281,7 +277,9 @@ class Scope:
         )
 
     @classmethod
-    def get_previous_scope(cls, scope: Scope) -> Scope | Literal[False]:
+    def get_previous_scope(
+        cls, scope: "Scope"
+    ) -> Union["Scope", Literal[False]]:
         for _scope in cls.scopes:
             if _scope == scope:
                 return _scope

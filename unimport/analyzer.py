@@ -1,13 +1,11 @@
 """This module performs static analysis using AST on the python code that's
 given as a string and reports its findings."""
 
-from __future__ import annotations
-
 import ast
 import functools
 import re
 from pathlib import Path
-from typing import cast
+from typing import FrozenSet, List, Set, cast
 
 from unimport import color
 from unimport import constants as C
@@ -69,7 +67,7 @@ class _ImportAnalyzer(ast.NodeVisitor):
         self.include_star_import = include_star_import
 
         self.any_import_error = False
-        self.defined_names: set[str] = set()
+        self.defined_names: Set[str] = set()
 
     def traverse(self, tree) -> None:
         defined_name_scanner = _DefinedNameAnalyzer()
@@ -85,9 +83,7 @@ class _ImportAnalyzer(ast.NodeVisitor):
 
         Scope.remove_current_scope()
 
-    def visit_FunctionDef(
-        self, node: ast.FunctionDef | ast.AsyncFunctionDef
-    ) -> None:
+    def visit_FunctionDef(self, node: C.ASTFunctionT) -> None:
         Scope.add_current_scope(node)
 
         self.generic_visit(node)
@@ -155,7 +151,7 @@ class _ImportAnalyzer(ast.NodeVisitor):
         self.generic_visit(node)
         self.any_import_error = False
 
-    def skip_import(self, node: ast.Import | ast.ImportFrom) -> bool:
+    def skip_import(self, node: C.ASTImport) -> bool:
         if C.PY38_PLUS:
             source_segment = "\n".join(
                 self.source.splitlines()[node.lineno - 1 : node.end_lineno]
@@ -173,7 +169,7 @@ class _ImportAnalyzer(ast.NodeVisitor):
             or self.any_import_error
         )
 
-    def get_suggestions(self, package: str) -> list[str]:
+    def get_suggestions(self, package: str) -> List[str]:
         names = {name.name.split(".")[0] for name in Name.names}
         from_names = _ImportableAnalyzer().get_names(package)
         return sorted(from_names & (names - self.defined_names))
@@ -245,7 +241,7 @@ class _NameAnalyzer(ast.NodeVisitor):
         # type_variable
         # type_var = List["object"] etc.
 
-        def visit_constant_str(node: ast.Constant | ast.Str) -> None:
+        def visit_constant_str(node: C.ASTNameType) -> None:
             """Separates the value by node type (str or constant) and gives it
             to the visit function."""
 
@@ -331,10 +327,10 @@ class _ImportableAnalyzer(ast.NodeVisitor):
     def __init__(self, register_name: bool = True) -> None:
         self.register_name = register_name
 
-        self.importable_nodes: list[
-            ast.Str | ast.Constant
+        self.importable_nodes: List[
+            C.ASTNameType
         ] = []  # nodes on the __all__ list
-        self.suggestions_nodes: list[C.ASTImportableT] = []  # nodes on the CFN
+        self.suggestions_nodes: List[C.ASTImportableT] = []  # nodes on the CFN
 
     def visit_CFN(self, node: C.CFNT) -> None:
         Scope.add_current_scope(node)
@@ -436,7 +432,7 @@ class _ImportableAnalyzer(ast.NodeVisitor):
                                     is_all=True,
                                 )
 
-    def get_names(self, package: str) -> frozenset[str]:
+    def get_names(self, package: str) -> FrozenSet[str]:
         if utils.is_std(package):
             return utils.get_dir(package)
 
@@ -453,7 +449,7 @@ class _ImportableAnalyzer(ast.NodeVisitor):
                 return visitor.get_all() or visitor.get_suggestion()
         return frozenset()
 
-    def get_all(self) -> frozenset[str]:
+    def get_all(self) -> FrozenSet[str]:
         names = set()
         for node in self.importable_nodes:
             if isinstance(node, ast.Constant):
@@ -462,7 +458,7 @@ class _ImportableAnalyzer(ast.NodeVisitor):
                 names.add(node.s)
         return frozenset(names)
 
-    def get_suggestion(self) -> frozenset[str]:
+    def get_suggestion(self) -> FrozenSet[str]:
         names = set()
         for node in self.suggestions_nodes:  # type: ignore
             if isinstance(node, ast.Name):
