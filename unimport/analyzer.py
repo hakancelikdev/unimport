@@ -170,8 +170,8 @@ class _ImportAnalyzer(ast.NodeVisitor):
         )
 
     def get_suggestions(self, package: str) -> List[str]:
-        names = {name.name.split(".")[0] for name in Name.names}
-        from_names = _ImportableAnalyzer().get_names(package)
+        names = set(map(lambda name: name.name.split(".")[0], Name.names))
+        from_names = _ImportableAnalyzer.get_names(package)
         return sorted(from_names & (names - self.defined_names))
 
 
@@ -324,9 +324,7 @@ class _NameAnalyzer(ast.NodeVisitor):
 class _ImportableAnalyzer(ast.NodeVisitor):
     __slots__ = ["importable_nodes", "suggestions_nodes"]
 
-    def __init__(self, register_name: bool = True) -> None:
-        self.register_name = register_name
-
+    def __init__(self) -> None:
         self.importable_nodes: List[
             C.ASTNameType
         ] = []  # nodes on the __all__ list
@@ -365,17 +363,6 @@ class _ImportableAnalyzer(ast.NodeVisitor):
             for item in node.value.elts:
                 if isinstance(item, (ast.Constant, ast.Str)):
                     self.importable_nodes.append(item)
-                if self.register_name and isinstance(item, ast.Constant):
-                    Name.register(
-                        lineno=item.lineno,
-                        name=str(item.value),
-                        node=item,
-                        is_all=True,
-                    )
-                elif self.register_name and isinstance(item, ast.Str):
-                    Name.register(
-                        lineno=item.lineno, name=item.s, node=item, is_all=True
-                    )
 
         for target in node.targets:  # we only get assigned names
             if isinstance(target, (ast.Name, ast.Attribute)):
@@ -393,46 +380,16 @@ class _ImportableAnalyzer(ast.NodeVisitor):
                 for arg in node.value.args:
                     if isinstance(arg, (ast.Constant, ast.Str)):
                         self.importable_nodes.append(arg)
-                    if self.register_name and isinstance(arg, ast.Constant):
-                        Name.register(
-                            lineno=arg.lineno,
-                            name=str(arg.value),
-                            node=arg,
-                            is_all=True,
-                        )
-                    elif self.register_name and isinstance(node, ast.Str):
-                        Name.register(
-                            lineno=arg.lineno,
-                            name=arg.s,
-                            node=arg,
-                            is_all=True,
-                        )
+
             elif node.value.func.attr == "extend":
                 for arg in node.value.args:
                     if isinstance(arg, ast.List):
                         for item in arg.elts:
                             if isinstance(item, (ast.Constant, ast.Str)):
                                 self.importable_nodes.append(item)
-                            if self.register_name and isinstance(
-                                item, ast.Constant
-                            ):
-                                Name.register(
-                                    lineno=item.lineno,
-                                    name=str(item.value),
-                                    node=item,
-                                    is_all=True,
-                                )
-                            elif self.register_name and isinstance(
-                                item, ast.Str
-                            ):
-                                Name.register(
-                                    lineno=item.lineno,
-                                    name=item.s,
-                                    node=item,
-                                    is_all=True,
-                                )
 
-    def get_names(self, package: str) -> FrozenSet[str]:
+    @classmethod
+    def get_names(cls, package: str) -> FrozenSet[str]:
         if utils.is_std(package):
             return utils.get_dir(package)
 
@@ -443,7 +400,7 @@ class _ImportableAnalyzer(ast.NodeVisitor):
             except SyntaxError:
                 return frozenset()
             else:
-                visitor = self.__class__(register_name=False)
+                visitor = cls()
                 relate(tree)
                 visitor.visit(tree)
                 return visitor.get_all() or visitor.get_suggestion()
@@ -468,6 +425,10 @@ class _ImportableAnalyzer(ast.NodeVisitor):
             elif isinstance(node, C.DefTuple):
                 names.add(node.name)
         return frozenset(names)
+
+    def clear(self):
+        self.importable_nodes.clear()
+        self.suggestions_nodes.clear()
 
 
 class Analyzer(ast.NodeVisitor):
@@ -517,7 +478,21 @@ class Analyzer(ast.NodeVisitor):
         """
         Receive items on the __all__ list
         """
-        _ImportableAnalyzer().visit(tree)
+        importable_visitor = _ImportableAnalyzer()
+        importable_visitor.visit(tree)
+        for node in importable_visitor.importable_nodes:
+            if isinstance(node, ast.Constant):
+                Name.register(
+                    lineno=node.lineno,
+                    name=str(node.value),
+                    node=node,
+                    is_all=True,
+                )
+            elif isinstance(node, ast.Str):
+                Name.register(
+                    lineno=node.lineno, name=node.s, node=node, is_all=True
+                )
+        importable_visitor.clear()
         """
         Import analyzer
         """
