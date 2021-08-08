@@ -2,7 +2,7 @@ from tests.refactor.utils import RefactorTestCase
 
 
 class StyleTestCase(RefactorTestCase):
-    def test_globa_import(self):
+    def test_global_import(self):
         self.assertActionAfterRefactorEqualToExpected(
             """\
             import x

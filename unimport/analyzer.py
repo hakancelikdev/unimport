@@ -33,7 +33,7 @@ class _DefinedNameAnalyzer(ast.NodeVisitor):
     __slots__ = ["defined_names"]
 
     def __init__(self):
-        self.defined_names: set[str] = set()
+        self.defined_names: Set[str] = set()
 
     @_generic_visit
     def visit_FunctionDef(self, node: C.ASTFunctionT) -> None:
