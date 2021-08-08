@@ -2,11 +2,15 @@ import textwrap
 import unittest
 
 from unimport.analyzer import Analyzer
+from unimport.statement import Import, Name
 
 
 class AnalyzerTestCase(unittest.TestCase):
     maxDiff = None
     include_star_import = False
+
+    def setUp(self) -> None:
+        Analyzer.clear()
 
     def assertUnimportEqual(
         self,
@@ -19,14 +23,16 @@ class AnalyzerTestCase(unittest.TestCase):
             include_star_import=self.include_star_import,
         )
         analyzer.traverse()
-        self.assertEqual(expected_names, analyzer.names)
-        self.assertEqual(expected_imports, analyzer.imports)
-        analyzer.clear()
+        self.assertListEqual(expected_names, Name.names)
+        self.assertListEqual(expected_imports, Import.imports)
 
 
 class UnusedTestCase(unittest.TestCase):
     maxDiff = None
     include_star_import = False
+
+    def setUp(self) -> None:
+        Analyzer.clear()
 
     def assertSourceAfterScanningEqualToExpected(
         self, source, expected_unused_imports=[]
@@ -36,8 +42,7 @@ class UnusedTestCase(unittest.TestCase):
             include_star_import=self.include_star_import,
         )
         analyzer.traverse()
-        super().assertEqual(
-            expected_unused_imports,
-            list(analyzer.get_unused_imports()),
+        self.assertListEqual(
+            list(reversed(expected_unused_imports)),
+            list(Import.get_unused_imports(self.include_star_import)),
         )
-        analyzer.clear()

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased - ././2021]
+
+- [Scope analyzer; #176, #175 #189 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/189)
+  - Scope analyzer
+  - Duplicate import feature has been enabled again.
+
 ## 0.8.4 - 06/26/2021
 
 - [Fix emoji issues by @hakancelik96](https://github.com/hakancelik96/unimport/pull/185)

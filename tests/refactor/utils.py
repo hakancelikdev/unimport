@@ -3,11 +3,15 @@ import unittest
 
 from unimport.analyzer import Analyzer
 from unimport.refactor import refactor_string
+from unimport.statement import Import
 
 
 class RefactorTestCase(unittest.TestCase):
     maxDiff = None
     include_star_import = False
+
+    def setUp(self) -> None:
+        Analyzer.clear()
 
     def refactor(self, action: str) -> str:
         analyzer = Analyzer(
@@ -17,7 +21,9 @@ class RefactorTestCase(unittest.TestCase):
         analyzer.traverse()
         refactor_result = refactor_string(
             source=analyzer.source,
-            unused_imports=list(analyzer.get_unused_imports()),
+            unused_imports=list(
+                Import.get_unused_imports(self.include_star_import)
+            ),
         )
         return refactor_result
 

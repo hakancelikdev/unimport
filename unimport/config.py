@@ -89,9 +89,7 @@ class Config:
                 elif key_type == str:
                     cfg_context[key] = value  # type: ignore
                 elif key_type == List[Path]:
-                    cfg_context[key] = [  # type: ignore
-                        Path(p) for p in get_config_as_list(key)
-                    ]
+                    cfg_context[key] = [Path(p) for p in get_config_as_list(key)]  # type: ignore
             return self.default_config._replace(**cfg_context)  # type: ignore
         else:
             return self.default_config
