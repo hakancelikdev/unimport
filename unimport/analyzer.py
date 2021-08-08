@@ -503,8 +503,6 @@ class Analyzer(ast.NodeVisitor):
 
         Scope.remove_current_scope()
 
-        Scope.set_child_scopes()
-
     def skip_file(self) -> bool:
         return bool(
             re.search(self.skip_file_regex, self.source, re.IGNORECASE)

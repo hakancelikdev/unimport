@@ -72,7 +72,7 @@ class ScopeAnalyzerTest(unittest.TestCase):
 
         self.assertEqual(len(Scope.scopes), 1)
         self.assertIsNone(Scope.scopes[0].parent)
-        self.assertEqual(Scope.scopes[0].child_scopes, [])
+        self.assertFalse(Scope.scopes[0].child_scopes)
 
     def test_import_class_scope(self):
         source = textwrap.dedent(
@@ -89,7 +89,7 @@ class ScopeAnalyzerTest(unittest.TestCase):
         self.assertEqual(Scope.scopes[1].parent, Scope.get_global_scope())
         self.assertIsNone(Scope.scopes[1].parent.parent)
         self.assertEqual(Scope.scopes[1].node.name, "Klass")
-        self.assertEqual(Scope.scopes[0].child_scopes[0], Scope.scopes[1])
+        self.assertEqual(Scope.scopes[0].child_scopes.pop(), Scope.scopes[1])
 
     def test_import_function_scope(self):
         source = textwrap.dedent(
@@ -105,7 +105,7 @@ class ScopeAnalyzerTest(unittest.TestCase):
         self.assertEqual(len(Scope.scopes), 2)
         self.assertIsNone(Scope.scopes[1].parent.parent)
         self.assertEqual(Scope.scopes[1].node.name, "func")
-        self.assertEqual(Scope.scopes[0].child_scopes[0], Scope.scopes[1])
+        self.assertEqual(Scope.scopes[0].child_scopes.pop(), Scope.scopes[1])
 
     def test_import_nonlocal_scope(self):
         source = textwrap.dedent(
@@ -119,16 +119,13 @@ class ScopeAnalyzerTest(unittest.TestCase):
 
         Analyzer(source=source).traverse()
 
-        self.assertEqual(len(Scope.scopes), 2)
+        self.assertEqual(len(Scope.scopes), 3)
         self.assertIsNone(Scope.scopes[1].parent.parent.parent)
         self.assertEqual(Scope.scopes[1].parent.node.name, "func")
         self.assertEqual(Scope.scopes[1].node.name, "inner")
-        self.assertEqual(Scope.scopes[1].current_nodes[0].name, "x")
+        self.assertEqual(Scope.scopes[1].current_nodes.pop().name, "x")
         self.assertEqual(
-            Scope.scopes[0].child_scopes[0], Scope.scopes[1].parent
-        )
-        self.assertEqual(
-            Scope.scopes[0].child_scopes[0].child_scopes[0], Scope.scopes[1]
+            Scope.scopes[0].child_scopes.pop(), Scope.scopes[1].parent
         )
 
     def test_name_global_scope(self):
@@ -189,7 +186,7 @@ class ScopeAnalyzerTest(unittest.TestCase):
 
         Analyzer(source=source).traverse()
 
-        self.assertEqual(len(Scope.scopes), 2)
+        self.assertEqual(len(Scope.scopes), 3)
         self.assertIsNone(Scope.scopes[1].parent.parent.parent)
         self.assertEqual(Scope.scopes[1].parent.node.name, "func")
         self.assertEqual(Scope.scopes[1].current_nodes[0].name, "x")

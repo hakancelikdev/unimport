@@ -2,7 +2,7 @@ import ast
 import operator
 import sys
 from dataclasses import dataclass, field
-from typing import ClassVar, Iterator, List, Union
+from typing import ClassVar, Iterator, List, Set, Union
 
 if sys.version_info >= (3, 8):
     from typing import Literal  # unimport: skip
@@ -201,13 +201,17 @@ class Scope:
     current_scope: ClassVar[List["Scope"]] = []
 
     node: ast.AST
-    parent: "Scope" = None
-    child_scopes: List["Scope"] = field(
-        init=False, repr=False, compare=False, default_factory=list
-    )
     current_nodes: List[Union[Import, ImportFrom, Name]] = field(
         init=False, repr=False, compare=False, default_factory=list
     )
+
+    parent: "Scope" = field(repr=False, default=None)
+    child_scopes: Set["Scope"] = field(
+        init=False, repr=False, compare=False, default_factory=set
+    )
+
+    def __hash__(self) -> int:
+        return hash(self.node)
 
     @classmethod
     def get_curent_scope(cls) -> "Scope":
@@ -240,17 +244,27 @@ class Scope:
     def register(
         cls, current_node: Union[Import, ImportFrom, Name], *, is_global=False
     ) -> None:
-        if not is_global:
-            scope = cls.get_curent_scope()
-        else:
-            scope = cls.get_global_scope()
+        scope = cls.get_previous_scope(
+            cls.get_global_scope() if is_global else cls.get_curent_scope()
+        )
 
-        previous_scope = cls.get_previous_scope(scope)
-        if previous_scope:
-            previous_scope.current_nodes.append(current_node)
-        else:
-            scope.current_nodes.append(current_node)
-            cls.scopes.append(scope)
+        # current nodes add to scope
+        scope.current_nodes.append(current_node)
+
+        # child scopes add to scope
+        if scope.parent is None:
+            return
+
+        parent = cls.get_previous_scope(scope.parent)
+        child_scope = scope
+
+        while parent:
+            parent.child_scopes.add(child_scope)
+
+            child_scope = parent
+            if parent.parent is None:
+                break
+            parent = cls.get_previous_scope(parent.parent)
 
     @classmethod
     def get_scope_by_current_node(
@@ -277,24 +291,13 @@ class Scope:
         )
 
     @classmethod
-    def get_previous_scope(
-        cls, scope: "Scope"
-    ) -> Union["Scope", Literal[False]]:
+    def get_previous_scope(cls, scope: "Scope") -> "Scope":
         for _scope in cls.scopes:
             if _scope == scope:
                 return _scope
-        return False
 
-    @classmethod
-    def set_child_scopes(cls) -> None:
-        for _scope in cls.scopes:
-            parent = _scope.parent
-            child_scope = _scope
-            while parent:
-                if child_scope not in parent.child_scopes:
-                    parent.child_scopes.append(child_scope)
-                child_scope = parent
-                parent = parent.parent
+        cls.scopes.append(scope)
+        return scope
 
     @classmethod
     def clear(cls):

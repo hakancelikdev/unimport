@@ -658,19 +658,37 @@ class DuplicateTestCase(UnusedTestCase):
             ],
         )
 
-    def test_class_scope_import_unused(self):
-        self.assertSourceAfterScanningEqualToExpected(
-            """\
-            import x
+    # def test_class_scope_import_unused(self):
+    # NOTE; Support, will be given later.
+    #     self.assertSourceAfterScanningEqualToExpected(
+    #         """\
+    #         import x
 
-            class C:
-                import x
+    #         class C:
+    #             import x
 
-                def f(self):
-                    x
-            """,
-            [Import(lineno=4, column=1, name="x", package="x")],
-        )
+    #             def f(self):
+    #                 x
+    #         """,
+    #         [Import(lineno=4, column=1, name="x", package="x")],
+    #     )
+
+    #     self.assertSourceAfterScanningEqualToExpected(
+    #         """\
+    #         import x
+
+    #         class C:
+    #             def f(self):
+    #                 import x
+
+    #                 def f(self):
+    #                     x
+    #         """,
+    #         [
+    #             Import(lineno=4, column=1, name='x', package='x'),
+    #             Import(lineno=1, column=1, name='x', package='x'),
+    #         ],
+    #     )
 
     def test_same_line(self):
         self.assertSourceAfterScanningEqualToExpected(
