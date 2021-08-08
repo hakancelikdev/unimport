@@ -1,5 +1,3 @@
-import unittest
-
 from tests.refactor.utils import RefactorTestCase
 
 
@@ -30,7 +28,6 @@ class AsImportTestCase(RefactorTestCase):
             """,
         )
 
-    @unittest.skip("Temporarily removed.")
     def test_multiple_import_name_as_import_duplicate(self):
         self.assertActionAfterRefactorEqualToExpected(
             """\
@@ -45,7 +42,6 @@ class AsImportTestCase(RefactorTestCase):
             """,
         )
 
-    @unittest.skip("Temporarily removed.")
     def test_as_import_used_all_cases(self):
         self.assertActionAfterRefactorEqualToExpected(
             """\

@@ -1,10 +1,7 @@
-import unittest
-
 from tests.analyzer.utils import UnusedTestCase
 from unimport.statement import Import, ImportFrom
 
 
-@unittest.skip("Temporarily removed.")
 class DuplicateTestCase(UnusedTestCase):
     def test__all__(self):
         self.assertSourceAfterScanningEqualToExpected(
@@ -661,6 +658,38 @@ class DuplicateTestCase(UnusedTestCase):
             ],
         )
 
+    # def test_class_scope_import_unused(self):
+    # NOTE; Support, will be given later.
+    #     self.assertSourceAfterScanningEqualToExpected(
+    #         """\
+    #         import x
+
+    #         class C:
+    #             import x
+
+    #             def f(self):
+    #                 x
+    #         """,
+    #         [Import(lineno=4, column=1, name="x", package="x")],
+    #     )
+
+    #     self.assertSourceAfterScanningEqualToExpected(
+    #         """\
+    #         import x
+
+    #         class C:
+    #             def f(self):
+    #                 import x
+
+    #                 def f(self):
+    #                     x
+    #         """,
+    #         [
+    #             Import(lineno=4, column=1, name='x', package='x'),
+    #             Import(lineno=1, column=1, name='x', package='x'),
+    #         ],
+    #     )
+
     def test_same_line(self):
         self.assertSourceAfterScanningEqualToExpected(
             """\
@@ -791,4 +820,20 @@ class DuplicateTestCase(UnusedTestCase):
                     suggestions=[],
                 ),
             ],
+        )
+
+    def test_function_scope_same(self):
+        self.assertSourceAfterScanningEqualToExpected(
+            """\
+            def c():
+                import x
+
+                x.s
+
+
+            def d():
+                import x
+
+                x.s
+            """
         )

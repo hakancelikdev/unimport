@@ -1,5 +1,3 @@
-import unittest
-
 from tests.analyzer.utils import UnusedTestCase
 from unimport.statement import Import, ImportFrom
 
@@ -95,7 +93,6 @@ class AsImportTestCase(UnusedTestCase):
             ],
         )
 
-    @unittest.skip("Temporarily removed.")
     def test_as_import_one_used_in_function_all_cases(self):
         self.assertSourceAfterScanningEqualToExpected(
             """\

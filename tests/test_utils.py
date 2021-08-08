@@ -8,6 +8,7 @@ from typing import Iterator
 from unimport import utils
 from unimport.analyzer import Analyzer
 from unimport.refactor import refactor_string
+from unimport.statement import Import
 
 
 @contextmanager
@@ -36,7 +37,7 @@ class UtilsTestCase(unittest.TestCase):
     include_star_import = True
 
     def test_list_paths(self):
-        self.assertEqual(len(list(utils.list_paths(Path("tests")))), 29)
+        self.assertEqual(len(list(utils.list_paths(Path("tests")))), 31)
         self.assertEqual(
             len(list(utils.list_paths(Path("tests/test_config.py")))), 1
         )
@@ -49,7 +50,9 @@ class UtilsTestCase(unittest.TestCase):
         analyzer.traverse()
         refactor_result = refactor_string(
             source=analyzer.source,
-            unused_imports=list(analyzer.get_unused_imports()),
+            unused_imports=list(
+                Import.get_unused_imports(self.include_star_import)
+            ),
         )
         return refactor_result
 

@@ -285,6 +285,67 @@ __all__.append("removedirs")
 __all__.extend(["walk"])
 ```
 
+## Scope
+
+Unimport tries to better understand whether the import is unused by performing scope
+analysis.
+
+Let me give a few examples.
+
+**input**
+
+```python
+import x
+
+def func():
+    import x
+
+    def inner():
+        import x
+        x
+
+```
+
+**output**
+
+```python
+def func():
+
+    def inner():
+        import x
+        x
+```
+
+**input**
+
+```python
+import x
+
+class Klass:
+
+  def f(self):
+      import x
+
+      def ff():
+        import x
+
+        x
+```
+
+**output**
+
+```python
+
+class Klass:
+
+  def f(self):
+
+      def ff():
+        import x
+
+        x
+```
+
 ## Command line options
 
 You can list many options by running unimport --help
