@@ -63,9 +63,7 @@ class _RemoveUnusedImportTransformer(cst.CSTTransformer):
             )
 
     def leave_import_alike(
-        self,
-        original_node: C.CSTImportT,
-        updated_node: C.CSTImportT,
+        self, original_node: C.CSTImportT, updated_node: C.CSTImportT
     ) -> Union[cst.RemovalSentinel, C.CSTImportT]:
         names_to_keep = []
         names = cast(Sequence[cst.ImportAlias], updated_node.names)
@@ -91,9 +89,14 @@ class _RemoveUnusedImportTransformer(cst.CSTTransformer):
             names_to_keep[-1] = names_to_keep[-1].with_changes(
                 comma=cst.MaybeSentinel.DEFAULT
             )
-            return cast(
-                C.CSTImportT, updated_node.with_changes(names=names_to_keep)
-            )
+            if isinstance(updated_node, cst.ImportFrom):
+                rpar = self.get_rpar(
+                    updated_node.rpar, self.get_location(original_node)
+                )
+                updated_node = updated_node.with_changes(rpar=rpar)
+
+            updated_node = updated_node.with_changes(names=names_to_keep)
+            return cast(C.CSTImportT, updated_node)
 
     @staticmethod
     def leave_StarImport(
@@ -141,12 +144,7 @@ class _RemoveUnusedImportTransformer(cst.CSTTransformer):
                 return self.leave_StarImport(updated_node, imp)
             else:
                 return original_node
-        rpar = self.get_rpar(
-            updated_node.rpar, self.get_location(original_node)
-        )
-        return self.leave_import_alike(
-            original_node, updated_node.with_changes(rpar=rpar)
-        )
+        return self.leave_import_alike(original_node, updated_node)
 
 
 def refactor_string(
