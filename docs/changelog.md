@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased - ././2021]
+## [0.9.0] - 5/September/2021
 
 - [Scope analyzer; #176, #175 #189 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/189)
   - Scope analyzer
@@ -27,19 +27,19 @@ All notable changes to this project will be documented in this file.
     test_list: List[str] = ["spam", "eggs"]
     ```
 
-## 0.8.4 - 06/26/2021
+## [0.8.4] - 26/June/2021
 
 - [Fix emoji issues by @hakancelik96](https://github.com/hakancelik96/unimport/pull/185)
 
-## [0.8.0] - 09/02/2021
+## [0.8.0] - 09/March/2021
 
 - Temporarily drop support for duplicate imports. by @isidentical
 
-## [0.7.4] - 19/02/2021
+## [0.7.4] - 19/February/2021
 
 - [🐞 Fix list_paths in utils by @hakancelik96](https://github.com/hakancelik96/unimport/pull/172)
 
-## [0.7.3] - 14/02/2021
+## [0.7.3] - 14/February/2021
 
 - [💪 Add `--ignore-init` flag by @hakancelik96](https://github.com/hakancelik96/unimport/pull/169)
 
