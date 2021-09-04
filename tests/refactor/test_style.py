@@ -89,3 +89,22 @@ class StyleTestCase(RefactorTestCase):
             y, q, e, r
             """,
         )
+
+    def test_vertical_dont_add_extra_line(self):
+        self.assertActionAfterRefactorEqualToExpected(
+            """\
+            import sys
+            from typing import (
+                List,
+            )
+
+            test_list: List[str] = ["spam", "eggs"]
+            """,
+            """\
+            from typing import (
+                List,
+            )
+
+            test_list: List[str] = ["spam", "eggs"]
+            """,
+        )
