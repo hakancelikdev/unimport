@@ -7,6 +7,25 @@ All notable changes to this project will be documented in this file.
 - [Scope analyzer; #176, #175 #189 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/189)
   - Scope analyzer
   - Duplicate import feature has been enabled again.
+- [Fix adding unnecessary rpar in vertical style #86, #190 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/191)
+
+  - ```python
+    import sys
+    from typing import (
+        List,
+    )
+
+    test_list: List[str] = ["spam", "eggs"]
+    ```
+
+  - ```python
+      from typing import (
+        List,
+
+    )
+
+    test_list: List[str] = ["spam", "eggs"]
+    ```
 
 ## 0.8.4 - 06/26/2021
 
