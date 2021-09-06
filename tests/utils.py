@@ -5,6 +5,14 @@ from pathlib import Path
 from typing import Iterator, Optional
 
 
+def get_non_native_linesep() -> str:
+    """Return an end of line character not native to the current platform."""
+    if os.linesep == "\n":
+        return "\r\n"
+    else:
+        return "\n"
+
+
 @contextmanager
 def reopenable_temp_file(
     content: str, newline: Optional[str] = None

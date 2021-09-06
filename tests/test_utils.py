@@ -1,7 +1,8 @@
+import os
 import unittest
 from pathlib import Path
 
-from tests.utils import reopenable_temp_file
+from tests.utils import get_non_native_linesep, reopenable_temp_file
 from unimport import utils
 from unimport.analyzer import Analyzer
 from unimport.refactor import refactor_string
@@ -11,6 +12,13 @@ from unimport.statement import Import
 class UtilsTestCase(unittest.TestCase):
     maxDiff = None
     include_star_import = True
+    source = "\n".join(
+        [
+            "import sys",
+            "",
+            "print(sys.executable)\n",
+        ]
+    )
 
     def test_list_paths(self):
         self.assertEqual(len(list(utils.list_paths(Path("tests")))), 33)
@@ -69,3 +77,18 @@ class UtilsTestCase(unittest.TestCase):
         source = "b�se"
         with reopenable_temp_file(source) as tmp_path:
             self.assertEqual((source, "utf-8", None), utils.read(tmp_path))
+
+    def test_read_newline_native(self):
+        with reopenable_temp_file(self.source, newline=os.linesep) as tmp_path:
+            self.assertEqual(
+                (self.source, "utf-8", os.linesep),
+                utils.read(tmp_path),
+            )
+
+    def test_read_newline_nonnative(self):
+        non_os_sep = get_non_native_linesep()
+        with reopenable_temp_file(self.source, newline=non_os_sep) as tmp_path:
+            self.assertEqual(
+                (self.source, "utf-8", get_non_native_linesep()),
+                utils.read(tmp_path),
+            )
