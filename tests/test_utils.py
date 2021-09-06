@@ -68,4 +68,4 @@ class UtilsTestCase(unittest.TestCase):
     def test_read(self):
         source = "b�se"
         with reopenable_temp_file(source) as tmp_path:
-            self.assertEqual((source, "utf-8"), utils.read(tmp_path))
+            self.assertEqual((source, "utf-8", None), utils.read(tmp_path))

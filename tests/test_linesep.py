@@ -31,7 +31,6 @@ class LineSepTestCase(unittest.TestCase):
                 self.assertEqual(os.linesep, tmp_py_file.newlines)
             self.assertEqual(self.result, unimport.utils.read(tmp_path)[0])
 
-    @unittest.expectedFailure
     def test_non_platform_native_linesep(self):
         if os.linesep == "\n":
             non_os_sep = "\r\n"
