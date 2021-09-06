@@ -40,13 +40,17 @@ if sys.platform == "win32":  # pragma: no cover (windows)
             ("GetConsoleMode", windll.kernel32),
             ((1, "hConsoleHandle"), (2, "lpMode")),
         )
-        GetConsoleMode.errcheck = bool_errcheck
+        GetConsoleMode.errcheck = (  # type: ignore[assignment, misc]
+            bool_errcheck  # type: ignore[assignment]
+        )
 
         SetConsoleMode = WINFUNCTYPE(BOOL, HANDLE, DWORD)(
             ("SetConsoleMode", windll.kernel32),
             ((1, "hConsoleHandle"), (1, "dwMode")),
         )
-        SetConsoleMode.errcheck = bool_errcheck
+        SetConsoleMode.errcheck = (  # type: ignore[assignment, misc]
+            bool_errcheck  # type: ignore[assignment]
+        )
 
         # As of Windows 10, the Windows console supports (some) ANSI escape
         # sequences, but it needs to be enabled using `SetConsoleMode` first.
