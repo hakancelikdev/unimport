@@ -10,12 +10,10 @@ repos:
     hooks:
       - id: isort
 
-  - repo: local
+  - repo: https://github.com/hakancelik96/unimport
+    rev: 0.9.0
     hooks:
       - id: unimport
-        name: unimport
-        entry: unimport
-        language: python
         args: [--remove, --include-star-import]
 
   - repo: https://github.com/myint/docformatter

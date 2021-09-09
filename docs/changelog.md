@@ -2,38 +2,46 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - ././2021
+
+- []()
+
 ## [0.9.0] - 5/September/2021
 
-- [Scope analyzer; #176, #175 #189 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/189)
+- [💪 🐞 🔥 Scope analyzer; #176, #175 #189 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/189)
   - Scope analyzer
   - Duplicate import feature has been enabled again.
-- [Fix adding unnecessary rpar in vertical style #86, #190 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/191)
+- [🐞 Fix adding unnecessary rpar in vertical style #86, #190 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/191)
 
-  - ```python
-    import sys
-    from typing import (
-        List,
-    )
+**İnput**
 
-    test_list: List[str] = ["spam", "eggs"]
-    ```
+```python
+import sys
+from typing import (
+    List,
+)
 
-  - ```python
-      from typing import (
-        List,
+test_list: List[str] = ["spam", "eggs"]
+```
 
-    )
+**Output**
 
-    test_list: List[str] = ["spam", "eggs"]
-    ```
+```python
+from typing import (
+  List,
+
+)
+
+test_list: List[str] = ["spam", "eggs"]
+```
 
 ## [0.8.4] - 26/June/2021
 
-- [Fix emoji issues by @hakancelik96](https://github.com/hakancelik96/unimport/pull/185)
+- [🐞 Fix emoji issues by @hakancelik96](https://github.com/hakancelik96/unimport/pull/185)
 
 ## [0.8.0] - 09/March/2021
 
-- Temporarily drop support for duplicate imports. by @isidentical
+- [👎 Temporarily drop support for duplicate imports. by @isidentical](https://github.com/hakancelik96/unimport/commit/35fa7239019fc4b4a68c98d3bde64f0302c367f6)
 
 ## [0.7.4] - 19/February/2021
 
@@ -99,14 +107,14 @@ All notable changes to this project will be documented in this file.
 
 - [🐞 Fix: vertical style issue by @hadialqattan](https://github.com/hakancelik96/unimport/pull/86)
 
-  - ```python
-    from foo import (
-        Foo,
-        Bar,
-        FooBar,
-    )
-    Foo, Bar
-    ```
+```python
+from foo import (
+    Foo,
+    Bar,
+    FooBar,
+)
+Foo, Bar
+```
 
 - [🐞 Fix: More than one star import exist on the same file by @hakancelik96.](https://github.com/hakancelik96/unimport/issues/84)
 
@@ -137,15 +145,15 @@ All notable changes to this project will be documented in this file.
 
 - [💪 Support for type hints (#58) by @hakancelik96 & string typing @isidentical](https://github.com/hakancelik96/unimport/pull/71)
 
-  - ```python
-    from typing import List, TYPE_TEST
-    test: 'List[TYPE_TEST]'
-    ```
+```python
+from typing import List, TYPE_TEST
+test: 'List[TYPE_TEST]'
+```
 
-  - ```python
-    from typing import List, TYPE_TEST
-    test: "List['TYPE_TEST']"
-    ```
+```python
+from typing import List, TYPE_TEST
+test: "List['TYPE_TEST']"
+```
 
 - [🔥 fix: get_suggestion_modules function fix for `__all__` name when import is star](https://github.com/hakancelik96/unimport/pull/64)
 
@@ -188,22 +196,22 @@ All notable changes to this project will be documented in this file.
 - 💪 Import skip feature has been added. Leave '#unimport: skip' at the end of the line
   to skip imports with some rare cases. **for example:**
 
-  ```python
-  try:
-    import django #unimport:skip
-  except ImportError:
-    print("install django")
-  ```
+```python
+try:
+  import django #unimport:skip
+except ImportError:
+  print("install django")
+```
 
 - 💪 Added support for the rare case of **all**. **for example:**
 
-  ```python
-  from codeop import compile_command
-  __all__ = ["compile_command"]
-  ```
+```python
+from codeop import compile_command
+__all__ = ["compile_command"]
+```
 
-  Thanks to this feature, we take the values ​​in the `__all__` list and see if there is
-  any matching import statements. If there isn't, this import is unused import.
+Thanks to this feature, we take the values ​​in the `__all__` list and see if there is
+any matching import statements. If there isn't, this import is unused import.
 
 - [💪 Support exclude & include config with regex by @hakancelik96](https://github.com/hakancelik96/unimport/pull/36)
   After this feature, we can write the file include and exclude pattern setting with
