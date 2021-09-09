@@ -26,7 +26,7 @@ repos:
     rev: v0.910
     hooks:
       - id: mypy
-        args: [--no-strict-optional, --ignore-missing-imports]
+        args: [--no-strict-optional, --ignore-missing-imports, --show-error-codes]
         additional_dependencies: [types-toml==0.1.3]
 
   - repo: https://github.com/pre-commit/mirrors-prettier

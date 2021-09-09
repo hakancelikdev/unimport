@@ -1,43 +1,27 @@
 import os
-import tempfile
 import unittest
-from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterator
 
+from tests.utils import get_non_native_linesep, reopenable_temp_file
 from unimport import utils
 from unimport.analyzer import Analyzer
 from unimport.refactor import refactor_string
 from unimport.statement import Import
 
 
-@contextmanager
-def reopenable_temp_file(content: str) -> Iterator[Path]:
-    """Reopenable tempfile to support writing/reading to/from the opened
-    tempfile (requiered for Windows OS).
-
-    For more information: https://bit.ly/3cr0Qkl
-
-    :param content: string content to write.
-    :yields: tempfile path.
-    """
-    try:
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".py", encoding="utf-8", delete=False
-        ) as tmp:
-            tmp_path = Path(tmp.name)
-            tmp.write(content)
-        yield tmp_path
-    finally:
-        os.unlink(tmp_path)
-
-
 class UtilsTestCase(unittest.TestCase):
     maxDiff = None
     include_star_import = True
+    source = "\n".join(
+        [
+            "import sys",
+            "",
+            "print(sys.executable)\n",
+        ]
+    )
 
     def test_list_paths(self):
-        self.assertEqual(len(list(utils.list_paths(Path("tests")))), 31)
+        self.assertEqual(len(list(utils.list_paths(Path("tests")))), 33)
         self.assertEqual(
             len(list(utils.list_paths(Path("tests/test_config.py")))), 1
         )
@@ -92,4 +76,19 @@ class UtilsTestCase(unittest.TestCase):
     def test_read(self):
         source = "b�se"
         with reopenable_temp_file(source) as tmp_path:
-            self.assertEqual((source, "utf-8"), utils.read(tmp_path))
+            self.assertEqual((source, "utf-8", None), utils.read(tmp_path))
+
+    def test_read_newline_native(self):
+        with reopenable_temp_file(self.source, newline=os.linesep) as tmp_path:
+            self.assertEqual(
+                (self.source, "utf-8", os.linesep),
+                utils.read(tmp_path),
+            )
+
+    def test_read_newline_nonnative(self):
+        non_os_sep = get_non_native_linesep()
+        with reopenable_temp_file(self.source, newline=non_os_sep) as tmp_path:
+            self.assertEqual(
+                (self.source, "utf-8", get_non_native_linesep()),
+                utils.read(tmp_path),
+            )
