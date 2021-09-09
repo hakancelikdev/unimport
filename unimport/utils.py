@@ -112,7 +112,7 @@ def get_exclude_list_from_gitignore() -> List[str]:
     path = Path(".gitignore")
     gitignore_regex: List[str] = []
     if path.is_file():
-        source, _ = read(path)
+        source, _, _ = read(path)
         for line in source.splitlines():
             regex = GitWildMatchPattern.pattern_to_regex(line)[0]
             if regex:
@@ -120,14 +120,18 @@ def get_exclude_list_from_gitignore() -> List[str]:
     return gitignore_regex
 
 
-def read(path: Path) -> Tuple[str, str]:
+def read(path: Path) -> Tuple[str, str, Optional[str]]:
     try:
         with tokenize.open(path) as stream:
             source = stream.read()
             encoding = stream.encoding
-    except (OSError, SyntaxError) as err:
-        return "", "utf-8"
-    return source, encoding
+            newline = stream.newlines
+    except (OSError, SyntaxError):
+        return "", "utf-8", None
+    # If mixed or unknown newlines, fall back to the platform default
+    if not isinstance(newline, str):
+        newline = None
+    return source, encoding, newline
 
 
 def list_paths(

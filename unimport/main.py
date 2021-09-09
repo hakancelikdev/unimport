@@ -128,7 +128,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         for py_path in utils.list_paths(
             source_path, config.include, config.exclude
         ):
-            source, encoding = utils.read(py_path)
+            source, encoding, newline = utils.read(py_path)
             analyzer = Analyzer(
                 source=source,
                 path=py_path,
@@ -189,7 +189,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 elif utils.actiontobool(action):
                     config = config._replace(remove=True)
             if config.remove and source != refactor_result:
-                py_path.write_text(refactor_result, encoding=encoding)
+                with open(
+                    py_path, mode="w", encoding=encoding, newline=newline
+                ) as py_file:
+                    py_file.write(refactor_result)
                 print(
                     f"Refactoring '{color.paint(str(py_path), color.GREEN)}'"
                 )
