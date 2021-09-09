@@ -16,7 +16,7 @@
 [![Issues](https://img.shields.io/github/issues/hakancelik96/unimport)](https://github.com/hakancelik96/unimport/issues)
 [![Stars](https://img.shields.io/github/stars/hakancelik96/unimport)](https://github.com/hakancelik96/unimport/stargazers)
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/ad6385b18b524cf2b100aa646358b89f)](https://www.codacy.com/gh/hakancelik96/unimport/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=hakancelik96/unimport&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/ad6385b18b524cf2b100aa646358b89f)](https://www.codacy.com/gh/hakancelik96/unimport/dashboard?utm_source=github.com&utm_medium=referral&utm_content=hakancelik96/unimport&utm_campaign=Badge_Grade)
 [![Codecov](https://codecov.io/gh/hakancelik96/unimport/branch/master/graph/badge.svg)](https://codecov.io/gh/hakancelik96/unimport)
 [![Contributors](https://img.shields.io/github/contributors/hakancelik96/unimport)](https://github.com/hakancelik96/unimport/graphs/contributors)
 [![Last Commit](https://img.shields.io/github/last-commit/hakancelik96/unimport.svg)](https://github.com/hakancelik96/unimport/commits/master)
