@@ -10,10 +10,17 @@ from distutils.util import strtobool
 from pathlib import Path
 from typing import FrozenSet, Iterable, Iterator, List, Optional, Set, Tuple
 
-from importlib_metadata import PackageNotFoundError, metadata
-from pathspec.patterns.gitwildmatch import GitWildMatchPattern
+import unimport.constants as C
 
-from unimport import constants as C
+if C.PY38_PLUS:
+    from importlib.metadata import (  # unimport: skip
+        PackageNotFoundError,
+        metadata,
+    )
+else:
+    from importlib_metadata import PackageNotFoundError, metadata  # type: ignore
+
+from pathspec.patterns.gitwildmatch import GitWildMatchPattern
 
 __all__ = [
     "get_dir",
