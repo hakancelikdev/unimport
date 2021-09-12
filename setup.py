@@ -17,7 +17,7 @@ def get_long_description():
 DESCRIPTION = (
     "A linter, formatter for finding and removing unused import statements."
 )
-VERSION = "0.9.0"
+VERSION = "0.9.1"
 
 
 setup(

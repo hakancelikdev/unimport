@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - ././2021
 
+- []()
+
+## [0.9.1] - 13/September/2021
+
 - [🐞 🧪 Fix EOLs not being respected in modified files per #183 by @CAM-Gerlach](https://github.com/hakancelik96/unimport/pull/193)
   - Respect the file's current EOL (LF/CRLF) instead of the platform default
   - Add unit and integration tests that EOLs are respected
