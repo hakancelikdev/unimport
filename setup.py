@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 assert sys.version_info >= (3, 6), "unimport requires Python 3.6+"
 
@@ -33,18 +33,20 @@ setup(
     project_urls={
         "Documentation": "https://unimport.hakancelik.dev/",
         "Issues": "https://github.com/hakancelik96/unimport/issues",
+        "Changelog": "https://unimport.hakancelik.dev/changelog/",
     },
     license="MIT",
     license_file="LICENSE",
     python_requires=">=3.6",
-    packages=["unimport"],
+    packages=find_packages(where="unimport"),
     install_requires=[
-        "libcst==0.3.19",
-        "pathspec==0.8.1",
-        "toml==0.10.2",
-        "importlib_metadata==4.5.0",
-        "dataclasses==0.6",
-        "typing-extensions==3.10.0.0",
+        "libcst>=0.3.7; python_version >= '3.9'",
+        "libcst>=0.3.0; python_version <= '3.8'",
+        "pathspec>=0.5.0",
+        "toml>=0.9.0",
+        "importlib_metadata>=0.12; python_version < '3.8'",
+        "dataclasses>=0.5; python_version < '3.7'",
+        "typing-extensions>=3.7.4; python_version < '3.8'",
     ],
     extras_require={
         "docs": [
@@ -55,15 +57,9 @@ setup(
             "mkdocs-git-revision-date-localized-plugin==0.9.2",
         ],
         "dev": [
-            "importlib_metadata==4.5.0",
-            "libcst==0.3.19",
-            "pathspec==0.8.1",
             "pytest==6.2.4",
             "pytest-cov==2.12.1",
             "semantic-version==2.8.5",
-            "toml==0.10.2",
-            "dataclasses==0.6",
-            "typing-extensions==3.10.0.0",
         ],
     },
     zip_safe=False,
