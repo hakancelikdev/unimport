@@ -1,17 +1,17 @@
 repos:
   - repo: https://github.com/psf/black
-    rev: 21.7b0
+    rev: 21.8b0
     hooks:
       - id: black
         args: [--line-length=79]
 
   - repo: https://github.com/PyCQA/isort
-    rev: 5.9.2
+    rev: 5.9.3
     hooks:
       - id: isort
 
   - repo: https://github.com/hakancelik96/unimport
-    rev: 0.9.0
+    rev: 0.9.1
     hooks:
       - id: unimport
         args: [--remove, --include-star-import]
@@ -30,7 +30,7 @@ repos:
         additional_dependencies: [types-toml==0.1.3]
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v2.3.2
+    rev: v2.4.0
     hooks:
       - id: prettier
         args: [--prose-wrap=always, --print-width=88]
@@ -44,7 +44,7 @@ repos:
         files: "\\.(py|.txt|.yaml|.json|.in|.md|.toml|.cfg|.html|.yml)$"
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.21.2
+    rev: v2.26.0
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
@@ -55,7 +55,7 @@ repos:
       - id: teyit
 
   - repo: https://github.com/hakancelik96/pyall
-    rev: 0.1.0
+    rev: 0.2.0
     hooks:
       - id: pyall
         args:
