@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 - []()
 
+## [0.9.2] - 14/September/2021
+
+- 🐞 Fix setup.py
+
 ## [0.9.1] - 13/September/2021
 
 - [🐞 🧪 Fix EOLs not being respected in modified files per #183 by @CAM-Gerlach](https://github.com/hakancelik96/unimport/pull/193)
