@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-from setuptools import find_packages, setup
+from setuptools import setup
 
 assert sys.version_info >= (3, 6), "unimport requires Python 3.6+"
 
@@ -17,7 +17,7 @@ def get_long_description():
 DESCRIPTION = (
     "A linter, formatter for finding and removing unused import statements."
 )
-VERSION = "0.9.1"
+VERSION = "0.9.2"
 
 
 setup(
@@ -38,7 +38,7 @@ setup(
     license="MIT",
     license_file="LICENSE",
     python_requires=">=3.6",
-    packages=find_packages(where="unimport"),
+    packages=["unimport"],
     install_requires=[
         "libcst>=0.3.7; python_version >= '3.9'",
         "libcst>=0.3.0; python_version <= '3.8'",
@@ -62,7 +62,7 @@ setup(
             "semantic-version==2.8.5",
         ],
     },
-    zip_safe=False,
+    zip_safe=True,
     include_package_data=True,
     classifiers=[
         "Development Status :: 4 - Beta",
