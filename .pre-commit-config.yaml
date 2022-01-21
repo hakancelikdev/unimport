@@ -50,7 +50,7 @@ repos:
         args: [--py36-plus]
 
   - repo: https://github.com/isidentical/teyit
-    rev: 56748d8824c1fa8300ea197c907c22b0da3d63b1
+    rev: 0.4.1
     hooks:
       - id: teyit
 
