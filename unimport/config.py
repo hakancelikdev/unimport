@@ -1,7 +1,8 @@
+import argparse
 import configparser
 from ast import literal_eval
 from pathlib import Path
-from typing import List, NamedTuple
+from typing import Iterator, List, NamedTuple
 
 import toml
 
@@ -54,6 +55,15 @@ class DefaultConfig(NamedTuple):
             )
         return config
 
+    def get_paths(self) -> Iterator[Path]:
+        for source_path in self.sources:
+            yield from utils.list_paths(
+                source_path, self.include, self.exclude
+            )
+
+    def get_requirements(self) -> Iterator[Path]:
+        yield from Path(".").glob("requirements*.txt")
+
 
 class Config:
 
@@ -100,3 +110,14 @@ class Config:
         sources = config.get("sources", self.default_config.sources)
         config["sources"] = [Path(path) for path in sources]
         return self.default_config._replace(**config)
+
+    @classmethod
+    def get_config(cls, args: argparse.Namespace) -> DefaultConfig:
+        config = (
+            Config(args.config).parse()
+            if args.config and args.config.name in CONFIG_FILES
+            else cls.default_config
+        )
+        config = config.merge(**vars(args))
+
+        return config

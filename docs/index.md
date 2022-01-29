@@ -154,6 +154,18 @@ You can automatically delete unused modules from the requirements.txt file
 - `unimport --requirements --permission` to refactor permission after seeing the diff.
 - `unimport --requirements --remove` to remove automatically.
 
+## Color
+
+> (optional: default `auto`) choices: (always, never, auto)
+
+Select whether to use color in the output.
+
+**Usage**
+
+- `unimport --color always`
+- `unimport --color never`
+- `unimport --color auto`
+
 ## Typing
 
 Unimport can understand that imports are used these cases.
@@ -351,9 +363,9 @@ class Klass:
 You can list many options by running unimport --help
 
 ```
-usage: unimport [-h] [--check] [-c PATH] [--include include] [--exclude exclude] [--gitignore]
-                [--ignore-init] [--include-star-import] [-d] [-r | -p] [--requirements] [-v]
-                [sources [sources ...]]
+usage: unimport [-h] [--check] [-c PATH] [--color {auto,always,never}] [--include include] [--exclude exclude] [--gitignore] [--ignore-init] [--include-star-import] [-d]
+                [-r | -p] [--requirements] [-v]
+                [sources ...]
 
 A linter, formatter for finding and removing unused import statements.
 
@@ -365,6 +377,8 @@ optional arguments:
   --check               Prints which file the unused imports are in.
   -c PATH, --config PATH
                         Read configuration from PATH.
+  --color {auto,always,never}
+                        Select whether to use color in the output. Defaults to `auto`.
   --include include     File include pattern.
   --exclude exclude     File exclude pattern.
   --gitignore           Exclude .gitignore patterns. if present.
@@ -438,3 +452,28 @@ repos:
         args:
           [--remove, --requirements, --include-star-import, --ignore-init, --gitignore]
 ```
+
+## Use as a Docker image
+
+Install from the command line:
+
+To use the latest
+
+```
+$ docker pull ghcr.io/hakancelik96/unimport:latest
+```
+
+To use the stable
+
+```
+$ docker pull ghcr.io/hakancelik96/unimport:stable
+```
+
+To use the other versions
+
+```
+$ docker pull ghcr.io/hakancelik96/unimport:{version_number}
+```
+
+For more information see:
+https://github.com/hakancelik96/unimport/pkgs/container/unimport
