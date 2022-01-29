@@ -6,6 +6,11 @@ All notable changes to this project will be documented in this file.
 
 - []()
 
+## [0.9.4] - 29/January/2021
+
+- [💪 🔥 🧪 i199 Refactor options & commands & Option color output by @hakancelik96](https://github.com/hakancelik96/unimport/pull/205)
+- [💪 🔥 Build an Docker image #202 by @hakancelik96](https://github.com/hakancelik96/unimport/issues/202)
+
 ## [0.9.2] - 14/September/2021
 
 - 🐞 Fix setup.py

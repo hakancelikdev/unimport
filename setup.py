@@ -17,7 +17,7 @@ def get_long_description():
 DESCRIPTION = (
     "A linter, formatter for finding and removing unused import statements."
 )
-VERSION = "0.9.2"
+VERSION = "0.9.4"
 
 
 setup(
@@ -38,7 +38,7 @@ setup(
     license="MIT",
     license_file="LICENSE",
     python_requires=">=3.6",
-    packages=["unimport"],
+    packages=["unimport", "unimport.commands"],
     install_requires=[
         "libcst>=0.3.7; python_version >= '3.9'",
         "libcst>=0.3.0; python_version <= '3.8'",

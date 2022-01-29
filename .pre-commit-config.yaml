@@ -60,4 +60,4 @@ repos:
       - id: pyall
         args:
           - --refactor
-          - --exclude=tests|setup.py
+          - --exclude=tests|setup.py|__init__.py|
