@@ -1,0 +1,10 @@
+__pycache__
+*.pyc
+.tox
+.coverage
+.coverage.*
+coverage.xml
+.git
+.mypy_cache
+.pytest_cache
+venv
