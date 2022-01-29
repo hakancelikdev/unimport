@@ -1,3 +1,4 @@
+import argparse
 import sys
 from typing import Tuple
 
@@ -5,6 +6,7 @@ __all__ = [
     "BLACK",
     "BLUE",
     "BOLD_WHITE",
+    "COLOR_CHOICES",
     "CYAN",
     "GREEN",
     "MAGENTA",
@@ -13,8 +15,10 @@ __all__ = [
     "TERMINAL_SUPPORT_COLOR",
     "WHITE",
     "YELLOW",
+    "add_color_option",
     "difference",
     "paint",
+    "use_color",
 ]
 
 if sys.platform == "win32":  # pragma: no cover (windows)
@@ -81,16 +85,37 @@ CYAN = "\033[36m"
 WHITE = "\033[97m"
 BOLD_WHITE = "\033[1;37m"
 
+COLOR_CHOICES = ("auto", "always", "never")
 
-def paint(content: str, color: str) -> str:
-    if TERMINAL_SUPPORT_COLOR:
-        return color + content + RESET
+
+def paint(text: str, color: str, use_color_setting: bool = True) -> str:
+    if use_color_setting:
+        return color + text + RESET
     else:
-        return content
+        return text
 
 
-def difference(content: Tuple[str, ...]) -> str:  # pragma: no cover
-    lines = list(content)
+def use_color(setting: str) -> bool:
+    if setting not in COLOR_CHOICES:
+        raise ValueError(setting)
+
+    return setting == "always" or (
+        setting == "auto" and sys.stderr.isatty() and TERMINAL_SUPPORT_COLOR
+    )
+
+
+def add_color_option(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--color",
+        default="auto",
+        type=use_color,
+        metavar="{" + ",".join(COLOR_CHOICES) + "}",
+        help="Select whether to use color in the output. Defaults to `%(default)s`.",
+    )
+
+
+def difference(text: Tuple[str, ...]) -> str:  # pragma: no cover
+    lines = list(text)
     for i, line in enumerate(lines):
         if line.startswith("+++") or line.startswith("---"):
             lines[i] = paint(line, BOLD_WHITE)

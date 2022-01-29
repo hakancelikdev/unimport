@@ -447,6 +447,13 @@ class Analyzer(ast.NodeVisitor):
         self.path = path
         self.include_star_import = include_star_import
 
+    def __enter__(self):
+        self.traverse()
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        self.clear()
+
     def traverse(self) -> None:
         if self.skip_file():
             return None
