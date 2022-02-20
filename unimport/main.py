@@ -11,7 +11,7 @@ from unimport.config import Config
 from unimport.refactor import refactor_string
 from unimport.statement import Import
 
-__all__ = ["main"]
+__all__ = ("main",)
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:

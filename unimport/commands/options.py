@@ -4,7 +4,7 @@ from pathlib import Path
 from unimport import constants as C
 from unimport.config import DefaultConfig
 
-__all__ = [
+__all__ = (
     "add_sources_option",
     "add_check_option",
     "add_config_option",
@@ -18,7 +18,7 @@ __all__ = [
     "add_permission_option",
     "add_requirements_option",
     "add_version_option",
-]
+)
 
 default_config = DefaultConfig()
 

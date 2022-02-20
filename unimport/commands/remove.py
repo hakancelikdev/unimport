@@ -2,7 +2,7 @@ from pathlib import Path
 
 from unimport.color import CYAN, GREEN, paint
 
-__all__ = ["remove", "requirements_remove"]
+__all__ = ("remove", "requirements_remove")
 
 
 def remove(

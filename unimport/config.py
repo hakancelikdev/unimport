@@ -9,7 +9,7 @@ import toml
 from unimport import constants as C
 from unimport import utils
 
-__all__ = ["CONFIG_FILES", "Config", "DefaultConfig"]
+__all__ = ("CONFIG_FILES", "Config", "DefaultConfig")
 
 CONFIG_FILES = {"setup.cfg": "unimport", "pyproject.toml": "tool.unimport"}
 
@@ -66,6 +66,7 @@ class DefaultConfig(NamedTuple):
 
 
 class Config:
+    __slots__ = ("config_file", "section")
 
     default_config = DefaultConfig()
 

@@ -13,7 +13,7 @@ DESCRIPTION = (
 )
 VERSION = "0.9.4"
 
-__all__ = [
+__all__ = (
     "BUILTINS",
     "BUILTIN_MODULE_NAMES",
     "CFNT",
@@ -28,7 +28,7 @@ __all__ = [
     "STDLIB_PATH",
     "SUBSCRIPT_TYPE_VARIABLE",
     "VERSION",
-]
+)
 
 #  TYPE
 FunctionT = TypeVar("FunctionT", bound=Callable[..., Any])

@@ -7,10 +7,12 @@ from libcst.metadata import CodeRange, PositionProvider
 from unimport import constants as C
 from unimport.statement import Import, ImportFrom
 
-__all__ = ["refactor_string"]
+__all__ = ("refactor_string",)
 
 
 class _RemoveUnusedImportTransformer(cst.CSTTransformer):
+    __slots__ = ("unused_imports",)
+
     METADATA_DEPENDENCIES = (PositionProvider,)
 
     def __init__(

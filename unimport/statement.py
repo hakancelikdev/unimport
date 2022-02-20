@@ -10,7 +10,7 @@ else:
     from typing_extensions import Literal
 
 
-__all__ = ["Import", "ImportFrom", "Name", "Scope"]
+__all__ = ("Import", "ImportFrom", "Name", "Scope")
 
 
 @dataclass
@@ -21,6 +21,7 @@ class Import:
     column: int
     name: str
     package: str
+
     node: ast.AST = field(init=False, repr=False, compare=False)
 
     def __len__(self) -> int:
@@ -140,8 +141,9 @@ class Name:
 
     lineno: int
     name: str
-    node: ast.AST = field(init=False, repr=False, compare=False)
     is_all: bool = False
+
+    node: ast.AST = field(init=False, repr=False, compare=False)
     match_import: Union[Import, Literal[False]] = field(
         init=False, repr=False, compare=False, default=False
     )
@@ -201,13 +203,13 @@ class Scope:
     current_scope: ClassVar[List["Scope"]] = []
 
     node: ast.AST
-    current_nodes: List[Union[Import, ImportFrom, Name]] = field(
-        init=False, repr=False, compare=False, default_factory=list
-    )
 
-    parent: "Scope" = field(repr=False, default=None)
+    current_nodes: List[Union[Import, ImportFrom, Name]] = field(
+        default_factory=list, init=False, repr=False, compare=False
+    )
+    parent: "Scope" = field(default=None, repr=False)
     child_scopes: Set["Scope"] = field(
-        init=False, repr=False, compare=False, default_factory=set
+        default_factory=set, init=False, repr=False, compare=False
     )
 
     def __hash__(self) -> int:

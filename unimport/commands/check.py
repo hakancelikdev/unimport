@@ -4,7 +4,7 @@ from typing import List, Union
 from unimport.color import CYAN, GREEN, RED, YELLOW, paint
 from unimport.statement import Import, ImportFrom
 
-__all__ = ["check", "requirements_check"]
+__all__ = ("check", "requirements_check")
 
 
 def check(

@@ -3,7 +3,7 @@ from pathlib import Path
 from unimport import utils
 from unimport.color import CYAN, YELLOW, paint
 
-__all__ = ["permission", "requirements_permission"]
+__all__ = ("permission", "requirements_permission")
 
 
 def permission(

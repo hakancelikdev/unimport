@@ -13,7 +13,7 @@ from unimport import utils
 from unimport.relate import first_occurrence, get_parents, relate
 from unimport.statement import Import, ImportFrom, Name, Scope
 
-__all__ = ["Analyzer"]
+__all__ = ("Analyzer",)
 
 
 def _generic_visit(func: C.FunctionT) -> C.FunctionT:
@@ -30,7 +30,7 @@ def _generic_visit(func: C.FunctionT) -> C.FunctionT:
 
 
 class _DefinedNameAnalyzer(ast.NodeVisitor):
-    __slots__ = ["defined_names"]
+    __slots__ = ("defined_names",)
 
     def __init__(self):
         self.defined_names: Set[str] = set()
@@ -52,7 +52,12 @@ class _DefinedNameAnalyzer(ast.NodeVisitor):
 
 
 class _ImportAnalyzer(ast.NodeVisitor):
-    __slots__ = ["source", "include_star_import"]
+    __slots__ = (
+        "source",
+        "include_star_import",
+        "any_import_error",
+        "defined_names",
+    )
 
     ignore_modules_imports = ("__future__",)
     skip_import_comments_regex = "#.*(unimport: {0,1}skip|noqa)"
@@ -322,7 +327,10 @@ class _NameAnalyzer(ast.NodeVisitor):
 
 
 class _ImportableAnalyzer(ast.NodeVisitor):
-    __slots__ = ["importable_nodes", "suggestions_nodes"]
+    __slots__ = (
+        "importable_nodes",
+        "suggestions_nodes",
+    )
 
     def __init__(self) -> None:
         self.importable_nodes: List[
@@ -432,7 +440,7 @@ class _ImportableAnalyzer(ast.NodeVisitor):
 
 
 class Analyzer(ast.NodeVisitor):
-    __slots__ = ["source", "path", "include_star_import"]
+    __slots__ = ("source", "path", "include_star_import")
 
     skip_file_regex = "#.*(unimport: {0,1}skip_file)"
 

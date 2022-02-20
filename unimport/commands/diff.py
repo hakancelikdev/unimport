@@ -3,7 +3,7 @@ from pathlib import Path
 from unimport import utils
 from unimport.color import difference as color_difference
 
-__all__ = ["diff", "requirements_diff"]
+__all__ = ("diff", "requirements_diff")
 
 
 def diff(
