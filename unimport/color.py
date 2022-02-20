@@ -2,7 +2,7 @@ import argparse
 import sys
 from typing import Tuple
 
-__all__ = [
+__all__ = (
     "BLACK",
     "BLUE",
     "BOLD_WHITE",
@@ -19,7 +19,7 @@ __all__ = [
     "difference",
     "paint",
     "use_color",
-]
+)
 
 if sys.platform == "win32":  # pragma: no cover (windows)
 

@@ -22,7 +22,7 @@ else:
 
 from pathspec.patterns.gitwildmatch import GitWildMatchPattern
 
-__all__ = [
+__all__ = (
     "get_dir",
     "get_source",
     "get_spec",
@@ -34,7 +34,7 @@ __all__ = [
     "read",
     "list_paths",
     "diff",
-]
+)
 
 
 def get_dir(package: str) -> FrozenSet[str]:
@@ -75,7 +75,7 @@ def is_std(package: str) -> bool:
         return any(
             (
                 spec.origin.startswith(C.STDLIB_PATH),
-                spec.origin in ["built-in", "frozen"],
+                spec.origin in ("built-in", "frozen"),
                 spec.origin.endswith(".so"),
             )
         )

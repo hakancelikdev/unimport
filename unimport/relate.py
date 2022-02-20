@@ -1,7 +1,11 @@
 import ast
 from typing import Iterator, Optional
 
-__all__ = ["relate", "get_parents", "first_occurrence"]
+__all__ = (
+    "relate",
+    "get_parents",
+    "first_occurrence",
+)
 
 
 def relate(tree: ast.AST, parent: Optional[ast.AST] = None) -> None:
