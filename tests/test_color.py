@@ -1,46 +1,46 @@
 import sys
-import unittest
 
 import pytest
 
 from unimport.color import RED, RESET, TERMINAL_SUPPORT_COLOR, paint, use_color
 
 
-class ColorTestCase(unittest.TestCase):
-    maxDiff = None
+@pytest.mark.skipif(sys.platform != "win32", reason="Requires Windows")
+def test_terminal_support_color_on_win():
+    from unimport.color import _enable
 
-    def setUp(self):
-        self.text = "test text"
+    try:
+        _enable()
+    except OSError:
+        assert TERMINAL_SUPPORT_COLOR is False
+    else:
+        assert TERMINAL_SUPPORT_COLOR is True
 
-    @unittest.skipUnless(sys.platform == "win32", "requires Windows32")
-    def test_terminal_support_color_on_win(self):
-        from unimport.color import _enable
 
-        try:
-            _enable()
-        except OSError:
-            self.assertFalse(TERMINAL_SUPPORT_COLOR)
-        else:
-            self.assertTrue(TERMINAL_SUPPORT_COLOR)
+@pytest.mark.skipif(sys.platform == "win32", reason="Does not run on Windows")
+def test_terminal_support_color():
+    assert TERMINAL_SUPPORT_COLOR is True
 
-    @unittest.skipUnless(sys.platform != "win32", "requires Windows32")
-    def test_terminal_support_color(self):
-        self.assertTrue(TERMINAL_SUPPORT_COLOR)
 
-    def test_red_paint(self):
-        action_text = paint(self.text, RED)
-        expected_text = RED + self.text + RESET
-        self.assertEqual(expected_text, action_text)
+def test_red_paint():
+    text = "test text"
 
-    def test_use_color_setting_false(self):
-        action_text = paint(self.text, RED, False)
-        expected_text = self.text
-        self.assertEqual(expected_text, action_text)
+    action_text = paint(text, RED)
+    assert RED + text + RESET == action_text
 
-    def test_use_color_setting_true(self):
-        action_text = paint(self.text, RED, True)
-        expected_text = RED + self.text + RESET
-        self.assertEqual(expected_text, action_text)
+
+def test_use_color_setting_false():
+    text = "test text"
+
+    action_text = paint(text, RED, False)
+    assert text == action_text
+
+
+def test_use_color_setting_true():
+    text = "test text"
+
+    action_text = paint(text, RED, True)
+    assert RED + text + RESET == action_text
 
 
 @pytest.mark.parametrize(

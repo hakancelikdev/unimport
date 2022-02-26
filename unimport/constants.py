@@ -30,7 +30,7 @@ __all__ = (
     "VERSION",
 )
 
-#  TYPE
+# TYPE
 FunctionT = TypeVar("FunctionT", bound=Callable[..., Any])
 ASTImportableT = Union[
     ast.AsyncFunctionDef,
@@ -55,7 +55,7 @@ CFNT = TypeVar(
 )
 CSTImportT = TypeVar("CSTImportT", cst.Import, cst.ImportFrom)
 
-#  REGEX
+# REGEX
 GLOB_PATTERN = r"**/*.py"
 INCLUDE_REGEX_PATTERN = r"\.(py)$"
 EXCLUDE_REGEX_PATTERN = r"^$"

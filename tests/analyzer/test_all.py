@@ -1,19 +1,24 @@
-from tests.analyzer.utils import UnusedTestCase
+import textwrap
+
+from unimport.analyzer import Analyzer
+from unimport.statement import Import
 
 
-class AllTestCase(UnusedTestCase):
-    def test_from_import(self):
-        self.assertSourceAfterScanningEqualToExpected(
-            """\
-            from codeop import compile_command
-            __all__ = ["compile_command"]
-            """
-        )
+def test_from_import():
+    source = """\
+        from codeop import compile_command
+        __all__ = ["compile_command"]
+        """
 
-    def test_defined_top(self):
-        self.assertSourceAfterScanningEqualToExpected(
-            source="""\
-            __all__ = ["x"]
-            import x
-            """,
-        )
+    with Analyzer(source=textwrap.dedent(source)):
+        assert list(Import.get_unused_imports()) == []
+
+
+def test_defined_top():
+    source = """\
+        __all__ = ["x"]
+        import x
+        """
+
+    with Analyzer(source=textwrap.dedent(source)):
+        assert list(Import.get_unused_imports()) == []

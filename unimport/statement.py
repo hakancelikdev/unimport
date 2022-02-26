@@ -82,7 +82,7 @@ class Import:
 
     @classmethod
     def get_unused_imports(
-        cls, include_star_import: bool
+        cls, include_star_import: bool = False
     ) -> Iterator[Union["Import", "ImportFrom"]]:
         for imp in reversed(Import.imports):
             if (
