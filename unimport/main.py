@@ -112,9 +112,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
             refactor_result = "\n".join(copy_source)
             if config.diff:
-                exists_diff = commands.requirements_diff(
-                    path, source, refactor_result
-                )
+                exists_diff = commands.diff(path, source, refactor_result)
                 if config.permission and exists_diff:
                     commands.requirements_permission(
                         path, refactor_result, args.color
