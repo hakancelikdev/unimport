@@ -11,7 +11,7 @@ from unimport.statement import Import, ImportFrom, Name
 DESCRIPTION = (
     "A linter, formatter for finding and removing unused import statements."
 )
-VERSION = "0.9.4"
+VERSION = "0.9.5"
 
 __all__ = (
     "BUILTINS",
@@ -30,7 +30,7 @@ __all__ = (
     "VERSION",
 )
 
-#  TYPE
+# TYPE
 FunctionT = TypeVar("FunctionT", bound=Callable[..., Any])
 ASTImportableT = Union[
     ast.AsyncFunctionDef,
@@ -55,7 +55,7 @@ CFNT = TypeVar(
 )
 CSTImportT = TypeVar("CSTImportT", cst.Import, cst.ImportFrom)
 
-#  REGEX
+# REGEX
 GLOB_PATTERN = r"**/*.py"
 INCLUDE_REGEX_PATTERN = r"\.(py)$"
 EXCLUDE_REGEX_PATTERN = r"^$"

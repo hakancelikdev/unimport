@@ -4,13 +4,10 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator, Optional
 
-
-def get_non_native_linesep() -> str:
-    """Return an end of line character not native to the current platform."""
-    if os.linesep == "\n":
-        return "\r\n"
-    else:
-        return "\n"
+from unimport import utils
+from unimport.analyzer import Analyzer
+from unimport.refactor import refactor_string
+from unimport.statement import Import
 
 
 @contextmanager
@@ -40,3 +37,13 @@ def reopenable_temp_file(
         yield tmp_path
     finally:
         os.unlink(tmp_path)
+
+
+def refactor(path: Path) -> str:
+    source = utils.read(path)[0]
+
+    with Analyzer(source=source) as analyzer:
+        return refactor_string(
+            source=analyzer.source,
+            unused_imports=list(Import.get_unused_imports()),
+        )

@@ -138,22 +138,10 @@ class _ImportAnalyzer(ast.NodeVisitor):
             )
 
     def visit_Try(self, node: ast.Try) -> None:
-        def any_import_error(items) -> bool:
-            for item in items:
-                if (
-                    isinstance(item, ast.Name)
-                    and item.id in {"ModuleNotFoundError", "ImportError"}
-                ) or (
-                    isinstance(item, ast.Tuple) and any_import_error(item.elts)
-                ):
-                    return True
-            else:
-                return False
+        self.any_import_error = True
 
-        self.any_import_error = any_import_error(
-            handle.type for handle in node.handlers
-        )
         self.generic_visit(node)
+
         self.any_import_error = False
 
     def skip_import(self, node: C.ASTImport) -> bool:
