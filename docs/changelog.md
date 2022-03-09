@@ -2,9 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - ././2021
+## [Unreleased] - ././2022
 
-- []()
+## [0.9.5] - 10/Match/2022
+
+- [🔥 🧪 Refactor: tests using pytest, fix check method](https://github.com/hakancelik96/unimport/pull/208)
 
 ## [0.9.4] - 29/January/2021
 
