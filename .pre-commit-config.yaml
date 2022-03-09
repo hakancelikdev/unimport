@@ -1,3 +1,5 @@
+exclude: tests/cases/(refactor|source).*
+
 repos:
   - repo: https://github.com/psf/black
     rev: 22.1.0
@@ -39,8 +41,6 @@ repos:
     rev: v4.1.0
     hooks:
       - id: end-of-file-fixer
-      - id: requirements-txt-fixer
-      - id: trailing-whitespace
         files: "\\.(py|.txt|.yaml|.json|.in|.md|.toml|.cfg|.html|.yml)$"
 
   - repo: https://github.com/asottile/pyupgrade

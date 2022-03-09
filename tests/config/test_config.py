@@ -1,6 +1,5 @@
 import re
 from pathlib import Path
-from unittest import TestCase
 
 from unimport import constants as C
 from unimport import utils
@@ -15,171 +14,192 @@ no_unimport_pyproject = TEST_DIR / "no_unimport" / "pyproject.toml"
 no_unimport_setup_cfg = TEST_DIR / "no_unimport" / "setup.cfg"
 
 
-class ConfigTestCase(TestCase):
+def test_config_toml_parse():
     include = "test|test2|tests.py"
     exclude = "__init__.py|tests/"
     sources = [Path("path1"), Path("path2")]
 
-    def test_toml_parse(self):
-        config = Config(config_file=pyproject).parse()
-        self.assertEqual(self.include, config.include)
-        self.assertEqual(self.exclude, config.exclude)
-        self.assertEqual(self.sources, config.sources)
-        self.assertTrue(config.gitignore)
-        self.assertTrue(config.requirements)
-        self.assertFalse(config.remove)
-        self.assertTrue(config.diff)
-        self.assertTrue(config.ignore_init)
+    config = Config(config_file=pyproject).parse()
 
-    def test_cfg_parse(self):
-        config = Config(config_file=setup_cfg).parse()
-        self.assertEqual(self.include, config.include)
-        self.assertEqual(self.exclude, config.exclude)
-        self.assertEqual(self.sources, config.sources)
-        self.assertTrue(config.gitignore)
-        self.assertTrue(config.requirements)
-        self.assertFalse(config.remove)
-        self.assertTrue(config.diff)
-        self.assertTrue(config.ignore_init)
+    assert include == config.include
+    assert exclude == config.exclude
+    assert sources == config.sources
 
-    def test_cfg_merge(self):
-        config = Config(config_file=setup_cfg).parse()
-        console_configuration = {
-            "include": "tests|env",
-            "remove": True,
-            "diff": False,
-            "include_star_import": True,
-        }
-        gitignore_exclude = utils.get_exclude_list_from_gitignore()
-        exclude = "|".join(
-            [config.exclude] + gitignore_exclude + [C.INIT_FILE_IGNORE_REGEX]
-        )
-        config = config.merge(**console_configuration)
-        self.assertEqual("tests|env", config.include)
-        self.assertEqual(exclude, config.exclude)
-        self.assertEqual(self.sources, config.sources)
-        self.assertTrue(config.gitignore)
-        self.assertTrue(config.requirements)
-        self.assertTrue(config.remove)
-        self.assertFalse(config.diff)
-        self.assertTrue(config.ignore_init)
+    assert config.gitignore is True
+    assert config.requirements is True
+    assert config.diff is True
+    assert config.ignore_init is True
+
+    assert config.remove is False
 
 
-class DefaultCommandTestCase(TestCase):
-    def setUp(self):
-        self.config = DefaultConfig()
+def test_config_cfg_parse():
+    include = "test|test2|tests.py"
+    exclude = "__init__.py|tests/"
+    sources = [Path("path1"), Path("path2")]
 
-    def test_there_is_no_command(self):
-        self.assertEqual(
-            self.config.merge(there_is_no_command=True), self.config.merge()
-        )
+    config = Config(config_file=setup_cfg).parse()
 
-    def test_same_with_default_config(self):
-        self.assertEqual(
-            self.config.merge(exclude=self.config.exclude).exclude,
-            self.config.merge().exclude,
-        )
+    assert include == config.include
+    assert exclude == config.exclude
+    assert sources == config.sources
 
-    def test_check(self):
-        self.assertTrue(self.config.merge().check)
-        self.assertTrue(self.config.merge(check=True).check)
-        self.assertTrue(self.config.merge(gitignore=True).check)
+    assert config.gitignore is True
+    assert config.requirements is True
+    assert config.diff is True
+    assert config.ignore_init is True
 
-        self.assertFalse(self.config.merge(diff=True).check)
-        self.assertFalse(self.config.merge(remove=True).check)
-        self.assertFalse(self.config.merge(permission=True).check)
-
-    def test_diff(self):
-        self.assertFalse(self.config.merge().diff)
-        self.assertFalse(self.config.merge(remove=True).diff)
-
-        self.assertTrue(self.config.merge(diff=True).diff)
-        self.assertTrue(self.config.merge(permission=True).diff)
+    assert config.remove is False
 
 
-class TomlCommandTestCase(TestCase):
-    def setUp(self):
-        self.config = Config(pyproject).parse()
-        self.exclude = "__init__.py|tests/"
+def test_config_cfg_merge():
+    sources = [Path("path1"), Path("path2")]
 
-    def test_same_with_toml_config(self):
-        self.assertEqual(
-            self.config.merge(exclude=self.exclude).exclude,
-            self.config.merge().exclude,
-        )
+    config = Config(config_file=setup_cfg).parse()
+    console_configuration = {
+        "include": "tests|env",
+        "remove": True,
+        "diff": False,
+        "include_star_import": True,
+    }
+    gitignore_exclude = utils.get_exclude_list_from_gitignore()
+    exclude = "|".join(
+        [config.exclude] + gitignore_exclude + [C.INIT_FILE_IGNORE_REGEX]
+    )
+    config = config.merge(**console_configuration)
 
-    def test_check(self):
-        self.assertTrue(self.config.merge(check=True).check)
-        self.assertTrue(self.config.merge(diff=False).check)
-        self.assertTrue(self.config.merge(diff=False, permission=False).check)
+    assert config.include == "tests|env"
+    assert config.exclude == exclude
+    assert config.sources == sources
 
-        self.assertFalse(self.config.merge().check)
-        self.assertFalse(self.config.merge(gitignore=True).check)
-        self.assertFalse(self.config.merge(diff=True).check)
-        self.assertFalse(self.config.merge(remove=True).check)
-        self.assertFalse(self.config.merge(permission=True).check)
+    assert config.gitignore is True
+    assert config.requirements is True
+    assert config.remove is True
 
-
-class NoUnimportSectionTestCase(TestCase):
-    def setUp(self):
-        self.default_config = DefaultConfig()
-
-    def test_toml_parse(self):
-        config = Config(config_file=no_unimport_pyproject).parse()
-        self.assertEqual(self.default_config.include, config.include)
-        self.assertEqual(self.default_config.exclude, config.exclude)
-        self.assertEqual(self.default_config.sources, config.sources)
-        self.assertFalse(config.gitignore)
-        self.assertFalse(config.requirements)
-        self.assertFalse(config.remove)
-        self.assertFalse(config.diff)
-        self.assertFalse(config.ignore_init)
-
-    def test_cfg_parse(self):
-        config = Config(config_file=no_unimport_setup_cfg).parse()
-        self.assertEqual(self.default_config.include, config.include)
-        self.assertEqual(self.default_config.exclude, config.exclude)
-        self.assertEqual(self.default_config.sources, config.sources)
-        self.assertFalse(config.gitignore)
-        self.assertFalse(config.requirements)
-        self.assertFalse(config.remove)
-        self.assertFalse(config.diff)
-        self.assertFalse(config.ignore_init)
-
-    def test_cfg_merge(self):
-        config = Config(config_file=no_unimport_setup_cfg).parse()
-        console_configuration = {
-            "include": "tests|env",
-            "remove": True,
-            "diff": False,
-            "include_star_import": True,
-        }
-        config = config.merge(**console_configuration)
-        self.assertEqual("tests|env", config.include)
-        self.assertEqual(self.default_config.exclude, config.exclude)
-        self.assertEqual(self.default_config.sources, config.sources)
-
-        self.assertTrue(config.remove)
-        self.assertTrue(config.include_star_import)
-
-        self.assertFalse(config.gitignore)
-        self.assertFalse(config.requirements)
-        self.assertFalse(config.diff)
+    assert config.diff is False
+    assert config.ignore_init is True
 
 
-class InitFileIgnoreRegexTestCase(TestCase):
+def test_default_command__there_is_no_command():
+    config = DefaultConfig()
+
+    assert config.merge(there_is_no_command=True) == config.merge()
+
+
+def test_default_command__same_with_default_config():
+    config = DefaultConfig()
+
+    assert (
+        config.merge(exclude=config.exclude).exclude == config.merge().exclude
+    )
+
+
+def test_default_command__check():
+    config = DefaultConfig()
+
+    assert config.merge().check is True
+    assert config.merge(check=True).check is True
+    assert config.merge(gitignore=True).check is True
+
+    assert config.merge(diff=True).check is False
+    assert config.merge(remove=True).check is False
+    assert config.merge(permission=True).check is False
+
+
+def test_default_command__diff():
+    config = DefaultConfig()
+    assert config.merge().diff is False
+    assert config.merge(remove=True).diff is False
+
+    assert config.merge(diff=True).diff is True
+    assert config.merge(permission=True).diff is True
+
+
+def test_toml_command_same_with_config():
+    config = Config(pyproject).parse()
+    exclude = "__init__.py|tests/"
+
+    assert config.merge(exclude=exclude).exclude == config.merge().exclude
+
+
+def test_toml_command_check():
+    config = Config(pyproject).parse()
+
+    assert config.merge(check=True).check is True
+    assert config.merge(diff=False).check is True
+    assert config.merge(diff=False, permission=False).check is True
+
+    assert config.merge().check is False
+    assert config.merge(gitignore=True).check is False
+    assert config.merge(diff=True).check is False
+    assert config.merge(remove=True).check is False
+    assert config.merge(permission=True).check is False
+
+
+def test_no_import_section_toml_parse():
+    default_config = DefaultConfig()
+    config = Config(config_file=no_unimport_pyproject).parse()
+
+    assert default_config.include == config.include
+    assert default_config.exclude == config.exclude
+    assert default_config.sources == config.sources
+    assert config.gitignore is False
+    assert config.requirements is False
+    assert config.remove is False
+    assert config.diff is False
+    assert config.ignore_init is False
+
+
+def test_no_import_section_cfg_parse():
+    default_config = DefaultConfig()
+    config = Config(config_file=no_unimport_setup_cfg).parse()
+
+    assert default_config.include == config.include
+    assert default_config.exclude == config.exclude
+    assert default_config.sources == config.sources
+    assert config.gitignore is False
+    assert config.requirements is False
+    assert config.remove is False
+    assert config.diff is False
+    assert config.ignore_init is False
+
+
+def test_no_import_section_cfg_merge():
+    default_config = DefaultConfig()
+    config = Config(config_file=no_unimport_setup_cfg).parse()
+    console_configuration = {
+        "include": "tests|env",
+        "remove": True,
+        "diff": False,
+        "include_star_import": True,
+    }
+    config = config.merge(**console_configuration)
+
+    assert config.include == "tests|env"
+    assert default_config.exclude == config.exclude
+    assert default_config.sources == config.sources
+
+    assert config.remove is True
+    assert config.include_star_import is True
+
+    assert config.gitignore is False
+    assert config.requirements is False
+    assert config.diff is False
+
+
+def test_init_file_ignore_regex_match():
     exclude_regex = re.compile(C.INIT_FILE_IGNORE_REGEX)
 
-    def test_match(self):
-        self.assertIsNotNone(self.exclude_regex.search("path/to/__init__.py"))
-        self.assertIsNotNone(self.exclude_regex.search("to/__init__.py"))
-        self.assertIsNotNone(self.exclude_regex.search("__init__.py"))
+    assert exclude_regex.search("path/to/__init__.py") is not None
+    assert exclude_regex.search("to/__init__.py") is not None
+    assert exclude_regex.search("__init__.py") is not None
 
-    def test_not_match(self):
-        self.assertIsNone(self.exclude_regex.search("path/to/_init_.py"))
-        self.assertIsNone(
-            self.exclude_regex.search("path/to/__init__/test.py")
-        )
-        self.assertIsNone(self.exclude_regex.search("__init__"))
-        self.assertIsNone(self.exclude_regex.search("__init__py"))
-        self.assertIsNone(self.exclude_regex.search("__init__bpy"))
+
+def test_init_file_ignore_regex_not_match():
+    exclude_regex = re.compile(C.INIT_FILE_IGNORE_REGEX)
+
+    assert exclude_regex.search("path/to/_init_.py") is None
+    assert exclude_regex.search("path/to/__init__/test.py") is None
+    assert exclude_regex.search("__init__") is None
+    assert exclude_regex.search("__init__py") is None
+    assert exclude_regex.search("__init__bpy") is None

@@ -38,6 +38,6 @@ def requirements_check(
     path: Path, index: int, requirement: str, use_color_setting: bool
 ) -> None:
     print(
-        f"{paint(requirement, CYAN), use_color_setting} at "
+        f"{paint(requirement, CYAN, use_color_setting)} at "
         f"{paint(path.as_posix(), CYAN, use_color_setting)}:{paint(str(index + 1), CYAN, use_color_setting)}"
     )
