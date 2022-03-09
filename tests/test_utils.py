@@ -10,7 +10,7 @@ from unimport import utils
 @pytest.mark.parametrize(
     "path, count",
     [
-        ("tests", 192),
+        ("tests", 194),
         ("tests/analyzer", 0),
         ("tests/config", 1),
         ("tests/config/configs", 0),
