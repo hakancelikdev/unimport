@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - ././2022
 
+## [0.9.6] - 4/May/2022
+
+- [3.10+ Support 💪 by @hakancelik96](https://github.com/hakancelik96/unimport/issues/26)
+
 ## [0.9.5] - 10/Match/2022
 
 - [🔥 🧪 Refactor: tests using pytest, fix check method](https://github.com/hakancelik96/unimport/pull/208)
