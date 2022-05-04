@@ -11,7 +11,7 @@ from unimport.statement import Import, ImportFrom, Name
 DESCRIPTION = (
     "A linter, formatter for finding and removing unused import statements."
 )
-VERSION = "0.9.5"
+VERSION = "0.9.6"
 
 __all__ = (
     "BUILTINS",

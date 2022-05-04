@@ -17,7 +17,7 @@ def get_long_description():
 DESCRIPTION = (
     "A linter, formatter for finding and removing unused import statements."
 )
-VERSION = "0.9.5"
+VERSION = "0.9.6"
 
 
 setup(
@@ -75,6 +75,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: Implementation :: CPython",
     ],
     entry_points={"console_scripts": ["unimport = unimport.__main__:main"]},
