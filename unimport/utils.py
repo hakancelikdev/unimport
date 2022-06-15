@@ -109,7 +109,7 @@ def actiontobool(action: str) -> bool:
     if action == "":
         return True
     with contextlib.suppress(ValueError):
-        return strtobool(action)
+        return True if strtobool(action) == 1 else False
     return False
 
 
