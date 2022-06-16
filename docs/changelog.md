@@ -6,16 +6,16 @@ All notable changes to this project will be documented in this file.
 
 ## [0.9.6] - 4/May/2022
 
-- [3.10+ Support 💪 by @hakancelik96](https://github.com/hakancelik96/unimport/issues/26)
+- [3.10+ Support 💪 by @hakancelikdev](https://github.com/hakancelikdev/unimport/issues/26)
 
 ## [0.9.5] - 10/Match/2022
 
-- [🔥 🧪 Refactor: tests using pytest, fix check method](https://github.com/hakancelik96/unimport/pull/208)
+- [🔥 🧪 Refactor: tests using pytest, fix check method](https://github.com/hakancelikdev/unimport/pull/208)
 
 ## [0.9.4] - 29/January/2021
 
-- [💪 🔥 🧪 i199 Refactor options & commands & Option color output by @hakancelik96](https://github.com/hakancelik96/unimport/pull/205)
-- [💪 🔥 Build an Docker image #202 by @hakancelik96](https://github.com/hakancelik96/unimport/issues/202)
+- [💪 🔥 🧪 i199 Refactor options & commands & Option color output by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/205)
+- [💪 🔥 Build an Docker image #202 by @hakancelikdev](https://github.com/hakancelikdev/unimport/issues/202)
 
 ## [0.9.2] - 14/September/2021
 
@@ -23,16 +23,16 @@ All notable changes to this project will be documented in this file.
 
 ## [0.9.1] - 13/September/2021
 
-- [🐞 🧪 Fix EOLs not being respected in modified files per #183 by @CAM-Gerlach](https://github.com/hakancelik96/unimport/pull/193)
+- [🐞 🧪 Fix EOLs not being respected in modified files per #183 by @CAM-Gerlach](https://github.com/hakancelikdev/unimport/pull/193)
   - Respect the file's current EOL (LF/CRLF) instead of the platform default
   - Add unit and integration tests that EOLs are respected
 
 ## [0.9.0] - 5/September/2021
 
-- [💪 🐞 🔥 Scope analyzer; #176, #175 #189 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/189)
+- [💪 🐞 🔥 Scope analyzer; #176, #175 #189 by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/189)
   - Scope analyzer
   - Duplicate import feature has been enabled again.
-- [🐞 Fix adding unnecessary rpar in vertical style #86, #190 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/191)
+- [🐞 Fix adding unnecessary rpar in vertical style #86, #190 by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/191)
 
 **İnput**
 
@@ -58,75 +58,75 @@ test_list: List[str] = ["spam", "eggs"]
 
 ## [0.8.4] - 26/June/2021
 
-- [🐞 Fix emoji issues by @hakancelik96](https://github.com/hakancelik96/unimport/pull/185)
+- [🐞 Fix emoji issues by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/185)
 
 ## [0.8.0] - 09/March/2021
 
-- [👎 Temporarily drop support for duplicate imports. by @isidentical](https://github.com/hakancelik96/unimport/commit/35fa7239019fc4b4a68c98d3bde64f0302c367f6)
+- [👎 Temporarily drop support for duplicate imports. by @isidentical](https://github.com/hakancelikdev/unimport/commit/35fa7239019fc4b4a68c98d3bde64f0302c367f6)
 
 ## [0.7.4] - 19/February/2021
 
-- [🐞 Fix list_paths in utils by @hakancelik96](https://github.com/hakancelik96/unimport/pull/172)
+- [🐞 Fix list_paths in utils by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/172)
 
 ## [0.7.3] - 14/February/2021
 
-- [💪 Add `--ignore-init` flag by @hakancelik96](https://github.com/hakancelik96/unimport/pull/169)
+- [💪 Add `--ignore-init` flag by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/169)
 
 ## [0.7.2] - 31/January/2021
 
-- [💪 Python3.9 Support by @hakancelik96](https://github.com/hakancelik96/unimport/pull/166)
+- [💪 Python3.9 Support by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/166)
 
 ## [0.7.1] - 1/January/2021/
 
-- [🐞 Fix by @hakancelik96 #127](https://github.com/hakancelik96/unimport/pull/161)
+- [🐞 Fix by @hakancelikdev #127](https://github.com/hakancelikdev/unimport/pull/161)
 
 ## [0.7.0] - 26/December/2020
 
-- [💊 %15 performance increase & remove show-error flag by @hakancelik96](https://github.com/hakancelik96/unimport/pull/159)
+- [💊 %15 performance increase & remove show-error flag by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/159)
 
-- [💪 Star import more accurate suggestion by @hakancelik96](https://github.com/hakancelik96/unimport/pull/158)
+- [💪 Star import more accurate suggestion by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/158)
 
   - #120 removed to implement it more accurately, later.
 
-- [🐞 Fix: scanner by @hakancelik96](https://github.com/hakancelik96/unimport/pull/157)
-- [🐞 & 💪 & 💊 Fix: #150 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/155)
+- [🐞 Fix: scanner by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/157)
+- [🐞 & 💪 & 💊 Fix: #150 by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/155)
 
   - Configuration Bug Fix ( Configuration priority, reading and merge )
   - %136 - %150 performance increase
 
 ## [0.6.8] - 2/December/2020
 
-- [🐞 Fix: Extra type check on `utils.is_std`, #148 (#149) by @isik-kaplan](https://github.com/hakancelik96/unimport/commit/b9e226ef18984189b4154b739b9b186a2c7a2418)
-- [🐞 Fix: import skip by @hakancelik96](https://github.com/hakancelik96/unimport/issues/146)
+- [🐞 Fix: Extra type check on `utils.is_std`, #148 (#149) by @isik-kaplan](https://github.com/hakancelikdev/unimport/commit/b9e226ef18984189b4154b739b9b186a2c7a2418)
+- [🐞 Fix: import skip by @hakancelikdev](https://github.com/hakancelikdev/unimport/issues/146)
 
 ## [0.6.6] - 24/October/2020
 
-- [🐞 Fix: call attribute scanner by @hakancelik96](https://github.com/hakancelik96/unimport/pull/145)
-- [🐞 Fix: requirements feature & star import suggestion by @hakancelik96](https://github.com/hakancelik96/unimport/pull/142)
-- [💪 Support multiline skip import only py3.8 and plus by @hakancelik96](https://github.com/hakancelik96/unimport/pull/138)
-- [🐞 Fix: Initial imports from sys.modules by @hakancelik96](https://github.com/hakancelik96/unimport/pull/136)
-- [🐞 Fix: import and name matcher by @hakancelik96](https://github.com/hakancelik96/unimport/pull/133)
-- [🐞 Fix: type comment by @hakancelik96](https://github.com/hakancelik96/unimport/pull/130)
-- [💪 Support type variable by @hakancelik96](https://github.com/hakancelik96/unimport/pull/128)
-- [🐞 Fix same line duplicates by @hakancelik96](https://github.com/hakancelik96/unimport/pull/125)
-- [💪 Support Windows OS coloring and encoding by @hadialqattan](https://github.com/hakancelik96/unimport/pull/116)
+- [🐞 Fix: call attribute scanner by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/145)
+- [🐞 Fix: requirements feature & star import suggestion by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/142)
+- [💪 Support multiline skip import only py3.8 and plus by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/138)
+- [🐞 Fix: Initial imports from sys.modules by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/136)
+- [🐞 Fix: import and name matcher by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/133)
+- [🐞 Fix: type comment by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/130)
+- [💪 Support type variable by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/128)
+- [🐞 Fix same line duplicates by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/125)
+- [💪 Support Windows OS coloring and encoding by @hadialqattan](https://github.com/hakancelikdev/unimport/pull/116)
 
 ## [0.3.0] - 22/September/2020
 
-- [🐞💊 Fix, improve: Names, Imports and star suggestion by @hakancelik96](https://github.com/hakancelik96/unimport/pull/112)
-- [💪💊 Configuration extend and refactoring by @hakancelik96](https://github.com/hakancelik96/unimport/pull/111)
-- [💪💊 General refactoring by @hakancelik96](https://github.com/hakancelik96/unimport/pull/108)
+- [🐞💊 Fix, improve: Names, Imports and star suggestion by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/112)
+- [💪💊 Configuration extend and refactoring by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/111)
+- [💪💊 General refactoring by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/108)
   - Support append and extend `__all__` list
   - Star import suggestions improved
-- [🐞 Fix: Unnecessary refactoring by @hakancelik96](https://github.com/hakancelik96/unimport/pull/107)
-- [💪 Support .gitignore exclude patterns by @hadialqattan](https://github.com/hakancelik96/unimport/pull/102)
-- [💊 Optimize Python >=3.8 type comments support method by @hadialqattan](https://github.com/hakancelik96/unimport/pull/95)
-- [💪 Improve test coverage by @hadialqattan](https://github.com/hakancelik96/unimport/pull/93)
-- [💪 Support async def by @hakancelik96](https://github.com/hakancelik96/unimport/issues/92)
+- [🐞 Fix: Unnecessary refactoring by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/107)
+- [💪 Support .gitignore exclude patterns by @hadialqattan](https://github.com/hakancelikdev/unimport/pull/102)
+- [💊 Optimize Python >=3.8 type comments support method by @hadialqattan](https://github.com/hakancelikdev/unimport/pull/95)
+- [💪 Improve test coverage by @hadialqattan](https://github.com/hakancelikdev/unimport/pull/93)
+- [💪 Support async def by @hakancelikdev](https://github.com/hakancelikdev/unimport/issues/92)
 
 ## [0.2.10] - 6/September/2020
 
-- [🐞 Fix: vertical style issue by @hadialqattan](https://github.com/hakancelik96/unimport/pull/86)
+- [🐞 Fix: vertical style issue by @hadialqattan](https://github.com/hakancelikdev/unimport/pull/86)
 
 ```python
 from foo import (
@@ -137,34 +137,34 @@ from foo import (
 Foo, Bar
 ```
 
-- [🐞 Fix: More than one star import exist on the same file by @hakancelik96.](https://github.com/hakancelik96/unimport/issues/84)
+- [🐞 Fix: More than one star import exist on the same file by @hakancelikdev.](https://github.com/hakancelikdev/unimport/issues/84)
 
-- [💪 Getting rid of some bad practice & 🐞 Fix: pre-commit bug by @hakancelik96](https://github.com/hakancelik96/unimport/commit/bd93a0cf6b1d5d27bf6a669f2a029faaf225ae5f)
+- [💪 Getting rid of some bad practice & 🐞 Fix: pre-commit bug by @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/bd93a0cf6b1d5d27bf6a669f2a029faaf225ae5f)
 
 ## [0.2.9] - 1/September/2020
 
-- [🔥 Fix: Double underscore in builtins imports by @hakancelik96](https://github.com/hakancelik96/unimport/pull/82)
-- [💪 Support for exit code and add some enhancement by @furkanonder](https://github.com/hakancelik96/unimport/pull/81)
-- [🔥 Fix: incorrect matching import and name by @hakancelik96](https://github.com/hakancelik96/unimport/pull/78)
+- [🔥 Fix: Double underscore in builtins imports by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/82)
+- [💪 Support for exit code and add some enhancement by @furkanonder](https://github.com/hakancelikdev/unimport/pull/81)
+- [🔥 Fix: incorrect matching import and name by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/78)
 
 ## [0.2.8] - 27/July/2020
 
-- [💪 Support: file-wide skips by @hakancelik96](https://github.com/hakancelik96/unimport/pull/77)
+- [💪 Support: file-wide skips by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/77)
 
   - Now, you can skip a file by typing `# unimport: skip_file` anywhere in that file.
 
-- [🔥 Fix: preserve import styles](https://github.com/hakancelik96/unimport/pull/76)
+- [🔥 Fix: preserve import styles](https://github.com/hakancelikdev/unimport/pull/76)
 
-- [💪 Support: requirements.txt file by @hakancelik96](https://github.com/hakancelik96/unimport/pull/75)
+- [💪 Support: requirements.txt file by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/75)
 
   - Now, You can automatically delete unused modules from the requirements.txt file (
     `unimport --requirements --remove`), see the difference (
     `unimport --requirements --diff`), delete it by requesting permission (
     `unimport --requirements --permission`), or just check ( `unimport --requirements`).
 
-- [🔥 Fix: match error between import name and name by @hakancelik96](https://github.com/hakancelik96/unimport/pull/74)
+- [🔥 Fix: match error between import name and name by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/74)
 
-- [💪 Support for type hints (#58) by @hakancelik96 & string typing @isidentical](https://github.com/hakancelik96/unimport/pull/71)
+- [💪 Support for type hints (#58) by @hakancelikdev & string typing @isidentical](https://github.com/hakancelikdev/unimport/pull/71)
 
 ```python
 from typing import List, TYPE_TEST
@@ -176,33 +176,33 @@ from typing import List, TYPE_TEST
 test: "List['TYPE_TEST']"
 ```
 
-- [🔥 fix: get_suggestion_modules function fix for `__all__` name when import is star](https://github.com/hakancelik96/unimport/pull/64)
+- [🔥 fix: get_suggestion_modules function fix for `__all__` name when import is star](https://github.com/hakancelikdev/unimport/pull/64)
 
 ## [0.2.7] - 9/June/2020
 
-- [🔥 If imports inside the `try ... except ImportError, ModuleNotFoundError` block, skip it. ( #46 ) by @hakancelik96 and @isidentical](https://github.com/hakancelik96/unimport/pull/62)
+- [🔥 If imports inside the `try ... except ImportError, ModuleNotFoundError` block, skip it. ( #46 ) by @hakancelikdev and @isidentical](https://github.com/hakancelikdev/unimport/pull/62)
 
-- [🔥 `--show-error` flag add by @hakancelik96](https://github.com/hakancelik96/unimport/pull/61)
+- [🔥 `--show-error` flag add by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/61)
 
-- [🐞fix: Skip star imports when the `--include-star-import` flag is not used by @hakancelik96](https://github.com/hakancelik96/unimport/pull/60)
+- [🐞fix: Skip star imports when the `--include-star-import` flag is not used by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/60)
 
-- [🐞fix: finding functions during scanning by @hakancelik96](https://github.com/hakancelik96/unimport/pull/55)
+- [🐞fix: finding functions during scanning by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/55)
 
-- [💪 `#noqa` comment support to skip import (#48) by @hakancelik96](https://github.com/hakancelik96/unimport/pull/54)
+- [💪 `#noqa` comment support to skip import (#48) by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/54)
 
-- [💪 `typing` imports used in typing comments support only python3.8 (#49) by @hakancelik96](https://github.com/hakancelik96/unimport/pull/53)
+- [💪 `typing` imports used in typing comments support only python3.8 (#49) by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/53)
 
-- [Set default of permission flag as yes (#51) by @semakaratas](https://github.com/hakancelik96/unimport/pull/52)
+- [Set default of permission flag as yes (#51) by @semakaratas](https://github.com/hakancelikdev/unimport/pull/52)
 
-- [Fix: 'Ignore imports that shadow builtin names' 🐞 💪 🧪 (#45 & #47) by @hakancelik96](https://github.com/hakancelik96/unimport/pull/50)
+- [Fix: 'Ignore imports that shadow builtin names' 🐞 💪 🧪 (#45 & #47) by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/50)
 
 ## [0.2.6.2] - 23/May/2020
 
-- [🐞 Config](https://github.com/hakancelik96/unimport/commit/ee4dbb1301fef66a0cf99e9cfb9b18c6b2f0587d)
+- [🐞 Config](https://github.com/hakancelikdev/unimport/commit/ee4dbb1301fef66a0cf99e9cfb9b18c6b2f0587d)
 
 ## [0.2.6.1] - 22/May/2020
 
-[PR: 0.2.6 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/32)
+[PR: 0.2.6 by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/32)
 
 - 💪 `--include-star-import command add` Include star imports during scanning and
   refactor.
@@ -234,90 +234,90 @@ __all__ = ["compile_command"]
 Thanks to this feature, we take the values ​​in the `__all__` list and see if there is
 any matching import statements. If there isn't, this import is unused import.
 
-- [💪 Support exclude & include config with regex by @hakancelik96](https://github.com/hakancelik96/unimport/pull/36)
+- [💪 Support exclude & include config with regex by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/36)
   After this feature, we can write the file include and exclude pattern setting with
   regex in the console and in the configuration files.
 
-- [🐞 Show, check and congratulations messages in \__main_ by @hakancelik96](https://github.com/hakancelik96/unimport/commit/54129bfc9e78f678bb2fea9b2411355d857a0a37)
+- [🐞 Show, check and congratulations messages in \__main_ by @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/54129bfc9e78f678bb2fea9b2411355d857a0a37)
 
-- [🐞 --include-star-import command refactor & scan by @hakancelik96](https://github.com/hakancelik96/unimport/commit/d44b2c6d0c5997fb716d58f00d0d5ab2a8042c26)
+- [🐞 --include-star-import command refactor & scan by @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/d44b2c6d0c5997fb716d58f00d0d5ab2a8042c26)
 
-- [🐞 \_list_paths in session by @hakancelik96](https://github.com/hakancelik96/unimport/commit/179ba9c45031de8d5aa1de43e0449ccdeece8d5e)
+- [🐞 \_list_paths in session by @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/179ba9c45031de8d5aa1de43e0449ccdeece8d5e)
 
-- [v0.2.61](https://github.com/hakancelik96/unimport/commit/dca5265eb4c106aaa190ea67af5f8da46202e00b)
+- [v0.2.61](https://github.com/hakancelikdev/unimport/commit/dca5265eb4c106aaa190ea67af5f8da46202e00b)
 
 ## [0.2.5] - 16/May/2020
 
-[0.2.5 by @hakancelik96](https://github.com/hakancelik96/unimport/pull/31)
+[0.2.5 by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/31)
 
 - 💪 Refactor code rewrite using libcst.
 - 🐞 Refactor bugs fix.
-- [🧪 Comma rare case support & test.](https://github.com/hakancelik96/unimport/blob/b8800ec19441bbc452900e1c8b558bea2e43d065/rare_cases/case_comma.py)
+- [🧪 Comma rare case support & test.](https://github.com/hakancelikdev/unimport/blob/b8800ec19441bbc452900e1c8b558bea2e43d065/rare_cases/case_comma.py)
 - 💪 pre-commit add & support
 - 🐞 Add Sytranx Error Catcher
 
 ## [0.2.4] - 17/April/2020
 
-- [💪 As import refactor support by @hakancelik96](https://github.com/hakancelik96/unimport/commit/147ed5e836d6a4589a92db4157bfd299ca935b02)
-- [💪 Duplicate detect and refactor support by @hakancelik96](https://github.com/hakancelik96/unimport/pull/23)
+- [💪 As import refactor support by @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/147ed5e836d6a4589a92db4157bfd299ca935b02)
+- [💪 Duplicate detect and refactor support by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/23)
 
 ## [0.2.2] - 4/April/2020
 
-- [🐞 Fix: Scan & Config - Add test to default exlude by @hakancelik96](https://github.com/hakancelik96/unimport/commit/7e789872917c51e5ffa167d26581e5397fd34998)
+- [🐞 Fix: Scan & Config - Add test to default exlude by @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/7e789872917c51e5ffa167d26581e5397fd34998)
 
 ## [0.2.1] - 8/March/2020
 
 💪 from x import \* support
 
-- [issue; #19](https://github.com/hakancelik96/unimport/issues/19)
-- [PR; #21](https://github.com/hakancelik96/unimport/pull/21) by @hakancelik96
+- [issue; #19](https://github.com/hakancelikdev/unimport/issues/19)
+- [PR; #21](https://github.com/hakancelikdev/unimport/pull/21) by @hakancelikdev
 
 ## [0.2.0] - 19/Jan/2020
 
 - 💪 Argparse support.
 
-  - [implement an initial arg parser by @gkmngrgn](https://github.com/hakancelik96/unimport/commit/4e5fbd778112704626c8d708a1077d7d1f345157)
-  - [argparse support by @gkmngrgn](https://github.com/hakancelik96/unimport/commit/837af61fab771b4a09893a7854df42452de7aff9)
-  - [argparse (#4) by @isidentical](https://github.com/hakancelik96/unimport/commit/90cfab776d3e15b417d1566f7ca1b1e2756763dd)
+  - [implement an initial arg parser by @gkmngrgn](https://github.com/hakancelikdev/unimport/commit/4e5fbd778112704626c8d708a1077d7d1f345157)
+  - [argparse support by @gkmngrgn](https://github.com/hakancelikdev/unimport/commit/837af61fab771b4a09893a7854df42452de7aff9)
+  - [argparse (#4) by @isidentical](https://github.com/hakancelikdev/unimport/commit/90cfab776d3e15b417d1566f7ca1b1e2756763dd)
   - Arguments
-    - ["-w" / "--write" parameter is fixed in this PR (#9) by @gkmngrgn](https://github.com/hakancelik96/unimport/commit/5c59f938d3ef3844a5420882ad318a120e4da4af)
-    - [#12 diff option & and overwrite permission add by @hakancelik96](https://github.com/hakancelik96/unimport/commit/36e7216cd6cc442864460d7b2b7661190c627757)
-    - [#12 -dw add by @hakancelik96](https://github.com/hakancelik96/unimport/commit/57913e0fb47073f4473e5694470cc2ee9dffdfb6)
-    - [#12 bug fix & Some functions have been moved to the corresponding files @hakancelik96](https://github.com/hakancelik96/unimport/commit/188370fc7928588a48e9e3dcd0ee70f9f12b733e)
-    - [--version add by @hakancelik96](https://github.com/hakancelik96/unimport/commit/2112e44e45bc0b34e330bc5320bbcd1462257f1e)
-    - [Console Argument (#17) by @hakancelik96](https://github.com/hakancelik96/unimport/commit/e4db14dbc74fbc8a51c5d1f62ca9d679af05af9b)
+    - ["-w" / "--write" parameter is fixed in this PR (#9) by @gkmngrgn](https://github.com/hakancelikdev/unimport/commit/5c59f938d3ef3844a5420882ad318a120e4da4af)
+    - [#12 diff option & and overwrite permission add by @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/36e7216cd6cc442864460d7b2b7661190c627757)
+    - [#12 -dw add by @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/57913e0fb47073f4473e5694470cc2ee9dffdfb6)
+    - [#12 bug fix & Some functions have been moved to the corresponding files @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/188370fc7928588a48e9e3dcd0ee70f9f12b733e)
+    - [--version add by @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/2112e44e45bc0b34e330bc5320bbcd1462257f1e)
+    - [Console Argument (#17) by @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/e4db14dbc74fbc8a51c5d1f62ca9d679af05af9b)
 
 - 🐞 Tests
 
-  - [fix_multiple_problems_at_once_action.py by @hakancelik96](https://github.com/hakancelik96/unimport/commit/aee62041b2d625cef0d723c526d5db28d96ce2fd)
-  - [test_overwrite source_expected path bug fix by @hakancelik96](https://github.com/hakancelik96/unimport/commit/63645dbb4333b3675e57bbc99bddfa133eb33594)
+  - [fix_multiple_problems_at_once_action.py by @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/aee62041b2d625cef0d723c526d5db28d96ce2fd)
+  - [test_overwrite source_expected path bug fix by @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/63645dbb4333b3675e57bbc99bddfa133eb33594)
 
 - 💪 Configuration
 
-  - [example_configuration add by @hakancelik96](https://github.com/hakancelik96/unimport/commit/70c70ba0d5ac8f200986c5c0a57acc8ccc574dab)
-  - [#8 & glob configuration by @hakancelik96](https://github.com/hakancelik96/unimport/commit/c8bd58e28855886c5908a626260820c3894a4600)
-  - [ignore config name change as exclude by @hakancelik96](https://github.com/hakancelik96/unimport/commit/aef61eb3ddf0c295719dc840390fba16e3d5e3e9)
-  - [remove .unimport.cfg by @hakancelik96](https://github.com/hakancelik96/unimport/commit/b052ffb336bc0f73a723f5f4938cb7ffb81cd038)
-  - [find_config bug fix & console config argument bug fix by @hakancelik96](https://github.com/hakancelik96/unimport/commit/860d57791a36c54e1830439bf9e571b1cb608123)
+  - [example_configuration add by @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/70c70ba0d5ac8f200986c5c0a57acc8ccc574dab)
+  - [#8 & glob configuration by @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/c8bd58e28855886c5908a626260820c3894a4600)
+  - [ignore config name change as exclude by @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/aef61eb3ddf0c295719dc840390fba16e3d5e3e9)
+  - [remove .unimport.cfg by @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/b052ffb336bc0f73a723f5f4938cb7ffb81cd038)
+  - [find_config bug fix & console config argument bug fix by @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/860d57791a36c54e1830439bf9e571b1cb608123)
 
 - 💪 Lib2to3 support
 
-  - [Initial lib2to3 refactor by @isidentical](https://github.com/hakancelik96/unimport/commit/9030cb2fea518aa9fb887a5d4ef1bb8b34947ed9)
-  - [add support for name binding by @isidentical](https://github.com/hakancelik96/unimport/commit/4a3df83b5b89d00472bed292c23b20693bdf5dd2)
-  - [adapt testing suite by @isidentical](https://github.com/hakancelik96/unimport/commit/c81036fe5b0d845c3220cfda1e4c30250e1107a1)
+  - [Initial lib2to3 refactor by @isidentical](https://github.com/hakancelikdev/unimport/commit/9030cb2fea518aa9fb887a5d4ef1bb8b34947ed9)
+  - [add support for name binding by @isidentical](https://github.com/hakancelikdev/unimport/commit/4a3df83b5b89d00472bed292c23b20693bdf5dd2)
+  - [adapt testing suite by @isidentical](https://github.com/hakancelikdev/unimport/commit/c81036fe5b0d845c3220cfda1e4c30250e1107a1)
 
 - 🐞 Bug Fix
 
-  - [setup.cfg bug fix & catch error in detect by @hakancelik96](https://github.com/hakancelik96/unimport/commit/a99b3846d55b723a701d6fdbbc7e634772b8c5ba)
-  - [get_files bug fix by @hakancelik96](https://github.com/hakancelik96/unimport/commit/3d3299f1c82161a8e95d909864ad00dd9fda23f9)
-  - [support local imports by @hakancelik96 and @isidentical](https://github.com/hakancelik96/unimport/commit/8c9b12295cf7c87670a685e59f95f1d83da130f7)
+  - [setup.cfg bug fix & catch error in detect by @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/a99b3846d55b723a701d6fdbbc7e634772b8c5ba)
+  - [get_files bug fix by @hakancelikdev](https://github.com/hakancelikdev/unimport/commit/3d3299f1c82161a8e95d909864ad00dd9fda23f9)
+  - [support local imports by @hakancelikdev and @isidentical](https://github.com/hakancelikdev/unimport/commit/8c9b12295cf7c87670a685e59f95f1d83da130f7)
 
 - 💊 Optimization
 
-  - [balamir by @hakancelik96 and @isidentical](https://github.com/hakancelik96/unimport/commit/d4c1594371e7d3a3646cf2d886e931b50ca104f6)
+  - [balamir by @hakancelikdev and @isidentical](https://github.com/hakancelikdev/unimport/commit/d4c1594371e7d3a3646cf2d886e931b50ca104f6)
 
 - 💪 API Support
-  - [General API Cleanup by @isidentical](https://github.com/hakancelik96/unimport/commit/f3efe4720eaa4eef5d991f838a0bd0872661dfa3)
+  - [General API Cleanup by @isidentical](https://github.com/hakancelikdev/unimport/commit/f3efe4720eaa4eef5d991f838a0bd0872661dfa3)
 
 ## [0.1.3] - 31/Oct/2019
 
