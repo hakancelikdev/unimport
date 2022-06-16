@@ -50,11 +50,11 @@ setup(
     ],
     extras_require={
         "docs": [
-            "mkdocs==1.2.1",
-            "mkdocs-material==7.1.9",
-            "mkdocs-markdownextradata-plugin==0.2.4",
-            "mkdocs-minify-plugin==0.4.0",
-            "mkdocs-git-revision-date-localized-plugin==0.9.2",
+            "mkdocs==1.3.0",
+            "mkdocs-material==8.3.6",
+            "mkdocs-markdownextradata-plugin==0.2.5",
+            "mkdocs-minify-plugin==0.5.0",
+            "mkdocs-git-revision-date-localized-plugin==1.0.1",
         ],
         "dev": [
             "pytest==6.2.4",

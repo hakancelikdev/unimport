@@ -4,8 +4,6 @@
 
 **A linter, formatter for finding and removing unused import statements.**
 
-https://user-images.githubusercontent.com/19157033/173917900-a3e99b84-bb53-455c-85ec-91d7e696b4c6.mp4
-
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/hakancelikdev/unimport/master.svg)](https://results.pre-commit.ci/latest/github/hakancelikdev/unimport/master)
 ![test](https://github.com/hakancelikdev/unimport/workflows/Test/badge.svg)
 
