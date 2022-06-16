@@ -67,19 +67,19 @@ while autoflake simply ignores them.
 
 - Our outputs are more useful, try using our --check, --diff or --permission commands.
 
-## Performance
+### Performance
 
 Unimport < 0.6.8 was much slower than Autoflake == 1.4 (current latest version as of
 writing this) but Unimport > 0.6.8 is slightly faster.
 
-## Reasons to choose autoflake
+### Reasons to choose autoflake
 
 - ~~It is faster. When tested, autoflake is 1-4x faster on average.~~ (Unimport is
   slightly faster now)
 - It removes unused variables which unimport doesn't support, and is not planning to.
 - Has a feature that removes duplicate keys on objects.
 
-## Reasons to choose unimport
+### Reasons to choose unimport
 
 - It does more static analysis to increse the accuracy of choosing the correct imports
   to remove.
@@ -91,8 +91,22 @@ writing this) but Unimport > 0.6.8 is slightly faster.
 - Has a feature to remove the unused imports from requirements file.
 - Allows configuration via pyproject.toml and setup.cfg files.
 
-## Overall
+### Overall
 
 Even though unimport and autoflake has features that are similar, they are not designed
 to do the same thing. When you are including one to your project, it is a good idea to
 know what your needs are, and decide accordingly.
+
+## I can already do this with many IDEs, why should I use Unimport?
+
+### Sort answer
+
+Not everyone works with IDEs and not all IDEs work in all environments.
+
+### Long answer
+
+Imagine that you are working with a team, not everyone's coding environment is the same,
+if you want to apply certain standards, pre-commit can be used, it helps a lot, and if
+you want to make sure that unnecessary imports are deleted before committing, you should
+use unimport with pre-commit, this control is tox you can also provide with or let's say
+you are refactoring a project, unimport, black, and isort will make your job easier.
