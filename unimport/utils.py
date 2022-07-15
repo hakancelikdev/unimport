@@ -34,6 +34,7 @@ __all__ = (
     "read",
     "list_paths",
     "diff",
+    "return_exit_code",
 )
 
 
@@ -169,3 +170,26 @@ def diff(
             fromfile=fromfile.as_posix() if fromfile else "",
         )
     )
+
+
+def return_exit_code(
+    *,
+    is_unused_import_names: bool,
+    is_syntax_error: bool,
+    refactor_applied: bool
+) -> int:
+    # NOTE: If this function changes, be sure to update this page https://unimport.hakancelik.dev/#exit-code-behavior
+
+    assert not (
+        is_unused_import_names is False and refactor_applied is True
+    ), "is_unused_import_names False while refactor_applied cannot be True."
+
+    if is_syntax_error:
+        return 1
+    elif is_unused_import_names:
+        if refactor_applied:
+            return 0
+        else:
+            return 1
+    else:
+        return 0

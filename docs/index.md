@@ -358,6 +358,11 @@ class Klass:
         x
 ```
 
+## Exit code behavior
+
+Exit code 1 if there is a syntax error Exit code 0 if unused import versa and auto
+removed for all other cases exit code 1 Exit code 0 if there is no unused import.
+
 ## Command line options
 
 You can list many options by running unimport --help
