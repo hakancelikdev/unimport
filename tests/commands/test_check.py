@@ -12,7 +12,7 @@ from unimport.statement import Import, ImportFrom
 @pytest.mark.parametrize(
     "use_color_setting, stdout", [[True, ""], [False, ""]]
 )
-def test_emty_print_check(use_color_setting: bool, stdout: str) -> None:
+def test_empty_print_check(use_color_setting: bool, stdout: str) -> None:
     with redirect_stdout(io.StringIO()) as f:
         check(Path("tests/commands/test_check.py"), [], use_color_setting)
     assert f.getvalue() == stdout

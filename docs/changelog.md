@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - ././2022
 
+- [Fix: exit code behavior by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/225)
+
 ## [0.9.6] - 4/May/2022
 
 - [3.10+ Support 💪 by @hakancelikdev](https://github.com/hakancelikdev/unimport/issues/26)

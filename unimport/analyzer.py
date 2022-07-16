@@ -7,7 +7,6 @@ import re
 from pathlib import Path
 from typing import FrozenSet, List, Set, cast
 
-from unimport import color
 from unimport import constants as C
 from unimport import utils
 from unimport.relate import first_occurrence, get_parents, relate
@@ -454,19 +453,11 @@ class Analyzer(ast.NodeVisitor):
         if self.skip_file():
             return None
 
-        try:
-            if C.PY38_PLUS:
-                tree = ast.parse(self.source, type_comments=True)
-            else:
-                tree = ast.parse(self.source)
-        except SyntaxError as e:
-            print(
-                color.paint(str(e), color.RED)
-                + " at "
-                + color.paint(self.path.as_posix(), color.GREEN)
-            )
-            return None
-
+        tree = (
+            ast.parse(self.source, type_comments=True)
+            if C.PY38_PLUS
+            else ast.parse(self.source)
+        )
         """
         Set parent
         """
