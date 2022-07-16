@@ -30,7 +30,7 @@ git checkout -b i{your issue number}
 ```shell
 $ git remote add upstream git@github.com:hakancelikdev/unimport.git
 $ git fetch upstream # or git fetch --all
-$ git rebase upstream/master
+$ git rebase upstream/main
 ```
 
 ## Testing

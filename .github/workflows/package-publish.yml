@@ -2,9 +2,9 @@ name: Package Publish
 
 on:
   push:
-    # Publish `master` as Docker `latest` image.
+    # Publish `main` as Docker `latest` image.
     branches:
-      - master
+      - main
       - stable
 
     # Publish `1.2.3` tags as releases.
@@ -43,7 +43,7 @@ jobs:
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
           # Use Docker `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
+          [ "$VERSION" == "main" ] && VERSION=latest
           # [ "$VERSION" == "stable" ] && VERSION=stable
 
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION

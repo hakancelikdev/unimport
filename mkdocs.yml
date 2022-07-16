@@ -120,7 +120,7 @@ theme:
 copyright: Copyright &copy; 2020 - 2020 Hakan Çelik
 repo_url: https://github.com/hakancelikdev/unimport
 repo_name: hakancelikdev/unimport
-edit_uri: https://github.com/hakancelikdev/unimport/tree/master/docs
+edit_uri: https://github.com/hakancelikdev/unimport/tree/main/docs
 
 nav:
   - Home: index.md
