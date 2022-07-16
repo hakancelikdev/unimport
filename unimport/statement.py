@@ -2,7 +2,7 @@ import ast
 import operator
 import sys
 from dataclasses import dataclass, field
-from typing import ClassVar, Iterator, List, Set, Union
+from typing import ClassVar, Iterator, List, Optional, Set, Union
 
 if sys.version_info >= (3, 8):
     from typing import Literal  # unimport: skip
@@ -216,7 +216,7 @@ class Scope:
         return hash(self.node)
 
     @classmethod
-    def get_curent_scope(cls) -> "Scope":
+    def get_current_scope(cls) -> "Scope":
         return cls.current_scope[-1]
 
     @classmethod
@@ -234,7 +234,7 @@ class Scope:
 
     @classmethod
     def add_current_scope(cls, node: ast.AST) -> None:
-        parent = cls.get_curent_scope()
+        parent = cls.get_current_scope()
         scope = Scope(node, parent)
         cls.current_scope.append(scope)
 
@@ -247,7 +247,7 @@ class Scope:
         cls, current_node: Union[Import, ImportFrom, Name], *, is_global=False
     ) -> None:
         scope = cls.get_previous_scope(
-            cls.get_global_scope() if is_global else cls.get_curent_scope()
+            cls.get_global_scope() if is_global else cls.get_current_scope()
         )
 
         # current nodes add to scope
@@ -271,7 +271,7 @@ class Scope:
     @classmethod
     def get_scope_by_current_node(
         cls, current_node: Union[Import, ImportFrom, Name]
-    ) -> "Scope":
+    ) -> Optional["Scope"]:
         for scope in cls.scopes:
             if current_node in scope.current_nodes:
                 return scope

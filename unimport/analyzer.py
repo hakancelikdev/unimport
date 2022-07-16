@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import FrozenSet, List, Set, cast
 
 from unimport import constants as C
+from unimport import typing as T
 from unimport import utils
 from unimport.relate import first_occurrence, get_parents, relate
 from unimport.statement import Import, ImportFrom, Name, Scope
@@ -15,7 +16,7 @@ from unimport.statement import Import, ImportFrom, Name, Scope
 __all__ = ("Analyzer",)
 
 
-def _generic_visit(func: C.FunctionT) -> C.FunctionT:
+def _generic_visit(func: T.FunctionT) -> T.FunctionT:
     """decorator to make visitor work _generic_visit."""
 
     @functools.wraps(func)
@@ -25,7 +26,7 @@ def _generic_visit(func: C.FunctionT) -> C.FunctionT:
         node = args[1]
         obj.generic_visit(node)
 
-    return cast(C.FunctionT, wrapper)
+    return cast(T.FunctionT, wrapper)
 
 
 class _DefinedNameAnalyzer(ast.NodeVisitor):
@@ -35,7 +36,7 @@ class _DefinedNameAnalyzer(ast.NodeVisitor):
         self.defined_names: Set[str] = set()
 
     @_generic_visit
-    def visit_FunctionDef(self, node: C.ASTFunctionT) -> None:
+    def visit_FunctionDef(self, node: T.ASTFunctionT) -> None:
         self.defined_names.add(node.name)
 
     visit_AsyncFunctionDef = visit_FunctionDef
@@ -87,7 +88,7 @@ class _ImportAnalyzer(ast.NodeVisitor):
 
         Scope.remove_current_scope()
 
-    def visit_FunctionDef(self, node: C.ASTFunctionT) -> None:
+    def visit_FunctionDef(self, node: T.ASTFunctionT) -> None:
         Scope.add_current_scope(node)
 
         self.generic_visit(node)
@@ -143,7 +144,7 @@ class _ImportAnalyzer(ast.NodeVisitor):
 
         self.any_import_error = False
 
-    def skip_import(self, node: C.ASTImport) -> bool:
+    def skip_import(self, node: T.ASTImport) -> bool:
         if C.PY38_PLUS:
             source_segment = "\n".join(
                 self.source.splitlines()[node.lineno - 1 : node.end_lineno]
@@ -175,7 +176,7 @@ class _NameAnalyzer(ast.NodeVisitor):
 
         Scope.remove_current_scope()
 
-    def visit_FunctionDef(self, node: C.ASTFunctionT) -> None:
+    def visit_FunctionDef(self, node: T.ASTFunctionT) -> None:
         Scope.add_current_scope(node)
 
         self._type_comment(node)
@@ -233,7 +234,7 @@ class _NameAnalyzer(ast.NodeVisitor):
         # type_variable
         # type_var = List["object"] etc.
 
-        def visit_constant_str(node: C.ASTNameType) -> None:
+        def visit_constant_str(node: T.ASTNameType) -> None:
             """Separates the value by node type (str or constant) and gives it
             to the visit function."""
 
@@ -321,11 +322,11 @@ class _ImportableAnalyzer(ast.NodeVisitor):
 
     def __init__(self) -> None:
         self.importable_nodes: List[
-            C.ASTNameType
+            T.ASTNameType
         ] = []  # nodes on the __all__ list
-        self.suggestions_nodes: List[C.ASTImportableT] = []  # nodes on the CFN
+        self.suggestions_nodes: List[T.ASTImportableT] = []  # nodes on the CFN
 
-    def visit_CFN(self, node: C.CFNT) -> None:
+    def visit_CFN(self, node: T.CFNT) -> None:
         Scope.add_current_scope(node)
 
         if not first_occurrence(node, C.DefTuple):

@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import FrozenSet, Iterable, Iterator, List, Optional, Set, Tuple
 
 import unimport.constants as C
+from unimport import typing as T
 
 if C.PY38_PLUS:
     from importlib.metadata import (  # unimport: skip
@@ -93,7 +94,7 @@ def package_name_from_metadata(package: str) -> Optional[str]:
 
 
 def get_used_packages(
-    imports: List[C.ImportT], unused_imports: List[C.ImportT]
+    imports: List[T.ImportT], unused_imports: List[T.ImportT]
 ) -> Set[str]:
     packages = set()
     used_packages = set(
