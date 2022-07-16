@@ -23,7 +23,7 @@ __all__ = (
 default_config = DefaultConfig()
 
 
-def add_sources_option(parser: argparse.ArgumentParser):
+def add_sources_option(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "sources",
         default=default_config.sources,
@@ -34,7 +34,7 @@ def add_sources_option(parser: argparse.ArgumentParser):
     )
 
 
-def add_check_option(parser: argparse.ArgumentParser):
+def add_check_option(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--check",
         action="store_true",
@@ -43,7 +43,7 @@ def add_check_option(parser: argparse.ArgumentParser):
     )
 
 
-def add_config_option(parser: argparse.ArgumentParser):
+def add_config_option(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-c",
         "--config",
@@ -55,7 +55,7 @@ def add_config_option(parser: argparse.ArgumentParser):
     )
 
 
-def add_include_option(parser: argparse.ArgumentParser):
+def add_include_option(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--include",
         help="File include pattern.",
@@ -66,7 +66,7 @@ def add_include_option(parser: argparse.ArgumentParser):
     )
 
 
-def add_exclude_option(parser: argparse.ArgumentParser):
+def add_exclude_option(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--exclude",
         help="File exclude pattern.",
@@ -77,7 +77,7 @@ def add_exclude_option(parser: argparse.ArgumentParser):
     )
 
 
-def add_gitignore_option(parser: argparse.ArgumentParser):
+def add_gitignore_option(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--gitignore",
         action="store_true",
@@ -86,7 +86,7 @@ def add_gitignore_option(parser: argparse.ArgumentParser):
     )
 
 
-def add_ignore_init_option(parser: argparse.ArgumentParser):
+def add_ignore_init_option(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--ignore-init",
         action="store_true",
@@ -95,7 +95,7 @@ def add_ignore_init_option(parser: argparse.ArgumentParser):
     )
 
 
-def add_include_star_import_option(parser: argparse.ArgumentParser):
+def add_include_star_import_option(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--include-star-import",
         action="store_true",
@@ -104,7 +104,7 @@ def add_include_star_import_option(parser: argparse.ArgumentParser):
     )
 
 
-def add_diff_option(parser: argparse.ArgumentParser):
+def add_diff_option(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-d",
         "--diff",
@@ -114,7 +114,9 @@ def add_diff_option(parser: argparse.ArgumentParser):
     )
 
 
-def add_remove_option(exclusive_group: argparse._MutuallyExclusiveGroup):
+def add_remove_option(
+    exclusive_group: argparse._MutuallyExclusiveGroup,
+) -> None:
     exclusive_group.add_argument(
         "-r",
         "--remove",
@@ -124,7 +126,9 @@ def add_remove_option(exclusive_group: argparse._MutuallyExclusiveGroup):
     )
 
 
-def add_permission_option(exclusive_group: argparse._MutuallyExclusiveGroup):
+def add_permission_option(
+    exclusive_group: argparse._MutuallyExclusiveGroup,
+) -> None:
     exclusive_group.add_argument(
         "-p",
         "--permission",
@@ -134,7 +138,7 @@ def add_permission_option(exclusive_group: argparse._MutuallyExclusiveGroup):
     )
 
 
-def add_requirements_option(parser: argparse.ArgumentParser):
+def add_requirements_option(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--requirements",
         action="store_true",
@@ -143,7 +147,7 @@ def add_requirements_option(parser: argparse.ArgumentParser):
     )
 
 
-def add_version_option(parser: argparse.ArgumentParser):
+def add_version_option(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-v",
         "--version",

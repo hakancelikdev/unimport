@@ -1,83 +1,75 @@
-import argparse
 import sys
-from typing import Optional, Sequence, Set
+from typing import Optional, Sequence
 
-from unimport import color, commands
-from unimport import constants as C
-from unimport import emoji, utils
+from unimport import color, commands, emoji, utils
 from unimport.analyzer import Analyzer
-from unimport.commands import options
+from unimport.commands import generate_parser
 from unimport.config import Config
 from unimport.refactor import refactor_string
 from unimport.statement import Import
+from unimport.utils import return_exit_code
 
 __all__ = ("main",)
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
-    parser = argparse.ArgumentParser(
-        prog="unimport",
-        description=C.DESCRIPTION,
-        epilog=f"Get rid of all unused imports {emoji.PARTYING_FACE}",
-    )
-    exclusive_group = parser.add_mutually_exclusive_group(required=False)
-
-    options.add_sources_option(parser)
-    options.add_check_option(parser)
-    options.add_config_option(parser)
-    color.add_color_option(parser)
-    options.add_include_option(parser)
-    options.add_exclude_option(parser)
-    options.add_gitignore_option(parser)
-    options.add_ignore_init_option(parser)
-    options.add_include_star_import_option(parser)
-    options.add_diff_option(parser)
-    options.add_remove_option(exclusive_group)
-    options.add_permission_option(exclusive_group)
-    options.add_requirements_option(parser)
-    options.add_version_option(parser)
-
     argv = argv if argv is not None else sys.argv[1:]
+
+    parser = generate_parser()
     args = parser.parse_args(argv)
     config = Config.get_config(args)
 
-    unused_modules = set()
-    used_packages: Set[str] = set()
-
+    unused_import_names, used_packages = set(), set()
+    is_syntax_error = False
+    refactor_applied = False
     for path in config.get_paths():
         source, encoding, newline = utils.read(path)
 
-        with Analyzer(
+        analysis = Analyzer(
             source=source,
             path=path,
             include_star_import=config.include_star_import,
-        ):
-            unused_imports = list(
-                Import.get_unused_imports(config.include_star_import)
+        )
+        try:
+            analysis.traverse()
+        except SyntaxError as exc:
+            print(
+                color.paint(str(exc), color.RED)
+                + " at "
+                + color.paint(path.as_posix(), color.GREEN)
             )
-            unused_modules.update({imp.name for imp in unused_imports})
-            used_packages.update(
-                utils.get_used_packages(Import.imports, unused_imports)
+            is_syntax_error = True
+            continue
+
+        unused_imports = list(
+            Import.get_unused_imports(config.include_star_import)
+        )
+        unused_import_names.update({imp.name for imp in unused_imports})
+        used_packages.update(
+            utils.get_used_packages(Import.imports, unused_imports)
+        )
+
+        analysis.clear()
+
+        if config.check:
+            commands.check(path, unused_imports, args.color)
+        if any((config.diff, config.remove)):
+            refactor_result = refactor_string(
+                source=source, unused_imports=unused_imports
             )
-            if config.check:
-                commands.check(path, unused_imports, args.color)
-            if any((config.diff, config.remove)):
-                refactor_result = refactor_string(
-                    source=source,
-                    unused_imports=unused_imports,
-                )
-                if config.diff:
-                    exists_diff = commands.diff(path, source, refactor_result)
+            if config.diff:
+                exists_diff = commands.diff(path, source, refactor_result)
                 if config.permission and exists_diff:
                     commands.permission(
                         path, encoding, newline, refactor_result, args.color
                     )
-                if config.remove and source != refactor_result:
-                    commands.remove(
-                        path, encoding, newline, refactor_result, args.color
-                    )
+            if config.remove and source != refactor_result:
+                commands.remove(
+                    path, encoding, newline, refactor_result, args.color
+                )
+                refactor_applied = True
 
-    if not unused_modules and config.check:
+    if not unused_import_names and config.check:
         print(
             color.paint(
                 f"{emoji.STAR} Congratulations there is no unused import in your project. {emoji.STAR}",
@@ -121,11 +113,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     commands.requirements_remove(
                         path, refactor_result, args.color
                     )
+                    refactor_applied = True
 
-    if unused_modules:
-        return 1
-    else:
-        return 0
+    return return_exit_code(
+        is_unused_import_names=bool(unused_import_names),
+        is_syntax_error=is_syntax_error,
+        refactor_applied=refactor_applied,
+    )
 
 
 if __name__ == "__main__":

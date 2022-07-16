@@ -1,3 +1,4 @@
+import contextlib
 import importlib
 import re
 from pathlib import Path
@@ -48,10 +49,11 @@ def test_cases(path: Path, refactor_path: Path, analyzer_path: Path, logger):
             reason = skip.group("reason")
             pytest.skip(reason, allow_module_level=True)
 
-    with Analyzer(source=source, include_star_import=True):
-        assert Name.names == analyzer.NAMES
-        assert Import.imports == analyzer.IMPORTS
-        assert list(Import.get_unused_imports()) == analyzer.UNUSED_IMPORTS
+    with contextlib.suppress(SyntaxError):
+        with Analyzer(source=source, include_star_import=True):
+            assert Name.names == analyzer.NAMES
+            assert Import.imports == analyzer.IMPORTS
+            assert list(Import.get_unused_imports()) == analyzer.UNUSED_IMPORTS
 
     # refactor tests
     refactor = refactor_string(source, analyzer.UNUSED_IMPORTS)
