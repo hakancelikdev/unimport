@@ -18,7 +18,7 @@ repos:
       - id: unimport
         args: [--remove, --include-star-import]
 
-  - repo: https://github.com/myint/docformatter
+  - repo: https://github.com/PyCQA/docformatter
     rev: v1.4
     hooks:
       - id: docformatter
