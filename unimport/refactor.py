@@ -4,7 +4,7 @@ import libcst as cst
 import libcst.matchers as m
 from libcst.metadata import CodeRange, PositionProvider
 
-from unimport import constants as C
+from unimport import typing as T
 from unimport.statement import Import, ImportFrom
 
 __all__ = ("refactor_string",)
@@ -65,8 +65,8 @@ class _RemoveUnusedImportTransformer(cst.CSTTransformer):
             )
 
     def leave_import_alike(
-        self, original_node: C.CSTImportT, updated_node: C.CSTImportT
-    ) -> Union[cst.RemovalSentinel, C.CSTImportT]:
+        self, original_node: T.CSTImportT, updated_node: T.CSTImportT
+    ) -> Union[cst.RemovalSentinel, T.CSTImportT]:
         names_to_keep = []
         names = cast(Sequence[cst.ImportAlias], updated_node.names)
         # already handled by leave_ImportFrom
@@ -98,7 +98,7 @@ class _RemoveUnusedImportTransformer(cst.CSTTransformer):
                 updated_node = updated_node.with_changes(rpar=rpar)
 
             updated_node = updated_node.with_changes(names=names_to_keep)
-            return cast(C.CSTImportT, updated_node)
+            return cast(T.CSTImportT, updated_node)
 
     @staticmethod
     def leave_StarImport(

@@ -2,11 +2,6 @@ import ast
 import builtins
 import distutils.sysconfig
 import sys
-from typing import Any, Callable, TypeVar, Union
-
-import libcst as cst
-
-from unimport.statement import Import, ImportFrom, Name
 
 DESCRIPTION = (
     "A linter, formatter for finding and removing unused import statements."
@@ -16,7 +11,6 @@ VERSION = "0.9.6"
 __all__ = (
     "BUILTINS",
     "BUILTIN_MODULE_NAMES",
-    "CFNT",
     "DESCRIPTION",
     "EXCLUDE_REGEX_PATTERN",
     "GLOB_PATTERN",
@@ -30,31 +24,6 @@ __all__ = (
     "VERSION",
 )
 
-# TYPE
-FunctionT = TypeVar("FunctionT", bound=Callable[..., Any])
-ASTImportableT = Union[
-    ast.AsyncFunctionDef,
-    ast.Attribute,
-    ast.ClassDef,
-    ast.FunctionDef,
-    ast.Name,
-    ast.alias,
-]
-
-ASTFunctionT = TypeVar("ASTFunctionT", ast.FunctionDef, ast.AsyncFunctionDef)
-ImportT = Union[Import, ImportFrom]
-StatementT = Union[Import, ImportFrom, Name]
-ASTImport = Union[ast.Import, ast.ImportFrom]
-ASTNameType = Union[ast.Name, ast.Constant]
-CFNT = TypeVar(
-    "CFNT",
-    ast.ClassDef,
-    ast.FunctionDef,
-    ast.AsyncFunctionDef,
-    ast.Name,
-)
-CSTImportT = TypeVar("CSTImportT", cst.Import, cst.ImportFrom)
-
 # REGEX
 GLOB_PATTERN = r"**/*.py"
 INCLUDE_REGEX_PATTERN = r"\.(py)$"
@@ -64,7 +33,6 @@ INIT_FILE_IGNORE_REGEX = r"__init__\.py"
 # TUPLE
 DefTuple = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
 ASTFunctionTuple = (ast.FunctionDef, ast.AsyncFunctionDef)
-
 
 # CONF
 PY38_PLUS = sys.version_info >= (3, 8)
