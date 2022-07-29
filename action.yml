@@ -1,6 +1,8 @@
 # action.yml
 name: "unimport"
 description: "Get rid of all unused imports 🥳"
+icon: check
+color: red
 inputs:
   extra_args:
     description: "options to pass to unimport run"
