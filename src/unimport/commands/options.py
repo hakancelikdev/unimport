@@ -2,7 +2,7 @@ import argparse
 from pathlib import Path
 
 from unimport import constants as C
-from unimport.config import DefaultConfig
+from unimport.config import Config
 
 __all__ = (
     "add_sources_option",
@@ -20,13 +20,11 @@ __all__ = (
     "add_version_option",
 )
 
-default_config = DefaultConfig()
-
 
 def add_sources_option(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "sources",
-        default=default_config.sources,
+        default=Config.default_sources,
         nargs="*",
         help="Files and folders to find the unused imports.",
         action="store",
@@ -39,7 +37,7 @@ def add_check_option(parser: argparse.ArgumentParser) -> None:
         "--check",
         action="store_true",
         help="Prints which file the unused imports are in.",
-        default=default_config.check,
+        default=Config.check,
     )
 
 
@@ -61,7 +59,7 @@ def add_include_option(parser: argparse.ArgumentParser) -> None:
         help="File include pattern.",
         metavar="include",
         action="store",
-        default=default_config.include,
+        default=Config.include,
         type=str,
     )
 
@@ -72,7 +70,7 @@ def add_exclude_option(parser: argparse.ArgumentParser) -> None:
         help="File exclude pattern.",
         metavar="exclude",
         action="store",
-        default=default_config.exclude,
+        default=Config.exclude,
         type=str,
     )
 
@@ -82,7 +80,7 @@ def add_gitignore_option(parser: argparse.ArgumentParser) -> None:
         "--gitignore",
         action="store_true",
         help="Exclude .gitignore patterns. if present.",
-        default=default_config.gitignore,
+        default=Config.gitignore,
     )
 
 
@@ -91,7 +89,7 @@ def add_ignore_init_option(parser: argparse.ArgumentParser) -> None:
         "--ignore-init",
         action="store_true",
         help="Ignore the __init__.py file.",
-        default=default_config.ignore_init,
+        default=Config.ignore_init,
     )
 
 
@@ -100,7 +98,7 @@ def add_include_star_import_option(parser: argparse.ArgumentParser) -> None:
         "--include-star-import",
         action="store_true",
         help="Include star imports during scanning and refactor.",
-        default=default_config.include_star_import,
+        default=Config.include_star_import,
     )
 
 
@@ -110,7 +108,7 @@ def add_diff_option(parser: argparse.ArgumentParser) -> None:
         "--diff",
         action="store_true",
         help="Prints a diff of all the changes unimport would make to a file.",
-        default=default_config.diff,
+        default=Config.diff,
     )
 
 
@@ -122,7 +120,7 @@ def add_remove_option(
         "--remove",
         action="store_true",
         help="Remove unused imports automatically.",
-        default=default_config.remove,
+        default=Config.remove,
     )
 
 
@@ -134,7 +132,7 @@ def add_permission_option(
         "--permission",
         action="store_true",
         help="Refactor permission after see diff.",
-        default=default_config.permission,
+        default=Config.permission,
     )
 
 
@@ -143,7 +141,7 @@ def add_requirements_option(parser: argparse.ArgumentParser) -> None:
         "--requirements",
         action="store_true",
         help="Include requirements.txt file, You can use it with all other arguments",
-        default=default_config.requirements,
+        default=Config.requirements,
     )
 
 
@@ -154,4 +152,14 @@ def add_version_option(parser: argparse.ArgumentParser) -> None:
         action="version",
         version=f"Unimport {C.VERSION}",
         help="Prints version of unimport",
+    )
+
+
+def add_color_option(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--color",
+        default=Config.color,
+        type=str,
+        metavar="{" + ",".join(Config._get_color_choices()) + "}",
+        help="Select whether to use color in the output. Defaults to `%(default)s`.",
     )

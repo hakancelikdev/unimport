@@ -2,7 +2,7 @@ import sys
 
 import pytest
 
-from unimport.color import RED, RESET, TERMINAL_SUPPORT_COLOR, paint, use_color
+from unimport.color import RED, RESET, TERMINAL_SUPPORT_COLOR, paint
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="Requires Windows")
@@ -29,7 +29,7 @@ def test_red_paint():
     assert RED + text + RESET == action_text
 
 
-def test_use_color_setting_false():
+def test_paint_use_color_false():
     text = "test text"
 
     action_text = paint(text, RED, False)
@@ -41,22 +41,3 @@ def test_use_color_setting_true():
 
     action_text = paint(text, RED, True)
     assert RED + text + RESET == action_text
-
-
-@pytest.mark.parametrize(
-    "option,expected_result",
-    [
-        ("auto", TERMINAL_SUPPORT_COLOR and sys.stderr.isatty()),
-        ("always", True),
-        ("never", False),
-    ],
-)
-def test_use_color(option, expected_result):
-    assert expected_result == use_color(option)
-
-
-def test_use_color_none_of_them():
-    with pytest.raises(ValueError) as cm:
-        use_color("none-of-them")
-
-    assert "none-of-them" in str(cm.value)

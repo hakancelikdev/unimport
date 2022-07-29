@@ -35,7 +35,7 @@ def test_generate_parser_argument_parser(parser: argparse.ArgumentParser):
 def test_generate_parser_empty_parse_args(parser: argparse.ArgumentParser):
     assert vars(parser.parse_args(["--color", "never"])) == dict(
         check=False,
-        color=False,
+        color="never",
         config=Path("."),
         diff=False,
         exclude="^$",

@@ -4,7 +4,7 @@ from typing import Optional, Sequence
 from unimport import color, commands, emoji, utils
 from unimport.analyzer import Analyzer
 from unimport.commands import generate_parser
-from unimport.config import Config
+from unimport.config import ParseConfig
 from unimport.refactor import refactor_string
 from unimport.statement import Import
 from unimport.utils import return_exit_code
@@ -17,7 +17,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     parser = generate_parser()
     args = parser.parse_args(argv)
-    config = Config.get_config(args)
+    config = ParseConfig.parse_args(args)
 
     unused_import_names, used_packages = set(), set()
     is_syntax_error = False
@@ -45,14 +45,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             Import.get_unused_imports(config.include_star_import)
         )
         unused_import_names.update({imp.name for imp in unused_imports})
-        used_packages.update(
-            utils.get_used_packages(Import.imports, unused_imports)
-        )
+        if config.requirements:
+            used_packages.update(
+                utils.get_used_packages(Import.imports, unused_imports)
+            )
 
         analysis.clear()
 
         if config.check:
-            commands.check(path, unused_imports, args.color)
+            commands.check(path, unused_imports, config.use_color)
         if any((config.diff, config.remove)):
             refactor_result = refactor_string(
                 source=source, unused_imports=unused_imports
@@ -61,11 +62,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 exists_diff = commands.diff(path, source, refactor_result)
                 if config.permission and exists_diff:
                     commands.permission(
-                        path, encoding, newline, refactor_result, args.color
+                        path,
+                        encoding,
+                        newline,
+                        refactor_result,
+                        config.use_color,
                     )
             if config.remove and source != refactor_result:
                 commands.remove(
-                    path, encoding, newline, refactor_result, args.color
+                    path, encoding, newline, refactor_result, config.use_color
                 )
                 refactor_applied = True
 
@@ -74,7 +79,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             color.paint(
                 f"{emoji.STAR} Congratulations there is no unused import in your project. {emoji.STAR}",
                 color.GREEN,
-                args.color,
+                config.use_color,
             )
         )
     if config.requirements:
@@ -89,7 +94,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 if module_name is None:
                     print(
                         color.paint(
-                            requirement + " not found", color.RED, args.color
+                            requirement + " not found",
+                            color.RED,
+                            config.use_color,
                         )
                     )
                     continue
@@ -99,7 +106,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
                     if config.check:
                         commands.requirements_check(
-                            path, index, requirement, args.color
+                            path, index, requirement, config.use_color
                         )
 
             refactor_result = "\n".join(copy_source)
@@ -107,11 +114,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 exists_diff = commands.diff(path, source, refactor_result)
                 if config.permission and exists_diff:
                     commands.requirements_permission(
-                        path, refactor_result, args.color
+                        path, refactor_result, config.use_color
                     )
                 if config.remove and source != refactor_result:
                     commands.requirements_remove(
-                        path, refactor_result, args.color
+                        path, refactor_result, config.use_color
                     )
                     refactor_applied = True
 
