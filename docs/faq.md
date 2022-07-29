@@ -106,7 +106,8 @@ Not everyone works with IDEs and not all IDEs work in all environments.
 ### Long answer
 
 Imagine that you are working with a team, not everyone's coding environment is the same,
-if you want to apply certain standards, pre-commit can be used, it helps a lot, and if
-you want to make sure that unnecessary imports are deleted before committing, you should
-use unimport with pre-commit, this control is tox you can also provide with or let's say
-you are refactoring a project, unimport, black, and isort will make your job easier.
+not everyone uses PyCharm or VScode. if you want to apply certain standards, pre-commit
+can be used, it helps a lot, and if you want to make sure that unnecessary imports are
+removed before committing, you should use unimport with pre-commit, or Let's say you
+want to make sure that there are no unnecessary imports in your entire project, unimport
+will help you.

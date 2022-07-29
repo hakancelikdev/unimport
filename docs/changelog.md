@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - ././2022
+## [0.10.0] - 30/July/2022
 
 - [💪 Support Github action by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/231)
 - [🐞 Fix: configurations flow by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/230)

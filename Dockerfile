@@ -1,11 +1,10 @@
-FROM python:3.9-alpine
+FROM python:3.10-alpine
 
 COPY . /app
 WORKDIR /app
 
-RUN apk add cargo
+RUN apk add cargo  \
+&& pip install --upgrade pip  \
+&& pip install .
 
-RUN pip install --upgrade pip
-RUN pip install .
-
-ENTRYPOINT [ "python", "-m", "unimport" ]
+ENTRYPOINT ["python", "-m", "unimport"]
