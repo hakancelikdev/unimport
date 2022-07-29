@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - ././2022
 
+- [💪 Support Github action by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/231)
 - [🐞 Fix: configurations flow by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/230)
 - [🐞 Fix: exit code behavior by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/225)
 

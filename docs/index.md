@@ -481,3 +481,20 @@ $ docker pull ghcr.io/hakancelikdev/unimport:{version_number}
 
 For more information see:
 https://github.com/hakancelikdev/unimport/pkgs/container/unimport
+
+## Use with Github action
+
+```yaml
+name: Unimport
+on: [push, pull_request]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+      - name: Check unused imports
+        uses: hakancelikdev/unimport@stable
+        with:
+          extra_args: --include src/
+```
