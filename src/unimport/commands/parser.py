@@ -1,6 +1,5 @@
 import argparse
 
-from unimport import color
 from unimport import constants as C
 from unimport import emoji
 from unimport.commands import options
@@ -16,7 +15,7 @@ def generate_parser() -> argparse.ArgumentParser:
     )
     exclusive_group = parser.add_mutually_exclusive_group(required=False)
 
-    color.add_color_option(parser)
+    options.add_color_option(parser)
     options.add_sources_option(parser)
     options.add_check_option(parser)
     options.add_config_option(parser)

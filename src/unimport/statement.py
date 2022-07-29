@@ -1,10 +1,11 @@
 import ast
 import operator
-import sys
 from dataclasses import dataclass, field
 from typing import ClassVar, Iterator, List, Optional, Set, Union
 
-if sys.version_info >= (3, 8):
+from unimport import constants as C
+
+if C.PY38_PLUS:
     from typing import Literal  # unimport: skip
 else:
     from typing_extensions import Literal
