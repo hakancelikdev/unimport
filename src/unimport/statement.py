@@ -8,7 +8,7 @@ from unimport import constants as C
 if C.PY38_PLUS:
     from typing import Literal  # unimport: skip
 else:
-    from typing_extensions import Literal
+    from typing_extensions import Literal  # type: ignore
 
 
 __all__ = ("Import", "ImportFrom", "Name", "Scope")

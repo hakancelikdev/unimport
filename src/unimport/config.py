@@ -13,7 +13,7 @@ from unimport.color import TERMINAL_SUPPORT_COLOR
 if C.PY38_PLUS:
     from typing import Literal  # unimport: skip
 else:
-    from typing_extensions import Literal
+    from typing_extensions import Literal  # type: ignore
 
 import toml
 
@@ -105,7 +105,7 @@ class Config:
         if args is None and config_context is None:
             return cls()
 
-        args: dict = args if args is not None else {}
+        args = args if args is not None else {}
         config_context = config_context if config_context is not None else {}
 
         context = {}
