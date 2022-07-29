@@ -9,17 +9,15 @@ from unimport.commands import check, requirements_check
 from unimport.statement import Import, ImportFrom
 
 
-@pytest.mark.parametrize(
-    "use_color_setting, stdout", [[True, ""], [False, ""]]
-)
-def test_empty_print_check(use_color_setting: bool, stdout: str) -> None:
+@pytest.mark.parametrize("use_color, stdout", [[True, ""], [False, ""]])
+def test_empty_print_check(use_color: bool, stdout: str) -> None:
     with redirect_stdout(io.StringIO()) as f:
-        check(Path("tests/commands/test_check.py"), [], use_color_setting)
+        check(Path("tests/commands/test_check.py"), [], use_color)
     assert f.getvalue() == stdout
 
 
 @pytest.mark.parametrize(
-    "use_color_setting, stdout",
+    "use_color, stdout",
     [
         [
             True,
@@ -28,7 +26,7 @@ def test_empty_print_check(use_color_setting: bool, stdout: str) -> None:
         [False, "z at tests/commands/test_check.py:1\n"],
     ],
 )
-def test_import_print_check(use_color_setting: bool, stdout: str) -> None:
+def test_import_print_check(use_color: bool, stdout: str) -> None:
     with redirect_stdout(io.StringIO()) as f:
         check(
             Path("tests/commands/test_check.py"),
@@ -42,13 +40,13 @@ def test_import_print_check(use_color_setting: bool, stdout: str) -> None:
                     suggestions=[],
                 )
             ],
-            use_color_setting,
+            use_color,
         )
     assert f.getvalue() == stdout
 
 
 @pytest.mark.parametrize(
-    "use_color_setting, stdout",
+    "use_color, stdout",
     [
         [
             True,
@@ -71,7 +69,7 @@ def test_import_print_check(use_color_setting: bool, stdout: str) -> None:
     ],
 )
 def test_import_and_fromimport_print_check(
-    use_color_setting: bool, stdout: str
+    use_color: bool, stdout: str
 ) -> None:
     with redirect_stdout(io.StringIO()) as f:
         check(
@@ -87,13 +85,13 @@ def test_import_and_fromimport_print_check(
                 ),
                 Import(lineno=4, column=1, name="x", package="le"),
             ],
-            use_color_setting,
+            use_color,
         )
     assert f.getvalue() == stdout
 
 
 @pytest.mark.parametrize(
-    "use_color_setting, stdout",
+    "use_color, stdout",
     [
         [
             True,
@@ -102,13 +100,13 @@ def test_import_and_fromimport_print_check(
         [False, "unimport at tests/commands/test_check.py:2\n"],
     ],
 )
-def test_requirements_check(use_color_setting: bool, stdout: str) -> None:
+def test_requirements_check(use_color: bool, stdout: str) -> None:
     with redirect_stdout(io.StringIO()) as f:
         requirements_check(
             Path("tests/commands/test_check.py"),
             1,
             "unimport",
-            use_color_setting,
+            use_color,
         )
 
     assert f.getvalue() == stdout

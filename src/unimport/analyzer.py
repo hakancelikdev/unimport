@@ -20,11 +20,9 @@ def _generic_visit(func: T.FunctionT) -> T.FunctionT:
     """decorator to make visitor work _generic_visit."""
 
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        func(*args, **kwargs)
-        obj = args[0]
-        node = args[1]
-        obj.generic_visit(node)
+    def wrapper(self, *args, **kwargs):
+        func(self, *args, **kwargs)
+        self.generic_visit(*args)
 
     return cast(T.FunctionT, wrapper)
 

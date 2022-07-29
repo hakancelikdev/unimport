@@ -11,28 +11,26 @@ def permission(
     encoding: str,
     newline: str,
     refactor_result: str,
-    use_color_setting: bool,
+    use_color: bool,
 ) -> None:
     action = input(
-        f"Apply suggested changes to '{paint(str(path), YELLOW, use_color_setting)}' [Y/n/q] ? >"
+        f"Apply suggested changes to '{paint(str(path), YELLOW, use_color)}' [Y/n/q] ? >"
     ).lower()
     if action == "q":
         raise SystemExit(1)
     elif utils.actiontobool(action):
         from unimport.commands import remove
 
-        remove(path, encoding, newline, refactor_result, use_color_setting)
+        remove(path, encoding, newline, refactor_result, use_color)
 
 
-def requirements_permission(
-    path: Path, refactor_result: str, use_color_setting: bool
-):
+def requirements_permission(path: Path, refactor_result: str, use_color: bool):
     action = input(
-        f"Apply suggested changes to '{paint(path.as_posix(), CYAN, use_color_setting)}' [Y/n/q] ? >"
+        f"Apply suggested changes to '{paint(path.as_posix(), CYAN, use_color)}' [Y/n/q] ? >"
     ).lower()
     if action == "q":
         return 1
     if utils.actiontobool(action):
         from unimport.commands import requirements_remove
 
-        requirements_remove(path, refactor_result, use_color_setting)
+        requirements_remove(path, refactor_result, use_color)

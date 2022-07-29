@@ -17,6 +17,7 @@ __all__ = (
     "IGNORE_IMPORT_NAMES",
     "INCLUDE_REGEX_PATTERN",
     "INIT_FILE_IGNORE_REGEX",
+    "PY37_PLUS",
     "PY38_PLUS",
     "PY39_PLUS",
     "STDLIB_PATH",
@@ -35,6 +36,7 @@ DefTuple = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
 ASTFunctionTuple = (ast.FunctionDef, ast.AsyncFunctionDef)
 
 # CONF
+PY37_PLUS = sys.version_info >= (3, 7)
 PY38_PLUS = sys.version_info >= (3, 8)
 PY39_PLUS = sys.version_info >= (3, 9)
 
