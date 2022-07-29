@@ -1,0 +1,15 @@
+# action.yml
+name: "unimport"
+description: "Get rid of all unused imports 🥳"
+inputs:
+  extra_args:
+    description: "options to pass to unimport run"
+    required: false
+    default: "--check"
+runs:
+  using: "composite"
+  steps:
+    - run: pip install --upgrade pip && python -m pip install unimport==0.10.0
+      shell: bash
+    - run: unimport --color auto --gitignore --ignore-init ${{ inputs.extra_args }}
+      shell: bash
