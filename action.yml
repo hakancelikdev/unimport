@@ -15,5 +15,5 @@ runs:
     - run: unimport --color auto --gitignore --ignore-init ${{ inputs.extra_args }}
       shell: bash
 branding:
-  icon: 'check'
-  color: 'red'
+  icon: "check"
+  color: "red"
