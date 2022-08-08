@@ -1,5 +1,12 @@
-{% extends "base.html" %} {% block outdated %} You're not viewing the latest version.
-<a href="{{ '../' ~ base_url }}">
-  <strong>Click here to go to latest.</strong>
-</a>
-{% endblock %}
+{% extends "base.html" %} {% block announce %}
+<div style="display: flex; justify-content: flex-end">
+  <div style="padding: 5px 16px">You can now sponsor <strong>Unimport</strong> 🍰</div>
+  <iframe
+    src="https://github.com/sponsors/hakancelikdev/button"
+    title="Sponsor hakancelikdev"
+    height="35"
+    width="116"
+    style="border: 0"
+  ></iframe>
+</div>
+{% endblock %} {%- block scripts %} {{ super() }} {%- endblock %}

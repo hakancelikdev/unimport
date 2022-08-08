@@ -99,7 +99,7 @@ theme:
       primary: red
       accent: amber
       toggle:
-        icon: material/weather-sunny
+        icon: material/lightbulb-outline
         name: Switch to dark mode
 
     - media: "(prefers-color-scheme: dark)"
@@ -107,7 +107,7 @@ theme:
       primary: red
       accent: amber
       toggle:
-        icon: material/weather-night
+        icon: material/lightbulb
         name: Switch to light mode
 
   font:
@@ -115,7 +115,7 @@ theme:
     code: Roboto Mono
 
   icon:
-    repo: fontawesome/brands/github
+    repo: fontawesome/brands/github-alt
 
 copyright: Copyright &copy; 2020 - 2020 Hakan Çelik
 repo_url: https://github.com/hakancelikdev/unimport
@@ -123,7 +123,19 @@ repo_name: hakancelikdev/unimport
 edit_uri: https://github.com/hakancelikdev/unimport/tree/main/docs
 
 nav:
-  - Home: index.md
+  - Unimport: index.md
+  - Languages:
+      - en: /
+      - tr: /tr/
+  - User Guide:
+      - tutorial/installation.md
+      - tutorial/command-line-options.md
+      - tutorial/supported-behaviors.md
+      - tutorial/other-useful-features.md
+      - tutorial/configurations.md
+      - tutorial/use-with-pre-commit.md
+      - tutorial/use-with-docker.md
+      - tutorial/use-with-github-action.md
   - Contributing: contributing.md
   - Changelog: changelog.md
   - Authors: authors.md
