@@ -2,8 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - ././.
+## [0.11.0] - 8/August/2022
 
+- Update docs
 - [Remove requirements feature by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/234)
   > This feature alone is not enough and can be developed as a new project using
   > unimport, it should not be a feature of unimport.
