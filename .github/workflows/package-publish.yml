@@ -2,9 +2,7 @@ name: Package Publish
 
 on:
   push:
-    # Publish `main` as Docker `latest` image.
     branches:
-      - main
       - stable
 
     # Publish `1.2.3` tags as releases.
@@ -42,8 +40,7 @@ jobs:
           # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "main" ] && VERSION=latest
+          # [ "$VERSION" == "main" ] && VERSION=latest
           # [ "$VERSION" == "stable" ] && VERSION=stable
 
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
