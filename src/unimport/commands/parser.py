@@ -1,7 +1,6 @@
 import argparse
 
-from unimport import constants as C
-from unimport import emoji
+from unimport import __description__, emoji
 from unimport.commands import options
 
 __all__ = ("generate_parser",)
@@ -10,7 +9,7 @@ __all__ = ("generate_parser",)
 def generate_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="unimport",
-        description=C.DESCRIPTION,
+        description=__description__,
         epilog=f"Get rid of all unused imports {emoji.PARTYING_FACE}",
     )
     exclusive_group = parser.add_mutually_exclusive_group(required=False)

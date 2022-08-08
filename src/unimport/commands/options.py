@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-from unimport import constants as C
+from unimport import __version__
 from unimport.config import Config
 
 __all__ = (
@@ -140,7 +140,7 @@ def add_version_option(parser: argparse.ArgumentParser) -> None:
         "-v",
         "--version",
         action="version",
-        version=f"Unimport {C.VERSION}",
+        version=f"Unimport {__version__}",
         help="Prints version of unimport",
     )
 

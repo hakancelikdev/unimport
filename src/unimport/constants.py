@@ -3,15 +3,9 @@ import builtins
 import distutils.sysconfig
 import sys
 
-DESCRIPTION = (
-    "A linter, formatter for finding and removing unused import statements."
-)
-VERSION = "0.11.0"
-
 __all__ = (
     "BUILTINS",
     "BUILTIN_MODULE_NAMES",
-    "DESCRIPTION",
     "EXCLUDE_REGEX_PATTERN",
     "GLOB_PATTERN",
     "IGNORE_IMPORT_NAMES",
@@ -22,7 +16,6 @@ __all__ = (
     "PY39_PLUS",
     "STDLIB_PATH",
     "SUBSCRIPT_TYPE_VARIABLE",
-    "VERSION",
 )
 
 # REGEX
