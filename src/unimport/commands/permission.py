@@ -1,9 +1,9 @@
 from pathlib import Path
 
 from unimport import utils
-from unimport.color import CYAN, YELLOW, paint
+from unimport.color import YELLOW, paint
 
-__all__ = ("permission", "requirements_permission")
+__all__ = ("permission",)
 
 
 def permission(
@@ -19,18 +19,6 @@ def permission(
     if action == "q":
         raise SystemExit(1)
     elif utils.actiontobool(action):
-        from unimport.commands import remove
+        from unimport import commands
 
-        remove(path, encoding, newline, refactor_result, use_color)
-
-
-def requirements_permission(path: Path, refactor_result: str, use_color: bool):
-    action = input(
-        f"Apply suggested changes to '{paint(path.as_posix(), CYAN, use_color)}' [Y/n/q] ? >"
-    ).lower()
-    if action == "q":
-        return 1
-    if utils.actiontobool(action):
-        from unimport.commands import requirements_remove
-
-        requirements_remove(path, refactor_result, use_color)
+        commands.remove(path, encoding, newline, refactor_result, use_color)

@@ -1,4 +1,3 @@
-"""It offers some utils."""
 import contextlib
 import difflib
 import functools
@@ -8,28 +7,17 @@ import re
 import tokenize
 from distutils.util import strtobool
 from pathlib import Path
-from typing import FrozenSet, Iterable, Iterator, List, Optional, Set, Tuple
-
-import unimport.constants as C
-from unimport import typing as T
-
-if C.PY38_PLUS:
-    from importlib.metadata import (  # unimport: skip
-        PackageNotFoundError,
-        metadata,
-    )
-else:
-    from importlib_metadata import PackageNotFoundError, metadata  # type: ignore
+from typing import FrozenSet, Iterable, Iterator, List, Optional, Tuple
 
 from pathspec.patterns.gitwildmatch import GitWildMatchPattern
+
+import unimport.constants as C
 
 __all__ = (
     "get_dir",
     "get_source",
     "get_spec",
     "is_std",
-    "package_name_from_metadata",
-    "get_used_packages",
     "actiontobool",
     "get_exclude_list_from_gitignore",
     "read",
@@ -83,28 +71,6 @@ def is_std(package: str) -> bool:
         )
     else:
         return False
-
-
-@functools.lru_cache(maxsize=None)
-def package_name_from_metadata(package: str) -> Optional[str]:
-    if not is_std(package):
-        with contextlib.suppress(PackageNotFoundError):
-            return metadata(package)["Name"]
-    return None
-
-
-def get_used_packages(
-    imports: List[T.ImportT], unused_imports: List[T.ImportT]
-) -> Set[str]:
-    packages = set()
-    used_packages = set(
-        map(lambda imp: imp.package.split(".")[0], imports)
-    ) - set(map(lambda imp: imp.package.split(".")[0], unused_imports))
-    for package in used_packages:
-        name = package_name_from_metadata(package)
-        if name:
-            packages.add(name)
-    return packages
 
 
 def actiontobool(action: str) -> bool:

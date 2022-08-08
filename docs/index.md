@@ -139,20 +139,6 @@ Ignore the **init**.py file.
 - `$ unimport -p`
 - `$ unimport --permission`
 
-## Requirements
-
-> (optional: default `False`)
-
-You can automatically delete unused modules from the requirements.txt file
-
-**Usage**
-
-- `unimport --requirements` to check
-- `unimport --check --requirements` to check
-- `unimport --requirements --diff` to check and seeing diff
-- `unimport --requirements --permission` to refactor permission after seeing the diff.
-- `unimport --requirements --remove` to remove automatically.
-
 ## Color
 
 > (optional: default `auto`) choices: (always, never, auto)
@@ -366,36 +352,38 @@ removed for all other cases exit code 1 Exit code 0 if there is no unused import
 
 You can list many options by running unimport --help
 
-```
-usage: unimport [-h] [--check] [-c PATH] [--color {auto,always,never}] [--include include] [--exclude exclude] [--gitignore] [--ignore-init] [--include-star-import] [-d]
-                [-r | -p] [--requirements] [-v]
-                [sources ...]
+```bash
+usage: unimport [-h] [--color {auto,always,never}] [--check] [-c PATH]
+                    [--include include] [--exclude exclude] [--gitignore]
+                    [--ignore-init] [--include-star-import] [-d] [-r | -p] [-v]
+                    [sources [sources ...]]
 
-A linter, formatter for finding and removing unused import statements.
+    A linter, formatter for finding and removing unused import statements.
 
-positional arguments:
-  sources               Files and folders to find the unused imports.
+    positional arguments:
+      sources               Files and folders to find the unused imports.
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --check               Prints which file the unused imports are in.
-  -c PATH, --config PATH
-                        Read configuration from PATH.
-  --color {auto,always,never}
-                        Select whether to use color in the output. Defaults to `auto`.
-  --include include     File include pattern.
-  --exclude exclude     File exclude pattern.
-  --gitignore           Exclude .gitignore patterns. if present.
-  --ignore-init         Ignore the __init__.py file.
-  --include-star-import
-                        Include star imports during scanning and refactor.
-  -d, --diff            Prints a diff of all the changes unimport would make to a file.
-  -r, --remove          Remove unused imports automatically.
-  -p, --permission      Refactor permission after see diff.
-  --requirements        Include requirements.txt file, You can use it with all other arguments
-  -v, --version         Prints version of unimport
+    optional arguments:
+      -h, --help            show this help message and exit
+      --color {auto,always,never}
+                            Select whether to use color in the output. Defaults to
+                            `auto`.
+      --check               Prints which file the unused imports are in.
+      -c PATH, --config PATH
+                            Read configuration from PATH.
+      --include include     File include pattern.
+      --exclude exclude     File exclude pattern.
+      --gitignore           Exclude .gitignore patterns. if present.
+      --ignore-init         Ignore the __init__.py file.
+      --include-star-import
+                            Include star imports during scanning and refactor.
+      -d, --diff            Prints a diff of all the changes unimport would make
+                            to a file.
+      -r, --remove          Remove unused imports automatically.
+      -p, --permission      Refactor permission after see diff.
+      -v, --version         Prints version of unimport
 
-Get rid of all unused imports 🥳
+    Get rid of all unused imports 🥳
 ```
 
 ## Configuring Unimport
@@ -416,7 +404,6 @@ sources = ["path1", "path2"]
 exclude = '__init__.py|tests/'
 include = 'test|test2|tests.py'
 gitignore = true
-requirements = true
 remove = false
 diff = true
 include_star_import = true
@@ -431,7 +418,6 @@ sources = ["path1", "path2"]
 exclude = __init__.py|tests/
 include = test|test2|tests.py
 gitignore = true
-requirements = true
 remove = false
 diff = true
 include_star_import = true
@@ -453,8 +439,7 @@ repos:
     rev: stable
     hooks:
       - id: unimport
-        args:
-          [--remove, --requirements, --include-star-import, --ignore-init, --gitignore]
+        args: [--remove, --include-star-import, --ignore-init, --gitignore]
 ```
 
 ## Use as a Docker image

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from unimport.commands import check, requirements_check
+from unimport.commands import check
 from unimport.statement import Import, ImportFrom
 
 
@@ -87,26 +87,4 @@ def test_import_and_fromimport_print_check(
             ],
             use_color,
         )
-    assert f.getvalue() == stdout
-
-
-@pytest.mark.parametrize(
-    "use_color, stdout",
-    [
-        [
-            True,
-            "\x1b[36munimport\x1b[0m at \x1b[36mtests/commands/test_check.py\x1b[0m:\x1b[36m2\x1b[0m\n",
-        ],
-        [False, "unimport at tests/commands/test_check.py:2\n"],
-    ],
-)
-def test_requirements_check(use_color: bool, stdout: str) -> None:
-    with redirect_stdout(io.StringIO()) as f:
-        requirements_check(
-            Path("tests/commands/test_check.py"),
-            1,
-            "unimport",
-            use_color,
-        )
-
     assert f.getvalue() == stdout

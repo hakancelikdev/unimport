@@ -5,7 +5,6 @@ __all__ = (
     "BLACK",
     "BLUE",
     "BOLD_WHITE",
-    "COLOR_CHOICES",
     "CYAN",
     "GREEN",
     "MAGENTA",

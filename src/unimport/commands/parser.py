@@ -27,7 +27,6 @@ def generate_parser() -> argparse.ArgumentParser:
     options.add_diff_option(parser)
     options.add_remove_option(exclusive_group)
     options.add_permission_option(exclusive_group)
-    options.add_requirements_option(parser)
     options.add_version_option(parser)
 
     return parser
