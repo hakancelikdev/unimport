@@ -1,11 +1,5 @@
 Install from the command line:
 
-To use the latest
-
-```
-$ docker pull ghcr.io/hakancelikdev/unimport:latest
-```
-
 To use the stable
 
 ```
