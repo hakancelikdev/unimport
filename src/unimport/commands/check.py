@@ -1,10 +1,10 @@
 from pathlib import Path
 from typing import List, Union
 
-from unimport.color import CYAN, GREEN, RED, YELLOW, paint
+from unimport.color import GREEN, RED, YELLOW, paint
 from unimport.statement import Import, ImportFrom
 
-__all__ = ("check", "requirements_check")
+__all__ = ("check",)
 
 
 def check(
@@ -32,12 +32,3 @@ def check(
             + ":"
             + paint(str(imp.lineno), GREEN, use_color)
         )
-
-
-def requirements_check(
-    path: Path, index: int, requirement: str, use_color: bool
-) -> None:
-    print(
-        f"{paint(requirement, CYAN, use_color)} at "
-        f"{paint(path.as_posix(), CYAN, use_color)}:{paint(str(index + 1), CYAN, use_color)}"
-    )

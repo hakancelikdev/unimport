@@ -7,7 +7,10 @@ from ast import literal_eval
 from pathlib import Path
 from typing import Any, ClassVar, Dict, Iterator, List, Optional, Tuple
 
+import toml
+
 from unimport import constants as C
+from unimport import utils
 from unimport.color import TERMINAL_SUPPORT_COLOR
 
 if C.PY38_PLUS:
@@ -15,12 +18,7 @@ if C.PY38_PLUS:
 else:
     from typing_extensions import Literal  # type: ignore
 
-import toml
-
-from unimport import constants as C
-from unimport import utils
-
-__all__ = ("CONFIG_FILES", "Config", "ParseConfig")
+__all__ = ("Config", "ParseConfig")
 
 
 @dataclasses.dataclass
@@ -30,7 +28,6 @@ class Config:
     sources: Optional[List[Path]] = None
     include: str = C.INCLUDE_REGEX_PATTERN
     exclude: str = C.EXCLUDE_REGEX_PATTERN
-    requirements: bool = False
     gitignore: bool = False
     remove: bool = False
     diff: bool = False
@@ -75,9 +72,6 @@ class Config:
             yield from utils.list_paths(
                 source_path, self.include, self.exclude
             )
-
-    def get_requirements(self) -> Iterator[Path]:
-        yield from Path(".").glob("requirements*.txt")
 
     @classmethod
     def _get_color_choices(cls) -> Tuple[str]:
@@ -156,7 +150,6 @@ class ParseConfig:
                 "sources": List[Path],
                 "include": str,
                 "exclude": str,
-                "requirements": bool,
                 "gitignore": bool,
                 "remove": bool,
                 "diff": bool,

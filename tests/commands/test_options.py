@@ -102,12 +102,3 @@ def test_add_permission_option(parser: argparse.ArgumentParser):
     assert vars(parser.parse_args([])) == dict(permission=False)
     assert vars(parser.parse_args(["-p"])) == dict(permission=True)
     assert vars(parser.parse_args(["--permission"])) == dict(permission=True)
-
-
-def test_add_requirements_option(parser: argparse.ArgumentParser):
-    options.add_requirements_option(parser)
-
-    assert vars(parser.parse_args([])) == dict(requirements=False)
-    assert vars(parser.parse_args(["--requirements"])) == dict(
-        requirements=True
-    )

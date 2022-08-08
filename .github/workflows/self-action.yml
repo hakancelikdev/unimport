@@ -1,4 +1,4 @@
-name: Self action
+name: unimport
 on: [push, pull_request]
 jobs:
   lint:
@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
-      - name: self test action
+      - name: unimport
         uses: ./
         with:
-          extra_args: --include unimport --requirements
+          extra_args: --include src/

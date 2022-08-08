@@ -17,7 +17,6 @@ sources = ["path1", "path2"]
 exclude = '__init__.py|tests/'
 include = 'test|test2|tests.py'
 gitignore = false
-requirements = false
 remove = false
 diff = false
 ignore_init = false

@@ -27,7 +27,6 @@ def test_parse_config_toml_parse():
         "exclude": "__init__.py|tests/",
         "include": "test|test2|tests.py",
         "gitignore": False,
-        "requirements": False,
         "remove": False,
         "diff": False,
         "ignore_init": False,
@@ -42,7 +41,6 @@ def test_parse_config_cfg_parse():
         "exclude": "__init__.py|tests/",
         "include": "test|test2|tests.py",
         "gitignore": False,
-        "requirements": False,
         "remove": False,
         "diff": False,
         "ignore_init": False,
@@ -67,7 +65,6 @@ def test_parse_config_parse_args_config_setup_cfg():
     assert config.sources == [Path(".")]
     assert config.include == "tests|env"
     assert config.exclude == "__init__.py|tests/"
-    assert config.requirements is False
     assert config.gitignore is False
     assert config.remove is True
     assert config.diff is True
@@ -88,7 +85,6 @@ def test_parse_config_parse_args_config_setup_cfg():
             [Path("package"), Path("pakcage-2")],
             "sources",
         ),
-        (["--requirements"], True, "requirements"),
         (["--gitignore"], True, "gitignore"),
         (["--remove"], True, "remove"),
         (["--diff"], True, "diff"),

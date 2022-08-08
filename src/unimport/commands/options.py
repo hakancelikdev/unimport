@@ -16,7 +16,6 @@ __all__ = (
     "add_diff_option",
     "add_remove_option",
     "add_permission_option",
-    "add_requirements_option",
     "add_version_option",
 )
 
@@ -133,15 +132,6 @@ def add_permission_option(
         action="store_true",
         help="Refactor permission after see diff.",
         default=Config.permission,
-    )
-
-
-def add_requirements_option(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument(
-        "--requirements",
-        action="store_true",
-        help="Include requirements.txt file, You can use it with all other arguments",
-        default=Config.requirements,
     )
 
 
