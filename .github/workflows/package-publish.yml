@@ -1,4 +1,4 @@
-name: Package Publish
+name: package publish
 
 on:
   push:
@@ -13,7 +13,7 @@ env:
   IMAGE_NAME: unimport
 
 jobs:
-  push:
+  package_publish:
     runs-on: ubuntu-latest
     permissions:
       packages: write
