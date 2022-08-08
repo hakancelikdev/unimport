@@ -45,7 +45,6 @@ def test_generate_parser_empty_parse_args(parser: argparse.ArgumentParser):
         include_star_import=False,
         permission=False,
         remove=False,
-        requirements=False,
         sources=[Path(".")],
     )
 
@@ -64,15 +63,14 @@ def test_generate_parser_print_help(parser: argparse.ArgumentParser):
         """\
     usage: unimport [-h] [--color {auto,always,never}] [--check] [-c PATH]
                     [--include include] [--exclude exclude] [--gitignore]
-                    [--ignore-init] [--include-star-import] [-d] [-r | -p]
-                    [--requirements] [-v]
+                    [--ignore-init] [--include-star-import] [-d] [-r | -p] [-v]
                     [sources [sources ...]]
-                    
+
     A linter, formatter for finding and removing unused import statements.
-                    
+    
     positional arguments:
       sources               Files and folders to find the unused imports.
-                      
+    
     optional arguments:
       -h, --help            show this help message and exit
       --color {auto,always,never}
@@ -91,10 +89,8 @@ def test_generate_parser_print_help(parser: argparse.ArgumentParser):
                             to a file.
       -r, --remove          Remove unused imports automatically.
       -p, --permission      Refactor permission after see diff.
-      --requirements        Include requirements.txt file, You can use it with all
-                            other arguments
       -v, --version         Prints version of unimport
-      
+    
     Get rid of all unused imports 🥳
     """
     )

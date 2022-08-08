@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from unimport.color import CYAN, GREEN, paint
+from unimport.color import GREEN, paint
 
-__all__ = ("remove", "requirements_remove")
+__all__ = ("remove",)
 
 
 def remove(
@@ -12,10 +12,3 @@ def remove(
         py_file.write(refactor_result)
 
     print(f"Refactoring '{paint(str(path), GREEN, use_color)}'")
-
-
-def requirements_remove(
-    path: Path, refactor_result: str, use_color: bool
-) -> None:
-    path.write_text(refactor_result)
-    print(f"Refactoring '{paint(path.as_posix(), CYAN, use_color)}'")

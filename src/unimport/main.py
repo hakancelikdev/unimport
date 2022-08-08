@@ -13,15 +13,16 @@ __all__ = ("main",)
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
-    argv = argv if argv is not None else sys.argv[1:]
-
-    parser = generate_parser()
-    args = parser.parse_args(argv)
-    config = ParseConfig.parse_args(args)
-
-    unused_import_names, used_packages = set(), set()
-    is_syntax_error = False
-    refactor_applied = False
+    config = ParseConfig.parse_args(
+        generate_parser().parse_args(
+            argv if argv is not None else sys.argv[1:]
+        )
+    )
+    unused_import_names, is_syntax_error, refactor_applied = (
+        set(),
+        False,
+        False,
+    )
     for path in config.get_paths():
         source, encoding, newline = utils.read(path)
 
@@ -45,11 +46,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             Import.get_unused_imports(config.include_star_import)
         )
         unused_import_names.update({imp.name for imp in unused_imports})
-        if config.requirements:
-            used_packages.update(
-                utils.get_used_packages(Import.imports, unused_imports)
-            )
-
         analysis.clear()
 
         if config.check:
@@ -82,45 +78,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 config.use_color,
             )
         )
-    if config.requirements:
-        for path in config.get_requirements():
-            source = path.read_text()
-            copy_source = source.splitlines().copy()
-
-            for index, requirement in enumerate(source.splitlines()):
-                module_name = utils.package_name_from_metadata(
-                    requirement.split("==")[0]
-                )
-                if module_name is None:
-                    print(
-                        color.paint(
-                            requirement + " not found",
-                            color.RED,
-                            config.use_color,
-                        )
-                    )
-                    continue
-
-                if module_name not in used_packages:
-                    copy_source.remove(requirement)
-
-                    if config.check:
-                        commands.requirements_check(
-                            path, index, requirement, config.use_color
-                        )
-
-            refactor_result = "\n".join(copy_source)
-            if config.diff:
-                exists_diff = commands.diff(path, source, refactor_result)
-                if config.permission and exists_diff:
-                    commands.requirements_permission(
-                        path, refactor_result, config.use_color
-                    )
-                if config.remove and source != refactor_result:
-                    commands.requirements_remove(
-                        path, refactor_result, config.use_color
-                    )
-                    refactor_applied = True
 
     return return_exit_code(
         is_unused_import_names=bool(unused_import_names),

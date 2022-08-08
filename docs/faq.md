@@ -88,7 +88,6 @@ writing this) but Unimport > 0.6.8 is slightly faster.
 - Works with multiple star imports.
 - Removes duplicate imports.
 - Has skip_file feature that allows one to skip an entire file.
-- Has a feature to remove the unused imports from requirements file.
 - Allows configuration via pyproject.toml and setup.cfg files.
 
 ### Overall

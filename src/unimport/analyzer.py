@@ -1,6 +1,3 @@
-"""This module performs static analysis using AST on the python code that's
-given as a string and reports its findings."""
-
 import ast
 import functools
 import re

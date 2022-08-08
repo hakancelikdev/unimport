@@ -9,4 +9,4 @@ jobs:
       - name: self test action
         uses: ./
         with:
-          extra_args: --include unimport --requirements
+          extra_args: --include src/
