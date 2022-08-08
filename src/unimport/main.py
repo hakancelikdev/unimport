@@ -35,9 +35,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             analysis.traverse()
         except SyntaxError as exc:
             print(
-                color.paint(str(exc), color.RED)
+                color.paint(str(exc), color.RED, config.use_color)
                 + " at "
-                + color.paint(path.as_posix(), color.GREEN)
+                + color.paint(path.as_posix(), color.GREEN, config.use_color)
             )
             is_syntax_error = True
             continue

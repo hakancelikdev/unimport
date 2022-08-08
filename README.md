@@ -1,4 +1,4 @@
-![unimport](docs/assets/logo/unimport.png)
+![unimport](https://raw.githubusercontent.com/hakancelikdev/unimport/main/docs/assets/logo/unimport.png)
 
 **A linter, formatter for finding and removing unused import statements.**
 
