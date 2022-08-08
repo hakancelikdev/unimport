@@ -1,7 +1,8 @@
 name: publish on pypi
 on:
-  tags:
-    - "**"
+  push:
+    tags:
+      - "**"
 jobs:
   publish:
     runs-on: ubuntu-latest
