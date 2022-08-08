@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.11.1] - 8/August/2022
+
+- fix setup
+
 ## [0.11.0] - 8/August/2022
 
 - Update docs
