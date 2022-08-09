@@ -24,8 +24,4 @@
 - **Issues** https://github.com/hakancelikdev/unimport/issues/
 - **Changelog** https://unimport.hakancelik.dev/changelog
 
----
-
 Unimport is a linter and formatter for finding and removing unused import statements.
-
----
