@@ -66,8 +66,7 @@ class Main:
                     path.as_posix(), color.GREEN, self.config.use_color
                 )
             )
-            if self.is_syntax_error is False:
-                self.is_syntax_error = True
+            self.is_syntax_error = True
 
         try:
             yield
@@ -100,8 +99,7 @@ class Main:
             refactor_result,
             self.config.use_color,
         )
-        if self.refactor_applied is False:
-            self.refactor_applied = True
+        self.refactor_applied = True
 
     @staticmethod
     def diff(result, refactor_result):

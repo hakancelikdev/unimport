@@ -37,8 +37,15 @@ def test_main_run_under_path():
 @pytest.mark.parametrize(
     "command_name", ["check", "diff", "permission", "remove"]
 )
-def test_main_command(command_name, mocker):
-    mock_command = mocker.patch.object(Main, command_name)
+def test_main_command(command_name, monkeypatch):
+    def mock_command(*args, **kwargs):
+        if not hasattr(mock_command, "call_count"):
+            mock_command.call_count = 0
+
+        mock_command.call_count += 1
+
+    monkeypatch.setattr(Main, command_name, mock_command)
+
     source = dedent(
         """\
         import os
