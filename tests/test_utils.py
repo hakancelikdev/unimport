@@ -10,7 +10,7 @@ from unimport import utils
 @pytest.mark.parametrize(
     "path, count",
     [
-        ("tests", 196),
+        ("tests", 197),
         ("tests/analyzer", 0),
         ("tests/config", 1),
         ("tests/config/configs", 0),
@@ -91,7 +91,7 @@ def test_read_newline_nonnative(non_native_linesep):
 
 
 @pytest.mark.parametrize(
-    "is_unused_import_names, is_syntax_error, refactor_applied, expected_exit_code",
+    "is_unused_imports, is_syntax_error, refactor_applied, expected_exit_code",
     [
         (True, True, True, 1),
         (True, True, False, 1),
@@ -103,14 +103,14 @@ def test_read_newline_nonnative(non_native_linesep):
     ],
 )
 def test_return_exit_code(
-    is_unused_import_names,
+    is_unused_imports,
     is_syntax_error,
     refactor_applied,
     expected_exit_code,
 ):
     assert (
         utils.return_exit_code(
-            is_unused_import_names=is_unused_import_names,
+            is_unused_imports=is_unused_imports,
             is_syntax_error=is_syntax_error,
             refactor_applied=refactor_applied,
         )
