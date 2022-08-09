@@ -1,8 +1,6 @@
 coverage:
   status:
     project: yes
-    patch: yes
-    changes: yes
 
 comment: false
 
