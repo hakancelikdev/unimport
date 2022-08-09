@@ -142,7 +142,9 @@ def diff(
 def return_exit_code(
     *, is_unused_imports: bool, is_syntax_error: bool, refactor_applied: bool
 ) -> int:
-    # NOTE: If this function changes, be sure to update this page https://unimport.hakancelik.dev/#exit-code-behavior
+    """If this function changes, be sure to update this page
+    https://unimport.hakancelik.dev/tutorial/other-useful-features/#exit-code-
+    behavior."""
 
     assert not (
         is_unused_imports is False and refactor_applied is True
