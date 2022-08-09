@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - ././
+
+- Docs update by @hakancelikdev
+- [Refactor main.py and add tests by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/238)
+
 ## [0.11.1] - 8/August/2022
 
 - fix setup
