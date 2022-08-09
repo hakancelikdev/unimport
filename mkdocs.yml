@@ -136,7 +136,7 @@ nav:
       - tutorial/use-with-pre-commit.md
       - tutorial/use-with-docker.md
       - tutorial/use-with-github-action.md
-  - Contributing: contributing.md
-  - Changelog: changelog.md
-  - Authors: authors.md
-  - FAQ: faq.md
+  - Contributing: CONTRIBUTING.md
+  - Changelog: CHANGELOG.md
+  - Authors: AUTHORS.md
+  - FAQ: FAQ.md

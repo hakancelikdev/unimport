@@ -246,8 +246,8 @@ from codeop import compile_command
 __all__ = ["compile_command"]
 ```
 
-Thanks to this feature, we take the values ​​in the `__all__` list and see if there is
-any matching import statements. If there isn't, this import is unused import.
+Thanks to this feature, we take the values in the `__all__` list and see if there is any
+matching import statements. If there isn't, this import is unused import.
 
 - [💪 Support exclude & include config with regex by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/36)
   After this feature, we can write the file include and exclude pattern setting with
