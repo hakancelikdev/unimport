@@ -13,7 +13,7 @@ repos:
       - id: isort
 
   - repo: https://github.com/hakancelikdev/unimport
-    rev: 0.10.0
+    rev: 0.11.1
     hooks:
       - id: unimport
         args: [--remove, --include-star-import]
@@ -50,7 +50,7 @@ repos:
         args: [--py36-plus]
 
   - repo: https://github.com/hakancelikdev/pyall
-    rev: 45214fda8203313a66eba84c745c7efc80ab638c
+    rev: d2897f7df4418e4e0c6b7a9dd7edb3761a46333d
     hooks:
       - id: pyall
         args:
