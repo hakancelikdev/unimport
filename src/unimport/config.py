@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, ClassVar, Dict, Iterator, List, Optional, Tuple
 
 import toml
+from pathspec.patterns import GitWildMatchPattern
 
 from unimport import constants as C
 from unimport import utils
@@ -23,7 +24,11 @@ __all__ = ("Config", "ParseConfig")
 
 @dataclasses.dataclass
 class Config:
-    default_sources: ClassVar[List[Path]] = [Path(".")]
+    default_sources: ClassVar[List[Path]] = [Path(".")]  # Not init attribute
+    gitignore_patterns: List[GitWildMatchPattern] = dataclasses.field(
+        default_factory=list, init=False, repr=False, compare=False
+    )  # Not init attribute
+    use_color: bool = dataclasses.field(init=False)  # Not init attribute
 
     sources: Optional[List[Path]] = None
     include: str = C.INCLUDE_REGEX_PATTERN
@@ -40,12 +45,10 @@ class Config:
     @classmethod
     @functools.lru_cache(maxsize=None)
     def _get_init_fields(cls):
-        import typing
-
         return [
             key
-            for key, value in cls.__annotations__.items()
-            if not dataclasses._is_classvar(value, typing)
+            for key, field in cls.__dataclass_fields__.items()
+            if field._field_type == dataclasses._FIELD and field.init
         ]
 
     def __post_init__(self):
@@ -56,21 +59,19 @@ class Config:
         self.check = self.check or not any((self.diff, self.remove))
         self.use_color: bool = self._use_color(self.color)
 
-        if self.gitignore and self.ignore_init:
-            gitignore_exclude = utils.get_exclude_list_from_gitignore()
-            self.exclude = "|".join(
-                [self.exclude, C.INIT_FILE_IGNORE_REGEX] + gitignore_exclude
-            )
-        elif self.gitignore:
-            gitignore_exclude = utils.get_exclude_list_from_gitignore()
-            self.exclude = "|".join([self.exclude] + gitignore_exclude)
+        if self.gitignore:
+            self.gitignore_patterns = utils.get_exclude_list_from_gitignore()
+
         elif self.ignore_init:
             self.exclude = "|".join([self.exclude, C.INIT_FILE_IGNORE_REGEX])
 
     def get_paths(self) -> Iterator[Path]:
         for source_path in self.sources:
             yield from utils.list_paths(
-                source_path, self.include, self.exclude
+                source_path,
+                include=self.include,
+                exclude=self.exclude,
+                gitignore_patterns=self.gitignore_patterns,
             )
 
     @classmethod
@@ -113,7 +114,7 @@ class Config:
                 )
             context[field_name] = config_value
 
-        return cls(**context)
+        return cls(**context)  # Only init attribute values
 
 
 @dataclasses.dataclass

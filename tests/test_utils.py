@@ -1,9 +1,12 @@
 import os
+import sys
+import textwrap
 from pathlib import Path
 
 import pytest
 
 from tests.utils import refactor, reopenable_temp_file
+from unimport import constants as C
 from unimport import utils
 
 
@@ -23,6 +26,29 @@ def test_list_paths(path, count):
     path = Path(path)
 
     assert len(list(utils.list_paths(path))) == count
+
+
+@pytest.mark.skipif(
+    not C.PY37_PLUS or sys.platform == "win32",
+    reason="Patspec version 0.10.0 and above are only supported for Python 3.7 above.",
+)
+def test_list_paths_with_gitignore():
+    gitignore = textwrap.dedent(
+        """\
+        a
+        b
+        spam/**
+        **/api/
+        **/
+        """
+    )
+    with reopenable_temp_file(gitignore) as gitignore_path:
+        gitignore_patterns = utils.get_exclude_list_from_gitignore(
+            gitignore_path
+        )
+        assert list(
+            utils.list_paths(Path("."), gitignore_patterns=gitignore_patterns)
+        ) == [Path("setup.py")]
 
 
 def test_bad_encoding():
