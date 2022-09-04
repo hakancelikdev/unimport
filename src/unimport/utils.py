@@ -135,7 +135,11 @@ def list_paths(
                 str(file_name)
             ) and not exclude_regex.search(str(file_name)):
                 for gitignore_pattern in gitignore_patterns:
-                    match_file = gitignore_pattern.match_file if C.PY37_PLUS else gitignore_pattern.match
+                    match_file = (
+                        gitignore_pattern.match_file
+                        if C.PY37_PLUS
+                        else gitignore_pattern.match
+                    )
                     if match_file(str(file_name)):
                         break
                 else:

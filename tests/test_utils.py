@@ -1,4 +1,3 @@
-from unimport import constants as C
 import os
 import textwrap
 from pathlib import Path
@@ -6,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from tests.utils import refactor, reopenable_temp_file
+from unimport import constants as C
 from unimport import utils
 
 
@@ -27,7 +27,10 @@ def test_list_paths(path, count):
     assert len(list(utils.list_paths(path))) == count
 
 
-@pytest.mark.skipif(not C.PY37_PLUS, reason="0.10.0 and above are only supported for Python 3.7 and above.")
+@pytest.mark.skipif(
+    not C.PY37_PLUS,
+    reason="0.10.0 and above are only supported for Python 3.7 and above.",
+)
 def test_gitignore_no_error_raise():
     gitignore = textwrap.dedent(
         """\
@@ -42,7 +45,9 @@ def test_gitignore_no_error_raise():
         gitignore_patterns = utils.get_exclude_list_from_gitignore(
             gitignore_path
         )
-        assert list(utils.list_paths(Path("."), gitignore_patterns=gitignore_patterns)) == [Path("setup.py")]
+        assert list(
+            utils.list_paths(Path("."), gitignore_patterns=gitignore_patterns)
+        ) == [Path("setup.py")]
 
 
 def test_bad_encoding():
