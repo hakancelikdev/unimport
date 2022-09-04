@@ -1,4 +1,5 @@
 import os
+import sys
 import textwrap
 from pathlib import Path
 
@@ -28,7 +29,7 @@ def test_list_paths(path, count):
 
 
 @pytest.mark.skipif(
-    not C.PY37_PLUS,
+    not C.PY37_PLUS and sys.platform != "win32",
     reason="0.10.0 and above are only supported for Python 3.7 and above.",
 )
 def test_gitignore_no_error_raise():

@@ -110,6 +110,12 @@ It's possible to skip `.gitignore` glob patterns.
 
 - `$ unimport --gitignore`
 
+**Warning:**
+
+For more accurate results when using `--gitignore` parameter, please do not use Python
+3.6 and Windows. For more information, please visit ->
+https://github.com/hakancelikdev/unimport/issues/240
+
 ---
 
 ## Ignore init
