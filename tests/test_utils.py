@@ -29,10 +29,10 @@ def test_list_paths(path, count):
 
 
 @pytest.mark.skipif(
-    not C.PY37_PLUS and sys.platform != "win32",
-    reason="0.10.0 and above are only supported for Python 3.7 and above.",
+    not C.PY37_PLUS or sys.platform == "win32",
+    reason="Patspec version 0.10.0 and above are only supported for Python 3.7 above.",
 )
-def test_gitignore_no_error_raise():
+def test_list_paths_with_gitignore():
     gitignore = textwrap.dedent(
         """\
         a

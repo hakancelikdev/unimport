@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - ././
+## [0.11.2] - 4/September/2022
 
 - [Fix Re complile fail mentioning 'ps_d' when using --gitignore by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/241)
   - For Python 3.7 and above
