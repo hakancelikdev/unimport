@@ -12,18 +12,10 @@ NAMES: List[Name] = [
     Name(lineno=10, name="math.pi", is_all=False),
 ]
 IMPORTS: List[Union[Import, ImportFrom]] = [
-    ImportFrom(
-        lineno=2, column=1, name="y", package="x", star=False, suggestions=[]
-    ),
-    ImportFrom(
-        lineno=2, column=2, name="z", package="x", star=False, suggestions=[]
-    ),
+    ImportFrom(lineno=2, column=1, name="y", package="x", star=False, suggestions=[]),
+    ImportFrom(lineno=2, column=2, name="z", package="x", star=False, suggestions=[]),
 ]
 UNUSED_IMPORTS: List[Union[Import, ImportFrom]] = [
-    ImportFrom(
-        lineno=2, column=2, name="z", package="x", star=False, suggestions=[]
-    ),
-    ImportFrom(
-        lineno=2, column=1, name="y", package="x", star=False, suggestions=[]
-    ),
+    ImportFrom(lineno=2, column=2, name="z", package="x", star=False, suggestions=[]),
+    ImportFrom(lineno=2, column=1, name="y", package="x", star=False, suggestions=[]),
 ]

@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, ClassVar, Dict, Iterator, List, Optional, Tuple
 
 import toml
+from pathspec.patterns import GitWildMatchPattern
 
 from unimport import constants as C
 from unimport import utils
@@ -23,7 +24,11 @@ __all__ = ("Config", "ParseConfig")
 
 @dataclasses.dataclass
 class Config:
-    default_sources: ClassVar[List[Path]] = [Path(".")]
+    default_sources: ClassVar[List[Path]] = [Path(".")]  # Not init attribute
+    gitignore_patterns: List[GitWildMatchPattern] = dataclasses.field(
+        default_factory=list, init=False, repr=False, compare=False
+    )  # Not init attribute
+    use_color: bool = dataclasses.field(init=False)  # Not init attribute
 
     sources: Optional[List[Path]] = None
     include: str = C.INCLUDE_REGEX_PATTERN
@@ -40,13 +45,7 @@ class Config:
     @classmethod
     @functools.lru_cache(maxsize=None)
     def _get_init_fields(cls):
-        import typing
-
-        return [
-            key
-            for key, value in cls.__annotations__.items()
-            if not dataclasses._is_classvar(value, typing)
-        ]
+        return [key for key, field in cls.__dataclass_fields__.items() if field._field_type == dataclasses._FIELD and field.init]
 
     def __post_init__(self):
         if self.sources is None:
@@ -56,21 +55,19 @@ class Config:
         self.check = self.check or not any((self.diff, self.remove))
         self.use_color: bool = self._use_color(self.color)
 
-        if self.gitignore and self.ignore_init:
-            gitignore_exclude = utils.get_exclude_list_from_gitignore()
-            self.exclude = "|".join(
-                [self.exclude, C.INIT_FILE_IGNORE_REGEX] + gitignore_exclude
-            )
-        elif self.gitignore:
-            gitignore_exclude = utils.get_exclude_list_from_gitignore()
-            self.exclude = "|".join([self.exclude] + gitignore_exclude)
+        if self.gitignore:
+            self.gitignore_patterns = utils.get_exclude_list_from_gitignore()
+
         elif self.ignore_init:
             self.exclude = "|".join([self.exclude, C.INIT_FILE_IGNORE_REGEX])
 
     def get_paths(self) -> Iterator[Path]:
         for source_path in self.sources:
             yield from utils.list_paths(
-                source_path, self.include, self.exclude
+                source_path,
+                include=self.include,
+                exclude=self.exclude,
+                gitignore_patterns=self.gitignore_patterns,
             )
 
     @classmethod
@@ -85,9 +82,7 @@ class Config:
         if color not in cls._get_color_choices():
             raise ValueError(color)
 
-        return color == "always" or (
-            color == "auto" and sys.stderr.isatty() and TERMINAL_SUPPORT_COLOR
-        )
+        return color == "always" or (color == "auto" and sys.stderr.isatty() and TERMINAL_SUPPORT_COLOR)
 
     @classmethod
     def build(
@@ -105,15 +100,11 @@ class Config:
         context = {}
         for field_name in cls._get_init_fields():
             config_value = args.get(field_name, None)
-            if config_value is None or config_value == getattr(
-                cls, field_name
-            ):
-                config_value = config_context.get(
-                    field_name, getattr(cls, field_name)
-                )
+            if config_value is None or config_value == getattr(cls, field_name):
+                config_value = config_context.get(field_name, getattr(cls, field_name))
             context[field_name] = config_value
 
-        return cls(**context)
+        return cls(**context)  # Only init attribute values
 
 
 @dataclasses.dataclass
@@ -173,9 +164,7 @@ class ParseConfig:
 
     def parse_toml(self) -> Dict[str, Any]:
         parsed_toml = toml.loads(self.config_file.read_text())
-        toml_context: Dict[str, Any] = parsed_toml.get("tool", {}).get(
-            "unimport", {}
-        )
+        toml_context: Dict[str, Any] = parsed_toml.get("tool", {}).get("unimport", {})
         if toml_context:
             sources = toml_context.get("sources", Config.default_sources)
             toml_context["sources"] = [Path(path) for path in sources]
@@ -185,8 +174,6 @@ class ParseConfig:
     def parse_args(cls, args: argparse.Namespace) -> Config:
         if args.config and args.config.name in cls.CONFIG_FILES:
             config_context = cls(args.config).parse()
-            return Config.build(
-                args=args.__dict__, config_context=config_context
-            )
+            return Config.build(args=args.__dict__, config_context=config_context)
 
         return Config.build(args=vars(args))

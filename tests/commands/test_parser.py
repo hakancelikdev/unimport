@@ -23,10 +23,7 @@ def test_generate_parser_type(parser: argparse.ArgumentParser):
 def test_generate_parser_argument_parser(parser: argparse.ArgumentParser):
     assert parser.prog == "unimport"
     assert parser.usage is None
-    assert (
-        parser.description
-        == "A linter, formatter for finding and removing unused import statements."
-    )
+    assert parser.description == "A linter, formatter for finding and removing unused import statements."
     assert parser.formatter_class == argparse.HelpFormatter
     assert parser.conflict_handler == "error"
     assert parser.add_help is True
@@ -49,9 +46,7 @@ def test_generate_parser_empty_parse_args(parser: argparse.ArgumentParser):
     )
 
 
-@pytest.mark.skipif(
-    PY39_PLUS, reason="This test should work on versions 3.8 and lower."
-)
+@pytest.mark.skipif(PY39_PLUS, reason="This test should work on versions 3.8 and lower.")
 def test_generate_parser_print_help(parser: argparse.ArgumentParser):
     # NOTE: If this test changes, be sure to update this page https://unimport.hakancelik.dev/#command-line-options
 

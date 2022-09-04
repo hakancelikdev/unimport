@@ -81,18 +81,24 @@ def actiontobool(action: str) -> bool:
     return False
 
 
-def get_exclude_list_from_gitignore() -> List[str]:
-    """Converts .gitignore patterns to regex and return this exclude regex
+def get_exclude_list_from_gitignore(
+    path=Path(".gitignore"),
+) -> List[GitWildMatchPattern]:  # TODO: rename
+    """Converts .gitignore patterns to regex and return this excludes regex
     list."""
-    path = Path(".gitignore")
-    gitignore_regex: List[str] = []
-    if path.is_file():
-        source, _, _ = read(path)
-        for line in source.splitlines():
-            regex = GitWildMatchPattern.pattern_to_regex(line)[0]
-            if regex:
-                gitignore_regex.append(regex)
-    return gitignore_regex
+
+    if not path.is_file():
+        return []
+
+    gitignore_patterns: List[GitWildMatchPattern] = []
+    source, _, _ = read(path)
+    for line in source.splitlines():
+        regex, include = GitWildMatchPattern.pattern_to_regex(line)
+        if regex:
+            pattern = GitWildMatchPattern(re.compile(regex), include)
+            gitignore_patterns.append(pattern)
+
+    return gitignore_patterns
 
 
 def read(path: Path) -> Tuple[str, str, Optional[str]]:
@@ -111,8 +117,10 @@ def read(path: Path) -> Tuple[str, str, Optional[str]]:
 
 def list_paths(
     start: Path,
+    *,
     include: str = C.INCLUDE_REGEX_PATTERN,
     exclude: str = C.EXCLUDE_REGEX_PATTERN,
+    gitignore_patterns: Optional[List[GitWildMatchPattern]] = None
 ) -> Iterator[Path]:
     include_regex, exclude_regex = re.compile(include), re.compile(exclude)
     file_names: Iterable[Path]
@@ -120,16 +128,27 @@ def list_paths(
         file_names = start.glob(C.GLOB_PATTERN)
     else:
         file_names = [start]
-    yield from filter(
-        lambda filename: include_regex.search(str(filename))
-        and not exclude_regex.search(str(filename)),
-        file_names,
-    )
+
+    if gitignore_patterns:
+        for file_name in file_names:
+            if include_regex.search(str(file_name)) and not exclude_regex.search(str(file_name)):
+                for gitignore_pattern in gitignore_patterns:
+                    match_file = getattr(
+                        gitignore_pattern,
+                        "match_file",
+                        getattr(gitignore_pattern, "match"),
+                    )
+                    if match_file(str(file_name)):
+                        break
+                else:
+                    yield file_name
+    else:
+        for file_name in file_names:
+            if include_regex.search(str(file_name)) and not exclude_regex.search(str(file_name)):
+                yield file_name
 
 
-def diff(
-    *, source: str, refactor_result: str, fromfile: Path = None
-) -> Tuple[str, ...]:
+def diff(*, source: str, refactor_result: str, fromfile: Path = None) -> Tuple[str, ...]:
     return tuple(
         difflib.unified_diff(
             source.splitlines(),
@@ -139,9 +158,7 @@ def diff(
     )
 
 
-def return_exit_code(
-    *, is_unused_imports: bool, is_syntax_error: bool, refactor_applied: bool
-) -> int:
+def return_exit_code(*, is_unused_imports: bool, is_syntax_error: bool, refactor_applied: bool) -> int:
     """If this function changes, be sure to update this page
     https://unimport.hakancelik.dev/tutorial/other-useful-features/#exit-code-
     behavior."""

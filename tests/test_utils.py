@@ -1,4 +1,5 @@
 import os
+import textwrap
 from pathlib import Path
 
 import pytest
@@ -23,6 +24,21 @@ def test_list_paths(path, count):
     path = Path(path)
 
     assert len(list(utils.list_paths(path))) == count
+
+
+def test_gitignore_no_error_raise():
+    gitignore = textwrap.dedent(
+        """\
+        a
+        b
+        spam/**
+        **/api/
+        **/
+        """
+    )
+    with reopenable_temp_file(gitignore) as gitignore_path:
+        gitignore_patterns = utils.get_exclude_list_from_gitignore(gitignore_path)
+        assert list(utils.list_paths(Path("."), gitignore_patterns=gitignore_patterns)) == [Path("setup.py")]
 
 
 def test_bad_encoding():

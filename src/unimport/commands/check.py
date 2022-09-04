@@ -25,10 +25,4 @@ def check(
             )
         else:
             context = paint(imp.name, YELLOW, use_color)
-        print(
-            context
-            + " at "
-            + paint(path.as_posix(), GREEN, use_color)
-            + ":"
-            + paint(str(imp.lineno), GREEN, use_color)
-        )
+        print(context + " at " + paint(path.as_posix(), GREEN, use_color) + ":" + paint(str(imp.lineno), GREEN, use_color))
