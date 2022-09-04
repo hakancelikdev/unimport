@@ -280,18 +280,14 @@ class Scope:
 
     @property
     def names(self) -> Iterator[Name]:
-        yield from filter(  # type: ignore
-            lambda node: isinstance(node, Name), self.current_nodes
-        )
+        yield from filter(lambda node: isinstance(node, Name), self.current_nodes)  # type: ignore
 
         for child_scope in self.child_scopes:
             yield from child_scope.names
 
     @property
     def imports(self) -> Iterator[Import]:
-        yield from filter(  # type: ignore
-            lambda node: isinstance(node, Import), self.current_nodes
-        )
+        yield from filter(lambda node: isinstance(node, Import), self.current_nodes)  # type: ignore
 
     @classmethod
     def get_previous_scope(cls, scope: "Scope") -> "Scope":

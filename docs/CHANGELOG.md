@@ -2,8 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - ././
+## [0.11.2] - 4/September/2022
 
+- [Fix Re complile fail mentioning 'ps_d' when using --gitignore by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/241)
+  - For Python 3.7 and above
+    - Drop support for patspec, 0.5.0 above and below 0.10.0 versions.
+    - Only 0.10.0 and above versions are supported, in these versions the gitignore
+      parameter works more accurately.
+    - For more accurate results when using --gitignore parameter, please do not use
+      Python 3.6 and Windows.
 - Docs update by @hakancelikdev
 - [Refactor main.py and add tests by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/238)
 
