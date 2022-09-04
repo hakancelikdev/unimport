@@ -11,8 +11,12 @@ NAMES: List[Name] = [
     Name(lineno=11, name="q", is_all=False),
 ]
 IMPORTS: List[Union[Import, ImportFrom]] = [
-    ImportFrom(lineno=1, column=1, name="y", package=".x", star=False, suggestions=[]),
-    ImportFrom(lineno=2, column=1, name="t", package="..z", star=False, suggestions=[]),
+    ImportFrom(
+        lineno=1, column=1, name="y", package=".x", star=False, suggestions=[]
+    ),
+    ImportFrom(
+        lineno=2, column=1, name="t", package="..z", star=False, suggestions=[]
+    ),
     ImportFrom(
         lineno=3,
         column=1,
@@ -21,7 +25,9 @@ IMPORTS: List[Union[Import, ImportFrom]] = [
         star=False,
         suggestions=[],
     ),
-    ImportFrom(lineno=4, column=1, name="y", package=".x", star=False, suggestions=[]),
+    ImportFrom(
+        lineno=4, column=1, name="y", package=".x", star=False, suggestions=[]
+    ),
     ImportFrom(
         lineno=4,
         column=2,
@@ -30,8 +36,12 @@ IMPORTS: List[Union[Import, ImportFrom]] = [
         star=False,
         suggestions=[],
     ),
-    ImportFrom(lineno=5, column=1, name="u", package="..z", star=False, suggestions=[]),
-    ImportFrom(lineno=5, column=2, name="b", package="..z", star=False, suggestions=[]),
+    ImportFrom(
+        lineno=5, column=1, name="u", package="..z", star=False, suggestions=[]
+    ),
+    ImportFrom(
+        lineno=5, column=2, name="b", package="..z", star=False, suggestions=[]
+    ),
     ImportFrom(
         lineno=6,
         column=1,
@@ -58,8 +68,12 @@ UNUSED_IMPORTS: List[Union[Import, ImportFrom]] = [
         star=False,
         suggestions=[],
     ),
-    ImportFrom(lineno=5, column=1, name="u", package="..z", star=False, suggestions=[]),
-    ImportFrom(lineno=4, column=1, name="y", package=".x", star=False, suggestions=[]),
+    ImportFrom(
+        lineno=5, column=1, name="u", package="..z", star=False, suggestions=[]
+    ),
+    ImportFrom(
+        lineno=4, column=1, name="y", package=".x", star=False, suggestions=[]
+    ),
     ImportFrom(
         lineno=3,
         column=1,
@@ -68,6 +82,10 @@ UNUSED_IMPORTS: List[Union[Import, ImportFrom]] = [
         star=False,
         suggestions=[],
     ),
-    ImportFrom(lineno=2, column=1, name="t", package="..z", star=False, suggestions=[]),
-    ImportFrom(lineno=1, column=1, name="y", package=".x", star=False, suggestions=[]),
+    ImportFrom(
+        lineno=2, column=1, name="t", package="..z", star=False, suggestions=[]
+    ),
+    ImportFrom(
+        lineno=1, column=1, name="y", package=".x", star=False, suggestions=[]
+    ),
 ]

@@ -31,22 +31,30 @@ def test_add_config_option(parser: argparse.ArgumentParser):
     options.add_config_option(parser)
 
     assert vars(parser.parse_args([])) == dict(config=Path("."))
-    assert vars(parser.parse_args(["-c", "config.toml"])) == dict(config=Path("config.toml"))
-    assert vars(parser.parse_args(["--config", "config.toml"])) == dict(config=Path("config.toml"))
+    assert vars(parser.parse_args(["-c", "config.toml"])) == dict(
+        config=Path("config.toml")
+    )
+    assert vars(parser.parse_args(["--config", "config.toml"])) == dict(
+        config=Path("config.toml")
+    )
 
 
 def test_add_include_option(parser: argparse.ArgumentParser):
     options.add_include_option(parser)
 
     assert vars(parser.parse_args([])) == dict(include="\\.(py)$")
-    assert vars(parser.parse_args(["--include", "tests|datasets|t.py"])) == dict(include="tests|datasets|t.py")
+    assert vars(
+        parser.parse_args(["--include", "tests|datasets|t.py"])
+    ) == dict(include="tests|datasets|t.py")
 
 
 def test_add_exclude_option(parser: argparse.ArgumentParser):
     options.add_exclude_option(parser)
 
     assert vars(parser.parse_args([])) == dict(exclude="^$")
-    assert vars(parser.parse_args(["--exclude", "tests|datasets|t.py"])) == dict(exclude="tests|datasets|t.py")
+    assert vars(
+        parser.parse_args(["--exclude", "tests|datasets|t.py"])
+    ) == dict(exclude="tests|datasets|t.py")
 
 
 def test_add_gitignore_option(parser: argparse.ArgumentParser):
@@ -67,7 +75,9 @@ def test_add_include_star_import_option(parser: argparse.ArgumentParser):
     options.add_include_star_import_option(parser)
 
     assert vars(parser.parse_args([])) == dict(include_star_import=False)
-    assert vars(parser.parse_args(["--include-star-import"])) == dict(include_star_import=True)
+    assert vars(parser.parse_args(["--include-star-import"])) == dict(
+        include_star_import=True
+    )
 
 
 def test_add_diff_option(parser: argparse.ArgumentParser):

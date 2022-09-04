@@ -131,7 +131,9 @@ def list_paths(
 
     if gitignore_patterns:
         for file_name in file_names:
-            if include_regex.search(str(file_name)) and not exclude_regex.search(str(file_name)):
+            if include_regex.search(
+                str(file_name)
+            ) and not exclude_regex.search(str(file_name)):
                 for gitignore_pattern in gitignore_patterns:
                     match_file = getattr(
                         gitignore_pattern,
@@ -144,11 +146,15 @@ def list_paths(
                     yield file_name
     else:
         for file_name in file_names:
-            if include_regex.search(str(file_name)) and not exclude_regex.search(str(file_name)):
+            if include_regex.search(
+                str(file_name)
+            ) and not exclude_regex.search(str(file_name)):
                 yield file_name
 
 
-def diff(*, source: str, refactor_result: str, fromfile: Path = None) -> Tuple[str, ...]:
+def diff(
+    *, source: str, refactor_result: str, fromfile: Path = None
+) -> Tuple[str, ...]:
     return tuple(
         difflib.unified_diff(
             source.splitlines(),
@@ -158,7 +164,9 @@ def diff(*, source: str, refactor_result: str, fromfile: Path = None) -> Tuple[s
     )
 
 
-def return_exit_code(*, is_unused_imports: bool, is_syntax_error: bool, refactor_applied: bool) -> int:
+def return_exit_code(
+    *, is_unused_imports: bool, is_syntax_error: bool, refactor_applied: bool
+) -> int:
     """If this function changes, be sure to update this page
     https://unimport.hakancelik.dev/tutorial/other-useful-features/#exit-code-
     behavior."""

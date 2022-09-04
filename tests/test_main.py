@@ -34,7 +34,9 @@ def test_main_run_under_path():
     assert main.refactor_applied is False
 
 
-@pytest.mark.parametrize("command_name", ["check", "diff", "permission", "remove"])
+@pytest.mark.parametrize(
+    "command_name", ["check", "diff", "permission", "remove"]
+)
 def test_main_command(command_name, monkeypatch):
     def mock_command(*args, **kwargs):
         if not hasattr(mock_command, "call_count"):

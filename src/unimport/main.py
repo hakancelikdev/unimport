@@ -17,7 +17,9 @@ __all__ = ("Main",)
 
 @dataclasses.dataclass
 class _Result:
-    unused_imports: List[Union["Import", "ImportFrom"]] = dataclasses.field(repr=False)
+    unused_imports: List[Union["Import", "ImportFrom"]] = dataclasses.field(
+        repr=False
+    )
     path: Path
     source: str
     encoding: str
@@ -42,7 +44,9 @@ class Main:
         from unimport.config import ParseConfig
 
         return ParseConfig.parse_args(
-            commands.generate_parser().parse_args(self.argv if self.argv is not None else sys.argv[1:])
+            commands.generate_parser().parse_args(
+                self.argv if self.argv is not None else sys.argv[1:]
+            )
         )
 
     @contextlib.contextmanager
@@ -58,7 +62,9 @@ class Main:
             print(
                 color.paint(str(exc), color.RED, self.config.use_color)
                 + " at "
-                + color.paint(path.as_posix(), color.GREEN, self.config.use_color)
+                + color.paint(
+                    path.as_posix(), color.GREEN, self.config.use_color
+                )
             )
             self.is_syntax_error = True
 
@@ -72,14 +78,18 @@ class Main:
             source, encoding, newline = utils.read(path)
 
             with self.analysis(source, path):
-                unused_imports = list(Import.get_unused_imports(self.config.include_star_import))
+                unused_imports = list(
+                    Import.get_unused_imports(self.config.include_star_import)
+                )
                 if self.is_unused_imports is False:
                     self.is_unused_imports = unused_imports != []
 
                 yield _Result(unused_imports, path, source, encoding, newline)
 
     def check(self, result: _Result) -> None:
-        commands.check(result.path, result.unused_imports, self.config.use_color)
+        commands.check(
+            result.path, result.unused_imports, self.config.use_color
+        )
 
     def remove(self, result: _Result, refactor_result):
         commands.remove(
@@ -113,7 +123,9 @@ class Main:
             if self.config.check:
                 self.check(result)
             if any((self.config.diff, self.config.remove)):
-                refactor_result = refactor_string(source=result.source, unused_imports=result.unused_imports)
+                refactor_result = refactor_string(
+                    source=result.source, unused_imports=result.unused_imports
+                )
                 if self.config.diff:
                     exists_diff = self.diff(result, refactor_result)
                     if self.config.permission and exists_diff:

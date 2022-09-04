@@ -11,7 +11,9 @@ def diff(
     source: str,
     refactor_result: str,
 ) -> bool:
-    diff_ = utils.diff(source=source, refactor_result=refactor_result, fromfile=path)
+    diff_ = utils.diff(
+        source=source, refactor_result=refactor_result, fromfile=path
+    )
     exists_diff = bool(diff_)
     if exists_diff:
         print(color_difference(diff_))

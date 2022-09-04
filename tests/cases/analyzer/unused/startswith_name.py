@@ -6,5 +6,9 @@ __all__ = ["NAMES", "IMPORTS", "UNUSED_IMPORTS"]
 
 
 NAMES: List[Name] = [Name(lineno=4, name="xxx", is_all=False)]
-IMPORTS: List[Union[Import, ImportFrom]] = [Import(lineno=1, column=1, name="xx", package="xx")]
-UNUSED_IMPORTS: List[Union[Import, ImportFrom]] = [Import(lineno=1, column=1, name="xx", package="xx")]
+IMPORTS: List[Union[Import, ImportFrom]] = [
+    Import(lineno=1, column=1, name="xx", package="xx")
+]
+UNUSED_IMPORTS: List[Union[Import, ImportFrom]] = [
+    Import(lineno=1, column=1, name="xx", package="xx")
+]

@@ -118,7 +118,9 @@ class _ImportAnalyzer(ast.NodeVisitor):
             else:
                 package = "." * node.level + str(node.module) or ""
             alias_name = alias.asname or alias.name
-            if (package in self.ignore_modules_imports) or (is_star and not self.include_star_import):
+            if (package in self.ignore_modules_imports) or (
+                is_star and not self.include_star_import
+            ):
                 return
             ImportFrom.register(
                 lineno=node.lineno,
@@ -139,7 +141,9 @@ class _ImportAnalyzer(ast.NodeVisitor):
 
     def skip_import(self, node: T.ASTImport) -> bool:
         if C.PY38_PLUS:
-            source_segment = "\n".join(self.source.splitlines()[node.lineno - 1 : node.end_lineno])
+            source_segment = "\n".join(
+                self.source.splitlines()[node.lineno - 1 : node.end_lineno]
+            )
         else:
             source_segment = self.source.splitlines()[node.lineno - 1]
         return (
@@ -179,8 +183,13 @@ class _NameAnalyzer(ast.NodeVisitor):
 
     def visit_str_helper(self, value: str, node: ast.AST) -> None:
         parent = first_occurrence(node, *C.ASTFunctionTuple)
-        is_annassign_or_arg = any(isinstance(parent, (ast.AnnAssign, ast.arg)) for parent in get_parents(node))
-        if is_annassign_or_arg or (parent is not None and parent.returns is node):
+        is_annassign_or_arg = any(
+            isinstance(parent, (ast.AnnAssign, ast.arg))
+            for parent in get_parents(node)
+        )
+        if is_annassign_or_arg or (
+            parent is not None and parent.returns is node
+        ):
             self.join_visit(value, node)
 
     def visit_Str(self, node: ast.Str) -> None:
@@ -230,8 +239,13 @@ class _NameAnalyzer(ast.NodeVisitor):
                 self.join_visit(node.s, node)
 
         if (
-            isinstance(node.value, ast.Attribute) and isinstance(node.value.value, ast.Name) and node.value.value.id == "typing"
-        ) or (isinstance(node.value, ast.Name) and node.value.id in C.SUBSCRIPT_TYPE_VARIABLE):
+            isinstance(node.value, ast.Attribute)
+            and isinstance(node.value.value, ast.Name)
+            and node.value.value.id == "typing"
+        ) or (
+            isinstance(node.value, ast.Name)
+            and node.value.id in C.SUBSCRIPT_TYPE_VARIABLE
+        ):
 
             if C.PY39_PLUS:
                 _slice = node.slice
@@ -260,7 +274,9 @@ class _NameAnalyzer(ast.NodeVisitor):
             or isinstance(node.func, ast.Name)
             and node.func.id == "cast"
         ):
-            if isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str):
+            if isinstance(node.args[0], ast.Constant) and isinstance(
+                node.args[0].value, str
+            ):
                 self.join_visit(node.args[0].value, node.args[0])
             elif isinstance(node.args[0], ast.Str):
                 self.join_visit(node.args[0].s, node.args[0])
@@ -274,7 +290,9 @@ class _NameAnalyzer(ast.NodeVisitor):
         if type_comment is not None:
             self.join_visit(type_comment, node, mode=mode)
 
-    def join_visit(self, value: str, node: ast.AST, *, mode: str = "eval") -> None:
+    def join_visit(
+        self, value: str, node: ast.AST, *, mode: str = "eval"
+    ) -> None:
         """A function that parses the value, copies locations from the node and
         includes them in self.visit."""
         try:
@@ -298,7 +316,9 @@ class _ImportableAnalyzer(ast.NodeVisitor):
     )
 
     def __init__(self) -> None:
-        self.importable_nodes: List[T.ASTNameType] = []  # nodes on the __all__ list
+        self.importable_nodes: List[
+            T.ASTNameType
+        ] = []  # nodes on the __all__ list
         self.suggestions_nodes: List[T.ASTImportableT] = []  # nodes on the CFN
 
     def visit_CFN(self, node: T.CFNT) -> None:
@@ -328,7 +348,9 @@ class _ImportableAnalyzer(ast.NodeVisitor):
 
     @_generic_visit
     def visit_Assign(self, node: ast.Assign) -> None:
-        if getattr(node.targets[0], "id", None) == "__all__" and isinstance(node.value, (ast.List, ast.Tuple, ast.Set)):
+        if getattr(node.targets[0], "id", None) == "__all__" and isinstance(
+            node.value, (ast.List, ast.Tuple, ast.Set)
+        ):
             for item in node.value.elts:
                 if isinstance(item, (ast.Constant, ast.Str)):
                     self.importable_nodes.append(item)
@@ -427,7 +449,11 @@ class Analyzer(ast.NodeVisitor):
         if self.skip_file():
             return None
 
-        tree = ast.parse(self.source, type_comments=True) if C.PY38_PLUS else ast.parse(self.source)
+        tree = (
+            ast.parse(self.source, type_comments=True)
+            if C.PY38_PLUS
+            else ast.parse(self.source)
+        )
         """
         Set parent
         """
@@ -453,7 +479,9 @@ class Analyzer(ast.NodeVisitor):
                     is_all=True,
                 )
             elif isinstance(node, ast.Str):
-                Name.register(lineno=node.lineno, name=node.s, node=node, is_all=True)
+                Name.register(
+                    lineno=node.lineno, name=node.s, node=node, is_all=True
+                )
         importable_visitor.clear()
         """
         Import analyzer
@@ -466,7 +494,9 @@ class Analyzer(ast.NodeVisitor):
         Scope.remove_current_scope()
 
     def skip_file(self) -> bool:
-        return bool(re.search(self.skip_file_regex, self.source, re.IGNORECASE))
+        return bool(
+            re.search(self.skip_file_regex, self.source, re.IGNORECASE)
+        )
 
     @staticmethod
     def clear():
