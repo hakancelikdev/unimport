@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.11.3] - 5/September/2022
+
+- Fix main.py to run unimport
+
 ## [0.11.2] - 4/September/2022
 
 - [Fix Re complile fail mentioning 'ps_d' when using --gitignore by @hakancelikdev](https://github.com/hakancelikdev/unimport/pull/241)

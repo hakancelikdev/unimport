@@ -10,7 +10,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: pip install --upgrade pip && python -m pip install unimport==0.11.2
+    - run: pip install --upgrade pip && python -m pip install unimport==0.11.3
       shell: bash
     - run: unimport --color auto --gitignore --ignore-init ${{ inputs.extra_args }}
       shell: bash
