@@ -1,7 +1,7 @@
-from unimport import color, emoji
-from unimport.main import Main
+def main():
+    from unimport import color, emoji
+    from unimport.main import Main
 
-if __name__ == "__main__":
     main = Main.run()
     if not main.is_unused_imports and main.config.check:
         print(
@@ -13,3 +13,7 @@ if __name__ == "__main__":
         )
 
     raise SystemExit(main.exit_code())
+
+
+if __name__ == "__main__":
+    main()
