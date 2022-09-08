@@ -1,7 +1,7 @@
 name: unimport
 on: [push, pull_request]
 jobs:
-  unimport:
+  run:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

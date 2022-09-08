@@ -13,9 +13,7 @@ def permission(
     refactor_result: str,
     use_color: bool,
 ) -> None:
-    action = input(
-        f"Apply suggested changes to '{paint(str(path), YELLOW, use_color)}' [Y/n/q] ? >"
-    ).lower()
+    action = input(f"Apply suggested changes to '{paint(str(path), YELLOW, use_color)}' [Y/n/q] ? >").lower()
     if action == "q":
         raise SystemExit(1)
     elif utils.actiontobool(action):

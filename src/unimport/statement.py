@@ -53,20 +53,13 @@ class Import:
 
         scope = name.scope
         while scope:
-            imports = [
-                _import
-                for _import in scope.imports
-                if name.match_2(_import) and name.lineno > _import.lineno
-            ]
+            imports = [_import for _import in scope.imports if name.match_2(_import) and name.lineno > _import.lineno]
             scope = scope.parent
 
             if imports:
                 nearest_import = max(
                     filter(
-                        lambda _import: _import.lineno
-                        == max(
-                            imports, key=lambda _import: _import.lineno
-                        ).lineno,
+                        lambda _import: _import.lineno == max(imports, key=lambda _import: _import.lineno).lineno,
                         imports,
                     ),
                     key=lambda _import: _import.column,
@@ -82,23 +75,15 @@ class Import:
         return [_import.name for _import in self.imports].count(self.name) > 1
 
     @classmethod
-    def get_unused_imports(
-        cls, include_star_import: bool = False
-    ) -> Iterator[Union["Import", "ImportFrom"]]:
+    def get_unused_imports(cls, include_star_import: bool = False) -> Iterator[Union["Import", "ImportFrom"]]:
         for imp in reversed(Import.imports):
-            if (
-                include_star_import
-                and isinstance(imp, ImportFrom)
-                and imp.star
-            ):
+            if include_star_import and isinstance(imp, ImportFrom) and imp.star:
                 yield imp
             elif not imp.is_used():
                 yield imp
 
     @classmethod
-    def register(
-        cls, lineno: int, column: int, name: str, package: str, node: ast.AST
-    ) -> None:
+    def register(cls, lineno: int, column: int, name: str, package: str, node: ast.AST) -> None:
         _import = cls(lineno, column, name, package)
         _import.node = node
         cls.imports.append(_import)
@@ -145,9 +130,7 @@ class Name:
     is_all: bool = False
 
     node: ast.AST = field(init=False, repr=False, compare=False)
-    match_import: Union[Import, Literal[False]] = field(
-        init=False, repr=False, compare=False, default=False
-    )
+    match_import: Union[Import, Literal[False]] = field(init=False, repr=False, compare=False, default=False)
 
     @property
     def is_attribute(self):
@@ -158,13 +141,10 @@ class Name:
             is_match = self.name == imp.name
         elif self.is_attribute:
             is_match = imp.lineno < self.lineno and (
-                ".".join(self.name.split(".")[: len(imp)]) == imp.name
-                or imp.is_match_sub_packages(self.name)
+                ".".join(self.name.split(".")[: len(imp)]) == imp.name or imp.is_match_sub_packages(self.name)
             )
         else:
-            is_match = (imp.lineno < self.lineno) and (
-                self.name == imp.name or imp.is_match_sub_packages(self.name)
-            )
+            is_match = (imp.lineno < self.lineno) and (self.name == imp.name or imp.is_match_sub_packages(self.name))
 
         return is_match
 
@@ -184,9 +164,7 @@ class Name:
         return Scope.get_scope_by_current_node(self)
 
     @classmethod
-    def register(
-        cls, lineno: int, name: str, node: ast.AST, is_all: bool = False
-    ) -> None:
+    def register(cls, lineno: int, name: str, node: ast.AST, is_all: bool = False) -> None:
         _name = cls(lineno, name, is_all)
         _name.node = node
         cls.names.append(_name)
@@ -209,9 +187,7 @@ class Scope:
         default_factory=list, init=False, repr=False, compare=False
     )
     parent: "Scope" = field(default=None, repr=False)
-    child_scopes: Set["Scope"] = field(
-        default_factory=set, init=False, repr=False, compare=False
-    )
+    child_scopes: Set["Scope"] = field(default_factory=set, init=False, repr=False, compare=False)
 
     def __hash__(self) -> int:
         return hash(self.node)
@@ -244,12 +220,8 @@ class Scope:
         cls.current_scope.pop()
 
     @classmethod
-    def register(
-        cls, current_node: Union[Import, ImportFrom, Name], *, is_global=False
-    ) -> None:
-        scope = cls.get_previous_scope(
-            cls.get_global_scope() if is_global else cls.get_current_scope()
-        )
+    def register(cls, current_node: Union[Import, ImportFrom, Name], *, is_global=False) -> None:
+        scope = cls.get_previous_scope(cls.get_global_scope() if is_global else cls.get_current_scope())
 
         # current nodes add to scope
         scope.current_nodes.append(current_node)
@@ -270,12 +242,11 @@ class Scope:
             parent = cls.get_previous_scope(parent.parent)
 
     @classmethod
-    def get_scope_by_current_node(
-        cls, current_node: Union[Import, ImportFrom, Name]
-    ) -> Optional["Scope"]:
+    def get_scope_by_current_node(cls, current_node: Union[Import, ImportFrom, Name]) -> Optional["Scope"]:
         for scope in cls.scopes:
             if current_node in scope.current_nodes:
                 return scope
+
         return None
 
     @property
