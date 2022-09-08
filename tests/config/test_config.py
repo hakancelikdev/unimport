@@ -94,25 +94,18 @@ def test_parse_config_parse_args_config_setup_cfg():
         (["--ignore-init"], True, "ignore_init"),
     ],
 )
-def test_parse_config_parse_args(
-    argv: List[str], expected_argv: str, attribute_name: str
-):
+def test_parse_config_parse_args(argv: List[str], expected_argv: str, attribute_name: str):
     parser = generate_parser()
     args = parser.parse_args(argv)
     config = ParseConfig.parse_args(parser.parse_args(argv))
 
-    assert (
-        getattr(config, attribute_name) == expected_argv
-    ), f"args: {args}, attribute_name: {attribute_name}"
+    assert getattr(config, attribute_name) == expected_argv, f"args: {args}, attribute_name: {attribute_name}"
 
 
 def test_config_build_default_command_same_with_default_config():
     config = Config()
 
-    assert (
-        config.build(args={"exclude": config.exclude}).exclude
-        == config.build().exclude
-    )
+    assert config.build(args={"exclude": config.exclude}).exclude == config.build().exclude
 
 
 def test_config_build_default_check():
@@ -142,10 +135,7 @@ def test_parse_config_toml_command_check():
     config_context = ParseConfig(pyproject).parse()
     parser = generate_parser()
 
-    assert (
-        Config.build(args={"check": True}, config_context=config_context).check
-        is True
-    )
+    assert Config.build(args={"check": True}, config_context=config_context).check is True
     assert (
         Config.build(
             args={"gitignore": True},
@@ -153,16 +143,8 @@ def test_parse_config_toml_command_check():
         ).check
         is True
     )
-    assert (
-        Config.build(args={"diff": True}, config_context=config_context).check
-        is False
-    )
-    assert (
-        Config.build(
-            args={"remove": True}, config_context=config_context
-        ).check
-        is False
-    )
+    assert Config.build(args={"diff": True}, config_context=config_context).check is False
+    assert Config.build(args={"remove": True}, config_context=config_context).check is False
     assert (
         Config.build(
             args={"permission": True},

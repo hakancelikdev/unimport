@@ -23,6 +23,4 @@ IMPORTS: List[Union[Import, ImportFrom]] = [
         suggestions=[],
     ),
 ]
-UNUSED_IMPORTS: List[Union[Import, ImportFrom]] = [
-    Import(lineno=1, column=1, name="sys", package="sys")
-]
+UNUSED_IMPORTS: List[Union[Import, ImportFrom]] = [Import(lineno=1, column=1, name="sys", package="sys")]

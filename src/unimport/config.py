@@ -86,9 +86,7 @@ class Config:
         if color not in cls._get_color_choices():
             raise ValueError(color)
 
-        return color == "always" or (
-            color == "auto" and sys.stderr.isatty() and TERMINAL_SUPPORT_COLOR
-        )
+        return color == "always" or (color == "auto" and sys.stderr.isatty() and TERMINAL_SUPPORT_COLOR)
 
     @classmethod
     def build(
@@ -106,12 +104,8 @@ class Config:
         context = {}
         for field_name in cls._get_init_fields():
             config_value = args.get(field_name, None)
-            if config_value is None or config_value == getattr(
-                cls, field_name
-            ):
-                config_value = config_context.get(
-                    field_name, getattr(cls, field_name)
-                )
+            if config_value is None or config_value == getattr(cls, field_name):
+                config_value = config_context.get(field_name, getattr(cls, field_name))
             context[field_name] = config_value
 
         return cls(**context)  # Only init attribute values
@@ -174,9 +168,7 @@ class ParseConfig:
 
     def parse_toml(self) -> Dict[str, Any]:
         parsed_toml = toml.loads(self.config_file.read_text())
-        toml_context: Dict[str, Any] = parsed_toml.get("tool", {}).get(
-            "unimport", {}
-        )
+        toml_context: Dict[str, Any] = parsed_toml.get("tool", {}).get("unimport", {})
         if toml_context:
             sources = toml_context.get("sources", Config.default_sources)
             toml_context["sources"] = [Path(path) for path in sources]
@@ -186,8 +178,6 @@ class ParseConfig:
     def parse_args(cls, args: argparse.Namespace) -> Config:
         if args.config and args.config.name in cls.CONFIG_FILES:
             config_context = cls(args.config).parse()
-            return Config.build(
-                args=args.__dict__, config_context=config_context
-            )
+            return Config.build(args=args.__dict__, config_context=config_context)
 
         return Config.build(args=vars(args))

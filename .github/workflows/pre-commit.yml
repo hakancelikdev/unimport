@@ -1,12 +1,11 @@
-name: unimport
+name: pre-commit
 on: [push, pull_request]
 jobs:
-  unimport:
+  run:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
-      - name: unimport
-        uses: ./
-        with:
-          extra_args: --include src/
+      - name: pre-commit
+        run: |
+          tox -e pre-commit
