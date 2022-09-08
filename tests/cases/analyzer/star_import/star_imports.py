@@ -14,12 +14,8 @@ NAMES: List[Name] = [
     Name(lineno=11, name="NAME", is_all=False),
 ]
 IMPORTS: List[Union[Import, ImportFrom]] = [
-    ImportFrom(
-        lineno=1, column=1, name="os", package="os", star=True, suggestions=[]
-    ),
-    ImportFrom(
-        lineno=2, column=1, name="y", package="x", star=False, suggestions=[]
-    ),
+    ImportFrom(lineno=1, column=1, name="os", package="os", star=True, suggestions=[]),
+    ImportFrom(lineno=2, column=1, name="y", package="x", star=False, suggestions=[]),
     ImportFrom(
         lineno=3,
         column=1,
@@ -86,10 +82,6 @@ UNUSED_IMPORTS: List[Union[Import, ImportFrom]] = [
         star=True,
         suggestions=["match", "search"],
     ),
-    ImportFrom(
-        lineno=2, column=1, name="y", package="x", star=False, suggestions=[]
-    ),
-    ImportFrom(
-        lineno=1, column=1, name="os", package="os", star=True, suggestions=[]
-    ),
+    ImportFrom(lineno=2, column=1, name="y", package="x", star=False, suggestions=[]),
+    ImportFrom(lineno=1, column=1, name="os", package="os", star=True, suggestions=[]),
 ]

@@ -1,7 +1,7 @@
-name: Test
+name: test
 on: [push, pull_request]
 jobs:
-  test:
+  run:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -16,18 +16,35 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: x64
 
+      - name: Install  Dependencies for Python${{ matrix.python-version }}
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install tox
+
+      - name: Test with pytest for Python${{ matrix.python-version }}
+        run: |
+          tox -e ${{ matrix.python-version }}
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+
+      - name: Set up Python${{ matrix.python-version }}
+        uses: actions/setup-python@v2.1.4
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+
       - name: Install  Dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e .[dev]
-
-      - name: Test with pytest
-        run: |
-          python -m pytest tests -v
+          python -m pip install .[test]
 
       - name: Generate coverage report
         run: |
-          pytest --cov=./ --cov-report=xml
+          python -m pytest --cov=./ --cov-report=xml
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1.0.14
         with:

@@ -11,9 +11,7 @@ from unimport.statement import Import
 
 
 @contextmanager
-def reopenable_temp_file(
-    content: str, newline: Optional[str] = None
-) -> Iterator[Path]:
+def reopenable_temp_file(content: str, newline: Optional[str] = None) -> Iterator[Path]:
     """Create a reopenable tempfile to supporting multiple reads/writes.
 
     Required to avoid file locking issues on Windows.
@@ -23,6 +21,7 @@ def reopenable_temp_file(
     :param content: string content to write.
     :param newline: Newline character to use, if not platform default.
     :yields: tempfile path.
+
     """
     try:
         with tempfile.NamedTemporaryFile(

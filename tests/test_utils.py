@@ -39,16 +39,13 @@ def test_list_paths_with_gitignore():
         b
         spam/**
         **/api/
+        **/tests
         **/
         """
     )
     with reopenable_temp_file(gitignore) as gitignore_path:
-        gitignore_patterns = utils.get_exclude_list_from_gitignore(
-            gitignore_path
-        )
-        assert list(
-            utils.list_paths(Path("."), gitignore_patterns=gitignore_patterns)
-        ) == [Path("setup.py")]
+        gitignore_patterns = utils.get_exclude_list_from_gitignore(gitignore_path)
+        assert list(utils.list_paths(Path("."), gitignore_patterns=gitignore_patterns)) == []
 
 
 def test_bad_encoding():
