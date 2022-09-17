@@ -1,6 +1,7 @@
 def main():
     from unimport import emoji
-    from unimport.color import Color, paint
+    from unimport.color import paint
+    from unimport.enums import Color
     from unimport.main import Main
 
     main = Main.run()

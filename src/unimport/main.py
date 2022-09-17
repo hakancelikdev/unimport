@@ -5,8 +5,9 @@ from typing import TYPE_CHECKING, Iterator, List, Optional, Sequence, Union
 
 from unimport import commands, utils
 from unimport.analyzer import Analyzer
-from unimport.color import Color, paint
+from unimport.color import paint
 from unimport.config import Config
+from unimport.enums import Color
 from unimport.statement import Import
 
 if TYPE_CHECKING:

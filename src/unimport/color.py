@@ -1,9 +1,9 @@
 import sys
-from enum import Enum
 from typing import Tuple
 
+from unimport.enums import Color
+
 __all__ = (
-    "Color",
     "TERMINAL_SUPPORT_COLOR",
     "difference",
     "paint",
@@ -61,19 +61,6 @@ if sys.platform == "win32":  # pragma: no cover (windows)
         TERMINAL_SUPPORT_COLOR = True
 else:  # pragma: win32 no cover
     TERMINAL_SUPPORT_COLOR = True
-
-
-class Color(str, Enum):
-    RESET = "\033[0m"
-    BLACK = "\033[30m"
-    RED = "\033[31m"
-    GREEN = "\033[32m"
-    YELLOW = "\033[33m"
-    BLUE = "\033[34m"
-    MAGENTA = "\033[35m"
-    CYAN = "\033[36m"
-    WHITE = "\033[97m"
-    BOLD_WHITE = "\033[1;37m"
 
 
 def paint(text: str, color: Color, use_color: bool = True) -> str:

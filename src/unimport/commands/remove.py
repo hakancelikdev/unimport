@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from unimport.color import Color, paint
+from unimport.color import paint
+from unimport.enums import Color
 
 __all__ = ("remove",)
 

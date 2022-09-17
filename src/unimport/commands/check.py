@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import List, Union
 
-from unimport.color import Color, paint
+from unimport.color import paint
+from unimport.enums import Color
 from unimport.statement import Import, ImportFrom
 
 __all__ = ("check",)
