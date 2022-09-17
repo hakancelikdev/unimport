@@ -62,6 +62,7 @@ class _ImportAnalyzer(ast.NodeVisitor):
         self.include_star_import = include_star_import
 
         self.any_import_error = False
+        self.in_if = False
         self.defined_names: Set[str] = set()
 
     def traverse(self, tree) -> None:
@@ -89,6 +90,14 @@ class _ImportAnalyzer(ast.NodeVisitor):
 
     @_generic_visit
     def visit_Import(self, node: ast.Import) -> None:
+        if_node = first_occurrence(node, (ast.If,))
+        if if_node:
+            if_names = {name.asname or name.name for n in if_node.body for name in n.names}
+            orelse_names = {name.asname or name.name for n in if_node.orelse for name in n.names}
+
+            if if_names.intersection(orelse_names):
+                self.in_if = True
+
         if self.skip_import(node):
             return None
 
@@ -101,8 +110,18 @@ class _ImportAnalyzer(ast.NodeVisitor):
                 node=node,
             )
 
+        self.in_if = False
+
     @_generic_visit
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
+        if_node = first_occurrence(node, (ast.If,))
+        if if_node:
+            if_names = {name.asname or name.name for n in if_node.body for name in n.names}
+            orelse_names = {name.asname or name.name for n in if_node.orelse for name in n.names}
+
+            if if_names.intersection(orelse_names):
+                self.in_if = True
+
         if self.skip_import(node):
             return None
 
@@ -125,6 +144,8 @@ class _ImportAnalyzer(ast.NodeVisitor):
                 node=node,
             )
 
+        self.in_if = False
+
     def visit_Try(self, node: ast.Try) -> None:
         self.any_import_error = True
 
@@ -137,16 +158,9 @@ class _ImportAnalyzer(ast.NodeVisitor):
             source_segment = "\n".join(self.source.splitlines()[node.lineno - 1 : node.end_lineno])
         else:
             source_segment = self.source.splitlines()[node.lineno - 1]
-        return (
-            bool(
-                re.search(
-                    self.skip_import_comments_regex,
-                    source_segment,
-                    re.IGNORECASE,
-                )
-            )
-            or self.any_import_error
-        )
+
+        skip_comment = bool(re.search(self.skip_import_comments_regex, source_segment, re.IGNORECASE))
+        return any((skip_comment, self.any_import_error, self.in_if))
 
     def get_suggestions(self, package: str) -> List[str]:
         names = set(map(lambda name: name.name.split(".")[0], Name.names))
