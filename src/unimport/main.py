@@ -3,8 +3,9 @@ import dataclasses
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterator, List, Optional, Sequence, Union
 
-from unimport import color, commands, utils
+from unimport import commands, utils
 from unimport.analyzer import Analyzer
+from unimport.color import Color, paint
 from unimport.config import Config
 from unimport.statement import Import
 
@@ -56,9 +57,9 @@ class Main:
             analysis.traverse()
         except SyntaxError as exc:
             print(
-                color.paint(str(exc), color.RED, self.config.use_color)
+                paint(str(exc), Color.RED, self.config.use_color)
                 + " at "
-                + color.paint(path.as_posix(), color.GREEN, self.config.use_color)
+                + paint(path.as_posix(), Color.GREEN, self.config.use_color)
             )
             self.is_syntax_error = True
 

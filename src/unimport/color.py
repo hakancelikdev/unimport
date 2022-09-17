@@ -1,18 +1,10 @@
 import sys
+from enum import Enum
 from typing import Tuple
 
 __all__ = (
-    "BLACK",
-    "BLUE",
-    "BOLD_WHITE",
-    "CYAN",
-    "GREEN",
-    "MAGENTA",
-    "RED",
-    "RESET",
+    "Color",
     "TERMINAL_SUPPORT_COLOR",
-    "WHITE",
-    "YELLOW",
     "difference",
     "paint",
 )
@@ -70,34 +62,33 @@ if sys.platform == "win32":  # pragma: no cover (windows)
 else:  # pragma: win32 no cover
     TERMINAL_SUPPORT_COLOR = True
 
-RESET = "\033[0m"
-BLACK = "\033[30m"
-RED = "\033[31m"
-GREEN = "\033[32m"
-YELLOW = "\033[33m"
-BLUE = "\033[34m"
-MAGENTA = "\033[35m"
-CYAN = "\033[36m"
-WHITE = "\033[97m"
-BOLD_WHITE = "\033[1;37m"
+
+class Color(str, Enum):
+    RESET = "\033[0m"
+    BLACK = "\033[30m"
+    RED = "\033[31m"
+    GREEN = "\033[32m"
+    YELLOW = "\033[33m"
+    BLUE = "\033[34m"
+    MAGENTA = "\033[35m"
+    CYAN = "\033[36m"
+    WHITE = "\033[97m"
+    BOLD_WHITE = "\033[1;37m"
 
 
-def paint(text: str, color: str, use_color: bool = True) -> str:
-    if use_color:
-        return color + text + RESET
-    else:
-        return text
+def paint(text: str, color: Color, use_color: bool = True) -> str:
+    return color.value + text + Color.RESET.value if use_color else text
 
 
 def difference(text: Tuple[str, ...]) -> str:  # pragma: no cover
     lines = list(text)
     for i, line in enumerate(lines):
         if line.startswith("+++") or line.startswith("---"):
-            lines[i] = paint(line, BOLD_WHITE)
+            lines[i] = paint(line, Color.BOLD_WHITE)
         elif line.startswith("@@"):
-            lines[i] = paint(line, CYAN)
+            lines[i] = paint(line, Color.CYAN)
         elif line.startswith("+"):
-            lines[i] = paint(line, GREEN)
+            lines[i] = paint(line, Color.GREEN)
         elif line.startswith("-"):
-            lines[i] = paint(line, RED)
+            lines[i] = paint(line, Color.RED)
     return "\n".join(lines)

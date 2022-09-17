@@ -16,6 +16,8 @@ class _RemoveUnusedImportTransformer(cst.CSTTransformer):
     METADATA_DEPENDENCIES = (PositionProvider,)
 
     def __init__(self, unused_imports: List[Union[Import, ImportFrom]]) -> None:
+        super().__init__()
+
         self.unused_imports = unused_imports
 
     @staticmethod
