@@ -25,8 +25,8 @@ EXCLUDE_REGEX_PATTERN = r"^$"
 INIT_FILE_IGNORE_REGEX = r"__init__\.py"
 
 # TUPLE
-DefTuple = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
-ASTFunctionTuple = (ast.FunctionDef, ast.AsyncFunctionDef)
+DEF_TUPLE = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+AST_FUNCTION_TUPLE = (ast.FunctionDef, ast.AsyncFunctionDef)
 
 # CONF
 PY37_PLUS = sys.version_info >= (3, 7)

@@ -17,7 +17,7 @@ def permission(
     action = input(f"Apply suggested changes to '{paint(str(path), Color.YELLOW, use_color)}' [Y/n/q] ? >").lower()
     if action == "q":
         raise SystemExit(1)
-    elif utils.actiontobool(action):
+    elif utils.action_to_bool(action):
         from unimport import commands
 
         commands.remove(path, encoding, newline, refactor_result, use_color)

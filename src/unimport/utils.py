@@ -18,7 +18,7 @@ __all__ = (
     "get_source",
     "get_spec",
     "is_std",
-    "actiontobool",
+    "action_to_bool",
     "get_exclude_list_from_gitignore",
     "read",
     "list_paths",
@@ -74,7 +74,7 @@ def is_std(package: str) -> bool:
     return False
 
 
-def actiontobool(action: str) -> bool:
+def action_to_bool(action: str) -> bool:
     if action == "":
         return True
     with contextlib.suppress(ValueError):
@@ -83,9 +83,7 @@ def actiontobool(action: str) -> bool:
     return False
 
 
-def get_exclude_list_from_gitignore(
-    path=Path(".gitignore"),
-) -> List[GitWildMatchPattern]:
+def get_exclude_list_from_gitignore(path=Path(".gitignore")) -> List[GitWildMatchPattern]:
     """Converts .gitignore patterns to regex and return this excludes regex
     list."""
 

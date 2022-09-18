@@ -92,11 +92,23 @@ class _ImportAnalyzer(ast.NodeVisitor):
     def visit_Import(self, node: ast.Import) -> None:
         if_node = first_occurrence(node, (ast.If,))
         if if_node:
-            if_names = {name.asname or name.name for n in if_node.body for name in n.names}
-            orelse_names = {name.asname or name.name for n in if_node.orelse for name in n.names}
+            if_names = {
+                name.asname or name.name
+                for n in filter(lambda node: isinstance(node, (ast.Import, ast.ImportFrom)), if_node.body)
+                for name in n.names
+            }
+            orelse_names = {
+                name.asname or name.name
+                for n in filter(lambda node: isinstance(node, (ast.Import, ast.ImportFrom)), if_node.orelse)
+                for name in n.names
+            }
 
             if if_names.intersection(orelse_names):
                 self.in_if = True
+
+        if self.in_if:
+            self.in_if = False
+            return None
 
         if self.skip_import(node):
             return None
@@ -110,17 +122,28 @@ class _ImportAnalyzer(ast.NodeVisitor):
                 node=node,
             )
 
-        self.in_if = False
-
     @_generic_visit
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
+        # TODO: if, elif, else duurmlarında ast farklı böyle durum gelince hata vermediğine emin ol
         if_node = first_occurrence(node, (ast.If,))
         if if_node:
-            if_names = {name.asname or name.name for n in if_node.body for name in n.names}
-            orelse_names = {name.asname or name.name for n in if_node.orelse for name in n.names}
+            if_names = {
+                name.asname or name.name
+                for n in filter(lambda node: isinstance(node, (ast.Import, ast.ImportFrom)), if_node.body)
+                for name in n.names
+            }
+            orelse_names = {
+                name.asname or name.name
+                for n in filter(lambda node: isinstance(node, (ast.Import, ast.ImportFrom)), if_node.orelse)
+                for name in n.names
+            }
 
             if if_names.intersection(orelse_names):
                 self.in_if = True
+
+        if self.in_if:
+            self.in_if = False
+            return None
 
         if self.skip_import(node):
             return None
@@ -138,13 +161,11 @@ class _ImportAnalyzer(ast.NodeVisitor):
                 lineno=node.lineno,
                 column=column + 1,
                 name=package if is_star else alias_name,
+                package=package,
                 star=is_star,
                 suggestions=self.get_suggestions(package) if is_star else [],
-                package=package,
                 node=node,
             )
-
-        self.in_if = False
 
     def visit_Try(self, node: ast.Try) -> None:
         self.any_import_error = True
@@ -160,7 +181,7 @@ class _ImportAnalyzer(ast.NodeVisitor):
             source_segment = self.source.splitlines()[node.lineno - 1]
 
         skip_comment = bool(re.search(self.skip_import_comments_regex, source_segment, re.IGNORECASE))
-        return any((skip_comment, self.any_import_error, self.in_if))
+        return any((skip_comment, self.any_import_error))
 
     def get_suggestions(self, package: str) -> List[str]:
         names = set(map(lambda name: name.name.split(".")[0], Name.names))
@@ -187,7 +208,7 @@ class _NameAnalyzer(ast.NodeVisitor):
     visit_AsyncFunctionDef = visit_FunctionDef
 
     def visit_str_helper(self, value: str, node: ast.AST) -> None:
-        parent = first_occurrence(node, *C.ASTFunctionTuple)
+        parent = first_occurrence(node, *C.AST_FUNCTION_TUPLE)
         is_annassign_or_arg = any(isinstance(parent, (ast.AnnAssign, ast.arg)) for parent in get_parents(node))
         if is_annassign_or_arg or (parent is not None and parent.returns is node):
             self.join_visit(value, node)
@@ -276,7 +297,7 @@ class _NameAnalyzer(ast.NodeVisitor):
                 self.join_visit(node.args[0].s, node.args[0])
 
     def _type_comment(self, node: ast.AST) -> None:
-        mode = "func_type" if isinstance(node, C.ASTFunctionTuple) else "eval"
+        mode = "func_type" if isinstance(node, C.AST_FUNCTION_TUPLE) else "eval"
         type_comment = getattr(node, "type_comment", None)
         if type_comment is not None:
             self.join_visit(type_comment, node, mode=mode)
@@ -308,7 +329,7 @@ class _ImportableAnalyzer(ast.NodeVisitor):
     def visit_CFN(self, node: T.CFNT) -> None:
         Scope.add_current_scope(node)
 
-        if not first_occurrence(node, C.DefTuple):
+        if not first_occurrence(node, C.DEF_TUPLE):
             self.suggestions_nodes.append(node)
 
         self.generic_visit(node)
@@ -395,7 +416,7 @@ class _ImportableAnalyzer(ast.NodeVisitor):
                 names.add(node.id)
             elif isinstance(node, ast.alias):
                 names.add(node.asname or node.name)
-            elif isinstance(node, C.DefTuple):
+            elif isinstance(node, C.DEF_TUPLE):
                 names.add(node.name)
         return frozenset(names)
 

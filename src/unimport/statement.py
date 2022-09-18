@@ -1,6 +1,6 @@
 import ast
+import dataclasses
 import operator
-from dataclasses import dataclass, field
 from typing import ClassVar, Iterator, List, Optional, Set, Union
 
 from unimport import constants as C
@@ -14,7 +14,7 @@ else:
 __all__ = ("Import", "ImportFrom", "Name", "Scope")
 
 
-@dataclass
+@dataclasses.dataclass
 class Import:
     imports: ClassVar[List[Union["Import", "ImportFrom"]]] = []
 
@@ -23,12 +23,12 @@ class Import:
     name: str
     package: str
 
-    node: ast.AST = field(init=False, repr=False, compare=False)
+    node: Union[ast.Import, ast.ImportFrom] = dataclasses.field(init=False, repr=False, compare=False)
 
     def __len__(self) -> int:
         return operator.length_hint(self.name.split("."))
 
-    def is_match_sub_packages(self, name_name) -> bool:
+    def is_match_sub_packages(self, name_name: str) -> bool:
         return self.name.split(".")[0] == name_name
 
     @property
@@ -37,9 +37,6 @@ class Import:
 
     def is_used(self) -> bool:
         for name in self.scope.names:
-            if name is None:
-                continue
-
             if name.match_import:
                 if name.match_import == self:
                     return True
@@ -75,7 +72,7 @@ class Import:
         return [_import.name for _import in self.imports].count(self.name) > 1
 
     @classmethod
-    def get_unused_imports(cls, include_star_import: bool = False) -> Iterator[Union["Import", "ImportFrom"]]:
+    def get_unused_imports(cls, *, include_star_import: bool = False) -> Iterator[Union["Import", "ImportFrom"]]:
         for imp in reversed(Import.imports):
             if include_star_import and isinstance(imp, ImportFrom) and imp.star:
                 yield imp
@@ -83,7 +80,7 @@ class Import:
                 yield imp
 
     @classmethod
-    def register(cls, lineno: int, column: int, name: str, package: str, node: ast.AST) -> None:
+    def register(cls, *, lineno: int, column: int, name: str, package: str, node: ast.Import) -> None:
         _import = cls(lineno, column, name, package)
         _import.node = node
         cls.imports.append(_import)
@@ -95,24 +92,25 @@ class Import:
         cls.imports.clear()
 
 
-@dataclass
+@dataclasses.dataclass
 class ImportFrom(Import):
     star: bool
     suggestions: List[str]
 
-    def is_match_sub_packages(self, name_name):
+    def is_match_sub_packages(self, name_name: str) -> Literal[False]:
         return False
 
     @classmethod
     def register(  # type: ignore
         cls,
+        *,
         lineno: int,
         column: int,
         name: str,
         package: str,
-        node: ast.AST,
         star: bool,
         suggestions: List[str],
+        node: ast.ImportFrom,
     ) -> None:
         _import = cls(lineno, column, name, package, star, suggestions)
         _import.node = node
@@ -121,7 +119,7 @@ class ImportFrom(Import):
         Scope.register(_import)
 
 
-@dataclass
+@dataclasses.dataclass
 class Name:
     names: ClassVar[List["Name"]] = []
 
@@ -129,8 +127,10 @@ class Name:
     name: str
     is_all: bool = False
 
-    node: ast.AST = field(init=False, repr=False, compare=False)
-    match_import: Union[Import, Literal[False]] = field(init=False, repr=False, compare=False, default=False)
+    node: Union[ast.Name, ast.Attribute, ast.Constant] = dataclasses.field(init=False, repr=False, compare=False)
+    match_import: Union[Import, ImportFrom, Literal[False]] = dataclasses.field(
+        init=False, repr=False, compare=False, default=False
+    )
 
     @property
     def is_attribute(self):
@@ -164,7 +164,9 @@ class Name:
         return Scope.get_scope_by_current_node(self)
 
     @classmethod
-    def register(cls, lineno: int, name: str, node: ast.AST, is_all: bool = False) -> None:
+    def register(
+        cls, *, lineno: int, name: str, node: Union[ast.Name, ast.Attribute, ast.Constant], is_all: bool = False
+    ) -> None:
         _name = cls(lineno, name, is_all)
         _name.node = node
         cls.names.append(_name)
@@ -176,18 +178,18 @@ class Name:
         cls.names.clear()
 
 
-@dataclass
+@dataclasses.dataclass
 class Scope:
     scopes: ClassVar[List["Scope"]] = []
     current_scope: ClassVar[List["Scope"]] = []
 
     node: ast.AST
 
-    current_nodes: List[Union[Import, ImportFrom, Name]] = field(
+    current_nodes: List[Union[Import, ImportFrom, Name]] = dataclasses.field(
         default_factory=list, init=False, repr=False, compare=False
     )
-    parent: "Scope" = field(default=None, repr=False)
-    child_scopes: Set["Scope"] = field(default_factory=set, init=False, repr=False, compare=False)
+    parent: "Scope" = dataclasses.field(default=None, repr=False)
+    child_scopes: Set["Scope"] = dataclasses.field(default_factory=set, init=False, repr=False, compare=False)
 
     def __hash__(self) -> int:
         return hash(self.node)
