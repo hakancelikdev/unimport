@@ -17,9 +17,25 @@ def _generic_visit(func: T.FunctionT) -> T.FunctionT:
     """decorator to make visitor work _generic_visit."""
 
     @functools.wraps(func)
-    def wrapper(self, *args, **kwargs):
-        func(self, *args, **kwargs)
-        self.generic_visit(*args)
+    def wrapper(self, node, *args, **kwargs):
+
+        func(self, node, *args, **kwargs)
+        self.generic_visit(node)
+
+    return cast(T.FunctionT, wrapper)
+
+
+def _skip_import(func: T.FunctionT) -> T.FunctionT:
+    @functools.wraps(func)
+    def wrapper(self, node, *args, **kwargs):
+        if C.PY38_PLUS:
+            source_segment = "\n".join(self.source.splitlines()[node.lineno - 1 : node.end_lineno])
+        else:
+            source_segment = self.source.splitlines()[node.lineno - 1]
+
+        skip_comment = bool(re.search(self.skip_import_comments_regex, source_segment, re.IGNORECASE))
+        if not any((skip_comment, self.any_import_error)):
+            func(self, node, *args, **kwargs)
 
     return cast(T.FunctionT, wrapper)
 
@@ -62,7 +78,6 @@ class _ImportAnalyzer(ast.NodeVisitor):
         self.include_star_import = include_star_import
 
         self.any_import_error = False
-        self.in_if = False
         self.defined_names: Set[str] = set()
 
     def traverse(self, tree) -> None:
@@ -89,7 +104,10 @@ class _ImportAnalyzer(ast.NodeVisitor):
     visit_AsyncFunctionDef = visit_FunctionDef
 
     @_generic_visit
+    @_skip_import
     def visit_Import(self, node: ast.Import) -> None:
+        if_names, orelse_names = set(), set()
+
         if_node = first_occurrence(node, (ast.If,))
         if if_node:
             if_names = {
@@ -102,29 +120,19 @@ class _ImportAnalyzer(ast.NodeVisitor):
                 for n in filter(lambda node: isinstance(node, (ast.Import, ast.ImportFrom)), if_node.orelse)
                 for name in n.names
             }
-
-            if if_names.intersection(orelse_names):
-                self.in_if = True
-
-        if self.in_if:
-            self.in_if = False
-            return None
-
-        if self.skip_import(node):
-            return None
 
         for column, alias in enumerate(node.names):
-            Import.register(
-                lineno=node.lineno,
-                column=column + 1,
-                name=(alias.asname or alias.name),
-                package=alias.name,
-                node=node,
-            )
+            name = alias.asname or alias.name
+            if name in if_names and name in orelse_names:
+                continue
+
+            Import.register(lineno=node.lineno, column=column + 1, name=name, package=alias.name, node=node)
 
     @_generic_visit
+    @_skip_import
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
-        # TODO: if, elif, else duurmlarında ast farklı böyle durum gelince hata vermediğine emin ol
+        if_names, orelse_names = set(), set()
+
         if_node = first_occurrence(node, (ast.If,))
         if if_node:
             if_names = {
@@ -137,30 +145,21 @@ class _ImportAnalyzer(ast.NodeVisitor):
                 for n in filter(lambda node: isinstance(node, (ast.Import, ast.ImportFrom)), if_node.orelse)
                 for name in n.names
             }
-
-            if if_names.intersection(orelse_names):
-                self.in_if = True
-
-        if self.in_if:
-            self.in_if = False
-            return None
-
-        if self.skip_import(node):
-            return None
 
         is_star = node.names[0].name == "*"
         for column, alias in enumerate(node.names):
-            if not node.level:
-                package = node.module
-            else:
-                package = "." * node.level + str(node.module) or ""
-            alias_name = alias.asname or alias.name
+            package = node.module if not node.level else "." * node.level + str(node.module) or ""
             if (package in self.ignore_modules_imports) or (is_star and not self.include_star_import):
                 return
+
+            name = package if is_star else (alias.asname or alias.name)
+            if name in if_names and name in orelse_names:
+                continue
+
             ImportFrom.register(
                 lineno=node.lineno,
                 column=column + 1,
-                name=package if is_star else alias_name,
+                name=name,
                 package=package,
                 star=is_star,
                 suggestions=self.get_suggestions(package) if is_star else [],
@@ -173,15 +172,6 @@ class _ImportAnalyzer(ast.NodeVisitor):
         self.generic_visit(node)
 
         self.any_import_error = False
-
-    def skip_import(self, node: T.ASTImport) -> bool:
-        if C.PY38_PLUS:
-            source_segment = "\n".join(self.source.splitlines()[node.lineno - 1 : node.end_lineno])
-        else:
-            source_segment = self.source.splitlines()[node.lineno - 1]
-
-        skip_comment = bool(re.search(self.skip_import_comments_regex, source_segment, re.IGNORECASE))
-        return any((skip_comment, self.any_import_error))
 
     def get_suggestions(self, package: str) -> List[str]:
         names = set(map(lambda name: name.name.split(".")[0], Name.names))

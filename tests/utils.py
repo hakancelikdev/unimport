@@ -21,7 +21,6 @@ def reopenable_temp_file(content: str, newline: Optional[str] = None) -> Iterato
     :param content: string content to write.
     :param newline: Newline character to use, if not platform default.
     :yields: tempfile path.
-
     """
     try:
         with tempfile.NamedTemporaryFile(

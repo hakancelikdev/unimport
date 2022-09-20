@@ -38,11 +38,7 @@ def test_cases(path: Path, refactor_path: Path, analyzer_path: Path, logger):
     analyzer = importlib.import_module(analyzer_import_path)
 
     source = path.read_text()
-    skip = re.search(
-        "# skip; condition: (?P<condition>.*), reason: (?P<reason>.*)",
-        source,
-        re.IGNORECASE,
-    )
+    skip = re.search("# skip; condition: (?P<condition>.*), reason: (?P<reason>.*)", source, re.IGNORECASE)
     if skip:
         condition = skip.group("condition")
         if condition in ["not PY38_PLUS"] and eval(condition):
@@ -57,5 +53,4 @@ def test_cases(path: Path, refactor_path: Path, analyzer_path: Path, logger):
 
     # refactor tests
     refactor = refactor_string(source, analyzer.UNUSED_IMPORTS)
-    refactor_path_.write_text(refactor)
-    assert refactor_path_.read_text() == refactor
+    assert refactor == refactor_path_.read_text()
