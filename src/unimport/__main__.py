@@ -1,13 +1,14 @@
 def main():
-    from unimport import color, emoji
+    from unimport.color import paint
+    from unimport.enums import Color, Emoji
     from unimport.main import Main
 
     main = Main.run()
     if not main.is_unused_imports and main.config.check:
         print(
-            color.paint(
-                f"{emoji.STAR} Congratulations there is no unused import in your project. {emoji.STAR}",
-                color.GREEN,
+            paint(
+                f"{Emoji.STAR} Congratulations there is no unused import in your project. {Emoji.STAR}",
+                Color.GREEN,
                 main.config.use_color,
             )
         )

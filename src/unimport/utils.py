@@ -18,7 +18,7 @@ __all__ = (
     "get_source",
     "get_spec",
     "is_std",
-    "actiontobool",
+    "action_to_bool",
     "get_exclude_list_from_gitignore",
     "read",
     "list_paths",
@@ -27,6 +27,7 @@ __all__ = (
 )
 
 
+@functools.lru_cache(maxsize=128)
 def get_dir(package: str) -> FrozenSet[str]:
     try:
         module = importlib.import_module(package)
@@ -35,11 +36,10 @@ def get_dir(package: str) -> FrozenSet[str]:
     return frozenset(dir(module))
 
 
+@functools.lru_cache(maxsize=128)
 def get_source(package: str) -> Optional[str]:
     spec = get_spec(package)
-    # The below two can be one of several values per their previous type annotations
-    # But for our use case, we know that these are the specific classes that asserted to be
-    if spec:
+    if spec is not None:
         assert isinstance(spec.loader, importlib.machinery.SourceFileLoader)
         assert isinstance(spec.loader.path, str)
         if spec.loader.path.endswith(".py"):
@@ -48,7 +48,7 @@ def get_source(package: str) -> Optional[str]:
     return None
 
 
-@functools.lru_cache(maxsize=None)
+@functools.lru_cache(maxsize=128)
 def get_spec(package: str) -> Optional[importlib.machinery.ModuleSpec]:
     try:
         return importlib.util.find_spec(package)
@@ -56,6 +56,7 @@ def get_spec(package: str) -> Optional[importlib.machinery.ModuleSpec]:
         return None
 
 
+@functools.lru_cache(maxsize=128)
 def is_std(package: str) -> bool:
     """Returns True if package module came with from Python."""
 
@@ -74,7 +75,8 @@ def is_std(package: str) -> bool:
     return False
 
 
-def actiontobool(action: str) -> bool:
+@functools.lru_cache(maxsize=3)
+def action_to_bool(action: str) -> bool:
     if action == "":
         return True
     with contextlib.suppress(ValueError):
@@ -83,9 +85,7 @@ def actiontobool(action: str) -> bool:
     return False
 
 
-def get_exclude_list_from_gitignore(
-    path=Path(".gitignore"),
-) -> List[GitWildMatchPattern]:
+def get_exclude_list_from_gitignore(path=Path(".gitignore")) -> List[GitWildMatchPattern]:
     """Converts .gitignore patterns to regex and return this excludes regex
     list."""
 
@@ -127,11 +127,7 @@ def list_paths(
     gitignore_patterns: Optional[List[GitWildMatchPattern]] = None,
 ) -> Iterator[Path]:
     include_regex, exclude_regex = re.compile(include), re.compile(exclude)
-    file_names: Iterable[Path]
-    if start.is_dir():
-        file_names = start.glob(C.GLOB_PATTERN)
-    else:
-        file_names = [start]
+    file_names: Iterable[Path] = start.glob(C.GLOB_PATTERN) if start.is_dir() else [start]
 
     if gitignore_patterns:
         for file_name in file_names:
@@ -162,6 +158,7 @@ def diff(*, source: str, refactor_result: str, fromfile: Path = None) -> Tuple[s
     )
 
 
+@functools.lru_cache(maxsize=128)
 def return_exit_code(*, is_unused_imports: bool, is_syntax_error: bool, refactor_applied: bool) -> int:
     """If this function changes, be sure to update this page
     https://unimport.hakancelik.dev/tutorial/other-useful-features/#exit-code-
