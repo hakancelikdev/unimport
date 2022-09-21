@@ -15,8 +15,7 @@ repos:
     rev: 0.11.3
     hooks:
       - id: unimport
-        args:
-          - --config pyproject.toml
+        args: [--config=pyproject.toml]
 
   - repo: https://github.com/PyCQA/docformatter
     rev: v1.5.0

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Iterator, List, Optional, Sequence, Union
 
 from unimport import commands, utils
-from unimport.analyzer import Analyzer
+from unimport.analyzers import MainAnalyzer
 from unimport.color import paint
 from unimport.config import Config
 from unimport.enums import Color
@@ -49,13 +49,13 @@ class Main:
 
     @contextlib.contextmanager
     def analysis(self, source: str, path: Path) -> Iterator:
-        analysis = Analyzer(
+        analyzer = MainAnalyzer(
             source=source,
             path=path,
             include_star_import=self.config.include_star_import,
         )
         try:
-            analysis.traverse()
+            analyzer.traverse()
         except SyntaxError as exc:
             print(
                 paint(str(exc), Color.RED, self.config.use_color)
@@ -67,7 +67,7 @@ class Main:
         try:
             yield
         finally:
-            analysis.clear()
+            analyzer.clear()
 
     def get_results(self) -> Iterator[_Result]:
         for path in self.config.get_paths():

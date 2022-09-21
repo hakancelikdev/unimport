@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from unimport.analyzer import Analyzer
+from unimport.analyzers import MainAnalyzer
 from unimport.constants import PY38_PLUS  # noqa using eval expression
 from unimport.refactor import refactor_string
 from unimport.statement import Import, Name
@@ -46,7 +46,7 @@ def test_cases(path: Path, refactor_path: Path, analyzer_path: Path, logger):
             pytest.skip(reason, allow_module_level=True)
 
     with contextlib.suppress(SyntaxError):
-        with Analyzer(source=source, include_star_import=True):
+        with MainAnalyzer(source=source, include_star_import=True):
             assert Name.names == analyzer.NAMES
             assert Import.imports == analyzer.IMPORTS
             assert list(Import.get_unused_imports()) == analyzer.UNUSED_IMPORTS

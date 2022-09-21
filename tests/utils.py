@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Iterator, Optional
 
 from unimport import utils
-from unimport.analyzer import Analyzer
+from unimport.analyzers import MainAnalyzer
 from unimport.refactor import refactor_string
 from unimport.statement import Import
 
@@ -40,7 +40,7 @@ def reopenable_temp_file(content: str, newline: Optional[str] = None) -> Iterato
 def refactor(path: Path) -> str:
     source = utils.read(path)[0]
 
-    with Analyzer(source=source) as analyzer:
+    with MainAnalyzer(source=source) as analyzer:
         return refactor_string(
             source=analyzer.source,
             unused_imports=list(Import.get_unused_imports()),
