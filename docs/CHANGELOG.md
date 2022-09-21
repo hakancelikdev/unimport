@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.12.1
+
+### Fixes
+
+- 🐛 Fix changelog url PR #250 by @hakancelikdev
+- 🐛 Fix Name Error PR #250 by @hakancelikdev
+
 ## 0.12.0
 
 ### Features
