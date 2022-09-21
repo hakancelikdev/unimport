@@ -6,7 +6,7 @@ from unimport import typing as T
 from unimport import utils
 from unimport.analyzers.decarators import generic_visit
 from unimport.analyzers.utils import first_parent_match, set_tree_parents
-from unimport.statement import Scope
+from unimport.statement import Name, Scope
 
 __all__ = ("ImportableAnalyzer",)
 
