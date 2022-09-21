@@ -12,18 +12,11 @@ from unimport.statement import Import, Name
 from unimport.utils import list_paths
 
 
-@pytest.fixture(scope="session")
-def refactor_path():
-    return Path("tests/cases/refactor")
-
-
-@pytest.fixture(scope="session")
-def analyzer_path():
-    return Path("tests/cases/analyzer")
-
-
 @pytest.mark.parametrize("path", list(list_paths(Path("tests/cases/source"))))
-def test_cases(path: Path, refactor_path: Path, analyzer_path: Path, logger):
+def test_cases(path: Path, logger):
+    refactor_path = Path("tests/cases/refactor")
+    analyzer_path = Path("tests/cases/analyzer")
+
     case_path = f"{path.parent.name}/{path.name}"
     analyzer_path_ = analyzer_path / case_path
     refactor_path_ = refactor_path / case_path

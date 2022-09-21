@@ -6,7 +6,7 @@ from unimport import constants as C
 from unimport.analyzers.import_statement import ImportAnalyzer
 from unimport.analyzers.importable import ImportableAnalyzer
 from unimport.analyzers.name import NameAnalyzer
-from unimport.relate import relate
+from unimport.analyzers.utils import get_defined_names, set_tree_parents
 from unimport.statement import Import, ImportFrom, Name, Scope
 
 __all__ = ("MainAnalyzer",)
@@ -15,15 +15,7 @@ __all__ = ("MainAnalyzer",)
 class MainAnalyzer(ast.NodeVisitor):
     __slots__ = ("source", "path", "include_star_import")
 
-    skip_file_regex = "#.*(unimport: {0,1}skip_file)"
-
-    def __init__(
-        self,
-        *,
-        source: str,
-        path: Path = Path("<unknown file>"),
-        include_star_import: bool = False,
-    ):
+    def __init__(self, *, source: str, path: Path = Path("<unknown file>"), include_star_import: bool = False):
         self.source = source
         self.path = path
         self.include_star_import = include_star_import
@@ -40,42 +32,25 @@ class MainAnalyzer(ast.NodeVisitor):
             return None
 
         tree = ast.parse(self.source, type_comments=True) if C.PY38_PLUS else ast.parse(self.source)
-        """
-        Set parent
-        """
-        relate(tree)
 
-        Scope.add_global_scope(tree)
+        set_tree_parents(tree)  # set parents to tree
 
-        """
-        Name analyzer
-        """
-        NameAnalyzer().visit(tree)
-        """
-        Receive items on the __all__ list
-        """
-        importable_visitor = ImportableAnalyzer()
-        importable_visitor.visit(tree)
-        for node in importable_visitor.importable_nodes:
-            if isinstance(node, ast.Constant):
-                Name.register(
-                    lineno=node.lineno,
-                    name=str(node.value),
-                    node=node,
-                    is_all=True,
-                )
-            elif isinstance(node, ast.Str):
-                Name.register(lineno=node.lineno, name=node.s, node=node, is_all=True)
-        importable_visitor.clear()
-        """
-        Import analyzer
-        """
-        ImportAnalyzer(source=self.source, include_star_import=self.include_star_import).traverse(tree)
+        Scope.add_global_scope(tree)  # add global scope of the top tree
 
-        Scope.remove_current_scope()
+        NameAnalyzer().traverse(tree)  # name analyzers
+
+        ImportableAnalyzer().traverse(tree)  # importable analyzers for collect in __all__
+
+        ImportAnalyzer(  # import analyzers
+            source=self.source, include_star_import=self.include_star_import, defined_names=get_defined_names(tree)
+        ).traverse(tree)
+
+        Scope.remove_current_scope()  # remove global scope
 
     def skip_file(self) -> bool:
-        return bool(re.search(self.skip_file_regex, self.source, re.IGNORECASE))
+        SKIP_FILE_REGEX = "#.*(unimport: {0,1}skip_file)"
+
+        return bool(re.search(SKIP_FILE_REGEX, self.source, re.IGNORECASE))
 
     @staticmethod
     def clear():

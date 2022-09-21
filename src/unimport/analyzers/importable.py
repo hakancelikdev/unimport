@@ -5,7 +5,7 @@ from unimport import constants as C
 from unimport import typing as T
 from unimport import utils
 from unimport.analyzers.decarators import generic_visit
-from unimport.relate import first_occurrence, relate
+from unimport.analyzers.utils import first_parent_match, set_tree_parents
 from unimport.statement import Scope
 
 __all__ = ("ImportableAnalyzer",)
@@ -21,10 +21,21 @@ class ImportableAnalyzer(ast.NodeVisitor):
         self.importable_nodes: List[T.ASTNameType] = []  # nodes on the __all__ list
         self.suggestions_nodes: List[T.ASTImportableT] = []  # nodes on the CFN
 
+    def traverse(self, tree):
+        self.visit(tree)
+
+        for node in self.importable_nodes:
+            if isinstance(node, ast.Constant):
+                Name.register(lineno=node.lineno, name=str(node.value), node=node, is_all=True)
+            elif isinstance(node, ast.Str):
+                Name.register(lineno=node.lineno, name=node.s, node=node, is_all=True)
+
+        self.clear()
+
     def visit_CFN(self, node: T.CFNT) -> None:
         Scope.add_current_scope(node)
 
-        if not first_occurrence(node, C.DEF_TUPLE):
+        if not first_parent_match(node, C.DEF_TUPLE):
             self.suggestions_nodes.append(node)
 
         self.generic_visit(node)
@@ -90,7 +101,7 @@ class ImportableAnalyzer(ast.NodeVisitor):
                 return frozenset()
             else:
                 visitor = cls()
-                relate(tree)
+                set_tree_parents(tree)
                 visitor.visit(tree)
                 return visitor.get_all() or visitor.get_suggestion()
         return frozenset()

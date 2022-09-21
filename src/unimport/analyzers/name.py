@@ -3,7 +3,7 @@ import ast
 from unimport import constants as C
 from unimport import typing as T
 from unimport.analyzers.decarators import generic_visit
-from unimport.relate import first_occurrence, get_parents, relate
+from unimport.analyzers.utils import first_parent_match, get_parents, set_tree_parents
 from unimport.statement import Name, Scope
 
 __all__ = ("NameAnalyzer",)
@@ -28,7 +28,7 @@ class NameAnalyzer(ast.NodeVisitor):
     visit_AsyncFunctionDef = visit_FunctionDef
 
     def visit_str_helper(self, value: str, node: ast.AST) -> None:
-        parent = first_occurrence(node, *C.AST_FUNCTION_TUPLE)
+        parent = first_parent_match(node, *C.AST_FUNCTION_TUPLE)
         is_annassign_or_arg = any(isinstance(parent, (ast.AnnAssign, ast.arg)) for parent in get_parents(node))
         if is_annassign_or_arg or (parent is not None and parent.returns is node):
             self.join_visit(value, node)
@@ -130,7 +130,10 @@ class NameAnalyzer(ast.NodeVisitor):
         except SyntaxError:
             return None
         else:
-            relate(tree, parent=node.parent)  # type: ignore
+            set_tree_parents(tree, parent=node.parent)  # type: ignore
             for new_node in ast.walk(tree):
                 ast.copy_location(new_node, node)
             self.visit(tree)
+
+    def traverse(self, tree) -> None:
+        self.visit(tree)
