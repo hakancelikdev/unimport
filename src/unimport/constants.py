@@ -1,14 +1,11 @@
 import ast
-import builtins
 import distutils.sysconfig
 import sys
 
 __all__ = (
-    "BUILTINS",
     "BUILTIN_MODULE_NAMES",
     "EXCLUDE_REGEX_PATTERN",
     "GLOB_PATTERN",
-    "IGNORE_IMPORT_NAMES",
     "INCLUDE_REGEX_PATTERN",
     "INIT_FILE_IGNORE_REGEX",
     "PY37_PLUS",
@@ -25,8 +22,8 @@ EXCLUDE_REGEX_PATTERN = r"^$"
 INIT_FILE_IGNORE_REGEX = r"__init__\.py"
 
 # TUPLE
-DefTuple = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
-ASTFunctionTuple = (ast.FunctionDef, ast.AsyncFunctionDef)
+DEF_TUPLE = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+AST_FUNCTION_TUPLE = (ast.FunctionDef, ast.AsyncFunctionDef)
 
 # CONF
 PY37_PLUS = sys.version_info >= (3, 7)
@@ -83,7 +80,5 @@ SUBSCRIPT_TYPE_VARIABLE = frozenset(
     }
 )
 
-IGNORE_IMPORT_NAMES = frozenset({"__all__", "__doc__", "__name__"})
-BUILTINS = frozenset(dir(builtins))
 BUILTIN_MODULE_NAMES = frozenset(sys.builtin_module_names)
 STDLIB_PATH = distutils.sysconfig.get_python_lib(standard_lib=True)

@@ -5,25 +5,18 @@ from pathlib import Path
 
 import pytest
 
-from unimport.analyzer import Analyzer
+from unimport.analyzers import MainAnalyzer
 from unimport.constants import PY38_PLUS  # noqa using eval expression
 from unimport.refactor import refactor_string
 from unimport.statement import Import, Name
 from unimport.utils import list_paths
 
 
-@pytest.fixture(scope="session")
-def refactor_path():
-    return Path("tests/cases/refactor")
-
-
-@pytest.fixture(scope="session")
-def analyzer_path():
-    return Path("tests/cases/analyzer")
-
-
 @pytest.mark.parametrize("path", list(list_paths(Path("tests/cases/source"))))
-def test_cases(path: Path, refactor_path: Path, analyzer_path: Path, logger):
+def test_cases(path: Path, logger):
+    refactor_path = Path("tests/cases/refactor")
+    analyzer_path = Path("tests/cases/analyzer")
+
     case_path = f"{path.parent.name}/{path.name}"
     analyzer_path_ = analyzer_path / case_path
     refactor_path_ = refactor_path / case_path
@@ -38,11 +31,7 @@ def test_cases(path: Path, refactor_path: Path, analyzer_path: Path, logger):
     analyzer = importlib.import_module(analyzer_import_path)
 
     source = path.read_text()
-    skip = re.search(
-        "# skip; condition: (?P<condition>.*), reason: (?P<reason>.*)",
-        source,
-        re.IGNORECASE,
-    )
+    skip = re.search("# skip; condition: (?P<condition>.*), reason: (?P<reason>.*)", source, re.IGNORECASE)
     if skip:
         condition = skip.group("condition")
         if condition in ["not PY38_PLUS"] and eval(condition):
@@ -50,12 +39,11 @@ def test_cases(path: Path, refactor_path: Path, analyzer_path: Path, logger):
             pytest.skip(reason, allow_module_level=True)
 
     with contextlib.suppress(SyntaxError):
-        with Analyzer(source=source, include_star_import=True):
+        with MainAnalyzer(source=source, include_star_import=True):
             assert Name.names == analyzer.NAMES
             assert Import.imports == analyzer.IMPORTS
             assert list(Import.get_unused_imports()) == analyzer.UNUSED_IMPORTS
 
     # refactor tests
     refactor = refactor_string(source, analyzer.UNUSED_IMPORTS)
-    refactor_path_.write_text(refactor)
-    assert refactor_path_.read_text() == refactor
+    assert refactor == refactor_path_.read_text()

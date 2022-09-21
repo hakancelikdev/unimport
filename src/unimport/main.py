@@ -3,9 +3,11 @@ import dataclasses
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterator, List, Optional, Sequence, Union
 
-from unimport import color, commands, utils
-from unimport.analyzer import Analyzer
+from unimport import commands, utils
+from unimport.analyzers import MainAnalyzer
+from unimport.color import paint
 from unimport.config import Config
+from unimport.enums import Color
 from unimport.statement import Import
 
 if TYPE_CHECKING:
@@ -47,32 +49,32 @@ class Main:
 
     @contextlib.contextmanager
     def analysis(self, source: str, path: Path) -> Iterator:
-        analysis = Analyzer(
+        analyzer = MainAnalyzer(
             source=source,
             path=path,
             include_star_import=self.config.include_star_import,
         )
         try:
-            analysis.traverse()
+            analyzer.traverse()
         except SyntaxError as exc:
             print(
-                color.paint(str(exc), color.RED, self.config.use_color)
+                paint(str(exc), Color.RED, self.config.use_color)
                 + " at "
-                + color.paint(path.as_posix(), color.GREEN, self.config.use_color)
+                + paint(path.as_posix(), Color.GREEN, self.config.use_color)
             )
             self.is_syntax_error = True
 
         try:
             yield
         finally:
-            analysis.clear()
+            analyzer.clear()
 
     def get_results(self) -> Iterator[_Result]:
         for path in self.config.get_paths():
             source, encoding, newline = utils.read(path)
 
             with self.analysis(source, path):
-                unused_imports = list(Import.get_unused_imports(self.config.include_star_import))
+                unused_imports = list(Import.get_unused_imports(include_star_import=self.config.include_star_import))
                 if self.is_unused_imports is False:
                     self.is_unused_imports = unused_imports != []
 
