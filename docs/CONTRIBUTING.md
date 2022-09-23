@@ -53,29 +53,6 @@ After adding a new feature or fixing a bug please report your change to
 [CHANGELOG.md](CHANGELOG.md) and write your name, GitHub address, and email in the
 [AUTHORS.md](AUTHORS.md) file in alphabetical order.
 
-### Changelog Guide
-
-```
-## [Unreleased] - ././2021
-
-- [{Use the emoji below that suits you.} {Explain the change.} @{Add who solved the issue.}]({Add PR link})
-
-{You can provide more details or examples if you wish.}
-
-```
-
-### Commit Messages
-
-If you want, you can use the emoji about the commit message you will throw, this can
-help us better understand the change you have made and also it is fun.
-
-- When you make any support commit; 💪
-- When you make any tests commit; 🧪
-- When you make any fix commit; 🐞
-- When you make any optimization commit; 💊
-- When you make any new feature commit; 🔥
-- When you make any drop or delete existing feature; 👎
-
 ## License
 
 Unimport is MIT licensed, as found in the LICENSE file.
