@@ -1,6 +1,6 @@
 ## Authors
 
-- Hakan Çelik (@hakancelikdev) <contact@hakancelik.dev>
+- Hakan Çelik (@hakancelikdev) <hakancelikdev@gmail.com>
 - Batuhan Taşkaya (@isidentical) <isidentical@gmail.com>
 - Gökmen Görgen (@gkmngrgn) <gkmngrgn@gmail.com>
 
