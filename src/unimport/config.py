@@ -15,7 +15,7 @@ from unimport import utils
 from unimport.color import TERMINAL_SUPPORT_COLOR
 
 if C.PY38_PLUS:
-    from typing import Literal  # unimport: skip
+    from typing import Literal
 else:
     from typing_extensions import Literal  # type: ignore
 
