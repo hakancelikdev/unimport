@@ -21,4 +21,6 @@ https://user-images.githubusercontent.com/19157033/173917900-a3e99b84-bb53-455c-
 [![Last Commit](https://img.shields.io/github/last-commit/hakancelikdev/unimport.svg)](https://github.com/hakancelikdev/unimport/commits/main)
 
 For more information see: https://unimport.hakancelik.dev/
-Try it out now using the Unimport Playground, https://playground-unimport.hakancelik.dev/
+
+Try it out now using the Unimport Playground,
+https://playground-unimport.hakancelik.dev/

@@ -30,7 +30,7 @@ repos:
         additional_dependencies: [types-toml==0.1.3]
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.0.0-alpha.1
+    rev: v3.0.0-alpha.3
     hooks:
       - id: prettier
         args: [--prose-wrap=always, --print-width=88]
@@ -48,7 +48,7 @@ repos:
         args: [--py36-plus]
 
   - repo: https://github.com/hakancelikdev/pyall
-    rev: d2897f7df4418e4e0c6b7a9dd7edb3761a46333d
+    rev: 00a95e9fe84d9dede21c750b8edf40336ba03b3e
     hooks:
       - id: pyall
         args:
