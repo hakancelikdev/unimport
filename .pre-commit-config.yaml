@@ -12,7 +12,7 @@ repos:
       - id: isort
 
   - repo: https://github.com/hakancelikdev/unimport
-    rev: 0.12.1
+    rev: 0dc8d609eb670eeb3335958acddcb6059cc4b8dd
     hooks:
       - id: unimport
         args: [--config=pyproject.toml]
@@ -30,7 +30,7 @@ repos:
         additional_dependencies: [types-toml==0.1.3]
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.0.0-alpha.3
+    rev: v3.0.0-alpha.4
     hooks:
       - id: prettier
         args: [--prose-wrap=always, --print-width=88]
@@ -42,13 +42,13 @@ repos:
         files: "\\.(py|.txt|.yaml|.json|.in|.md|.toml|.cfg|.html|.yml)$"
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.1.0
+    rev: v3.2.0
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
 
   - repo: https://github.com/hakancelikdev/pyall
-    rev: 00a95e9fe84d9dede21c750b8edf40336ba03b3e
+    rev: 0.3.5
     hooks:
       - id: pyall
         args:
