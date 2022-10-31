@@ -7,10 +7,10 @@ from libcst.metadata import CodeRange, PositionProvider
 from unimport import typing as T
 from unimport.statement import Import, ImportFrom
 
-__all__ = ("refactor_string",)
+__all__ = ("RemoveUnusedImportTransformer",)
 
 
-class _RemoveUnusedImportTransformer(cst.CSTTransformer):
+class RemoveUnusedImportTransformer(cst.CSTTransformer):
     __slots__ = ("unused_imports",)
 
     METADATA_DEPENDENCIES = (PositionProvider,)
@@ -121,12 +121,3 @@ class _RemoveUnusedImportTransformer(cst.CSTTransformer):
                 return original_node
 
         return self.leave_import_alike(original_node, updated_node)
-
-
-def refactor_string(source: str, unused_imports: List[Union[Import, ImportFrom]]) -> str:
-    if unused_imports:
-        wrapper = cst.MetadataWrapper(cst.parse_module(source))
-        fixed_module = wrapper.visit(_RemoveUnusedImportTransformer(unused_imports))
-        return fixed_module.code
-
-    return source
