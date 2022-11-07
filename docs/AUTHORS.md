@@ -9,6 +9,7 @@
 <!-- Please write your name alphabetically. -->
 
 - C.A.M. Gerlach (@CAM-Gerlach) <CAM.Gerlach@Gerlach.CAM>
+- Drew Winstel (@drewbrew) <drew@hsv.beer>
 - Furkan Önder (@furkanonder) <furkanonder@protonmail.com>
 - Hadi Alqattan (@hadialqattan) <alqattanhadizaki@gmail.com>
 - Işık Kaplan (@isik-kaplan) <isik.kaplan@outlook.com>
