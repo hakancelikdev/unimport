@@ -22,7 +22,7 @@
 
 - **Documentation** https://unimport.hakancelik.dev/
 - **Issues** https://github.com/hakancelikdev/unimport/issues/
-- **Changelog** https://unimport.hakancelik.dev/changelog
+- **Changelog** https://unimport.hakancelik.dev/CHANGELOG/
 - **Playground** https://playground-unimport.hakancelik.dev/
 
 Unimport is a linter and formatter for finding and removing unused import statements.
