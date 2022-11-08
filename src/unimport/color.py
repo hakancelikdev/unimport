@@ -67,15 +67,15 @@ def paint(text: str, color: Color, use_color: bool = True) -> str:
     return color.value + text + Color.RESET.value if use_color else text
 
 
-def difference(text: Tuple[str, ...]) -> str:  # pragma: no cover
+def difference(text: Tuple[str, ...], use_color: bool = True) -> str:  # pragma: no cover
     lines = list(text)
     for i, line in enumerate(lines):
         if line.startswith("+++") or line.startswith("---"):
-            lines[i] = paint(line, Color.BOLD_WHITE)
+            lines[i] = paint(line, Color.BOLD_WHITE, use_color)
         elif line.startswith("@@"):
-            lines[i] = paint(line, Color.CYAN)
+            lines[i] = paint(line, Color.CYAN, use_color)
         elif line.startswith("+"):
-            lines[i] = paint(line, Color.GREEN)
+            lines[i] = paint(line, Color.GREEN, use_color)
         elif line.startswith("-"):
-            lines[i] = paint(line, Color.RED)
+            lines[i] = paint(line, Color.RED, use_color)
     return "\n".join(lines)

@@ -93,9 +93,8 @@ class Main:
         )
         self.refactor_applied = True
 
-    @staticmethod
-    def diff(result, refactor_result):
-        return commands.diff(result.path, result.source, refactor_result)
+    def diff(self, result, refactor_result):
+        return commands.diff(result.path, result.source, refactor_result, self.config.use_color)
 
     def permission(self, result, refactor_result):
         commands.permission(
