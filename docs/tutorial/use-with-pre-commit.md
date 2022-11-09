@@ -11,5 +11,9 @@ repos:
     rev: stable
     hooks:
       - id: unimport
-        args: [--remove, --include-star-import, --ignore-init, --gitignore]
+        args:
+          - --remove
+          - --include-star-import
+          - --ignore-init
+          - --gitignore
 ```
