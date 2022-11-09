@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### 🐛 Fixes
 
-- `--color=never` is now respected hwen showing the diffs
+- `--color=never` is now respected when showing the diffs
 
 ## 0.12.1
 
