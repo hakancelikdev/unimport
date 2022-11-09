@@ -27,6 +27,7 @@ target-version = ['py36', 'py37', 'py38', 'py39', 'py310']
 remove = true
 include_start_import = true
 ignore_init = true
+gitignore = true
 
 [tool.docformatter]
 recursive = true
