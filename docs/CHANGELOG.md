@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - ././
+
+### 🐛 Fixes
+
+- `--color=never` is now respected when showing the diffs
+
 ## 0.12.1
 
 ### 🐛 Fixes

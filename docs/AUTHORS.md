@@ -8,6 +8,7 @@
 
 <!-- Please write your name alphabetically. -->
 
+- Benjamin Schubert (@BenjaminSchubert) <contact@benschubert.me>
 - C.A.M. Gerlach (@CAM-Gerlach) <CAM.Gerlach@Gerlach.CAM>
 - Drew Winstel (@drewbrew) <drew@hsv.beer>
 - Furkan Önder (@furkanonder) <furkanonder@protonmail.com>
