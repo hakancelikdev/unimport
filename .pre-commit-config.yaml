@@ -12,7 +12,7 @@ repos:
       - id: isort
 
   - repo: https://github.com/hakancelikdev/unimport
-    rev: 0.12.2
+    rev: 0.12.3
     hooks:
       - id: unimport
         args:

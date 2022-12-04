@@ -1,8 +1,8 @@
 name: build-docs
 on:
   push:
-    branches:
-      - stable
+    tags:
+      - "**"
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,4 +23,4 @@ jobs:
           git config --local user.email "hakancelikdev@gmail.com"
           git config --local user.name "Hakan Celik"
           git fetch --all
-          mkdocs gh-deploy -m "Update Docs" --remote-branch gh-pages
+          mike deploy ${{github.ref_name}} latest --update-aliases --push

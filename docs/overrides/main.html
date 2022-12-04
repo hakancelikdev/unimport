@@ -9,4 +9,8 @@
     style="border: 0"
   ></iframe>
 </div>
-{% endblock %} {%- block scripts %} {{ super() }} {%- endblock %}
+{% endblock %} {% block outdated %} You're not viewing the latest version.
+<a href="{{ '../' ~ base_url }}">
+  <strong>Click here to go to latest.</strong>
+</a>
+{% endblock %}

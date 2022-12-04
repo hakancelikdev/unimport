@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - YYYY-MM-DD
 
+## [0.12.3] - 2022-12-04
+
+### Added
+- Multiple versions of the docs
+
 ## [0.12.2] - 2022-11-09
 
 ### 🐛 Fixes
