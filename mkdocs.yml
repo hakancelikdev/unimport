@@ -1,6 +1,10 @@
 site_name: Unimport
 site_description: A linter, formatter for finding and removing unused import statements.
 site_url: https://unimport.hakancelik.dev
+repo_url: https://github.com/hakancelikdev/unimport
+repo_name: hakancelikdev/unimport
+edit_uri: https://github.com/hakancelikdev/unimport/tree/main/docs
+copyright: Copyright &copy; 2020 - 2020 Hakan Çelik
 
 markdown_extensions:
   - fenced_code
@@ -47,32 +51,37 @@ plugins:
   - search:
       separator: '[\s\-\.]+'
       prebuild_index: true
-
   - git-revision-date-localized:
       type: date
       enable_creation_date: true
-
   - minify:
       minify_html: true
+  - mike:
+      canonical_version: latest
 
 extra:
   version:
     provider: mike
-    default: stable
-
+    default: latest
+  analytics:
+    provider: google
+    property: G-2EGM5WWEED
+  consent:
+    title: Cookie consent
+    description: >-
+      We use cookies to recognize your repeated visits and preferences, as well as to
+      measure the effectiveness of our documentation and whether users find what they're
+      searching for. With your consent, you're helping us to make our documentation
+      better.
   social:
     - icon: fontawesome/brands/discord
       link: https://discord.com/invite/6z8YXy4
-
     - icon: fontawesome/brands/twitter
       link: https://twitter.com/hakancelikdev
-
     - icon: fontawesome/brands/linkedin
       link: https://www.linkedin.com/in/hakancelikdev
-
     - icon: fontawesome/solid/globe
       link: https://hakancelik.dev
-
   homepage: https://unimport.hakancelik.dev
 
 theme:
@@ -83,49 +92,37 @@ theme:
     - navigation.instant
     - navigation.tracking
     - navigation.indexes
-    - navigation.top
     - search.suggest
     - search.highlight
     - search.share
     - header.autohide
-
+    - navigation.top
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: red
+      primary: white
       accent: amber
       toggle:
-        icon: material/lightbulb-outline
+        icon: material/weather-sunny
         name: Switch to dark mode
-
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: red
+      primary: black
       accent: amber
       toggle:
-        icon: material/lightbulb
+        icon: material/weather-night
         name: Switch to light mode
-
   font:
     text: Noto Sans
     code: Roboto Mono
-
   icon:
     repo: fontawesome/brands/github-alt
     edit: material/file-document-edit-outline
 
-copyright: Copyright &copy; 2020 - 2020 Hakan Çelik
-repo_url: https://github.com/hakancelikdev/unimport
-repo_name: hakancelikdev/unimport
-edit_uri: https://github.com/hakancelikdev/unimport/tree/main/docs
-
 nav:
-  - Unimport: index.md
-  - Languages:
-      - en: /
-      - tr: /tr/
+  - Overview: index.md
+  - Installation: installation.md
   - User Guide:
-      - tutorial/installation.md
       - tutorial/command-line-options.md
       - tutorial/supported-behaviors.md
       - tutorial/other-useful-features.md
