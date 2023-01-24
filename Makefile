@@ -65,7 +65,12 @@ publish:
 	python -m build
 	python -m twine upload dist/*
 
-.PHONY: docs
+.PHONY: docsv
 docs:
 	pip install -e .[docs]
 	mkdocs serve
+
+.PHONY: sync-main
+sync-main:
+	git fetch origin main
+	git rebase origin/main

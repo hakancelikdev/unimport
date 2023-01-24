@@ -56,7 +56,7 @@ class Config:
             self.sources = self.default_sources
 
         self.diff = self.diff or self.permission
-        self.check = self.check or not any((self.diff, self.remove))
+        self.remove = self.remove or not any((self.diff, self.check))
         self.use_color: bool = self._use_color(self.color)
 
         if self.gitignore:

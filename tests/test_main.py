@@ -1,4 +1,5 @@
 from textwrap import dedent
+from unittest import mock
 
 import pytest
 
@@ -71,3 +72,24 @@ def test_exit_code():
 
     main.refactor_applied = True
     assert main.exit_code() == 0
+
+
+@mock.patch("unimport.main.Main.permission")
+def test_commands_in_run(mock_permission):
+    source = dedent(
+        """\
+        import os
+
+        """
+    )
+
+    mock_permission.return_value = False
+
+    assert Main([]).config.remove is True
+    assert Main([]).config.permission is False
+
+    with reopenable_temp_file(source) as temp_file:
+        main = Main.run([f"--permission", temp_file.as_posix()])
+
+    assert main.config.remove is False
+    assert main.config.permission is True

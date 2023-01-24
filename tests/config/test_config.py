@@ -111,10 +111,8 @@ def test_config_build_default_command_same_with_default_config():
 def test_config_build_default_check():
     config = Config.build()
 
-    parser = generate_parser()
-    assert config.check is True
+    assert config.check is False
     assert Config.build(args={"check": True}).check is True
-
     assert Config.build(args={"diff": True}).check is False
     assert Config.build(args={"remove": True}).check is False
     assert Config.build(args={"permission": True}).check is False
@@ -123,17 +121,24 @@ def test_config_build_default_check():
 def test_config_build_default_command_diff():
     config = Config.build()
 
-    parser = generate_parser()
-
     assert config.diff is False
     assert Config.build(args={"remove": True}).diff is False
     assert Config.build(args={"diff": True}).diff is True
     assert Config.build(args={"permission": True}).diff is True
 
 
+def test_config_build_default_remove():
+    config = Config.build()
+
+    assert config.remove is True
+    assert Config.build(args={"check": True}).remove is False
+    assert Config.build(args={"diff": True}).remove is False
+    assert Config.build(args={"remove": True}).remove is True
+    assert Config.build(args={"permission": True}).remove is False
+
+
 def test_parse_config_toml_command_check():
     config_context = ParseConfig(pyproject).parse()
-    parser = generate_parser()
 
     assert Config.build(args={"check": True}, config_context=config_context).check is True
     assert (
@@ -141,7 +146,7 @@ def test_parse_config_toml_command_check():
             args={"gitignore": True},
             config_context=config_context,
         ).check
-        is True
+        is False
     )
     assert Config.build(args={"diff": True}, config_context=config_context).check is False
     assert Config.build(args={"remove": True}, config_context=config_context).check is False
