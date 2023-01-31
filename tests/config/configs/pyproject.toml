@@ -1,22 +1,9 @@
-[tool.black]
-line-length = 119
-target-version = ['py37']
-include = '\.pyi?$'
-exclude = '''
-(
-  /(
-    | just a
-    | multiline
-  )/
-  | test.py
-)
-'''
-
 [tool.unimport]
 sources = ["path1", "path2"]
 exclude = '__init__.py|tests/'
 include = 'test|test2|tests.py'
 gitignore = false
 remove = false
+check = false
 diff = false
 ignore_init = false

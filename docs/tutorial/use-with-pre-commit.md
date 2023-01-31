@@ -12,7 +12,6 @@ repos:
     hooks:
       - id: unimport
         args:
-          - --remove
           - --include-star-import
           - --ignore-init
           - --gitignore

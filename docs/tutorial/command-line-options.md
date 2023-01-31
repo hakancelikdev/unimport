@@ -52,10 +52,7 @@ You can give as many file or directory paths as you want.
 
 ## Check
 
-> (optional: default `True`) Prints which file the unused imports are in.
-
-When the `--diff`, `--permission` and `--remove` flags are used, the `--check` flag set
-as `False` If you still want to see the results, use the `--check` flag.
+> (optional: default `False`) Prints which file the unused imports are in.
 
 **Usage**
 
@@ -155,6 +152,9 @@ Ignore the **init**.py file.
 ## Remove
 
 > (optional: default `False`) remove unused imports automatically.
+
+When the `--diff` and `--check` flags are not used, the `--remove` flag set as `True` If
+you still want to remove the imports, use the `--remove` flag.
 
 **Usage**
 

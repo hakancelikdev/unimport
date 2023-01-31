@@ -96,14 +96,9 @@ class Main:
     def diff(self, result, refactor_result):
         return commands.diff(result.path, result.source, refactor_result, self.config.use_color)
 
-    def permission(self, result, refactor_result):
-        commands.permission(
-            result.path,
-            result.encoding,
-            result.newline,
-            refactor_result,
-            self.config.use_color,
-        )
+    @staticmethod
+    def permission(result) -> bool:
+        return commands.permission(result.path, result.encoding)
 
     @classmethod
     def run(cls, argv: Optional[Sequence[str]] = None) -> "Main":
@@ -118,7 +113,7 @@ class Main:
                 if self.config.diff:
                     exists_diff = self.diff(result, refactor_result)
                     if self.config.permission and exists_diff:
-                        self.permission(result, refactor_result)
+                        self.config.remove = self.permission(result)
                 if self.config.remove and result.source != refactor_result:
                     self.remove(result, refactor_result)
         return self
