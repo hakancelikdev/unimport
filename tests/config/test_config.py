@@ -28,6 +28,7 @@ def test_parse_config_toml_parse():
         "include": "test|test2|tests.py",
         "gitignore": False,
         "remove": False,
+        "check": False,
         "diff": False,
         "ignore_init": False,
     }
@@ -42,6 +43,7 @@ def test_parse_config_cfg_parse():
         "include": "test|test2|tests.py",
         "gitignore": False,
         "remove": False,
+        "check": False,
         "diff": False,
         "ignore_init": False,
     }
@@ -141,13 +143,7 @@ def test_parse_config_toml_command_check():
     config_context = ParseConfig(pyproject).parse()
 
     assert Config.build(args={"check": True}, config_context=config_context).check is True
-    assert (
-        Config.build(
-            args={"gitignore": True},
-            config_context=config_context,
-        ).check
-        is False
-    )
+    assert Config.build(args={"gitignore": True}, config_context=config_context).check is False
     assert Config.build(args={"diff": True}, config_context=config_context).check is False
     assert Config.build(args={"remove": True}, config_context=config_context).check is False
     assert (

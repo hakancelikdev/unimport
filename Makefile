@@ -65,7 +65,7 @@ publish:
 	python -m build
 	python -m twine upload dist/*
 
-.PHONY: docsv
+.PHONY: docs
 docs:
 	pip install -e .[docs]
 	mkdocs serve
