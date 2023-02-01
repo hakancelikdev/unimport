@@ -59,7 +59,6 @@ def get_spec(package: str) -> Optional[importlib.machinery.ModuleSpec]:
 @functools.lru_cache(maxsize=128)
 def is_std(package: str) -> bool:
     """Returns True if package module came with from Python."""
-
     if package in C.BUILTIN_MODULE_NAMES:
         return True
     spec = get_spec(package)
