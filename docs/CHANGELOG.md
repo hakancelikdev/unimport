@@ -4,11 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - YYYY-MM-DD
 
-## [0.13.0] - YYYY-MM-DD
+## [0.13.0] - 2023-02-01
 
 ### Changed
 
 - The remove command is set to the default behavior. #273
+
+### Fixes
+
+- pre-commit autoupdate yields a weird result #275
 
 ## [0.12.3] - 2022-12-04
 
