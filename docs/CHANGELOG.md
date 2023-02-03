@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - YYYY-MM-DD
 
+## [x.y.z] - YYYY-MM-DD
+
+### Added
+
+- Automatically pick up config options from setup.cfg if it is present in the project
+  root else check and if it exists use pyproject.toml. #256
+
+  If you want you can disable this feature by passing `--disable-auto-discovery-config`
+
 ## [0.13.0] - 2023-02-01
 
 ### Changed

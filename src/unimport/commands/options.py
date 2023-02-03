@@ -8,6 +8,7 @@ __all__ = (
     "add_sources_option",
     "add_check_option",
     "add_config_option",
+    "add_disable_auto_discovery_config_option",
     "add_include_option",
     "add_exclude_option",
     "add_gitignore_option",
@@ -44,11 +45,25 @@ def add_config_option(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-c",
         "--config",
-        default=".",
+        default=None,
         help="Read configuration from PATH.",
         metavar="PATH",
         action="store",
         type=Path,
+    )
+
+
+def add_disable_auto_discovery_config_option(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--disable-auto-discovery-config",
+        default=Config.disable_auto_discovery_config,
+        help=(
+            """
+            Automatically pick up config options from setup.cfg if it is present in the project
+            root else check and if it exists use pyproject.toml.
+            """
+        ),
+        action="store_true",
     )
 
 
@@ -150,6 +165,6 @@ def add_color_option(parser: argparse.ArgumentParser) -> None:
         "--color",
         default=Config.color,
         type=str,
-        metavar="{" + ",".join(Config._get_color_choices()) + "}",
+        metavar="{" + ",".join(Config.get_color_choices()) + "}",
         help="Select whether to use color in the output. Defaults to `%(default)s`.",
     )

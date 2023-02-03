@@ -1,8 +1,12 @@
 It's possible to configure **unimport** from `pyproject.toml` or `setup.cfg` files if
 you have.
 
-**When reading your configurations, it gives priority to the configurations you enter
-from the console.**
+Automatically pick up config options from setup.cfg if it is present in the project root
+else check and if it exists use pyproject.toml.
+
+If you want you can disable this feature by passing `--disable-auto-discovery-config` or
+you can pass the path to the configuration file by passing
+`--config path/to/pyproject.toml`.
 
 For example:
 
