@@ -19,6 +19,7 @@ def generate_parser() -> argparse.ArgumentParser:
     options.add_sources_option(parser)
     options.add_check_option(parser)
     options.add_config_option(parser)
+    options.add_disable_auto_discovery_config_option(parser)
     options.add_include_option(parser)
     options.add_exclude_option(parser)
     options.add_gitignore_option(parser)

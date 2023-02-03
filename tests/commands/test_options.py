@@ -30,7 +30,7 @@ def test_add_config_option(parser: argparse.ArgumentParser):
 
     options.add_config_option(parser)
 
-    assert vars(parser.parse_args([])) == dict(config=Path("."))
+    assert vars(parser.parse_args([])) == dict(config=None)
     assert vars(parser.parse_args(["-c", "config.toml"])) == dict(config=Path("config.toml"))
     assert vars(parser.parse_args(["--config", "config.toml"])) == dict(config=Path("config.toml"))
 

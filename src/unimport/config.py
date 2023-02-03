@@ -22,6 +22,12 @@ else:
 __all__ = ("Config", "ParseConfig")
 
 
+CONFIG_FILES: Dict[str, str] = {
+    "setup.cfg": "unimport",
+    "pyproject.toml": "tool.unimport",
+}
+
+
 @dataclasses.dataclass
 class Config:
     default_sources: ClassVar[List[Path]] = [Path(".")]  # Not init attribute
@@ -31,6 +37,7 @@ class Config:
     use_color: bool = dataclasses.field(init=False)  # Not init attribute
 
     sources: Optional[List[Path]] = None
+    disable_auto_discovery_config: bool = False
     include: str = C.INCLUDE_REGEX_PATTERN
     exclude: str = C.EXCLUDE_REGEX_PATTERN
     gitignore: bool = False
@@ -57,7 +64,7 @@ class Config:
 
         self.diff = self.diff or self.permission
         self.remove = self.remove or not any((self.diff, self.check))
-        self.use_color: bool = self._use_color(self.color)
+        self.use_color: bool = self.is_use_color(self.color)
 
         if self.gitignore:
             self.gitignore_patterns = utils.get_exclude_list_from_gitignore()
@@ -75,15 +82,15 @@ class Config:
             )
 
     @classmethod
-    def _get_color_choices(cls) -> Tuple[str]:
+    def get_color_choices(cls) -> Tuple[str]:
         return getattr(
             Config.__annotations__["color"],
             "__args__" if C.PY37_PLUS else "__values__",
         )
 
     @classmethod
-    def _use_color(cls, color: str) -> bool:
-        if color not in cls._get_color_choices():
+    def is_use_color(cls, color: str) -> bool:
+        if color not in cls.get_color_choices():
             raise ValueError(color)
 
         return color == "always" or (color == "auto" and sys.stderr.isatty() and TERMINAL_SUPPORT_COLOR)
@@ -113,15 +120,15 @@ class Config:
 
 @dataclasses.dataclass
 class ParseConfig:
-    CONFIG_FILES: ClassVar[Dict[str, str]] = {
-        "setup.cfg": "unimport",
-        "pyproject.toml": "tool.unimport",
-    }
-
     config_file: Path
 
     def __post_init__(self):
-        self.section: str = self.CONFIG_FILES[self.config_file.name]
+        if not self.config_file.exists():
+            raise FileNotFoundError(f"Config file not found: {self.config_file}")
+
+        self.config_section: Optional[str] = CONFIG_FILES.get(self.config_file.name, None)
+        if self.config_section is None:
+            raise ValueError(f"Unsupported config file: {self.config_file}")
 
     def parse(self) -> Dict[str, Any]:
         return getattr(self, f"parse_{self.config_file.suffix.strip('.')}")()
@@ -129,12 +136,12 @@ class ParseConfig:
     def parse_cfg(self) -> Dict[str, Any]:
         parser = configparser.ConfigParser(allow_no_value=True)
         parser.read(self.config_file)
-        if parser.has_section(self.section):
+        if parser.has_section(self.config_section):
 
             def get_config_as_list(name: str) -> List[str]:
                 return literal_eval(
                     parser.get(
-                        self.section,
+                        self.config_section,
                         name,
                         fallback=getattr(Config, name),
                     )
@@ -154,10 +161,10 @@ class ParseConfig:
                 "ignore_init": bool,
                 "color": str,
             }
-            for key, value in parser[self.section].items():
+            for key, value in parser[self.config_section].items():
                 key_type = config_annotations_mapping[key]
                 if key_type == bool:
-                    cfg_context[key] = parser.getboolean(self.section, key)
+                    cfg_context[key] = parser.getboolean(self.config_section, key)
                 elif key_type == str:
                     cfg_context[key] = value  # type: ignore
                 elif key_type == List[Path]:
@@ -168,16 +175,27 @@ class ParseConfig:
 
     def parse_toml(self) -> Dict[str, Any]:
         parsed_toml = toml.loads(self.config_file.read_text())
-        toml_context: Dict[str, Any] = parsed_toml.get("tool", {}).get("unimport", {})
+        toml_context: Dict[str, Any] = dict(
+            functools.reduce(lambda x, y: x.get(y, {}), self.config_section.split("."), parsed_toml)  # type: ignore[attr-defined]
+        )
         if toml_context:
             sources = toml_context.get("sources", Config.default_sources)
             toml_context["sources"] = [Path(path) for path in sources]
         return toml_context
 
     @classmethod
-    def parse_args(cls, args: argparse.Namespace) -> Config:
-        if args.config and args.config.name in cls.CONFIG_FILES:
-            config_context = cls(args.config).parse()
-            return Config.build(args=args.__dict__, config_context=config_context)
+    def parse_args(cls, args: argparse.Namespace) -> "Config":
+        config_context: Optional[Dict[str, Any]] = None
 
-        return Config.build(args=vars(args))
+        if args.config is not None:
+            config_context = cls(args.config).parse()
+        elif args.config is None and args.disable_auto_discovery_config is False:
+            for path in CONFIG_FILES.keys():
+                config_context = cls(Path(path)).parse()
+                if config_context:
+                    break
+
+        if not config_context:
+            config_context = None
+
+        return Config.build(args=vars(args), config_context=config_context)

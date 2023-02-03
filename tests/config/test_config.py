@@ -130,7 +130,7 @@ def test_config_build_default_command_diff():
 
 
 def test_config_build_default_remove():
-    config = Config.build()
+    config = Config.build(args={"disable_auto_discovery_config": True})
 
     assert config.remove is True
     assert Config.build(args={"check": True}).remove is False
@@ -202,11 +202,11 @@ def test_init_file_ignore_regex_not_match():
     ],
 )
 def test_use_color(option, expected_result):
-    assert expected_result == Config._use_color(option)
+    assert expected_result == Config.is_use_color(option)
 
 
 def test_use_color_none_of_them():
     with pytest.raises(ValueError) as cm:
-        Config._use_color("none-of-them")
+        Config.is_use_color("none-of-them")
 
     assert "none-of-them" in str(cm.value)

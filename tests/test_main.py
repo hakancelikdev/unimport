@@ -9,10 +9,10 @@ from unimport.main import Main
 
 
 def test_empty_main():
-    main = Main([])
+    main = Main(["--disable-auto-discovery-config"])
 
-    assert main.argv == []
-    assert main.config == Config()
+    assert main.argv == ["--disable-auto-discovery-config"]
+    assert main.config == Config(disable_auto_discovery_config=True)
     assert main.is_syntax_error is False
     assert main.is_unused_imports is False
     assert main.refactor_applied is False
@@ -26,10 +26,10 @@ def test_main_run_under_path():
         """
     )
     with reopenable_temp_file(source) as temp_file:
-        main = Main.run(["--include", temp_file.as_posix()])
+        main = Main.run(["--disable-auto-discovery-config", "--include", temp_file.as_posix()])
 
-    assert main.argv == ["--include", temp_file.as_posix()]
-    assert main.config == Config(include=temp_file.as_posix())
+    assert main.argv == ["--disable-auto-discovery-config", "--include", temp_file.as_posix()]
+    assert main.config == Config(disable_auto_discovery_config=True, include=temp_file.as_posix())
     assert main.is_syntax_error is False
     assert main.is_unused_imports is False
     assert main.refactor_applied is False
@@ -85,11 +85,11 @@ def test_commands_in_run(mock_permission):
 
     mock_permission.return_value = False
 
-    assert Main([]).config.remove is True
-    assert Main([]).config.permission is False
+    assert Main(["--disable-auto-discovery-config"]).config.remove is True
+    assert Main(["--disable-auto-discovery-config"]).config.permission is False
 
     with reopenable_temp_file(source) as temp_file:
-        main = Main.run([f"--permission", temp_file.as_posix()])
+        main = Main.run(["--disable-auto-discovery-config", f"--permission", temp_file.as_posix()])
 
     assert main.config.remove is False
     assert main.config.permission is True
