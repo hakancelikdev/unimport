@@ -12,11 +12,9 @@ repos:
       - id: isort
 
   - repo: https://github.com/hakancelikdev/unimport
-    rev: 0.13.0
+    rev: 0.14.0
     hooks:
       - id: unimport
-        args:
-          - --config pyproject.toml
 
   - repo: https://github.com/PyCQA/docformatter
     rev: v1.6.0.rc1

@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - YYYY-MM-DD
 
-## [x.y.z] - YYYY-MM-DD
+## [0.14.0] - 2023-02-03
 
 ### Added
 
