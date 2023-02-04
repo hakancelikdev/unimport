@@ -1,5 +1,6 @@
 import argparse
 import configparser
+import contextlib
 import dataclasses
 import functools
 import sys
@@ -191,9 +192,10 @@ class ParseConfig:
             config_context = cls(args.config).parse()
         elif args.config is None and args.disable_auto_discovery_config is False:
             for path in CONFIG_FILES.keys():
-                config_context = cls(Path(path)).parse()
-                if config_context:
-                    break
+                with contextlib.suppress(FileNotFoundError):
+                    config_context = cls(Path(path)).parse()
+                    if config_context:
+                        break
 
         if not config_context:
             config_context = None

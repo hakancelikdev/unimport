@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - YYYY-MM-DD
 
+## [0.14.1] - 2023-02-04
+
+### Fixed
+
+- Running without options or a config file #281.
+
 ## [0.14.0] - 2023-02-03
 
 ### Added

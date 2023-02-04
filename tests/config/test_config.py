@@ -210,3 +210,8 @@ def test_use_color_none_of_them():
         Config.is_use_color("none-of-them")
 
     assert "none-of-them" in str(cm.value)
+
+
+@pytest.mark.change_directory("tests/config")
+def test_disable_auto_discovery_config_not_found_config_files():
+    ParseConfig.parse_args(generate_parser().parse_args([]))

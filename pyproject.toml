@@ -10,7 +10,7 @@ build-backend = "setuptools.build_meta"
 # Tools
 
 [tool.pytest.ini_options]
-addopts = "-v"
+addopts = "--strict-markers"
 xfail_strict = true
 testpaths = ["tests"]
 

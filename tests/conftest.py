@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import pytest
 
@@ -17,3 +18,20 @@ def logger():
     logger.setLevel(level=logging.DEBUG)
 
     return logger
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "change_directory(path:str): mark test to change working directory")
+
+
+def pytest_runtest_setup(item):
+    for marker in item.iter_markers(name="change_directory"):
+        item.original_cwd = Path.cwd()
+
+        directory = marker.args[0]
+        os.chdir(directory)
+
+
+def pytest_runtest_teardown(item, nextitem):
+    for marker in item.iter_markers(name="change_directory"):
+        os.chdir(item.original_cwd)
