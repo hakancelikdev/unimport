@@ -64,7 +64,10 @@ class _RemoveUnusedImportTransformer(cst.CSTTransformer):
         # already handled by leave_ImportFrom
         for column, import_alias in enumerate(names):
             if isinstance(import_alias.name, cst.Attribute):
-                import_name = self.get_import_name_from_attr(attr_node=import_alias.name)
+                if import_alias.asname:
+                    import_name = import_alias.asname.name.value
+                else:
+                    import_name = self.get_import_name_from_attr(attr_node=import_alias.name)
             else:
                 raw_import = import_alias.asname or import_alias
                 raw_import_name = cst.ensure_type(raw_import.name, cst.Name)

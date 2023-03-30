@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - YYYY-MM-DD
 
+## [0.15.0] - 2023-03-31
+
+### Fixed
+
+- Fix: attribute as import refactor #284
+
 ## [0.14.1] - 2023-02-04
 
 ### Fixed
