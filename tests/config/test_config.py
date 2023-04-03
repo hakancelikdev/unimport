@@ -9,17 +9,13 @@ from unimport import constants as C
 from unimport.color import TERMINAL_SUPPORT_COLOR
 from unimport.commands import generate_parser
 from unimport.config import Config, ParseConfig
+from unimport.exceptions import UnknownConfigKeyException
 
 TEST_DIR = Path(__file__).parent / "configs"
 
-pyproject = TEST_DIR / "pyproject.toml"
-setup_cfg = TEST_DIR / "setup.cfg"
-
-no_unimport_pyproject = TEST_DIR / "no_unimport" / "pyproject.toml"
-no_unimport_setup_cfg = TEST_DIR / "no_unimport" / "setup.cfg"
-
 
 def test_parse_config_toml_parse():
+    pyproject = TEST_DIR / "pyproject.toml"
     config = ParseConfig(config_file=pyproject).parse()
 
     assert config == {
@@ -35,6 +31,7 @@ def test_parse_config_toml_parse():
 
 
 def test_parse_config_cfg_parse():
+    setup_cfg = TEST_DIR / "setup.cfg"
     config = ParseConfig(config_file=setup_cfg).parse()
 
     assert config == {
@@ -50,6 +47,7 @@ def test_parse_config_cfg_parse():
 
 
 def test_parse_config_parse_args_config_setup_cfg():
+    setup_cfg = TEST_DIR / "setup.cfg"
     parser = generate_parser()
     args = parser.parse_args(
         [
@@ -62,7 +60,7 @@ def test_parse_config_parse_args_config_setup_cfg():
             "--include-star-import",
         ]
     )
-    config: Config = ParseConfig.parse_args(args)
+    config = ParseConfig.parse_args(args)
 
     assert config.sources == [Path(".")]
     assert config.include == "tests|env"
@@ -140,6 +138,7 @@ def test_config_build_default_remove():
 
 
 def test_parse_config_toml_command_check():
+    pyproject = TEST_DIR / "pyproject.toml"
     config_context = ParseConfig(pyproject).parse()
 
     assert Config.build(args={"check": True}, config_context=config_context).check is True
@@ -156,6 +155,7 @@ def test_parse_config_toml_command_check():
 
 
 def test_no_import_section_toml_parse():
+    no_unimport_pyproject = TEST_DIR / "no_unimport" / "pyproject.toml"
     parsed_config = ParseConfig(config_file=no_unimport_pyproject).parse()
     assert parsed_config == {}
 
@@ -166,6 +166,7 @@ def test_no_import_section_toml_parse():
 
 
 def test_no_import_section_cfg_parse():
+    no_unimport_setup_cfg = TEST_DIR / "no_unimport" / "setup.cfg"
     parsed_config = ParseConfig(config_file=no_unimport_setup_cfg).parse()
     assert parsed_config == {}
 
@@ -215,3 +216,18 @@ def test_use_color_none_of_them():
 @pytest.mark.change_directory("tests/config")
 def test_disable_auto_discovery_config_not_found_config_files():
     ParseConfig.parse_args(generate_parser().parse_args([]))
+
+
+def test_mistyped_config_file():
+    setup_cfg = TEST_DIR / "mistyped" / "setup.cfg"
+    pyproject_config_file = TEST_DIR / "mistyped" / "pyproject.toml"
+
+    exc = UnknownConfigKeyException("there-is-no-such-config-key")
+
+    with pytest.raises(UnknownConfigKeyException) as cm:
+        ParseConfig(config_file=setup_cfg).parse()
+    assert cm.value is exc
+
+    with pytest.raises(UnknownConfigKeyException) as cm:
+        ParseConfig(config_file=pyproject_config_file).parse()
+    assert cm.value is exc

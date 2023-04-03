@@ -14,6 +14,7 @@ from pathspec.patterns import GitWildMatchPattern
 from unimport import constants as C
 from unimport import utils
 from unimport.color import TERMINAL_SUPPORT_COLOR
+from unimport.exceptions import ConfigFileNotFound, UnknownConfigKeyException, UnsupportedConfigFile
 
 if C.PY38_PLUS:
     from typing import Literal
@@ -26,6 +27,20 @@ __all__ = ("Config", "ParseConfig")
 CONFIG_FILES: Dict[str, str] = {
     "setup.cfg": "unimport",
     "pyproject.toml": "tool.unimport",
+}
+
+CONFIG_ANNOTATIONS_MAPPING = {
+    "sources": List[Path],
+    "include": str,
+    "exclude": str,
+    "gitignore": bool,
+    "remove": bool,
+    "diff": bool,
+    "include_star_import": bool,
+    "permission": bool,
+    "check": bool,
+    "ignore_init": bool,
+    "color": str,
 }
 
 
@@ -65,7 +80,7 @@ class Config:
 
         self.diff = self.diff or self.permission
         self.remove = self.remove or not any((self.diff, self.check))
-        self.use_color: bool = self.is_use_color(self.color)
+        self.use_color = self.is_use_color(self.color)
 
         if self.gitignore:
             self.gitignore_patterns = utils.get_exclude_list_from_gitignore()
@@ -125,11 +140,11 @@ class ParseConfig:
 
     def __post_init__(self):
         if not self.config_file.exists():
-            raise FileNotFoundError(f"Config file not found: {self.config_file}")
+            raise ConfigFileNotFound(self.config_file)
 
-        self.config_section: Optional[str] = CONFIG_FILES.get(self.config_file.name, None)
+        self.config_section = CONFIG_FILES.get(self.config_file.name, None)
         if self.config_section is None:
-            raise ValueError(f"Unsupported config file: {self.config_file}")
+            raise UnsupportedConfigFile(self.config_file)
 
     def parse(self) -> Dict[str, Any]:
         return getattr(self, f"parse_{self.config_file.suffix.strip('.')}")()
@@ -149,21 +164,10 @@ class ParseConfig:
                 )
 
             cfg_context: Dict[str, Any] = {}
-            config_annotations_mapping = {
-                "sources": List[Path],
-                "include": str,
-                "exclude": str,
-                "gitignore": bool,
-                "remove": bool,
-                "diff": bool,
-                "include_star_import": bool,
-                "permission": bool,
-                "check": bool,
-                "ignore_init": bool,
-                "color": str,
-            }
             for key, value in parser[self.config_section].items():
-                key_type = config_annotations_mapping[key]
+                if key not in CONFIG_ANNOTATIONS_MAPPING:
+                    raise UnknownConfigKeyException(key)
+                key_type = CONFIG_ANNOTATIONS_MAPPING[key]
                 if key_type == bool:
                     cfg_context[key] = parser.getboolean(self.config_section, key)
                 elif key_type == str:
@@ -180,6 +184,10 @@ class ParseConfig:
             functools.reduce(lambda x, y: x.get(y, {}), self.config_section.split("."), parsed_toml)  # type: ignore[attr-defined]
         )
         if toml_context:
+            for key, value in toml_context.items():
+                if key not in CONFIG_ANNOTATIONS_MAPPING:
+                    raise UnknownConfigKeyException(key)
+
             sources = toml_context.get("sources", Config.default_sources)
             toml_context["sources"] = [Path(path) for path in sources]
         return toml_context

@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - YYYY-MM-DD
 
+### Changed
+
+- Raise more human-readable exceptions when the key is mistyped in the configuration.
+  #286
+
 ## [0.15.0] - 2023-03-31
 
 ### Fixed
