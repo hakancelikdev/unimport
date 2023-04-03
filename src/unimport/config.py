@@ -41,6 +41,14 @@ CONFIG_ANNOTATIONS_MAPPING = {
     "check": bool,
     "ignore_init": bool,
     "color": str,
+    #
+    "include-star-import": bool,
+    "ignore-init": bool,
+}
+
+CONFIG_LIKE_COMMANDS_MAPPING = {
+    "include-star-import": "include_star_import",
+    "ignore-init": "ignore_init",
 }
 
 
@@ -167,6 +175,7 @@ class ParseConfig:
             for key, value in parser[self.config_section].items():
                 if key not in CONFIG_ANNOTATIONS_MAPPING:
                     raise UnknownConfigKeyException(key)
+
                 key_type = CONFIG_ANNOTATIONS_MAPPING[key]
                 if key_type == bool:
                     cfg_context[key] = parser.getboolean(self.config_section, key)
@@ -174,22 +183,32 @@ class ParseConfig:
                     cfg_context[key] = value  # type: ignore
                 elif key_type == List[Path]:
                     cfg_context[key] = [Path(p) for p in get_config_as_list(key)]  # type: ignore
+
+                expected_key = CONFIG_LIKE_COMMANDS_MAPPING.get(key, None)
+                if expected_key is not None:
+                    cfg_context[expected_key] = cfg_context.pop(key)
             return cfg_context
         else:
             return {}
 
     def parse_toml(self) -> Dict[str, Any]:
         parsed_toml = toml.loads(self.config_file.read_text())
-        toml_context: Dict[str, Any] = dict(
+        toml_context_from_conf: Dict[str, Any] = dict(
             functools.reduce(lambda x, y: x.get(y, {}), self.config_section.split("."), parsed_toml)  # type: ignore[attr-defined]
         )
-        if toml_context:
-            for key, value in toml_context.items():
+        toml_context: Dict[str, Any] = {}
+        if toml_context_from_conf:
+            for key, value in toml_context_from_conf.items():
+                key = CONFIG_LIKE_COMMANDS_MAPPING.get(key, key)
+
                 if key not in CONFIG_ANNOTATIONS_MAPPING:
                     raise UnknownConfigKeyException(key)
 
-            sources = toml_context.get("sources", Config.default_sources)
-            toml_context["sources"] = [Path(path) for path in sources]
+                toml_context[key] = value
+
+            sources = toml_context.get("sources", None)
+            if sources is not None:
+                toml_context["sources"] = [Path(path) for path in sources]
         return toml_context
 
     @classmethod

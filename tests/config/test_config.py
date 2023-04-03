@@ -219,15 +219,26 @@ def test_disable_auto_discovery_config_not_found_config_files():
 
 
 def test_mistyped_config_file():
-    setup_cfg = TEST_DIR / "mistyped" / "setup.cfg"
+    setup_cfg_config_file = TEST_DIR / "mistyped" / "setup.cfg"
     pyproject_config_file = TEST_DIR / "mistyped" / "pyproject.toml"
 
     exc = UnknownConfigKeyException("there-is-no-such-config-key")
 
     with pytest.raises(UnknownConfigKeyException) as cm:
-        ParseConfig(config_file=setup_cfg).parse()
+        ParseConfig(config_file=setup_cfg_config_file).parse()
     assert cm.value is exc
 
     with pytest.raises(UnknownConfigKeyException) as cm:
         ParseConfig(config_file=pyproject_config_file).parse()
     assert cm.value is exc
+
+
+def test_like_commands_config_file():
+    setup_cfg_config_file = TEST_DIR / "like-commands" / "setup.cfg"
+    pyproject_config_file = TEST_DIR / "like-commands" / "pyproject.toml"
+
+    parsed_config = ParseConfig(config_file=setup_cfg_config_file).parse()
+    assert parsed_config == {"ignore_init": True, "include_star_import": True}
+
+    parsed_config = ParseConfig(config_file=pyproject_config_file).parse()
+    assert parsed_config == {"ignore_init": True, "include_star_import": True}
