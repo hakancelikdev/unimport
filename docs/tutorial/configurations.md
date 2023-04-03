@@ -39,3 +39,19 @@ diff = true
 include_star_import = true
 ignore_init = true
 ```
+
+## Manage like CLI in configuration
+
+```ini
+[tool.unimport]
+include-star-import = true
+ignore-init = true
+```
+
+**setup.cfg**
+
+```ini
+[unimport]
+include-star-import = true
+ignore-init = true
+```

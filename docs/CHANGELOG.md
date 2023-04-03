@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - YYYY-MM-DD
 
+### Added
+
+- Add support like command line commands in configuration files. #287
+
 ### Changed
 
 - Raise more human-readable exceptions when the key is mistyped in the configuration.
