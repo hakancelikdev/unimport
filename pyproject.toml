@@ -24,7 +24,7 @@ line-length = 120
 target-version = ['py36', 'py37', 'py38', 'py39', 'py310']
 
 [tool.unimport]
-include_start_import = true
+include_star_import = true
 ignore_init = true
 gitignore = true
 

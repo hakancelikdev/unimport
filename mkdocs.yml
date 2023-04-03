@@ -1,10 +1,12 @@
 site_name: Unimport
-site_description: A linter, formatter for finding and removing unused import statements.
+site_description:
+  🚀 The ultimate linter and formatter for removing unused import statements in your
+  code.
 site_url: https://unimport.hakancelik.dev
 repo_url: https://github.com/hakancelikdev/unimport
 repo_name: hakancelikdev/unimport
 edit_uri: https://github.com/hakancelikdev/unimport/tree/main/docs
-copyright: Copyright &copy; 2020 - 2020 Hakan Çelik
+copyright: Copyright &copy; 2020 - 2023 Hakan Çelik
 
 markdown_extensions:
   - fenced_code
