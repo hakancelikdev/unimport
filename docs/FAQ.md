@@ -81,7 +81,7 @@ writing this) but Unimport > 0.6.8 is slightly faster.
 
 ### Reasons to choose unimport
 
-- It does more static analysis to increse the accuracy of choosing the correct imports
+- It does more static analysis to increase the accuracy of choosing the correct imports
   to remove.
 - Can handle star imports more accurately.(https://github.com/myint/autoflake/pull/18
   describes their approach)
@@ -104,9 +104,10 @@ Not everyone works with IDEs and not all IDEs work in all environments.
 
 ### Long answer
 
-Imagine that you are working with a team, not everyone's coding environment is the same,
-not everyone uses PyCharm or VScode. if you want to apply certain standards, pre-commit
-can be used, it helps a lot, and if you want to make sure that unnecessary imports are
-removed before committing, you should use unimport with pre-commit, or Let's say you
-want to make sure that there are no unnecessary imports in your entire project, unimport
-will help you.
+Imagine that you are working with a team where everyone may not have the same coding
+environment. For instance, not everyone uses PyCharm or VSCode. In such a scenario, if
+you want to apply certain standards, you can use pre-commit. It can be helpful.
+Furthermore, if you want to ensure that unnecessary imports are removed before
+committing, you should use Unimport with pre-commit. Let's assume that you want to
+ensure that there are no unnecessary imports in your entire project. In that case,
+Unimport will help you achieve this goal.

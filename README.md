@@ -1,8 +1,13 @@
 ![unimport](https://raw.githubusercontent.com/hakancelikdev/unimport/main/docs/assets/logo/unimport.png)
 
-**A linter, formatter for finding and removing unused import statements.**
+**🚀 The ultimate linter and formatter for removing unused import statements in your
+code.**
 
-https://user-images.githubusercontent.com/19157033/173917900-a3e99b84-bb53-455c-85ec-91d7e696b4c6.mp4
+Looking for a way to eliminate those pesky unused import statements in your code? Look
+no further than Unimport! This powerful tool serves as both a linter and formatter,
+making it easy to detect and remove any imports that are no longer needed. Say goodbye
+to cluttered, inefficient code and hello to a cleaner, more streamlined development
+process with Unimport.
 
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/hakancelikdev/unimport/main.svg)](https://results.pre-commit.ci/latest/github/hakancelikdev/unimport/main)
 ![test](https://github.com/hakancelikdev/unimport/workflows/Test/badge.svg)
