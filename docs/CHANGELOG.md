@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - YYYY-MM-DD
 
+## [0.16.0] - 2023-04-04
+
 ### Added
 
 - Add support like command line commands in configuration files. #287
