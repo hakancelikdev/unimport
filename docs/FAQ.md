@@ -98,7 +98,7 @@ know what your needs are, and decide accordingly.
 
 ## I can already do this with many IDEs, why should I use Unimport?
 
-### Sort answer
+### Short answer
 
 Not everyone works with IDEs and not all IDEs work in all environments.
 
