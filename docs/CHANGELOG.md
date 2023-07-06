@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - YYYY-MM-DD
 
+## [0.16.1] - 2023-07-05
+
+### Fixed
+
+- Fix: ignore-init setting is not working from command line call
+  [#263](https://github.com/hakancelikdev/unimport/issues/263)
+
 ## [0.16.0] - 2023-04-04
 
 ### Added

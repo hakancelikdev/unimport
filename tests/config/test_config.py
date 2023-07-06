@@ -97,7 +97,8 @@ def test_parse_config_parse_args_config_setup_cfg():
 def test_parse_config_parse_args(argv: List[str], expected_argv: str, attribute_name: str):
     parser = generate_parser()
     args = parser.parse_args(argv)
-    config = ParseConfig.parse_args(parser.parse_args(argv))
+    args.disable_auto_discovery_config = True
+    config = ParseConfig.parse_args(args)
 
     assert getattr(config, attribute_name) == expected_argv, f"args: {args}, attribute_name: {attribute_name}"
 
@@ -125,6 +126,25 @@ def test_config_build_default_command_diff():
     assert Config.build(args={"remove": True}).diff is False
     assert Config.build(args={"diff": True}).diff is True
     assert Config.build(args={"permission": True}).diff is True
+
+
+def test_config_build_command_ignore_init():
+    config = Config.build()
+
+    assert config.ignore_init is False
+    assert config.exclude == "^$"
+
+    c = Config.build(args={"ignore_init": True})
+    assert c.ignore_init is True
+    assert c.exclude == "^$|__init__\\.py"
+
+    c = Config.build(args={"gitignore": True})
+    assert c.ignore_init is False
+    assert c.exclude == "^$"
+
+    c = Config.build(args={"gitignore": True, "ignore_init": True})
+    assert c.ignore_init is True
+    assert c.exclude == "^$|__init__\\.py"
 
 
 def test_config_build_default_remove():

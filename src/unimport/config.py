@@ -93,7 +93,7 @@ class Config:
         if self.gitignore:
             self.gitignore_patterns = utils.get_exclude_list_from_gitignore()
 
-        elif self.ignore_init:
+        if self.ignore_init:
             self.exclude = "|".join([self.exclude, C.INIT_FILE_IGNORE_REGEX])
 
     def get_paths(self) -> Iterator[Path]:
