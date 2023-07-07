@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - YYYY-MM-DD
 
+## [1.0.0] - 2023-07-07
+
+### Added
+
+- Automatically pick up config options from setup.cfg if it is present in the project
+  root else check and if it exists use pyproject.toml.
+  [#256](https://github.com/hakancelikdev/unimport/issues/256)
+
+  If you want you can disable this feature by passing `--disable-auto-discovery-config`
+
+- Add github-action [#229](https://github.com/hakancelikdev/unimport/issues/229)
+- Add support like command line commands in configuration files. #287
+
+### Fixed
+
+- ignore-init setting is not working from command line call
+  [#263](https://github.com/hakancelikdev/unimport/issues/263)
+- Running without options or a config file
+  [#281](https://github.com/hakancelikdev/unimport/issues/281)
+- Attribute as import refactor #284
+
+### Changed
+
+- Raise more human-readable exceptions when the key is mistyped in the configuration
+  [#286](https://github.com/hakancelikdev/unimport/issues/286)
+
 ## [0.16.1] - 2023-07-05
 
 ### Fixed

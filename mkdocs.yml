@@ -52,7 +52,6 @@ markdown_extensions:
 plugins:
   - search:
       separator: '[\s\-\.]+'
-      prebuild_index: true
   - git-revision-date-localized:
       type: date
       enable_creation_date: true

@@ -7,8 +7,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v3.5.3
+      - uses: actions/setup-python@v4.6.1
       - name: Check unused imports
         uses: hakancelikdev/unimport@stable
         with:
@@ -24,10 +24,10 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v3.5.3
+      - uses: actions/setup-python@v4.6.1
       - name: Check unused imports
-        uses: hakancelikdev/unimport@0.16.1
+        uses: hakancelikdev/unimport@1.0.0
         with:
           extra_args: --include src/
 ```

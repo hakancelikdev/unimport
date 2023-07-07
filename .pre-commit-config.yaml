@@ -12,24 +12,24 @@ repos:
       - id: isort
 
   - repo: https://github.com/hakancelikdev/unimport
-    rev: 0.16.1
+    rev: 1.0.0
     hooks:
       - id: unimport
 
   - repo: https://github.com/PyCQA/docformatter
-    rev: v1.5.1
+    rev: v1.7.3
     hooks:
       - id: docformatter
         args: [--config=pyproject.toml]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.1.1
+    rev: v1.4.1
     hooks:
       - id: mypy
         additional_dependencies: [types-toml==0.1.3]
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.0.0-alpha.6
+    rev: v3.0.0
     hooks:
       - id: prettier
         args: [--prose-wrap=always, --print-width=88]
@@ -41,15 +41,15 @@ repos:
         files: "\\.(py|.txt|.yaml|.json|.in|.md|.toml|.cfg|.html|.yml)$"
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.3.1
+    rev: v3.8.0
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
 
-  - repo: https://github.com/hakancelikdev/pyall
-    rev: 00a95e9fe84d9dede21c750b8edf40336ba03b3e
+  - repo: https://github.com/hakancelikdev/unexport
+    rev: 0.4.0
     hooks:
-      - id: pyall
+      - id: unexport
         args:
           - --refactor
           - --exclude=tests|setup.py|__init__.py|

@@ -14,8 +14,8 @@ from unimport.statement import Import
 def reopenable_temp_file(content: str, newline: Optional[str] = None) -> Iterator[Path]:
     """Create a reopenable tempfile to supporting multiple reads/writes.
 
-    Required to avoid file locking issues on Windows.
-    For more information, see:
+    Required to avoid file locking issues on Windows. For more
+    information, see:
     https://docs.python.org/3/library/tempfile.html#tempfile.NamedTemporaryFile
 
     :param content: string content to write.
