@@ -1,5 +1,5 @@
 import ast
-import distutils.sysconfig
+import sysconfig
 import sys
 
 __all__ = (
@@ -81,4 +81,4 @@ SUBSCRIPT_TYPE_VARIABLE = frozenset(
 )
 
 BUILTIN_MODULE_NAMES = frozenset(sys.builtin_module_names)
-STDLIB_PATH = distutils.sysconfig.get_python_lib(standard_lib=True)
+STDLIB_PATH = sysconfig.get_paths()['stdlib']
