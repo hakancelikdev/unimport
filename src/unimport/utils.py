@@ -73,31 +73,13 @@ def is_std(package: str) -> bool:
     return False
 
 
+_AFFIRMATIVES = frozenset((
+    "", "y", "yes", "t", "true", "on", "1",
+))
+
 @functools.lru_cache(maxsize=3)
 def action_to_bool(action: str) -> bool:
-    if action == "":
-        return True
-    with contextlib.suppress(ValueError):
-        return _strtobool(action) == 1
-
-    return False
-
-
-def _strtobool(val: str) -> int:
-    """Convert a string representation of truth to true (1) or false (0).
-
-    True values are 'y', 'yes', 't', 'true', 'on', and '1'; false values
-    are 'n', 'no', 'f', 'false', 'off', and '0'.  Raises ValueError if
-    'val' is anything else.
-    Vendored from py311
-    """
-    val = val.lower()
-    if val in ('y', 'yes', 't', 'true', 'on', '1'):
-        return 1
-    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
-        return 0
-    else:
-        raise ValueError("invalid truth value %r" % (val,))
+    return action.lower() in _AFFIRMATIVES
 
 
 def get_exclude_list_from_gitignore(path=Path(".gitignore")) -> List[GitWildMatchPattern]:
