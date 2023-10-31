@@ -35,8 +35,8 @@ $ git rebase upstream/main
 
 ## Testing
 
-Firstly make sure you have py3.6, py3.7, py3.8, py3.9 and py3.10 python versions
-installed on your system.
+Firstly make sure you have py3.6, py3.7, py3.8, py3.9, py3.10 and py3.11 python
+versions installed on your system.
 
 After typing your codes, you should run the tests by typing the following command.
 
