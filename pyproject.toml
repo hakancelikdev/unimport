@@ -21,7 +21,7 @@ skip_gitignore = true
 
 [tool.black]
 line-length = 120
-target-version = ['py36', 'py37', 'py38', 'py39', 'py310']
+target-version = ['py36', 'py37', 'py38', 'py39', 'py310', 'py311']
 
 [tool.unimport]
 include_star_import = true
