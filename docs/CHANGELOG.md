@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - YYYY-MM-DD
 
+## [1.0.1] - 2023-11-17
+
 ### Changed
 
 - Implement `strtobool` function (and remove distutils dependency)
