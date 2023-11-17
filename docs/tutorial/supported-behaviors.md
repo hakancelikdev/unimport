@@ -4,6 +4,8 @@ Unimport can understand that imports are used these cases.
 
 ```python
 from typing import List, Dict
+
+
 def test(arg: List[Dict]) -> None:
    pass
 ```
@@ -16,12 +18,16 @@ Unimport supports the following cases
 
 ```python
 from typing import List, Dict
+
+
 def test(arg: 'List[Dict]') -> None:
    pass
 ```
 
 ```python
 from typing import List, Dict
+
+
 def test(arg: "List['Dict']") -> None:
    pass
 ```
@@ -38,6 +44,8 @@ Imports in the example below aren't flag as unused by import.
 from typing import Any
 from typing import Tuple
 from typing import Union
+
+
 def function(a, b):
     # type: (Any, str) -> Union[Tuple[None, None], Tuple[str, str]]
     pass
@@ -65,6 +73,7 @@ Other supported operations, **append** and **extend**
 ```python
 from os import *
 
+
 __all__ = []
 __all__.append("removedirs")
 __all__.extend(["walk"])
@@ -74,6 +83,7 @@ after refactoring
 
 ```python
 from os import removedirs, walk
+
 
 __all__ = []
 __all__.append("removedirs")
@@ -93,6 +103,7 @@ Let me give a few examples.
 
 ```python
 import x
+
 
 def func():
     import x
@@ -117,6 +128,7 @@ def func():
 
 ```python
 import x
+
 
 class Klass:
 
