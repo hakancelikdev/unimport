@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - YYYY-MM-DD
 
+## [1.1.0] - 2023-11-17
+
+### Added
+
+- Support for Python version 3.11.
+
 ## [1.0.1] - 2023-11-17
 
 ### Changed

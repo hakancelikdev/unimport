@@ -35,13 +35,15 @@ $ git rebase upstream/main
 
 ## Testing
 
-Firstly make sure you have py3.6, py3.7, py3.8, py3.9 and py3.10 python versions
-installed on your system.
+First, make sure you have at least one of the python versions py3.6, py3.7, py3.8,
+py3.9, py3.10 and py3.11. If not all versions are available, after opening PR, github
+action will run the tests for each version, so you can be sure that you wrote the
+correct code. You can skip the tox step below.
 
 After typing your codes, you should run the tests by typing the following command.
 
 ```shell
-$ python3.10 -m pip install tox
+$ python3.11 -m pip install tox
 $ tox
 ```
 

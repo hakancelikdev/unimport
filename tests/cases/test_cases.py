@@ -34,7 +34,7 @@ def test_cases(path: Path, logger):
     skip = re.search("# skip; condition: (?P<condition>.*), reason: (?P<reason>.*)", source, re.IGNORECASE)
     if skip:
         condition = skip.group("condition")
-        if condition in ["not PY38_PLUS"] and eval(condition):
+        if condition in ("not PY38_PLUS",) and eval(condition):
             reason = skip.group("reason")
             pytest.skip(reason, allow_module_level=True)
 

@@ -75,8 +75,6 @@ extra:
       searching for. With your consent, you're helping us to make our documentation
       better.
   social:
-    - icon: fontawesome/brands/discord
-      link: https://discord.com/invite/6z8YXy4
     - icon: fontawesome/brands/twitter
       link: https://twitter.com/hakancelikdev
     - icon: fontawesome/brands/linkedin
