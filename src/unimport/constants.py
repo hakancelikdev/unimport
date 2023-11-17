@@ -1,6 +1,6 @@
 import ast
-import sysconfig
 import sys
+import sysconfig
 
 __all__ = (
     "BUILTIN_MODULE_NAMES",
@@ -81,4 +81,4 @@ SUBSCRIPT_TYPE_VARIABLE = frozenset(
 )
 
 BUILTIN_MODULE_NAMES = frozenset(sys.builtin_module_names)
-STDLIB_PATH = sysconfig.get_paths()['stdlib']
+STDLIB_PATH = sysconfig.get_paths()["stdlib"]
