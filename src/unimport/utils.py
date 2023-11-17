@@ -80,7 +80,8 @@ def action_to_bool(action: str) -> bool:
     are 'n', 'no', 'f', 'false', 'off', and '0'.  Raises ValueError if
     'val' is anything else.
     """
-    if (action := action.lower()) in ("y", "yes", "t", "true", "on", "1"):
+    action = action.lower()
+    if action in ("y", "yes", "t", "true", "on", "1"):
         return True
     elif action in ("n", "no", "f", "false", "off", "0"):
         return False
