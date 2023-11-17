@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - YYYY-MM-DD
 
+### Changed
+
+- Implement `strtobool` function (and remove distutils dependency)
+  [#297](https://github.com/hakancelikdev/unimport/issues/297)
+
 ## [1.0.0] - 2023-07-07
 
 ### Added

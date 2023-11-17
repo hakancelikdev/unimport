@@ -8,6 +8,7 @@ import pytest
 from tests.utils import refactor, reopenable_temp_file
 from unimport import constants as C
 from unimport import utils
+from unimport.utils import action_to_bool
 
 
 @pytest.mark.parametrize(
@@ -139,3 +140,14 @@ def test_return_exit_code(
         )
         == expected_exit_code
     )
+
+
+def test_action_to_bool():
+    yes = ("y", "Y", "yes", "True", "t", "true", "True", "On", "on", "1")
+    no = ("n", "no", "f", "false", "off", "0", "Off", "No", "N")
+
+    for y in yes:
+        assert action_to_bool(y) is True
+
+    for n in no:
+        assert action_to_bool(n) is False
