@@ -1,4 +1,6 @@
-from typing import List, Optional, Sequence, Union, cast
+from __future__ import annotations
+
+from typing import Sequence, cast
 
 import libcst as cst
 import libcst.matchers as m
@@ -15,7 +17,7 @@ class _RemoveUnusedImportTransformer(cst.CSTTransformer):
 
     METADATA_DEPENDENCIES = (PositionProvider,)
 
-    def __init__(self, unused_imports: List[Union[Import, ImportFrom]]) -> None:
+    def __init__(self, unused_imports: list[Import | ImportFrom]) -> None:
         super().__init__()
 
         self.unused_imports = unused_imports
@@ -46,11 +48,11 @@ class _RemoveUnusedImportTransformer(cst.CSTTransformer):
                 return False
         return True
 
-    def get_location(self, node: Union[cst.Import, cst.ImportFrom]) -> CodeRange:
+    def get_location(self, node: cst.Import | cst.ImportFrom) -> CodeRange:
         return self.get_metadata(cst.metadata.PositionProvider, node)
 
     @staticmethod
-    def get_rpar(rpar: Optional[cst.RightParen], location: CodeRange) -> Optional[cst.RightParen]:
+    def get_rpar(rpar: cst.RightParen | None, location: CodeRange) -> cst.RightParen | None:
         if not rpar or location.start.line == location.end.line:
             return rpar
         else:
@@ -58,7 +60,7 @@ class _RemoveUnusedImportTransformer(cst.CSTTransformer):
 
     def leave_import_alike(
         self, original_node: T.CSTImportT, updated_node: T.CSTImportT
-    ) -> Union[cst.RemovalSentinel, T.CSTImportT]:
+    ) -> cst.RemovalSentinel | T.CSTImportT:
         names_to_keep = []
         names = cast(Sequence[cst.ImportAlias], updated_node.names)
         # already handled by leave_ImportFrom
@@ -88,24 +90,22 @@ class _RemoveUnusedImportTransformer(cst.CSTTransformer):
             return cast(T.CSTImportT, updated_node)
 
     @staticmethod
-    def leave_StarImport(updated_node: cst.ImportFrom, imp: ImportFrom) -> Union[cst.ImportFrom, cst.RemovalSentinel]:
+    def leave_StarImport(updated_node: cst.ImportFrom, imp: ImportFrom) -> cst.ImportFrom | cst.RemovalSentinel:
         if imp.suggestions:
             names_to_suggestions = [cst.ImportAlias(cst.Name(module)) for module in imp.suggestions]
             return updated_node.with_changes(names=names_to_suggestions)
         else:
             return cst.RemoveFromParent()
 
-    def leave_Import(
-        self, original_node: cst.Import, updated_node: cst.Import
-    ) -> Union[cst.RemovalSentinel, cst.Import]:
+    def leave_Import(self, original_node: cst.Import, updated_node: cst.Import) -> cst.RemovalSentinel | cst.Import:
         return self.leave_import_alike(original_node, updated_node)
 
     def leave_ImportFrom(
         self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom
-    ) -> Union[cst.RemovalSentinel, cst.ImportFrom]:
+    ) -> cst.RemovalSentinel | cst.ImportFrom:
         if isinstance(updated_node.names, cst.ImportStar):
 
-            def get_star_imp() -> Optional[ImportFrom]:
+            def get_star_imp() -> ImportFrom | None:
                 if isinstance(updated_node.module, cst.Attribute):
                     import_name = self.get_import_name_from_attr(attr_node=updated_node.module)
                 else:
@@ -126,7 +126,7 @@ class _RemoveUnusedImportTransformer(cst.CSTTransformer):
         return self.leave_import_alike(original_node, updated_node)
 
 
-def refactor_string(source: str, unused_imports: List[Union[Import, ImportFrom]]) -> str:
+def refactor_string(source: str, unused_imports: list[Import | ImportFrom]) -> str:
     if unused_imports:
         wrapper = cst.MetadataWrapper(cst.parse_module(source))
         fixed_module = wrapper.visit(_RemoveUnusedImportTransformer(unused_imports))

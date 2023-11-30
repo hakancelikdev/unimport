@@ -1,29 +1,23 @@
+from __future__ import annotations
+
 import ast
 import dataclasses
 import operator
-from typing import ClassVar, Iterator, List, Optional, Set, Union
-
-from unimport import constants as C
-
-if C.PY38_PLUS:
-    from typing import Literal  # unimport: skip
-else:
-    from typing_extensions import Literal  # type: ignore
-
+import typing
 
 __all__ = ("Import", "ImportFrom", "Name", "Scope")
 
 
 @dataclasses.dataclass
 class Import:
-    imports: ClassVar[List[Union["Import", "ImportFrom"]]] = []
+    imports: typing.ClassVar[list[Import | ImportFrom]] = []
 
     lineno: int
     column: int
     name: str
     package: str
 
-    node: Union[ast.Import, ast.ImportFrom] = dataclasses.field(init=False, repr=False, compare=False)
+    node: ast.Import | ast.ImportFrom = dataclasses.field(init=False, repr=False, compare=False)
 
     def __len__(self) -> int:
         return operator.length_hint(self.name.split("."))
@@ -45,7 +39,7 @@ class Import:
 
         return False
 
-    def match_nearest_duplicate_import(self, name: "Name") -> bool:
+    def match_nearest_duplicate_import(self, name: Name) -> bool:
         nearest_import = None
 
         scope = name.scope
@@ -72,7 +66,7 @@ class Import:
         return [_import.name for _import in self.imports].count(self.name) > 1
 
     @classmethod
-    def get_unused_imports(cls, *, include_star_import: bool = False) -> Iterator[Union["Import", "ImportFrom"]]:
+    def get_unused_imports(cls, *, include_star_import: bool = False) -> typing.Iterator[Import | ImportFrom]:
         for imp in reversed(Import.imports):
             if include_star_import and isinstance(imp, ImportFrom) and imp.star:
                 yield imp
@@ -95,13 +89,13 @@ class Import:
 @dataclasses.dataclass
 class ImportFrom(Import):
     star: bool
-    suggestions: List[str]
+    suggestions: list[str]
 
-    def is_match_sub_packages(self, name_name: str) -> Literal[False]:
+    def is_match_sub_packages(self, name_name: str) -> bool:
         return False
 
     @classmethod
-    def register(  # type: ignore
+    def register(  # type: ignore[override]  # noqa
         cls,
         *,
         lineno: int,
@@ -109,7 +103,7 @@ class ImportFrom(Import):
         name: str,
         package: str,
         star: bool,
-        suggestions: List[str],
+        suggestions: list[str],
         node: ast.ImportFrom,
     ) -> None:
         _import = cls(lineno, column, name, package, star, suggestions)
@@ -121,22 +115,20 @@ class ImportFrom(Import):
 
 @dataclasses.dataclass
 class Name:
-    names: ClassVar[List["Name"]] = []
+    names: typing.ClassVar[list[Name]] = []
 
     lineno: int
     name: str
     is_all: bool = False
 
-    node: Union[ast.Name, ast.Attribute, ast.Constant] = dataclasses.field(init=False, repr=False, compare=False)
-    match_import: Union[Import, ImportFrom, Literal[False]] = dataclasses.field(
-        init=False, repr=False, compare=False, default=False
-    )
+    node: ast.Name | ast.Attribute | ast.Constant = dataclasses.field(init=False, repr=False, compare=False)
+    match_import: Import | ImportFrom | bool = dataclasses.field(init=False, repr=False, compare=False, default=False)
 
     @property
     def is_attribute(self):
         return "." in self.name
 
-    def match_2(self, imp: Union[Import, ImportFrom]) -> bool:
+    def match_2(self, imp: Import | ImportFrom) -> bool:
         if self.is_all:
             is_match = self.name == imp.name
         elif self.is_attribute:
@@ -148,7 +140,7 @@ class Name:
 
         return is_match
 
-    def match(self, imp: Union[Import, ImportFrom]) -> bool:
+    def match(self, imp: Import | ImportFrom) -> bool:
         is_match = self.match_2(imp)
 
         if is_match and imp.is_duplicate:
@@ -165,7 +157,7 @@ class Name:
 
     @classmethod
     def register(
-        cls, *, lineno: int, name: str, node: Union[ast.Name, ast.Attribute, ast.Constant], is_all: bool = False
+        cls, *, lineno: int, name: str, node: ast.Name | ast.Attribute | ast.Constant, is_all: bool = False
     ) -> None:
         _name = cls(lineno, name, is_all)
         _name.node = node
@@ -180,26 +172,26 @@ class Name:
 
 @dataclasses.dataclass
 class Scope:
-    scopes: ClassVar[List["Scope"]] = []
-    current_scope: ClassVar[List["Scope"]] = []
+    scopes: typing.ClassVar[list[Scope]] = []
+    current_scope: typing.ClassVar[list[Scope]] = []
 
     node: ast.AST
 
-    current_nodes: List[Union[Import, ImportFrom, Name]] = dataclasses.field(
+    current_nodes: list[Import | ImportFrom | Name] = dataclasses.field(
         default_factory=list, init=False, repr=False, compare=False
     )
-    parent: "Scope" = dataclasses.field(default=None, repr=False)
-    child_scopes: Set["Scope"] = dataclasses.field(default_factory=set, init=False, repr=False, compare=False)
+    parent: Scope = dataclasses.field(default=None, repr=False)
+    child_scopes: set[Scope] = dataclasses.field(default_factory=set, init=False, repr=False, compare=False)
 
     def __hash__(self) -> int:
         return hash(self.node)
 
     @classmethod
-    def get_current_scope(cls) -> "Scope":
+    def get_current_scope(cls) -> Scope:
         return cls.current_scope[-1]
 
     @classmethod
-    def get_global_scope(cls) -> "Scope":
+    def get_global_scope(cls) -> Scope:
         global_scope = cls.scopes[0]
         assert global_scope.parent is None
         return global_scope
@@ -222,7 +214,7 @@ class Scope:
         cls.current_scope.pop()
 
     @classmethod
-    def register(cls, current_node: Union[Import, ImportFrom, Name], *, is_global=False) -> None:
+    def register(cls, current_node: Import | ImportFrom | Name, *, is_global=False) -> None:
         scope = cls.get_previous_scope(cls.get_global_scope() if is_global else cls.get_current_scope())
 
         # current nodes add to scope
@@ -244,7 +236,7 @@ class Scope:
             parent = cls.get_previous_scope(parent.parent)
 
     @classmethod
-    def get_scope_by_current_node(cls, current_node: Union[Import, ImportFrom, Name]) -> Optional["Scope"]:
+    def get_scope_by_current_node(cls, current_node: Import | ImportFrom | Name) -> Scope | None:
         for scope in cls.scopes:
             if current_node in scope.current_nodes:
                 return scope
@@ -252,18 +244,18 @@ class Scope:
         return None
 
     @property
-    def names(self) -> Iterator[Name]:
+    def names(self) -> typing.Iterator[Name]:
         yield from filter(lambda node: isinstance(node, Name), self.current_nodes)  # type: ignore
 
         for child_scope in self.child_scopes:
             yield from child_scope.names
 
     @property
-    def imports(self) -> Iterator[Import]:
+    def imports(self) -> typing.Iterator[Import]:
         yield from filter(lambda node: isinstance(node, Import), self.current_nodes)  # type: ignore
 
     @classmethod
-    def get_previous_scope(cls, scope: "Scope") -> "Scope":
+    def get_previous_scope(cls, scope: Scope) -> Scope:
         for _scope in cls.scopes:
             if _scope == scope:
                 return _scope

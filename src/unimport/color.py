@@ -7,6 +7,7 @@ __all__ = (
     "TERMINAL_SUPPORT_COLOR",
     "difference",
     "paint",
+    "Color",
 )
 
 if sys.platform == "win32":  # pragma: no cover (windows)

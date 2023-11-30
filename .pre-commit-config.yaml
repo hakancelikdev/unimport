@@ -38,7 +38,7 @@ repos:
     rev: v3.8.0
     hooks:
       - id: pyupgrade
-        args: [--py36-plus]
+        args: [--py37-plus]
 
   - repo: https://github.com/hakancelikdev/unexport
     rev: 0.4.0

@@ -1,12 +1,14 @@
+from __future__ import annotations
+
 import argparse
 import configparser
 import contextlib
 import dataclasses
 import functools
 import sys
+import typing
 from ast import literal_eval
 from pathlib import Path
-from typing import Any, ClassVar, Dict, Iterator, List, Optional, Tuple
 
 import toml
 from pathspec.patterns import GitWildMatchPattern
@@ -14,23 +16,19 @@ from pathspec.patterns import GitWildMatchPattern
 from unimport import constants as C
 from unimport import utils
 from unimport.color import TERMINAL_SUPPORT_COLOR
+from unimport.enums import ColorSelect
 from unimport.exceptions import ConfigFileNotFound, UnknownConfigKeyException, UnsupportedConfigFile
-
-if C.PY38_PLUS:
-    from typing import Literal
-else:
-    from typing_extensions import Literal  # type: ignore
 
 __all__ = ("Config", "ParseConfig")
 
 
-CONFIG_FILES: Dict[str, str] = {
+CONFIG_FILES: dict[str, str] = {
     "setup.cfg": "unimport",
     "pyproject.toml": "tool.unimport",
 }
 
 CONFIG_ANNOTATIONS_MAPPING = {
-    "sources": List[Path],
+    "sources": typing.List[Path],
     "include": str,
     "exclude": str,
     "gitignore": bool,
@@ -54,13 +52,13 @@ CONFIG_LIKE_COMMANDS_MAPPING = {
 
 @dataclasses.dataclass
 class Config:
-    default_sources: ClassVar[List[Path]] = [Path(".")]  # Not init attribute
-    gitignore_patterns: List[GitWildMatchPattern] = dataclasses.field(
+    default_sources: typing.ClassVar[list[Path]] = [Path(".")]  # Not init attribute
+    gitignore_patterns: list[GitWildMatchPattern] = dataclasses.field(
         default_factory=list, init=False, repr=False, compare=False
     )  # Not init attribute
     use_color: bool = dataclasses.field(init=False)  # Not init attribute
 
-    sources: Optional[List[Path]] = None
+    sources: list[Path] | None = None
     disable_auto_discovery_config: bool = False
     include: str = C.INCLUDE_REGEX_PATTERN
     exclude: str = C.EXCLUDE_REGEX_PATTERN
@@ -71,7 +69,7 @@ class Config:
     permission: bool = False
     check: bool = False
     ignore_init: bool = False
-    color: Literal["auto", "always", "never"] = "auto"
+    color: ColorSelect = ColorSelect.AUTO
 
     @classmethod
     @functools.lru_cache(maxsize=None)
@@ -96,7 +94,7 @@ class Config:
         if self.ignore_init:
             self.exclude = "|".join([self.exclude, C.INIT_FILE_IGNORE_REGEX])
 
-    def get_paths(self) -> Iterator[Path]:
+    def get_paths(self) -> typing.Iterator[Path]:
         for source_path in self.sources:
             yield from utils.list_paths(
                 source_path,
@@ -106,26 +104,20 @@ class Config:
             )
 
     @classmethod
-    def get_color_choices(cls) -> Tuple[str]:
-        return getattr(
-            Config.__annotations__["color"],
-            "__args__" if C.PY37_PLUS else "__values__",
+    def get_color_choices(cls) -> list[str]:
+        return list(ColorSelect._member_map_.keys())
+
+    @classmethod
+    def is_use_color(cls, color: ColorSelect) -> bool:
+        if color not in list(ColorSelect):
+            raise ValueError(color)
+
+        return color == ColorSelect.ALWAYS or (
+            color == ColorSelect.AUTO and sys.stderr.isatty() and TERMINAL_SUPPORT_COLOR
         )
 
     @classmethod
-    def is_use_color(cls, color: str) -> bool:
-        if color not in cls.get_color_choices():
-            raise ValueError(color)
-
-        return color == "always" or (color == "auto" and sys.stderr.isatty() and TERMINAL_SUPPORT_COLOR)
-
-    @classmethod
-    def build(
-        cls,
-        *,
-        args: Optional[Dict[str, Any]] = None,
-        config_context: Optional[Dict[str, Any]] = None,
-    ) -> "Config":
+    def build(cls, *, args: dict | None = None, config_context: dict | None = None) -> Config:
         if args is None and config_context is None:
             return cls()
 
@@ -154,15 +146,15 @@ class ParseConfig:
         if self.config_section is None:
             raise UnsupportedConfigFile(self.config_file)
 
-    def parse(self) -> Dict[str, Any]:
+    def parse(self) -> dict:
         return getattr(self, f"parse_{self.config_file.suffix.strip('.')}")()
 
-    def parse_cfg(self) -> Dict[str, Any]:
+    def parse_cfg(self) -> dict:
         parser = configparser.ConfigParser(allow_no_value=True)
         parser.read(self.config_file)
         if parser.has_section(self.config_section):
 
-            def get_config_as_list(name: str) -> List[str]:
+            def get_config_as_list(name: str) -> list[str]:
                 return literal_eval(
                     parser.get(
                         self.config_section,
@@ -171,7 +163,7 @@ class ParseConfig:
                     )
                 )
 
-            cfg_context: Dict[str, Any] = {}
+            cfg_context: dict = {}
             for key, value in parser[self.config_section].items():
                 if key not in CONFIG_ANNOTATIONS_MAPPING:
                     raise UnknownConfigKeyException(key)
@@ -181,7 +173,7 @@ class ParseConfig:
                     cfg_context[key] = parser.getboolean(self.config_section, key)
                 elif key_type == str:
                     cfg_context[key] = value  # type: ignore
-                elif key_type == List[Path]:
+                elif key_type == typing.List[Path]:
                     cfg_context[key] = [Path(p) for p in get_config_as_list(key)]  # type: ignore
 
                 expected_key = CONFIG_LIKE_COMMANDS_MAPPING.get(key, None)
@@ -191,12 +183,12 @@ class ParseConfig:
         else:
             return {}
 
-    def parse_toml(self) -> Dict[str, Any]:
+    def parse_toml(self) -> dict:
         parsed_toml = toml.loads(self.config_file.read_text())
-        toml_context_from_conf: Dict[str, Any] = dict(
+        toml_context_from_conf: dict = dict(
             functools.reduce(lambda x, y: x.get(y, {}), self.config_section.split("."), parsed_toml)  # type: ignore[attr-defined]
         )
-        toml_context: Dict[str, Any] = {}
+        toml_context: dict = {}
         if toml_context_from_conf:
             for key, value in toml_context_from_conf.items():
                 key = CONFIG_LIKE_COMMANDS_MAPPING.get(key, key)
@@ -212,8 +204,8 @@ class ParseConfig:
         return toml_context
 
     @classmethod
-    def parse_args(cls, args: argparse.Namespace) -> "Config":
-        config_context: Optional[Dict[str, Any]] = None
+    def parse_args(cls, args: argparse.Namespace) -> Config:
+        config_context: dict | None = None
 
         if args.config is not None:
             config_context = cls(args.config).parse()
