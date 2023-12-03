@@ -1,14 +1,14 @@
-from enum import Enum
+import enum
 
-__all__ = ("Emoji", "Color")
+__all__ = ("Emoji", "Color", "ColorSelect")
 
 
-class Emoji(str, Enum):
+class Emoji(str, enum.Enum):
     STAR = "\U0001F929"
     PARTYING_FACE = "\U0001F973"
 
 
-class Color(str, Enum):
+class Color(str, enum.Enum):
     RESET = "\033[0m"
     BLACK = "\033[30m"
     RED = "\033[31m"
@@ -19,3 +19,9 @@ class Color(str, Enum):
     CYAN = "\033[36m"
     WHITE = "\033[97m"
     BOLD_WHITE = "\033[1;37m"
+
+
+class ColorSelect(str, enum.Enum):
+    AUTO = "auto"
+    ALWAYS = "always"
+    NEVER = "never"

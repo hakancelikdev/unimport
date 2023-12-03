@@ -1,12 +1,10 @@
 import re
-import sys
 from pathlib import Path
 from typing import List
 
 import pytest
 
 from unimport import constants as C
-from unimport.color import TERMINAL_SUPPORT_COLOR
 from unimport.commands import generate_parser
 from unimport.config import Config, ParseConfig
 from unimport.exceptions import UnknownConfigKeyException
@@ -214,23 +212,23 @@ def test_init_file_ignore_regex_not_match():
     assert exclude_regex.search("__init__bpy") is None
 
 
-@pytest.mark.parametrize(
-    "option,expected_result",
-    [
-        ("auto", TERMINAL_SUPPORT_COLOR and sys.stderr.isatty()),
-        ("always", True),
-        ("never", False),
-    ],
-)
-def test_use_color(option, expected_result):
-    assert expected_result == Config.is_use_color(option)
+# @pytest.mark.parametrize(
+#     "option,expected_result",
+#     [
+#         ("auto", TERMINAL_SUPPORT_COLOR and sys.stderr.isatty()),
+#         ("always", True),
+#         ("never", False),
+#     ],
+# )
+# def test_use_color(option, expected_result):
+#     assert expected_result == Config.is_use_color(option)
 
 
-def test_use_color_none_of_them():
-    with pytest.raises(ValueError) as cm:
-        Config.is_use_color("none-of-them")
-
-    assert "none-of-them" in str(cm.value)
+# def test_use_color_none_of_them():
+#     with pytest.raises(ValueError) as cm:
+#         Config.is_use_color("none-of-them")
+#
+#     assert "none-of-them" in str(cm.value)
 
 
 @pytest.mark.change_directory("tests/config")

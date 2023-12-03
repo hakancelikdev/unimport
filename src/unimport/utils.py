@@ -1,11 +1,13 @@
+from __future__ import annotations
+
 import difflib
 import functools
 import importlib.machinery
 import importlib.util
 import re
 import tokenize
+import typing
 from pathlib import Path
-from typing import FrozenSet, Iterable, Iterator, List, Optional, Tuple
 
 from pathspec.patterns.gitwildmatch import GitWildMatchPattern
 
@@ -26,7 +28,7 @@ __all__ = (
 
 
 @functools.lru_cache(maxsize=128)
-def get_dir(package: str) -> FrozenSet[str]:
+def get_dir(package: str) -> frozenset[str]:
     try:
         module = importlib.import_module(package)
     except (ImportError, AttributeError, TypeError, ValueError):
@@ -35,7 +37,7 @@ def get_dir(package: str) -> FrozenSet[str]:
 
 
 @functools.lru_cache(maxsize=128)
-def get_source(package: str) -> Optional[str]:
+def get_source(package: str) -> str | None:
     spec = get_spec(package)
     if spec is not None:
         assert isinstance(spec.loader, importlib.machinery.SourceFileLoader)
@@ -47,7 +49,7 @@ def get_source(package: str) -> Optional[str]:
 
 
 @functools.lru_cache(maxsize=128)
-def get_spec(package: str) -> Optional[importlib.machinery.ModuleSpec]:
+def get_spec(package: str) -> importlib.machinery.ModuleSpec | None:
     try:
         return importlib.util.find_spec(package)
     except (ImportError, AttributeError, TypeError, ValueError):
@@ -89,14 +91,14 @@ def action_to_bool(action: str) -> bool:
         raise ValueError(f"invalid truth value {action!r}")
 
 
-def get_exclude_list_from_gitignore(path=Path(".gitignore")) -> List[GitWildMatchPattern]:
+def get_exclude_list_from_gitignore(path=Path(".gitignore")) -> list[GitWildMatchPattern]:
     """Converts .gitignore patterns to regex and return this excludes regex
     list."""
 
     if not path.is_file():
         return []
 
-    gitignore_patterns: List[GitWildMatchPattern] = []
+    gitignore_patterns: list[GitWildMatchPattern] = []
     source, _, _ = read(path)
     for line in source.splitlines():
         regex, include = GitWildMatchPattern.pattern_to_regex(line)
@@ -107,7 +109,7 @@ def get_exclude_list_from_gitignore(path=Path(".gitignore")) -> List[GitWildMatc
     return gitignore_patterns
 
 
-def read(path: Path) -> Tuple[str, str, Optional[str]]:
+def read(path: Path) -> tuple[str, str, str | None]:
     try:
         with tokenize.open(path) as stream:
             source = stream.read()
@@ -128,10 +130,10 @@ def list_paths(
     *,
     include: str = C.INCLUDE_REGEX_PATTERN,
     exclude: str = C.EXCLUDE_REGEX_PATTERN,
-    gitignore_patterns: Optional[List[GitWildMatchPattern]] = None,
-) -> Iterator[Path]:
+    gitignore_patterns: list[GitWildMatchPattern] | None = None,
+) -> typing.Iterator[Path]:
     include_regex, exclude_regex = re.compile(include), re.compile(exclude)
-    file_names: Iterable[Path] = start.glob(C.GLOB_PATTERN) if start.is_dir() else [start]
+    file_names: typing.Iterable[Path] = start.glob(C.GLOB_PATTERN) if start.is_dir() else [start]
 
     if gitignore_patterns:
         for file_name in file_names:
@@ -152,7 +154,7 @@ def list_paths(
                 yield file_name
 
 
-def diff(*, source: str, refactor_result: str, fromfile: Path = None) -> Tuple[str, ...]:
+def diff(*, source: str, refactor_result: str, fromfile: Path = None) -> tuple[str, ...]:
     return tuple(
         difflib.unified_diff(
             source.splitlines(),

@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import contextlib
 import dataclasses
+import typing
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterator, List, Optional, Sequence, Union
 
 from unimport import commands, utils
 from unimport.analyzers import MainAnalyzer
@@ -10,7 +12,7 @@ from unimport.config import Config
 from unimport.enums import Color
 from unimport.statement import Import
 
-if TYPE_CHECKING:
+if typing.TYPE_CHECKING:
     from unimport.statement import ImportFrom
 
 
@@ -19,16 +21,16 @@ __all__ = ("Main",)
 
 @dataclasses.dataclass
 class _Result:
-    unused_imports: List[Union["Import", "ImportFrom"]] = dataclasses.field(repr=False)
+    unused_imports: list[Import | ImportFrom] = dataclasses.field(repr=False)
     path: Path
     source: str
     encoding: str
-    newline: Optional[str] = None
+    newline: str | None = None
 
 
 @dataclasses.dataclass
 class Main:
-    argv: Optional[Sequence[str]] = None
+    argv: typing.Sequence[str] | None = None
 
     config: Config = dataclasses.field(init=False)
     is_syntax_error: bool = dataclasses.field(init=False, default=False)
@@ -48,7 +50,7 @@ class Main:
         )
 
     @contextlib.contextmanager
-    def analysis(self, source: str, path: Path) -> Iterator:
+    def analysis(self, source: str, path: Path) -> typing.Iterator:
         analyzer = MainAnalyzer(
             source=source,
             path=path,
@@ -69,7 +71,7 @@ class Main:
         finally:
             analyzer.clear()
 
-    def get_results(self) -> Iterator[_Result]:
+    def get_results(self) -> typing.Iterator[_Result]:
         for path in self.config.get_paths():
             source, encoding, newline = utils.read(path)
 
@@ -101,7 +103,7 @@ class Main:
         return commands.permission(result.path, result.encoding)
 
     @classmethod
-    def run(cls, argv: Optional[Sequence[str]] = None) -> "Main":
+    def run(cls, argv: typing.Sequence[str] | None = None) -> Main:
         from unimport.refactor import refactor_string
 
         self = cls(argv)

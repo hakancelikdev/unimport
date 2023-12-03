@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Callable, TypeVar, Union
+import typing
 
 import libcst as cst
 
@@ -12,11 +12,11 @@ __all__ = (
     "CSTImportT",
 )
 
-ASTImportableT = Union[ast.AsyncFunctionDef, ast.Attribute, ast.ClassDef, ast.FunctionDef, ast.Name, ast.alias]
-ASTFunctionT = TypeVar("ASTFunctionT", ast.FunctionDef, ast.AsyncFunctionDef)
-ASTNameType = Union[ast.Name, ast.Constant]
+ASTImportableT = typing.Union[ast.AsyncFunctionDef, ast.Attribute, ast.ClassDef, ast.FunctionDef, ast.Name, ast.alias]
+ASTFunctionT = typing.TypeVar("ASTFunctionT", ast.FunctionDef, ast.AsyncFunctionDef)
+ASTNameType = typing.Union[ast.Name, ast.Constant]
 
-CFNT = TypeVar("CFNT", ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Name)
-CSTImportT = TypeVar("CSTImportT", cst.Import, cst.ImportFrom)
+CFNT = typing.TypeVar("CFNT", ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Name)
+CSTImportT = typing.TypeVar("CSTImportT", cst.Import, cst.ImportFrom)
 
-FunctionT = TypeVar("FunctionT", bound=Callable[..., Any])
+FunctionT = typing.TypeVar("FunctionT", bound=typing.Callable[..., typing.Any])

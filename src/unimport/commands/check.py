@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import List, Union
 
 from unimport.color import paint
 from unimport.enums import Color
@@ -8,7 +9,7 @@ from unimport.statement import Import, ImportFrom
 __all__ = ("check",)
 
 
-def check(path: Path, unused_imports: List[Union[Import, ImportFrom]], use_color: bool) -> None:
+def check(path: Path, unused_imports: list[Import | ImportFrom], use_color: bool) -> None:
     for imp in unused_imports:
         if isinstance(imp, ImportFrom) and imp.star and imp.suggestions:
             context = (

@@ -20,6 +20,8 @@ __all__ = (
     "add_version_option",
 )
 
+from unimport.enums import ColorSelect
+
 
 def add_sources_option(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
@@ -164,7 +166,7 @@ def add_color_option(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--color",
         default=Config.color,
-        type=str,
+        type=ColorSelect,
         metavar="{" + ",".join(Config.get_color_choices()) + "}",
         help="Select whether to use color in the output. Defaults to `%(default)s`.",
     )

@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import ast
-from typing import List, Optional, Set
 
 from unimport.analyzers.decarators import generic_visit, skip_import
 from unimport.analyzers.importable import ImportableAnalyzer
@@ -20,7 +21,7 @@ class ImportAnalyzer(ast.NodeVisitor):
     IGNORE_IMPORT_NAMES = ("__all__", "__doc__", "__name__")
 
     def __init__(
-        self, *, source: str, include_star_import: bool = False, defined_names: Optional[Set[str]] = None
+        self, *, source: str, include_star_import: bool = False, defined_names: set[str] | None = None
     ) -> None:
         self.source = source
         self.include_star_import = include_star_import
@@ -28,8 +29,8 @@ class ImportAnalyzer(ast.NodeVisitor):
 
         self.any_import_error = False
 
-        self.if_names: Set[str] = set()
-        self.orelse_names: Set[str] = set()
+        self.if_names: set[str] = set()
+        self.orelse_names: set[str] = set()
 
     def traverse(self, tree) -> None:
         self.visit(tree)
@@ -104,7 +105,7 @@ class ImportAnalyzer(ast.NodeVisitor):
 
         self.any_import_error = False
 
-    def get_suggestions(self, package: str) -> List[str]:
+    def get_suggestions(self, package: str) -> list[str]:
         names = set(map(lambda name: name.name.split(".")[0], Name.names))
         from_names = ImportableAnalyzer.get_names(package)
         return sorted(from_names & (names - self.defined_names))

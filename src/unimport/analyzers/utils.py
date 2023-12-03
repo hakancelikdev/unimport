@@ -1,17 +1,19 @@
+from __future__ import annotations
+
 import ast
-from typing import Iterator, Optional, Set
+import typing
 
 __all__ = ("set_tree_parents", "get_parents", "first_parent_match", "get_defined_names")
 
 
-def set_tree_parents(tree: ast.AST, parent: Optional[ast.AST] = None) -> None:
+def set_tree_parents(tree: ast.AST, parent: ast.AST | None = None) -> None:
     tree.parent = parent  # type: ignore
     for node in ast.walk(tree):
         for child in ast.iter_child_nodes(node):
             child.parent = node  # type: ignore
 
 
-def get_parents(node: ast.AST) -> Iterator[ast.AST]:
+def get_parents(node: ast.AST) -> typing.Iterator[ast.AST]:
     parent = node
     while parent:
         parent = parent.parent  # type: ignore
@@ -20,14 +22,11 @@ def get_parents(node: ast.AST) -> Iterator[ast.AST]:
 
 
 def first_parent_match(node: ast.AST, *ancestors):
-    try:
-        return next(filter(lambda parent: isinstance(parent, ancestors), get_parents(node)))
-    except StopIteration:
-        return None
+    return next(filter(lambda parent: isinstance(parent, ancestors), get_parents(node)), None)
 
 
-def get_defined_names(tree: ast.AST) -> Set[str]:
-    defined_names: Set[str] = set()
+def get_defined_names(tree: ast.AST) -> set[str]:
+    defined_names: set[str] = set()
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
             defined_names.add(node.name)
