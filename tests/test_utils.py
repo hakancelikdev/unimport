@@ -6,7 +6,6 @@ from pathlib import Path
 import pytest
 
 from tests.utils import refactor, reopenable_temp_file
-from unimport import constants as C
 from unimport import utils
 from unimport.utils import action_to_bool
 
@@ -30,8 +29,8 @@ def test_list_paths(path, count):
 
 
 @pytest.mark.skipif(
-    not C.PY37_PLUS or sys.platform == "win32",
-    reason="Patspec version 0.10.0 and above are only supported for Python 3.7 above.",
+    sys.platform == "win32",
+    reason="Patspec version 0.10.1 and above are not supported on Windows",
 )
 def test_list_paths_with_gitignore():
     gitignore = textwrap.dedent(

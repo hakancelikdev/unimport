@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from unimport.analyzers import MainAnalyzer
-from unimport.constants import PY38_PLUS  # noqa using eval expression
+from unimport.constants import PY310_PLUS  # noqa using eval expression
 from unimport.refactor import refactor_string
 from unimport.statement import Import, Name
 from unimport.utils import list_paths
@@ -31,12 +31,10 @@ def test_cases(path: Path, logger):
     analyzer = importlib.import_module(analyzer_import_path)
 
     source = path.read_text()
-    skip = re.search("# skip; condition: (?P<condition>.*), reason: (?P<reason>.*)", source, re.IGNORECASE)
-    if skip:
-        condition = skip.group("condition")
-        if condition in ("not PY38_PLUS",) and eval(condition):
-            reason = skip.group("reason")
-            pytest.skip(reason, allow_module_level=True)
+    skip_if = re.search(r"# pytest.mark.skipif\((?P<condition>.*), reason: (?P<reason>.*)\)", source, re.IGNORECASE)
+    if skip_if and (condition := skip_if.group("condition")) and condition in ("not PY310_PLUS",):
+        reason = skip_if.group("reason")
+        pytest.mark.skipif(False, reason, allow_module_level=True)
 
     with contextlib.suppress(SyntaxError):
         with MainAnalyzer(source=source, include_star_import=True):

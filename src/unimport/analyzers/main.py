@@ -2,7 +2,6 @@ import ast
 import re
 from pathlib import Path
 
-from unimport import constants as C
 from unimport.analyzers.import_statement import ImportAnalyzer
 from unimport.analyzers.importable import ImportableAnalyzer
 from unimport.analyzers.name import NameAnalyzer
@@ -31,7 +30,7 @@ class MainAnalyzer(ast.NodeVisitor):
         if self.skip_file():
             return None
 
-        tree = ast.parse(self.source, type_comments=True) if C.PY38_PLUS else ast.parse(self.source)
+        tree = ast.parse(self.source, type_comments=True)
 
         set_tree_parents(tree)  # set parents to tree
 

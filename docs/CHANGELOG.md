@@ -4,11 +4,32 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - YYYY-MM-DD
 
-## [1.2.0] - 2023-12-03
+## [1.2.0] - 2023-12-22
 
 ### Changed
 
 - Python 3.6 support dropped
+- Python 3.7 support dropped
+
+### Fixed
+
+- Improved Type Comment Analysis
+
+  > To ensure accurate type comment analysis, a crucial fix was implemented in the code.
+  > The update involves refining the process by adding a check within ast.AnnAssign and
+  > ast.arg types. Specifically, the code now includes a verification that
+  > visit_Constant occurs under an annotation, addressing unnecessary name discovery
+  > issues for better accuracy in type_comment assessment.
+
+  ```python
+  import sys
+  from typing import (
+      List,
+  )
+
+
+  test_list: List[str] = ["spam", "eggs"]  # it thought spam and eggs were a ast.Name object.
+  ```
 
 ## [1.1.0] - 2023-11-17
 

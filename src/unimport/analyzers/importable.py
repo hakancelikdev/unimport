@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import ast
-from typing import FrozenSet, List
 
 from unimport import constants as C
 from unimport import typing as T
@@ -18,17 +19,14 @@ class ImportableAnalyzer(ast.NodeVisitor):
     )
 
     def __init__(self) -> None:
-        self.importable_nodes: List[T.ASTNameType] = []  # nodes on the __all__ list
-        self.suggestions_nodes: List[T.ASTImportableT] = []  # nodes on the CFN
+        self.importable_nodes: list[ast.Constant] = []  # nodes on the __all__ list
+        self.suggestions_nodes: list[T.ASTImportableT] = []  # nodes on the CFN
 
     def traverse(self, tree):
         self.visit(tree)
 
         for node in self.importable_nodes:
-            if isinstance(node, ast.Constant):
-                Name.register(lineno=node.lineno, name=str(node.value), node=node, is_all=True)
-            elif isinstance(node, ast.Str):
-                Name.register(lineno=node.lineno, name=node.s, node=node, is_all=True)
+            Name.register(lineno=node.lineno, name=node.value, node=node, is_all=True)
 
         self.clear()
 
@@ -61,7 +59,7 @@ class ImportableAnalyzer(ast.NodeVisitor):
     def visit_Assign(self, node: ast.Assign) -> None:
         if getattr(node.targets[0], "id", None) == "__all__" and isinstance(node.value, (ast.List, ast.Tuple, ast.Set)):
             for item in node.value.elts:
-                if isinstance(item, (ast.Constant, ast.Str)):
+                if isinstance(item, ast.Constant) and isinstance(item.value, str):
                     self.importable_nodes.append(item)
 
         for target in node.targets:  # we only get assigned names
@@ -78,18 +76,18 @@ class ImportableAnalyzer(ast.NodeVisitor):
         ):
             if node.value.func.attr == "append":
                 for arg in node.value.args:
-                    if isinstance(arg, (ast.Constant, ast.Str)):
+                    if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
                         self.importable_nodes.append(arg)
 
             elif node.value.func.attr == "extend":
                 for arg in node.value.args:
                     if isinstance(arg, ast.List):
                         for item in arg.elts:
-                            if isinstance(item, (ast.Constant, ast.Str)):
+                            if isinstance(item, ast.Constant) and isinstance(item.value, str):
                                 self.importable_nodes.append(item)
 
     @classmethod
-    def get_names(cls, package: str) -> FrozenSet[str]:
+    def get_names(cls, package: str) -> frozenset[str]:
         if utils.is_std(package):
             return utils.get_dir(package)
 
@@ -106,16 +104,13 @@ class ImportableAnalyzer(ast.NodeVisitor):
                 return visitor.get_all() or visitor.get_suggestion()
         return frozenset()
 
-    def get_all(self) -> FrozenSet[str]:
+    def get_all(self) -> frozenset[str]:
         names = set()
         for node in self.importable_nodes:
-            if isinstance(node, ast.Constant):
-                names.add(node.value)
-            elif isinstance(node, ast.Str):
-                names.add(node.s)
+            names.add(node.value)
         return frozenset(names)
 
-    def get_suggestion(self) -> FrozenSet[str]:
+    def get_suggestion(self) -> frozenset[str]:
         names = set()
         for node in self.suggestions_nodes:  # type: ignore
             if isinstance(node, ast.Name):

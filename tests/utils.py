@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import os
 import tempfile
+import typing
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterator, Optional
 
 from unimport import utils
 from unimport.analyzers import MainAnalyzer
@@ -11,7 +13,7 @@ from unimport.statement import Import
 
 
 @contextmanager
-def reopenable_temp_file(content: str, newline: Optional[str] = None) -> Iterator[Path]:
+def reopenable_temp_file(content: str, newline: str | None = None) -> typing.Iterator[Path]:
     """Create a reopenable tempfile to supporting multiple reads/writes.
 
     Required to avoid file locking issues on Windows. For more
