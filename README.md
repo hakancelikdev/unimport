@@ -10,7 +10,7 @@ to cluttered, inefficient code and hello to a cleaner, more streamlined developm
 process with Unimport.
 
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/hakancelikdev/unimport/main.svg)](https://results.pre-commit.ci/latest/github/hakancelikdev/unimport/main)
-![test](https://github.com/hakancelikdev/unimport/workflows/Test/badge.svg)
+![test](https://github.com/hakancelikdev/unimport/workflows/test/badge.svg)
 
 [![Pypi](https://img.shields.io/pypi/v/unimport)](https://pypi.org/project/unimport/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/unimport)
