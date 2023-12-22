@@ -36,9 +36,7 @@ def test(arg: "List['Dict']") -> None:
 
 #### Comments
 
-**This feature is only available for python 3.8.**
-
-Imports in the example below aren't flag as unused by import.
+Imports in the example below aren't flag as unused by unimport.
 
 ```python
 from typing import Any

@@ -7,14 +7,12 @@ __all__ = (
     "FunctionT",
     "ASTImportableT",
     "ASTFunctionT",
-    "ASTNameType",
     "CFNT",
     "CSTImportT",
 )
 
 ASTImportableT = typing.Union[ast.AsyncFunctionDef, ast.Attribute, ast.ClassDef, ast.FunctionDef, ast.Name, ast.alias]
 ASTFunctionT = typing.TypeVar("ASTFunctionT", ast.FunctionDef, ast.AsyncFunctionDef)
-ASTNameType = typing.Union[ast.Name, ast.Constant]
 
 CFNT = typing.TypeVar("CFNT", ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef, ast.Name)
 CSTImportT = typing.TypeVar("CSTImportT", cst.Import, cst.ImportFrom)

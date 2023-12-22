@@ -9,8 +9,6 @@ NAMES: List[Name] = [
     Name(lineno=7, name="test_list", is_all=False),
     Name(lineno=7, name="List", is_all=False),
     Name(lineno=7, name="str", is_all=False),
-    Name(lineno=7, name="spam", is_all=False),
-    Name(lineno=7, name="eggs", is_all=False),
 ]
 IMPORTS: List[Union[Import, ImportFrom]] = [
     Import(lineno=1, column=1, name="sys", package="sys"),

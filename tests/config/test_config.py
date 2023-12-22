@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import re
 from pathlib import Path
-from typing import List
 
 import pytest
 
@@ -92,7 +93,7 @@ def test_parse_config_parse_args_config_setup_cfg():
         (["--ignore-init"], True, "ignore_init"),
     ],
 )
-def test_parse_config_parse_args(argv: List[str], expected_argv: str, attribute_name: str):
+def test_parse_config_parse_args(argv: list[str], expected_argv: str, attribute_name: str):
     parser = generate_parser()
     args = parser.parse_args(argv)
     args.disable_auto_discovery_config = True

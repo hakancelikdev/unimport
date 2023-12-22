@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v3.5.3
       - uses: actions/setup-python@v4.6.1
       - name: Check unused imports
-        uses: hakancelikdev/unimport@1.1.0
+        uses: hakancelikdev/unimport@1.2.0
         with:
           extra_args: --include src/
 ```
