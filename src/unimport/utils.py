@@ -9,7 +9,7 @@ import tokenize
 import typing
 from pathlib import Path
 
-from pathspec.patterns.gitwildmatch import GitWildMatchPattern
+from pathspec.patterns import GitWildMatchPattern
 
 import unimport.constants as C
 
