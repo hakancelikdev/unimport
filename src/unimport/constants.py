@@ -10,6 +10,7 @@ __all__ = (
     "INIT_FILE_IGNORE_REGEX",
     "PY39_PLUS",
     "PY310_PLUS",
+    "PY312_PLUS",
     "STDLIB_PATH",
     "SUBSCRIPT_TYPE_VARIABLE",
 )
@@ -27,6 +28,7 @@ AST_FUNCTION_TUPLE = (ast.FunctionDef, ast.AsyncFunctionDef)
 # CONF
 PY39_PLUS = sys.version_info >= (3, 9)
 PY310_PLUS = sys.version_info >= (3, 10)
+PY312_PLUS = sys.version_info >= (3, 12)
 
 SUBSCRIPT_TYPE_VARIABLE = frozenset(
     {
