@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 
 from unimport.analyzers.import_statement import ImportAnalyzer
-from unimport.analyzers.importable import ImportableAnalyzer
+from unimport.analyzers.importable import ImportableNameWithScopeAnalyzer
 from unimport.analyzers.name import NameAnalyzer
 from unimport.analyzers.utils import get_defined_names, set_tree_parents
 from unimport.statement import Import, ImportFrom, Name, Scope
@@ -38,7 +38,7 @@ class MainAnalyzer(ast.NodeVisitor):
 
         NameAnalyzer().traverse(tree)  # name analyzers
 
-        ImportableAnalyzer().traverse(tree)  # importable analyzers for collect in __all__
+        ImportableNameWithScopeAnalyzer().traverse(tree)  # importable analyzers for collect in __all__
 
         ImportAnalyzer(  # import analyzers
             source=self.source, include_star_import=self.include_star_import, defined_names=get_defined_names(tree)

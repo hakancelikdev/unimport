@@ -2,58 +2,27 @@ from __future__ import annotations
 
 import ast
 
-from unimport import constants as C
-from unimport import typing as T
-from unimport import utils
+import unimport.constants as C
+import unimport.typing as T
 from unimport.analyzers.decarators import generic_visit
-from unimport.analyzers.utils import first_parent_match, set_tree_parents
+from unimport.analyzers.utils import first_parent_match
+
+__all__ = (
+    "ImportableNameAnalyzer",
+    "SuggestionNameAnalyzer",
+)
+
 from unimport.statement import Name, Scope
 
-__all__ = ("ImportableAnalyzer",)
 
-
-class ImportableAnalyzer(ast.NodeVisitor):
-    __slots__ = (
-        "importable_nodes",
-        "suggestions_nodes",
-    )
+class ImportableNameAnalyzer(ast.NodeVisitor):
+    __slots__ = ("importable_nodes",)
 
     def __init__(self) -> None:
         self.importable_nodes: list[ast.Constant] = []  # nodes on the __all__ list
-        self.suggestions_nodes: list[T.ASTImportableT] = []  # nodes on the CFN
 
     def traverse(self, tree):
         self.visit(tree)
-
-        for node in self.importable_nodes:
-            Name.register(lineno=node.lineno, name=node.value, node=node, is_all=True)
-
-        self.clear()
-
-    def visit_CFN(self, node: T.CFNT) -> None:
-        Scope.add_current_scope(node)
-
-        if not first_parent_match(node, C.DEF_TUPLE):
-            self.suggestions_nodes.append(node)
-
-        self.generic_visit(node)
-
-        Scope.remove_current_scope()
-
-    visit_ClassDef = visit_CFN
-    visit_FunctionDef = visit_CFN
-    visit_AsyncFunctionDef = visit_CFN
-
-    @generic_visit
-    def visit_Import(self, node: ast.Import) -> None:
-        for alias in node.names:
-            self.suggestions_nodes.append(alias)
-
-    @generic_visit
-    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
-        if not node.names[0].name == "*":
-            for alias in node.names:
-                self.suggestions_nodes.append(alias)
 
     @generic_visit
     def visit_Assign(self, node: ast.Assign) -> None:
@@ -61,10 +30,6 @@ class ImportableAnalyzer(ast.NodeVisitor):
             for item in node.value.elts:
                 if isinstance(item, ast.Constant) and isinstance(item.value, str):
                     self.importable_nodes.append(item)
-
-        for target in node.targets:  # we only get assigned names
-            if isinstance(target, (ast.Name, ast.Attribute)):
-                self.suggestions_nodes.append(target)
 
     @generic_visit
     def visit_Expr(self, node: ast.Expr) -> None:
@@ -86,41 +51,53 @@ class ImportableAnalyzer(ast.NodeVisitor):
                             if isinstance(item, ast.Constant) and isinstance(item.value, str):
                                 self.importable_nodes.append(item)
 
-    @classmethod
-    def get_names(cls, package: str) -> frozenset[str]:
-        if utils.is_std(package):
-            return utils.get_dir(package)
 
-        source = utils.get_source(package)
-        if source:
-            try:
-                tree = ast.parse(source)
-            except SyntaxError:
-                return frozenset()
-            else:
-                visitor = cls()
-                set_tree_parents(tree)
-                visitor.visit(tree)
-                return visitor.get_all() or visitor.get_suggestion()
-        return frozenset()
+class SuggestionNameAnalyzer(ast.NodeVisitor):
+    __slots__ = ("suggestions_nodes",)
 
-    def get_all(self) -> frozenset[str]:
-        names = set()
+    def __init__(self) -> None:
+        self.suggestions_nodes: list[T.ASTImportableT] = []  # nodes on the CFN
+
+    def traverse(self, tree):
+        self.visit(tree)
+
+    @generic_visit
+    def visit_def(self, node: T.CFNT) -> None:
+        if not first_parent_match(node, C.DEF_TUPLE):
+            self.suggestions_nodes.append(node)
+
+    visit_ClassDef = visit_FunctionDef = visit_AsyncFunctionDef = visit_def
+
+    @generic_visit
+    def visit_Import(self, node: ast.Import) -> None:
+        for alias in node.names:
+            self.suggestions_nodes.append(alias)
+
+    @generic_visit
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
+        if not node.names[0].name == "*":
+            for alias in node.names:
+                self.suggestions_nodes.append(alias)
+
+    @generic_visit
+    def visit_Assign(self, node: ast.Assign) -> None:
+        for target in node.targets:  # we only get assigned names
+            if isinstance(target, (ast.Name, ast.Attribute)):
+                self.suggestions_nodes.append(target)
+
+
+class ImportableNameWithScopeAnalyzer(ImportableNameAnalyzer):
+    def traverse(self, tree):
+        super().traverse(tree)
+
         for node in self.importable_nodes:
-            names.add(node.value)
-        return frozenset(names)
+            Name.register(lineno=node.lineno, name=node.value, node=node, is_all=True)
 
-    def get_suggestion(self) -> frozenset[str]:
-        names = set()
-        for node in self.suggestions_nodes:  # type: ignore
-            if isinstance(node, ast.Name):
-                names.add(node.id)
-            elif isinstance(node, ast.alias):
-                names.add(node.asname or node.name)
-            elif isinstance(node, C.DEF_TUPLE):
-                names.add(node.name)
-        return frozenset(names)
+    def visit_def(self, node: T.CFNT) -> None:
+        Scope.add_current_scope(node)
 
-    def clear(self):
-        self.importable_nodes.clear()
-        self.suggestions_nodes.clear()
+        self.generic_visit(node)
+
+        Scope.remove_current_scope()
+
+    visit_ClassDef = visit_FunctionDef = visit_AsyncFunctionDef = visit_def

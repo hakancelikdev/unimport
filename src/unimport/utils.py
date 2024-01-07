@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import difflib
-import functools
 import importlib.machinery
 import importlib.util
 import re
 import tokenize
 import typing
+from functools import lru_cache
 from pathlib import Path
 
 from pathspec.patterns import GitWildMatchPattern
@@ -14,7 +14,7 @@ from pathspec.patterns import GitWildMatchPattern
 import unimport.constants as C
 
 __all__ = (
-    "get_dir",
+    "get_module_dir",
     "get_source",
     "get_spec",
     "is_std",
@@ -27,16 +27,16 @@ __all__ = (
 )
 
 
-@functools.lru_cache(maxsize=128)
-def get_dir(package: str) -> frozenset[str]:
+@lru_cache(maxsize=128)
+def get_module_dir(package: str) -> list[str] | None:
     try:
         module = importlib.import_module(package)
+        return dir(module)
     except (ImportError, AttributeError, TypeError, ValueError):
-        return frozenset()
-    return frozenset(dir(module))
+        return None
 
 
-@functools.lru_cache(maxsize=128)
+@lru_cache(maxsize=128)
 def get_source(package: str) -> str | None:
     spec = get_spec(package)
     if spec is not None:
@@ -48,7 +48,7 @@ def get_source(package: str) -> str | None:
     return None
 
 
-@functools.lru_cache(maxsize=128)
+@lru_cache(maxsize=128)
 def get_spec(package: str) -> importlib.machinery.ModuleSpec | None:
     try:
         return importlib.util.find_spec(package)
@@ -56,7 +56,7 @@ def get_spec(package: str) -> importlib.machinery.ModuleSpec | None:
         return None
 
 
-@functools.lru_cache(maxsize=128)
+@lru_cache(maxsize=128)
 def is_std(package: str) -> bool:
     """Returns True if package module came with from Python."""
     if package in C.BUILTIN_MODULE_NAMES:
@@ -74,7 +74,7 @@ def is_std(package: str) -> bool:
     return False
 
 
-@functools.lru_cache(maxsize=3)
+@lru_cache(maxsize=12)
 def action_to_bool(action: str) -> bool:
     """Convert a string representation of truth to true (True) or false (False).
 
@@ -160,7 +160,7 @@ def diff(*, source: str, refactor_result: str, fromfile: Path = None) -> tuple[s
     )
 
 
-@functools.lru_cache(maxsize=128)
+@lru_cache(maxsize=6)
 def return_exit_code(*, is_unused_imports: bool, is_syntax_error: bool, refactor_applied: bool) -> int:
     """If this function changes, be sure to update this page
     https://unimport.hakancelik.dev/tutorial/other-useful-features/#exit-code-

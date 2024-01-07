@@ -2,17 +2,18 @@ all: lint test clean
 
 .PHONY: dev
 dev:
-	pip install -e .[test]
-	pip install pre-commit
+	python3.10 -m venv venv
+	source venv/bin/activate; pip install pip -U; pip install -e .[test]
+	source venv/bin/activate; pip install pre-commit
 
 .PHONY: lint
 lint:
 	git add .
-	pre-commit run --all-files
+	source venv/bin/activate; pre-commit run
 
 .PHONY: test
 test:
-	pytest tests -x -v --disable-warnings
+	source venv/bin/activate; pytest tests -x -v --disable-warnings
 
 .PHONY: tox
 tox:
@@ -67,8 +68,8 @@ publish:
 
 .PHONY: docs
 docs:
-	pip install -e .[docs]
-	mkdocs serve
+	source venv/bin/activate; pip install -e .[docs]
+	source venv/bin/activate; mkdocs serve
 
 .PHONY: sync-main
 sync-main:

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import ast
 import dataclasses
-import operator
 import typing
 
 __all__ = ("Import", "ImportFrom", "Name", "Scope")
@@ -20,7 +19,7 @@ class Import:
     node: ast.Import | ast.ImportFrom = dataclasses.field(init=False, repr=False, compare=False)
 
     def __len__(self) -> int:
-        return operator.length_hint(self.name.split("."))
+        return len(self.name.split("."))
 
     def is_match_sub_packages(self, name_name: str) -> bool:
         return self.name.split(".")[0] == name_name

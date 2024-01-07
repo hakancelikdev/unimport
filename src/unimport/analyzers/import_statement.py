@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import ast
+import typing
 
+import unimport.constants as C
+from unimport import utils
 from unimport.analyzers.decarators import generic_visit, skip_import
-from unimport.analyzers.importable import ImportableAnalyzer
+from unimport.analyzers.importable import ImportableNameAnalyzer, SuggestionNameAnalyzer
+from unimport.analyzers.utils import set_tree_parents
 from unimport.statement import Import, ImportFrom, Name, Scope
 
 __all__ = ("ImportAnalyzer",)
@@ -13,8 +17,10 @@ class ImportAnalyzer(ast.NodeVisitor):
     __slots__ = (
         "source",
         "include_star_import",
-        "any_import_error",
         "defined_names",
+        "any_import_error",
+        "if_names",
+        "orelse_names",
     )
 
     IGNORE_MODULES_IMPORTS = ("__future__",)
@@ -35,16 +41,14 @@ class ImportAnalyzer(ast.NodeVisitor):
     def traverse(self, tree) -> None:
         self.visit(tree)
 
-    def scope_analysis(self, node):
+    def visit_def(self, node):
         Scope.add_current_scope(node)
 
         self.generic_visit(node)
 
         Scope.remove_current_scope()
 
-    visit_ClassDef = scope_analysis
-    visit_FunctionDef = scope_analysis
-    visit_AsyncFunctionDef = scope_analysis
+    visit_ClassDef = visit_FunctionDef = visit_AsyncFunctionDef = visit_def
 
     @generic_visit
     @skip_import
@@ -105,7 +109,35 @@ class ImportAnalyzer(ast.NodeVisitor):
 
         self.any_import_error = False
 
+    @classmethod
+    def iget_importable_name(cls, package: str) -> typing.Iterator[str]:
+        if utils.is_std(package):
+            yield from utils.get_module_dir(package)
+
+        elif source := utils.get_source(package):
+            try:
+                tree = ast.parse(source)
+            except SyntaxError:
+                pass
+            else:
+                importable_name_analyzer = ImportableNameAnalyzer()
+                importable_name_analyzer.traverse(tree)
+                if importable_name_analyzer.importable_nodes:
+                    for node in importable_name_analyzer.importable_nodes:
+                        yield node.value
+                else:
+                    suggestion_name_analyzer = SuggestionNameAnalyzer()
+                    set_tree_parents(tree)
+                    suggestion_name_analyzer.traverse(tree)
+                    for node in suggestion_name_analyzer.suggestions_nodes:  # type: ignore[assignment]
+                        if isinstance(node, ast.Name):
+                            yield node.id
+                        elif isinstance(node, ast.alias):
+                            yield node.asname or node.name
+                        elif isinstance(node, C.DEF_TUPLE):
+                            yield node.name
+
     def get_suggestions(self, package: str) -> list[str]:
         names = set(map(lambda name: name.name.split(".")[0], Name.names))
-        from_names = ImportableAnalyzer.get_names(package)
-        return sorted(from_names & (names - self.defined_names))
+        from_names = self.iget_importable_name(package)
+        return sorted(set(from_names) & (names - self.defined_names))
