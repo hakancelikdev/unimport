@@ -13,7 +13,7 @@ lint:
 
 .PHONY: test
 test:
-	source venv/bin/activate; pytest tests -x -v --disable-warnings
+	source venv/bin/activate; pytest tests -x -v --disable-warnings -vv
 
 .PHONY: tox
 tox:
