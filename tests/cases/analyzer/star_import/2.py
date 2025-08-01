@@ -1,15 +1,15 @@
-from typing import List, Union
+from typing import Union
 
 from unimport.statement import Import, ImportFrom, Name
 
 __all__ = ["NAMES", "IMPORTS", "UNUSED_IMPORTS"]
 
 
-NAMES: List[Name] = [
+NAMES: list[Name] = [
     Name(lineno=17, name="print", is_all=False),
-    Name(lineno=17, name="Grammar", is_all=False),
+    Name(lineno=17, name="AST", is_all=False),
 ]
-IMPORTS: List[Union[Import, ImportFrom]] = [
+IMPORTS: list[Union[Import, ImportFrom]] = [
     ImportFrom(
         lineno=1,
         column=1,
@@ -93,34 +93,26 @@ IMPORTS: List[Union[Import, ImportFrom]] = [
     ImportFrom(
         lineno=13,
         column=1,
-        name="lib2to3.pgen2.token",
-        package="lib2to3.pgen2.token",
+        name="ast",
+        package="ast",
         star=True,
         suggestions=[],
     ),
     ImportFrom(
         lineno=14,
         column=1,
-        name="lib2to3.pgen2.grammar",
-        package="lib2to3.pgen2.grammar",
-        star=True,
-        suggestions=["Grammar"],
+        name="AST",
+        package="ast",
+        star=False,
+        suggestions=[],
     ),
 ]
-UNUSED_IMPORTS: List[Union[Import, ImportFrom]] = [
-    ImportFrom(
-        lineno=14,
-        column=1,
-        name="lib2to3.pgen2.grammar",
-        package="lib2to3.pgen2.grammar",
-        star=True,
-        suggestions=["Grammar"],
-    ),
+UNUSED_IMPORTS: list[Union[Import, ImportFrom]] = [
     ImportFrom(
         lineno=13,
         column=1,
-        name="lib2to3.pgen2.token",
-        package="lib2to3.pgen2.token",
+        name="ast",
+        package="ast",
         star=True,
         suggestions=[],
     ),

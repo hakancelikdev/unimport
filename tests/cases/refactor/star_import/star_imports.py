@@ -1,7 +1,7 @@
 from re import match, search
-from lib2to3.pgen2.token import NAME
+from ast import AST
 
 
 print(match)
 print(search)
-print(NAME)
+print(AST)

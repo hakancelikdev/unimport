@@ -1,13 +1,13 @@
-from typing import List, Union
+from typing import Union
 
 from unimport.statement import Import, ImportFrom, Name
 
-NAMES: List[Name] = [
+NAMES: list[Name] = [
     Name(lineno=12, name="some", is_all=False),
     Name(lineno=13, name="calls", is_all=False),
     Name(lineno=16, name="after", is_all=False),
 ]
-IMPORTS: List[Union[Import, ImportFrom]] = [
+IMPORTS: list[Union[Import, ImportFrom]] = [
     Import(lineno=1, column=1, name="x", package="x"),
     Import(lineno=2, column=1, name="x.y", package="x.y"),
     Import(lineno=3, column=1, name="x.y.z", package="x.y.z"),
@@ -135,7 +135,7 @@ IMPORTS: List[Union[Import, ImportFrom]] = [
         suggestions=[],
     ),
 ]
-UNUSED_IMPORTS: List[Union[Import, ImportFrom]] = [
+UNUSED_IMPORTS: list[Union[Import, ImportFrom]] = [
     ImportFrom(
         lineno=33,
         column=5,

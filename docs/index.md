@@ -1,4 +1,4 @@
-![unimport](assets/logo/unimport.png ":size=60%")
+![unimport](assets/logo/unimport.png)
 
 **🚀 The ultimate linter and formatter for removing unused import statements in your
 code.**

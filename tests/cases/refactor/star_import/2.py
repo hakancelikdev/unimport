@@ -1,4 +1,4 @@
-from lib2to3.pgen2.grammar import Grammar
+from ast import AST
 
 
-print(Grammar)
+print(AST)
