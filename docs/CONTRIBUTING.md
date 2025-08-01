@@ -35,10 +35,10 @@ $ git rebase upstream/main
 
 ## Testing
 
-First, make sure you have at least one of the python versions py3.9, py3.10, py3.11, py3.12 and
-py3.13 If not all versions are available, after opening PR, github action will run the
-tests for each version, so you can be sure that you wrote the correct code. You can skip
-the tox step below.
+First, make sure you have at least one of the python versions py3.9, py3.10, py3.11,
+py3.12 and py3.13 If not all versions are available, after opening PR, github action
+will run the tests for each version, so you can be sure that you wrote the correct code.
+You can skip the tox step below.
 
 After typing your codes, you should run the tests by typing the following command.
 
