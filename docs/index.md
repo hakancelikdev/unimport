@@ -1,4 +1,4 @@
-![unimport](assets/logo/unimport.png ":size=60%")
+![unimport](assets/logo/unimport.png)
 
 **🚀 The ultimate linter and formatter for removing unused import statements in your
 code.**
@@ -29,5 +29,5 @@ process with Unimport.
 
 - **Documentation** https://unimport.hakancelik.dev/
 - **Issues** https://github.com/hakancelikdev/unimport/issues/
-- **Changelog** https://unimport.hakancelik.dev/1.2.1/CHANGELOG/
+- **Changelog** https://unimport.hakancelik.dev/1.3.0/CHANGELOG/
 - **Playground** https://playground-unimport.hakancelik.dev/

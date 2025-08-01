@@ -1,11 +1,11 @@
-from typing import List, Union
+from typing import Union
 
 from unimport.statement import Import, ImportFrom, Name
 
 __all__ = ["NAMES", "IMPORTS", "UNUSED_IMPORTS"]
 
 
-NAMES: List[Name] = [
+NAMES: list[Name] = [
     Name(lineno=18, name="x", is_all=False),
     Name(lineno=18, name="e", is_all=False),
     Name(lineno=18, name="u", is_all=False),
@@ -19,7 +19,7 @@ NAMES: List[Name] = [
     Name(lineno=18, name="ug", is_all=False),
     Name(lineno=18, name="yt", is_all=False),
 ]
-IMPORTS: List[Union[Import, ImportFrom]] = [
+IMPORTS: list[Union[Import, ImportFrom]] = [
     Import(lineno=1, column=1, name="x", package="x"),
     Import(lineno=1, column=2, name="x", package="x"),
     Import(lineno=1, column=3, name="yt", package="yt"),
@@ -62,7 +62,7 @@ IMPORTS: List[Union[Import, ImportFrom]] = [
         suggestions=[],
     ),
 ]
-UNUSED_IMPORTS: List[Union[Import, ImportFrom]] = [
+UNUSED_IMPORTS: list[Union[Import, ImportFrom]] = [
     ImportFrom(
         lineno=15,
         column=1,

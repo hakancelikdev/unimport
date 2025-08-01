@@ -4,8 +4,8 @@ __all__ = ("Emoji", "Color", "ColorSelect")
 
 
 class Emoji(str, enum.Enum):
-    STAR = "\U0001F929"
-    PARTYING_FACE = "\U0001F973"
+    STAR = "\U0001f929"
+    PARTYING_FACE = "\U0001f973"
 
 
 class Color(str, enum.Enum):

@@ -1,12 +1,37 @@
-name: unimport
+name: Unimport Check
 on: [push, pull_request]
+
+env:
+  PYTHON_VERSION: "3.13"
+
 jobs:
-  run:
+  unimport:
+    name: Check for unused imports
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v3.5.3
-      - uses: actions/setup-python@v4.6.1
-      - name: unimport
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          architecture: x64
+          cache: 'pip'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ env.PYTHON_VERSION }}-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ env.PYTHON_VERSION }}-
+
+      - name: Run unimport check
         uses: ./
         with:
           extra_args: --include src/
+        timeout-minutes: 5

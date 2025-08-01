@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from unimport.analyzers import MainAnalyzer
-from unimport.constants import PY310_PLUS, PY312_PLUS  # noqa using eval expression
+from unimport.constants import PY310_PLUS, PY312_PLUS, PY313_PLUS  # noqa using eval expression
 from unimport.refactor import refactor_string
 from unimport.statement import Import, Name
 from unimport.utils import list_paths
@@ -32,7 +32,11 @@ def test_cases(path: Path, logger):
 
     source = path.read_text()
     skip_if = re.search(r"# pytest.mark.skipif\((?P<condition>.*), reason: (?P<reason>.*)\)", source, re.IGNORECASE)
-    if skip_if and (condition := skip_if.group("condition")) and condition in ("not PY310_PLUS", "not PY312_PLUS"):
+    if (
+        skip_if
+        and (condition := skip_if.group("condition"))
+        and condition in ("not PY310_PLUS", "not PY312_PLUS", "not PY313_PLUS")
+    ):
         reason = skip_if.group("reason")
         pytest.mark.skipif(False, reason, allow_module_level=True)
 

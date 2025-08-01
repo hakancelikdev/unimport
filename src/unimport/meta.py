@@ -1,10 +1,8 @@
-from typing import Dict
-
 __all__ = ("MakeSingletonWithParams",)
 
 
 class MakeSingletonWithParams(type):
-    _instances: Dict = {}
+    _instances: dict = {}
 
     def __call__(cls, *args, **kwargs):
         """Returns the same instance if args and kwargs are the same,

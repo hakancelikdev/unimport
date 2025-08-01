@@ -11,6 +11,7 @@ __all__ = (
     "PY39_PLUS",
     "PY310_PLUS",
     "PY312_PLUS",
+    "PY313_PLUS",
     "STDLIB_PATH",
     "SUBSCRIPT_TYPE_VARIABLE",
 )
@@ -29,6 +30,7 @@ AST_FUNCTION_TUPLE = (ast.FunctionDef, ast.AsyncFunctionDef)
 PY39_PLUS = sys.version_info >= (3, 9)
 PY310_PLUS = sys.version_info >= (3, 10)
 PY312_PLUS = sys.version_info >= (3, 12)
+PY313_PLUS = sys.version_info >= (3, 13)
 
 SUBSCRIPT_TYPE_VARIABLE = frozenset(
     {
@@ -75,7 +77,7 @@ SUBSCRIPT_TYPE_VARIABLE = frozenset(
         "ValuesView",
         # Python >= 3.7.
         "Literal",
-        # Python >= 3.8.
+        # Python >= 3.9.
         "OrderedDict",
     }
 )

@@ -10,8 +10,8 @@ from typing import (
     Union,
     cast,
 )
-from lib2to3.pgen2.token import *
-from lib2to3.pgen2.grammar import *
+from json import *
+from json import JSONEncoder
 
 
-print(Grammar)
+print(JSONEncoder)

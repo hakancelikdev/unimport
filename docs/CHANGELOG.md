@@ -2,7 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - YYYY-MM-DD
+## [1.3.0] - 2025-08-01
+
+### Added
+
+- Python 3.13 support added
+
+### Changed
+
+- Python 3.8 support dropped
+  - Updated minimum Python version requirement from 3.8+ to 3.9+
+  - Removed Python 3.8 from CI/CD pipeline and testing environments
+  - Updated all configuration files to reflect Python 3.9+ support
+- Upgraded all package versions in use
+
+### Fixed
+
+- Replace deprecated lib2to3 imports with ast module in test cases
+  - Fixed deprecation warning in Python 3.10+ compatibility
+  - Updated test cases to use modern ast module instead of deprecated lib2to3 package
+  - All tests now pass without deprecation warnings
 
 ## [1.2.1] - 2023-12-24
 
@@ -242,7 +261,7 @@ For Python 3.7 and above
 
 ### Internal
 
-- 🔥 Build an Docker image PR #202
+- 🔥 Build Docker image PR #202
 
 ## 0.9.2
 

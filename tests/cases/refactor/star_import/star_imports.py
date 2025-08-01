@@ -1,7 +1,8 @@
 from re import match, search
-from lib2to3.pgen2.token import NAME
+from json import JSONEncoder
+from json import JSONEncoder
 
 
 print(match)
 print(search)
-print(NAME)
+print(JSONEncoder)

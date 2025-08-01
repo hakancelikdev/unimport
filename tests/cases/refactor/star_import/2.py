@@ -1,4 +1,5 @@
-from lib2to3.pgen2.grammar import Grammar
+from json import JSONEncoder
+from json import JSONEncoder
 
 
-print(Grammar)
+print(JSONEncoder)

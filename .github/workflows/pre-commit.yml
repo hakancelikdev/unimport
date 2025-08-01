@@ -1,15 +1,40 @@
-name: pre-commit
+name: Pre-commit Checks
 on: [push, pull_request]
+
+env:
+  PYTHON_VERSION: "3.13"
+
 jobs:
-  run:
+  pre-commit:
+    name: Run pre-commit checks
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v3.5.3
-      - uses: actions/setup-python@v4.6.1
-      - name: Install dependencies for pre-commit
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          architecture: x64
+          cache: 'pip'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ env.PYTHON_VERSION }}-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ env.PYTHON_VERSION }}-
+
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install tox
-      - name: pre-commit
-        run: |
-          tox -e pre-commit
+
+      - name: Run pre-commit checks
+        run: tox -e pre-commit
+        timeout-minutes: 10

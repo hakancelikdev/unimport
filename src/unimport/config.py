@@ -28,7 +28,7 @@ CONFIG_FILES: dict[str, str] = {
 }
 
 CONFIG_ANNOTATIONS_MAPPING = {
-    "sources": typing.List[Path],
+    "sources": list[Path],
     "include": str,
     "exclude": str,
     "gitignore": bool,
@@ -72,7 +72,7 @@ class Config:
     color: ColorSelect = ColorSelect.AUTO
 
     @classmethod
-    @functools.lru_cache(maxsize=None)
+    @functools.cache
     def _get_init_fields(cls):
         return [
             key
@@ -173,7 +173,7 @@ class ParseConfig:
                     cfg_context[key] = parser.getboolean(self.config_section, key)
                 elif key_type == str:
                     cfg_context[key] = value  # type: ignore
-                elif key_type == typing.List[Path]:
+                elif key_type == list[Path]:
                     cfg_context[key] = [Path(p) for p in get_config_as_list(key)]  # type: ignore
 
                 expected_key = CONFIG_LIKE_COMMANDS_MAPPING.get(key, None)

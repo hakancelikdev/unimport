@@ -124,7 +124,8 @@ class ImportAnalyzer(ast.NodeVisitor):
                 importable_name_analyzer.traverse(tree)
                 if importable_name_analyzer.importable_nodes:
                     for node in importable_name_analyzer.importable_nodes:
-                        yield node.value
+                        if isinstance(node.value, str):
+                            yield node.value
                 else:
                     suggestion_name_analyzer = SuggestionNameAnalyzer()
                     set_tree_parents(tree)

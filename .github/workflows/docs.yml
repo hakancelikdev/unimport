@@ -1,26 +1,58 @@
-name: build-docs
+name: Build Documentation
+
 on:
   push:
     tags:
       - "**"
+
+env:
+  PYTHON_VERSION: "3.13"
+
 jobs:
   build:
+    name: Build and deploy documentation
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    
     steps:
-      - uses: actions/checkout@v3.5.3
-      - uses: actions/setup-python@v4.6.1
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          python-version: "3.12"
-          architecture: "x64"
+          fetch-depth: 0
 
-      - name: Install  Dependencies
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          architecture: x64
+          cache: 'pip'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ env.PYTHON_VERSION }}-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ env.PYTHON_VERSION }}-
+
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install .[docs]
 
-      - name: Build Docs
+      - name: Configure Git
         run: |
           git config --local user.email "hakancelikdev@gmail.com"
           git config --local user.name "Hakan Celik"
-          git fetch --all
-          mike deploy ${{github.ref_name}} latest --update-aliases --push
+
+      - name: Fetch all branches
+        run: git fetch --all
+
+      - name: Deploy documentation
+        run: |
+          mike deploy ${{ github.ref_name }} latest --update-aliases --push
+        timeout-minutes: 10

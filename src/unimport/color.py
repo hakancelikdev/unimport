@@ -1,5 +1,4 @@
 import sys
-from typing import Tuple
 
 from unimport.enums import Color
 
@@ -68,7 +67,7 @@ def paint(text: str, color: Color, use_color: bool = True) -> str:
     return color.value + text + Color.RESET.value if use_color else text
 
 
-def difference(text: Tuple[str, ...], use_color: bool = True) -> str:  # pragma: no cover
+def difference(text: tuple[str, ...], use_color: bool = True) -> str:  # pragma: no cover
     lines = list(text)
     for i, line in enumerate(lines):
         if line.startswith("+++") or line.startswith("---"):
