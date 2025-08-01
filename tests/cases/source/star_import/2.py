@@ -10,8 +10,8 @@ from typing import (
     Union,
     cast,
 )
-from ast import *
-from ast import AST
+from json import *
+from json import JSONEncoder
 
 
-print(AST)
+print(JSONEncoder)
