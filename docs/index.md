@@ -29,5 +29,5 @@ process with Unimport.
 
 - **Documentation** https://unimport.hakancelik.dev/
 - **Issues** https://github.com/hakancelikdev/unimport/issues/
-- **Changelog** https://unimport.hakancelik.dev/1.2.1/CHANGELOG/
+- **Changelog** https://unimport.hakancelik.dev/1.3.0/CHANGELOG/
 - **Playground** https://playground-unimport.hakancelik.dev/
