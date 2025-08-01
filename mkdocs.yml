@@ -127,7 +127,6 @@ nav:
       - tutorial/other-useful-features.md
       - tutorial/configurations.md
       - tutorial/use-with-pre-commit.md
-      - tutorial/use-with-docker.md
       - tutorial/use-with-github-action.md
   - Contributing: CONTRIBUTING.md
   - Changelog: CHANGELOG.md

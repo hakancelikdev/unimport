@@ -261,7 +261,7 @@ For Python 3.7 and above
 
 ### Internal
 
-- 🔥 Build an Docker image PR #202
+- 🔥 Build Docker image PR #202
 
 ## 0.9.2
 
