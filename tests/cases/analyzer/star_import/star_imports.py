@@ -11,7 +11,7 @@ NAMES: list[Name] = [
     Name(lineno=10, name="print", is_all=False),
     Name(lineno=10, name="search", is_all=False),
     Name(lineno=11, name="print", is_all=False),
-    Name(lineno=11, name="AST", is_all=False),
+    Name(lineno=11, name="JSONEncoder", is_all=False),
 ]
 IMPORTS: list[Union[Import, ImportFrom]] = [
     ImportFrom(
@@ -49,16 +49,16 @@ IMPORTS: list[Union[Import, ImportFrom]] = [
     ImportFrom(
         lineno=5,
         column=1,
-        name="ast",
-        package="ast",
+        name="json",
+        package="json",
         star=True,
-        suggestions=[],
+        suggestions=["JSONEncoder"],
     ),
     ImportFrom(
         lineno=6,
         column=1,
-        name="AST",
-        package="ast",
+        name="JSONEncoder",
+        package="json",
         star=False,
         suggestions=[],
     ),
@@ -67,10 +67,10 @@ UNUSED_IMPORTS: list[Union[Import, ImportFrom]] = [
     ImportFrom(
         lineno=5,
         column=1,
-        name="ast",
-        package="ast",
+        name="json",
+        package="json",
         star=True,
-        suggestions=[],
+        suggestions=["JSONEncoder"],
     ),
     ImportFrom(
         lineno=4,

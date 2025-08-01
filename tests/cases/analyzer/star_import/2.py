@@ -7,7 +7,7 @@ __all__ = ["NAMES", "IMPORTS", "UNUSED_IMPORTS"]
 
 NAMES: list[Name] = [
     Name(lineno=17, name="print", is_all=False),
-    Name(lineno=17, name="AST", is_all=False),
+    Name(lineno=17, name="JSONEncoder", is_all=False),
 ]
 IMPORTS: list[Union[Import, ImportFrom]] = [
     ImportFrom(
@@ -93,16 +93,16 @@ IMPORTS: list[Union[Import, ImportFrom]] = [
     ImportFrom(
         lineno=13,
         column=1,
-        name="ast",
-        package="ast",
+        name="json",
+        package="json",
         star=True,
-        suggestions=[],
+        suggestions=["JSONEncoder"],
     ),
     ImportFrom(
         lineno=14,
         column=1,
-        name="AST",
-        package="ast",
+        name="JSONEncoder",
+        package="json",
         star=False,
         suggestions=[],
     ),
@@ -111,10 +111,10 @@ UNUSED_IMPORTS: list[Union[Import, ImportFrom]] = [
     ImportFrom(
         lineno=13,
         column=1,
-        name="ast",
-        package="ast",
+        name="json",
+        package="json",
         star=True,
-        suggestions=[],
+        suggestions=["JSONEncoder"],
     ),
     ImportFrom(
         lineno=1,
