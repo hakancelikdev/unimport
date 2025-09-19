@@ -12,12 +12,12 @@ jobs:
   build:
     name: Build and deploy documentation
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: write
       pages: write
       id-token: write
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,13 +29,15 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
-          cache: 'pip'
+          cache: "pip"
 
       - name: Cache pip dependencies
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ env.PYTHON_VERSION }}-${{ hashFiles('**/pyproject.toml') }}
+          key:
+            ${{ runner.os }}-pip-${{ env.PYTHON_VERSION }}-${{
+            hashFiles('**/pyproject.toml') }}
           restore-keys: |
             ${{ runner.os }}-pip-${{ env.PYTHON_VERSION }}-
 
