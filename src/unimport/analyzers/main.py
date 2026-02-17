@@ -55,16 +55,19 @@ class MainAnalyzer(ast.NodeVisitor):
 
     @staticmethod
     def _deduplicate_star_suggestions() -> None:
-        """Remove duplicate suggestions across star imports.
+        """Remove duplicate suggestions across star and explicit imports.
 
-        When multiple star imports export the same name, the last one wins
-        (matching Python's shadowing semantics).
+        When multiple imports provide the same name, the last one wins
+        (matching Python's shadowing semantics). Explicit imports also
+        claim their name so star imports don't produce duplicates.
         """
         seen: set[str] = set()
         for imp in reversed(Import.imports):
             if isinstance(imp, ImportFrom) and imp.star:
                 imp.suggestions = [s for s in imp.suggestions if s not in seen]
                 seen.update(imp.suggestions)
+            else:
+                seen.add(imp.name)
 
     @staticmethod
     def clear():

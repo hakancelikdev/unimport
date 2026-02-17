@@ -96,7 +96,7 @@ IMPORTS: list[Union[Import, ImportFrom]] = [
         name="json",
         package="json",
         star=True,
-        suggestions=["JSONEncoder"],
+        suggestions=[],
     ),
     ImportFrom(
         lineno=14,
@@ -114,7 +114,7 @@ UNUSED_IMPORTS: list[Union[Import, ImportFrom]] = [
         name="json",
         package="json",
         star=True,
-        suggestions=["JSONEncoder"],
+        suggestions=[],
     ),
     ImportFrom(
         lineno=1,
