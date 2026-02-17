@@ -44,12 +44,27 @@ class MainAnalyzer(ast.NodeVisitor):
             source=self.source, include_star_import=self.include_star_import, defined_names=get_defined_names(tree)
         ).traverse(tree)
 
+        self._deduplicate_star_suggestions()
+
         Scope.remove_current_scope()  # remove global scope
 
     def skip_file(self) -> bool:
         SKIP_FILE_REGEX = "#.*(unimport: {0,1}skip_file)"
 
         return bool(re.search(SKIP_FILE_REGEX, self.source, re.IGNORECASE))
+
+    @staticmethod
+    def _deduplicate_star_suggestions() -> None:
+        """Remove duplicate suggestions across star imports.
+
+        When multiple star imports export the same name, the last one wins
+        (matching Python's shadowing semantics).
+        """
+        seen: set[str] = set()
+        for imp in reversed(Import.imports):
+            if isinstance(imp, ImportFrom) and imp.star:
+                imp.suggestions = [s for s in imp.suggestions if s not in seen]
+                seen.update(imp.suggestions)
 
     @staticmethod
     def clear():
