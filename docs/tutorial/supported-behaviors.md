@@ -55,6 +55,29 @@ For more information
 
 ---
 
+#### TYPE_CHECKING
+
+Unimport recognizes `if TYPE_CHECKING:` blocks and skips imports inside them. These
+imports only run during static analysis and are not available at runtime, so they should
+never shadow or conflict with runtime imports.
+
+```python
+from qtpy import QtCore
+import typing as t
+
+if t.TYPE_CHECKING:
+    from PySide6 import QtCore
+
+class MyThread(QtCore.QThread):
+    pass
+```
+
+In this example, unimport correctly keeps `from qtpy import QtCore` (the runtime import)
+and ignores the `TYPE_CHECKING`-guarded import. Both `if TYPE_CHECKING:` and
+`if typing.TYPE_CHECKING:` (or any alias like `if t.TYPE_CHECKING:`) are supported.
+
+---
+
 ## All
 
 Unimport looks at the items in the `__all__` list, if it matches the imports, marks it

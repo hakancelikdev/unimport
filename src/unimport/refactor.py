@@ -207,7 +207,31 @@ class _RemoveUnusedImportTransformer(cst.CSTTransformer):
         return True
 
     def leave_If(self, original_node: cst.If, updated_node: cst.If) -> cst.BaseStatement | cst.RemovalSentinel:
+        if (
+            self._is_type_checking_if(updated_node)
+            and self._is_body_pass_only(updated_node.body)
+            and updated_node.orelse is None
+        ):
+            self._pending_lines = self._pending_lines_stack.pop()
+            return cst.RemoveFromParent()
         return self._pop_and_apply(updated_node)
+
+    @staticmethod
+    def _is_type_checking_if(node: cst.If) -> bool:
+        if isinstance(node.test, cst.Name) and node.test.value == "TYPE_CHECKING":
+            return True
+        if isinstance(node.test, cst.Attribute) and node.test.attr.value == "TYPE_CHECKING":
+            return True
+        return False
+
+    @staticmethod
+    def _is_body_pass_only(body: cst.BaseSuite) -> bool:
+        if not isinstance(body, cst.IndentedBlock):
+            return False
+        return all(
+            isinstance(stmt, cst.SimpleStatementLine) and all(isinstance(s, cst.Pass) for s in stmt.body)
+            for stmt in body.body
+        )
 
     def visit_For(self, node: cst.For) -> bool:
         self._push_pending()

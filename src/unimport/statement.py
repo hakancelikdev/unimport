@@ -17,6 +17,7 @@ class Import:
     package: str
 
     node: ast.Import | ast.ImportFrom = dataclasses.field(init=False, repr=False, compare=False)
+    is_type_checking: bool = dataclasses.field(init=False, repr=False, compare=False, default=False)
 
     def __len__(self) -> int:
         return len(self.name.split("."))
@@ -30,7 +31,10 @@ class Import:
 
     def is_used(self) -> bool:
         for name in self.scope.names:
-            if name.match_import:
+            if self.is_type_checking:
+                if name.match_2(self):
+                    return True
+            elif name.match_import:
                 if name.match_import == self:
                     return True
             elif name.match(self):
@@ -43,7 +47,11 @@ class Import:
 
         scope = name.scope
         while scope:
-            imports = [_import for _import in scope.imports if name.match_2(_import) and name.lineno > _import.lineno]
+            imports = [
+                _import
+                for _import in scope.imports
+                if name.match_2(_import) and name.lineno > _import.lineno and not _import.is_type_checking
+            ]
             scope = scope.parent
 
             if imports:
@@ -62,7 +70,7 @@ class Import:
 
     @property
     def is_duplicate(self) -> bool:
-        return [_import.name for _import in self.imports].count(self.name) > 1
+        return [_import.name for _import in self.imports if not _import.is_type_checking].count(self.name) > 1
 
     @classmethod
     def get_unused_imports(cls, *, include_star_import: bool = False) -> typing.Iterator[Import | ImportFrom]:
@@ -73,9 +81,12 @@ class Import:
                 yield imp
 
     @classmethod
-    def register(cls, *, lineno: int, column: int, name: str, package: str, node: ast.Import) -> None:
+    def register(
+        cls, *, lineno: int, column: int, name: str, package: str, node: ast.Import, is_type_checking: bool = False
+    ) -> None:
         _import = cls(lineno, column, name, package)
         _import.node = node
+        _import.is_type_checking = is_type_checking
         cls.imports.append(_import)
 
         Scope.register(_import)
@@ -104,9 +115,11 @@ class ImportFrom(Import):
         star: bool,
         suggestions: list[str],
         node: ast.ImportFrom,
+        is_type_checking: bool = False,
     ) -> None:
         _import = cls(lineno, column, name, package, star, suggestions)
         _import.node = node
+        _import.is_type_checking = is_type_checking
         cls.imports.append(_import)
 
         Scope.register(_import)
