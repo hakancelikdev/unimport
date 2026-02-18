@@ -167,9 +167,9 @@ class Name:
             sub_match = (
                 not primary_match and imp.is_match_sub_packages(self.name) and not self._has_more_specific_import(imp)
             )
-            is_match = (imp.lineno < self.lineno or self._is_deferred_usage(imp)) and (primary_match or sub_match)
+            is_match = (imp.lineno <= self.lineno or self._is_deferred_usage(imp)) and (primary_match or sub_match)
         else:
-            is_match = (imp.lineno < self.lineno or self._is_deferred_usage(imp)) and (
+            is_match = (imp.lineno <= self.lineno or self._is_deferred_usage(imp)) and (
                 self.name == imp.name or imp.is_match_sub_packages(self.name)
             )
 
