@@ -188,6 +188,47 @@ explicit import, star imports won't produce a duplicate for that name.
 
 ---
 
+## Subpackage Imports
+
+`import a.b` binds `a` in the namespace, so any reference to `a.*` relies on that
+import. Unimport recognizes this and won't remove a subpackage import when its root
+package is used in the code.
+
+```python
+import urllib.request
+
+def parse_url(url):
+    return urllib.parse.urlparse(url)
+```
+
+In this example, `import urllib.request` is kept because removing it would remove
+`urllib` from the namespace, breaking the `urllib.parse.urlparse()` call.
+
+However, when a more specific import exists, unimport correctly identifies the redundant
+one:
+
+**input**
+
+```python
+import urllib.request
+import urllib.parse
+
+urllib.parse.urlparse('http://example.com')
+```
+
+**output**
+
+```python
+import urllib.parse
+
+urllib.parse.urlparse('http://example.com')
+```
+
+Here `import urllib.parse` directly provides the needed namespace, so
+`import urllib.request` is correctly flagged as unused.
+
+---
+
 ## Scope
 
 Unimport tries to better understand whether the import is unused by performing scope
@@ -249,4 +290,36 @@ class Klass:
         import x
 
         x
+```
+
+### Deferred Execution
+
+Function and async function bodies are deferred — they only execute when called. So a
+module-level import that appears textually after a function definition is still
+available when the function runs. Unimport understands this and won't remove such
+imports.
+
+```python
+def bob():
+    print(sys.path)
+
+import sys  # kept: sys is available when bob() is called
+```
+
+This applies to regular functions, async functions, nested functions, and methods:
+
+```python
+async def fetch():
+    return aiohttp.get(url)
+
+import aiohttp  # kept
+```
+
+Class bodies execute immediately (not deferred), so the lineno check still applies:
+
+```python
+class Foo:
+    x = sys.platform
+
+import sys  # removed: class body runs before this import
 ```
