@@ -103,6 +103,18 @@ class ImportAnalyzer(ast.NodeVisitor):
             return True
         return False
 
+    @staticmethod
+    def _collect_import_names(nodes: list[ast.stmt], *, recursive: bool = True) -> set[str]:
+        names: set[str] = set()
+        for node in nodes:
+            if isinstance(node, (ast.Import, ast.ImportFrom)):
+                for alias in node.names:
+                    names.add(alias.asname or alias.name)
+            elif recursive and isinstance(node, ast.If):
+                names |= ImportAnalyzer._collect_import_names(node.body)
+                names |= ImportAnalyzer._collect_import_names(node.orelse)
+        return names
+
     def visit_If(self, if_node: ast.If) -> None:
         if self._is_type_checking_block(if_node):
             self._in_type_checking = True
@@ -113,17 +125,9 @@ class ImportAnalyzer(ast.NodeVisitor):
                 self.visit(node)
             return
 
-        self.if_names = {
-            name.asname or name.name
-            for n in filter(lambda node: isinstance(node, (ast.Import, ast.ImportFrom)), if_node.body)
-            for name in n.names  # type: ignore
-        }
+        self.if_names = self._collect_import_names(if_node.body)
 
-        self.orelse_names = {
-            name.asname or name.name
-            for n in filter(lambda node: isinstance(node, (ast.Import, ast.ImportFrom)), if_node.orelse)
-            for name in n.names  # type: ignore
-        }
+        self.orelse_names = self._collect_import_names(if_node.orelse, recursive=False)
 
         self.generic_visit(if_node)
 
