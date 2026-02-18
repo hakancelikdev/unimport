@@ -103,3 +103,18 @@ Tests in `tests/cases/` use a **three-directory convention**:
 refactoring. To add a new test case, create matching files in all three directories.
 
 The `# unimport: skip_file` comment in source files tells unimport to skip analysis.
+
+## Issue Fix Checklist
+
+When fixing a bug or implementing a feature from a GitHub issue, follow these steps in
+order:
+
+1. **Understand the issue** — read the issue, reproduce the problem, identify root cause
+2. **Create a branch** — `git checkout -b fix/<short-description>`
+3. **Implement the fix** — make the minimal code change needed
+4. **Write test cases** — create matching files in all three test directories
+   (`source/`, `analyzer/`, `refactor/`). Cover edge cases
+5. **Run tests** — `pytest tests -x -v --disable-warnings`
+6. **Run pre-commit** — `pre-commit run --all-files` (black, isort, mypy, docformatter)
+7. **Fix any linting issues** — re-run tests after fixes
+8. **Commit and push** — commit with descriptive message, push to remote

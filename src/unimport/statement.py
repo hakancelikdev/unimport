@@ -165,9 +165,7 @@ class Name:
         elif self.is_attribute:
             primary_match = ".".join(self.name.split(".")[: len(imp)]) == imp.name
             sub_match = (
-                not primary_match
-                and imp.is_match_sub_packages(self.name)
-                and not self._has_more_specific_import(imp)
+                not primary_match and imp.is_match_sub_packages(self.name) and not self._has_more_specific_import(imp)
             )
             is_match = (imp.lineno < self.lineno or self._is_deferred_usage(imp)) and (primary_match or sub_match)
         else:
