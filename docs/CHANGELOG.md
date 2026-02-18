@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.1] - 2026-02-18
+
+### Fixed
+
+- Fix false positive when import and usage are on the same semicolon-separated line
+  [#292](https://github.com/hakancelikdev/unimport/issues/292)
+- Fix nested if statement dispatch not recognized (e.g. TYPE_CHECKING inside version
+  check) [#294](https://github.com/hakancelikdev/unimport/issues/294)
+- Fix incorrect removal of runtime import shadowed by TYPE_CHECKING import
+  [#313](https://github.com/hakancelikdev/unimport/issues/313)
+- Fix import after use in function incorrectly removed
+  [#178](https://github.com/hakancelikdev/unimport/issues/178)
+- Fix subpackage import incorrectly removed when sibling subpackage is used
+  [#180](https://github.com/hakancelikdev/unimport/issues/180)
+- Fix/deduplicate clashing star import suggestions
+- Preserve comments when removing unused imports
+
 ## [1.3.0] - 2025-08-01
 
 ### Added
