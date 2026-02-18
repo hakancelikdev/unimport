@@ -140,15 +140,26 @@ class Name:
     def is_attribute(self):
         return "." in self.name
 
+    def _is_deferred_usage(self, imp: Import | ImportFrom) -> bool:
+        imp_scope = imp.scope
+        scope = self.scope
+        while scope is not None and scope != imp_scope:
+            if isinstance(scope.node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                return True
+            scope = scope.parent
+        return False
+
     def match_2(self, imp: Import | ImportFrom) -> bool:
         if self.is_all:
             is_match = self.name == imp.name
         elif self.is_attribute:
-            is_match = imp.lineno < self.lineno and (
+            is_match = (imp.lineno < self.lineno or self._is_deferred_usage(imp)) and (
                 ".".join(self.name.split(".")[: len(imp)]) == imp.name or imp.is_match_sub_packages(self.name)
             )
         else:
-            is_match = (imp.lineno < self.lineno) and (self.name == imp.name or imp.is_match_sub_packages(self.name))
+            is_match = (imp.lineno < self.lineno or self._is_deferred_usage(imp)) and (
+                self.name == imp.name or imp.is_match_sub_packages(self.name)
+            )
 
         return is_match
 
