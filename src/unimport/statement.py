@@ -23,7 +23,7 @@ class Import:
         return len(self.name.split("."))
 
     def is_match_sub_packages(self, name_name: str) -> bool:
-        return self.name.split(".")[0] == name_name
+        return self.name.split(".")[0] == name_name.split(".")[0]
 
     @property
     def scope(self):
