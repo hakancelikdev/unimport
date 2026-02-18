@@ -23,7 +23,7 @@ class Import:
         return len(self.name.split("."))
 
     def is_match_sub_packages(self, name_name: str) -> bool:
-        return self.name.split(".")[0] == name_name
+        return self.name.split(".")[0] == name_name.split(".")[0]
 
     @property
     def scope(self):
@@ -149,13 +149,25 @@ class Name:
             scope = scope.parent
         return False
 
+    def _has_more_specific_import(self, imp: Import | ImportFrom) -> bool:
+        name_parts = self.name.split(".")
+        for other_imp in Import.imports:
+            if other_imp is imp:
+                continue
+            other_parts = other_imp.name.split(".")
+            if len(other_parts) <= len(name_parts) and name_parts[: len(other_parts)] == other_parts:
+                return True
+        return False
+
     def match_2(self, imp: Import | ImportFrom) -> bool:
         if self.is_all:
             is_match = self.name == imp.name
         elif self.is_attribute:
-            is_match = (imp.lineno < self.lineno or self._is_deferred_usage(imp)) and (
-                ".".join(self.name.split(".")[: len(imp)]) == imp.name or imp.is_match_sub_packages(self.name)
+            primary_match = ".".join(self.name.split(".")[: len(imp)]) == imp.name
+            sub_match = (
+                not primary_match and imp.is_match_sub_packages(self.name) and not self._has_more_specific_import(imp)
             )
+            is_match = (imp.lineno < self.lineno or self._is_deferred_usage(imp)) and (primary_match or sub_match)
         else:
             is_match = (imp.lineno < self.lineno or self._is_deferred_usage(imp)) and (
                 self.name == imp.name or imp.is_match_sub_packages(self.name)
