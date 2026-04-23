@@ -1,0 +1,66 @@
+name: Deploy Playground
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "playground/**"
+  workflow_run:
+    workflows: ["Build Documentation"]
+    types: [completed]
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: pip install "panel>=1.4.0" unimport
+
+      - name: Build playground
+        shell: python
+        run: |
+          import subprocess
+          from pathlib import Path
+
+          subprocess.check_output([
+              "panel", "convert",
+              "playground/index.py",
+              "--to", "pyodide-worker",
+              "--out", "_playground_build",
+              "--requirements", "unimport",
+          ])
+
+          # Fix JSON serialization bug in pyodide-worker mode
+          js_file = Path("_playground_build/index.js")
+          source = js_file.read_text()
+          source = source.replace(
+              "json.loads('${msg.patch}')",
+              "json.loads(${JSON.stringify(msg.patch)})",
+          )
+          js_file.write_text(source)
+
+      - name: Deploy to gh-pages
+        run: |
+          git config --local user.email "hakancelikdev@gmail.com"
+          git config --local user.name "Hakan Celik"
+          git fetch origin gh-pages
+          git checkout gh-pages
+          rm -rf playground/
+          cp -r _playground_build/ playground/
+          git add playground/
+          git diff --cached --quiet && echo "No changes to commit" || (git commit -m "Update playground" && git push origin gh-pages)

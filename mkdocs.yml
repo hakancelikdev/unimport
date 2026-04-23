@@ -6,7 +6,7 @@ site_url: https://unimport.hakancelik.dev
 repo_url: https://github.com/hakancelikdev/unimport
 repo_name: hakancelikdev/unimport
 edit_uri: https://github.com/hakancelikdev/unimport/tree/main/docs
-copyright: Copyright &copy; 2019 - 2024 Hakan Çelik
+copyright: Copyright &copy; 2019 - 2026 Hakan Çelik
 
 markdown_extensions:
   - fenced_code
