@@ -28,4 +28,4 @@ process with Unimport.
 For more information see: https://unimport.hakancelik.dev/
 
 Try it out now using the Unimport Playground,
-https://unimport.hakancelik.dev/playground/
+https://playground-unimport.hakancelik.dev/
