@@ -1,6 +1,7 @@
 import traceback
 
 import panel as pn
+
 from unimport.analyzers import MainAnalyzer
 from unimport.refactor import refactor_string
 from unimport.statement import Import
