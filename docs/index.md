@@ -29,4 +29,4 @@ process with Unimport.
 
 - **Documentation** https://unimport.hakancelik.dev/
 - **Issues** https://github.com/hakancelikdev/unimport/issues/
-- **Changelog** https://unimport.hakancelik.dev/1.3.1/CHANGELOG/
+- **Changelog** https://unimport.hakancelik.dev/1.4.0/CHANGELOG/

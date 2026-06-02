@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2026-06-02
+
+### Added
+
+- Python 3.14 support added, including the new `except` clause syntax without
+  parentheses around exception tuples (PEP 758)
+  [#326](https://github.com/hakancelikdev/unimport/issues/326)
+
+### Changed
+
+- Raised libcst upper pin from `<=1.8.2` to `<=1.8.6` so the refactor pipeline
+  can parse and round-trip files using PEP 758 syntax
+
 ## [1.3.1] - 2026-02-18
 
 ### Fixed
