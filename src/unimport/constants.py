@@ -12,6 +12,7 @@ __all__ = (
     "PY310_PLUS",
     "PY312_PLUS",
     "PY313_PLUS",
+    "PY314_PLUS",
     "STDLIB_PATH",
     "SUBSCRIPT_TYPE_VARIABLE",
 )
@@ -31,6 +32,7 @@ PY39_PLUS = sys.version_info >= (3, 9)
 PY310_PLUS = sys.version_info >= (3, 10)
 PY312_PLUS = sys.version_info >= (3, 12)
 PY313_PLUS = sys.version_info >= (3, 13)
+PY314_PLUS = sys.version_info >= (3, 14)
 
 SUBSCRIPT_TYPE_VARIABLE = frozenset(
     {
