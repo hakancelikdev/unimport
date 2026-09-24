@@ -46,6 +46,10 @@ All notable changes to this project will be documented in this file.
 - The `--permission` prompt honours `--color`; it received the file encoding instead of
   the color setting and was always colored
   [#339](https://github.com/hakancelikdev/unimport/issues/339)
+- Files that can't be read or decoded (bad encoding declaration, invalid bytes,
+  permission errors) are reported and make the exit code 1, instead of being skipped
+  silently or crashing the whole run
+  [#340](https://github.com/hakancelikdev/unimport/issues/340)
 
 ## [1.4.0] - 2026-06-02
 

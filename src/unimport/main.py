@@ -59,21 +59,29 @@ class Main:
         try:
             analyzer.traverse()
         except SyntaxError as exc:
-            print(
-                paint(str(exc), Color.RED, self.config.use_color)
-                + " at "
-                + paint(path.as_posix(), Color.GREEN, self.config.use_color)
-            )
-            self.is_syntax_error = True
+            self.report_error(str(exc), path)
 
         try:
             yield
         finally:
             analyzer.clear()
 
+    def report_error(self, message: str, path: Path) -> None:
+        """Print an error for a file that can't be read or parsed; the exit code becomes 1."""
+        print(
+            paint(message, Color.RED, self.config.use_color)
+            + " at "
+            + paint(path.as_posix(), Color.GREEN, self.config.use_color)
+        )
+        self.is_syntax_error = True
+
     def get_results(self) -> typing.Iterator[_Result]:
         for path in self.config.get_paths():
-            source, encoding, newline = utils.read(path)
+            try:
+                source, encoding, newline = utils.read(path)
+            except utils.READ_ERRORS as exc:
+                self.report_error(str(exc), path)
+                continue
 
             with self.analysis(source, path):
                 unused_imports = list(Import.get_unused_imports(include_star_import=self.config.include_star_import))
