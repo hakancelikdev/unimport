@@ -93,3 +93,19 @@ def test_commands_in_run(mock_permission):
 
     assert main.config.remove is False
     assert main.config.permission is True
+
+
+@pytest.mark.parametrize("color, use_color", [("never", False), ("always", True)])
+def test_permission_prompt_uses_color_setting(color, use_color, monkeypatch):
+    calls = []
+
+    def fake_permission(path, use_color):
+        calls.append(use_color)
+        return False
+
+    monkeypatch.setattr("unimport.commands.permission", fake_permission)
+
+    with reopenable_temp_file("import os\n") as temp_file:
+        Main.run(["--disable-auto-discovery-config", "--permission", "--color", color, temp_file.as_posix()])
+
+    assert calls == [use_color]

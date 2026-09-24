@@ -43,6 +43,9 @@ All notable changes to this project will be documented in this file.
 - On Python 3.12+ the output showed `Emoji.STAR`, `Emoji.PARTYING_FACE` and
   `ColorSelect.AUTO` instead of their values; `--help` also listed the `--color` choices
   in upper case [#338](https://github.com/hakancelikdev/unimport/issues/338)
+- The `--permission` prompt honours `--color`; it received the file encoding instead of
+  the color setting and was always colored
+  [#339](https://github.com/hakancelikdev/unimport/issues/339)
 
 ## [1.4.0] - 2026-06-02
 
