@@ -205,10 +205,12 @@ class Name:
         cls.names.clear()
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(eq=False)
 class Scope:
     scopes: typing.ClassVar[list[Scope]] = []
     current_scope: typing.ClassVar[list[Scope]] = []
+    # Registered scope for each AST node, keyed by id(node), so lookups don't scan cls.scopes.
+    _scopes_by_node: typing.ClassVar[dict[int, Scope]] = {}
 
     node: ast.AST
 
@@ -217,6 +219,11 @@ class Scope:
     )
     parent: Scope = dataclasses.field(default=None, repr=False)
     child_scopes: set[Scope] = dataclasses.field(default_factory=set, init=False, repr=False, compare=False)
+
+    def __eq__(self, other: object) -> bool:
+        # A scope is identified by its AST node. Several Scope objects can be created for the same node (the
+        # current_scope stack and the registered one); they are the same scope.
+        return isinstance(other, Scope) and self.node is other.node
 
     def __hash__(self) -> int:
         return hash(self.node)
@@ -236,7 +243,7 @@ class Scope:
         parent = None
         scope = Scope(tree, parent)
         cls.current_scope.append(scope)
-        cls.scopes.append(scope)  # global scope added to cls.scopes
+        cls.get_previous_scope(scope)  # global scope added to cls.scopes
 
     @classmethod
     def add_current_scope(cls, node: ast.AST) -> None:
@@ -254,6 +261,7 @@ class Scope:
 
         # current nodes add to scope
         scope.current_nodes.append(current_node)
+        current_node._scope = scope  # type: ignore[union-attr]
 
         # child scopes add to scope
         if scope.parent is None:
@@ -272,11 +280,9 @@ class Scope:
 
     @classmethod
     def get_scope_by_current_node(cls, current_node: Import | ImportFrom | Name) -> Scope | None:
-        for scope in cls.scopes:
-            if current_node in scope.current_nodes:
-                return scope
-
-        return None
+        # Set by register(). Nodes are compared by identity: dataclass equality compares fields, so two different
+        # Name objects with the same line and name would be indistinguishable.
+        return getattr(current_node, "_scope", None)
 
     @property
     def names(self) -> typing.Iterator[Name]:
@@ -291,13 +297,15 @@ class Scope:
 
     @classmethod
     def get_previous_scope(cls, scope: Scope) -> Scope:
-        for _scope in cls.scopes:
-            if _scope == scope:
-                return _scope
+        registered = cls._scopes_by_node.get(id(scope.node))
+        if registered is not None:
+            return registered
 
+        cls._scopes_by_node[id(scope.node)] = scope
         cls.scopes.append(scope)
         return scope
 
     @classmethod
     def clear(cls):
         cls.scopes.clear()
+        cls._scopes_by_node.clear()
