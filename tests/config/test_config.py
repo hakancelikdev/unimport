@@ -26,6 +26,7 @@ def test_parse_config_toml_parse():
         "check": False,
         "diff": False,
         "ignore_init": False,
+        "jobs": 2,
     }
 
 
@@ -42,6 +43,7 @@ def test_parse_config_cfg_parse():
         "check": False,
         "diff": False,
         "ignore_init": False,
+        "jobs": 2,
     }
 
 
@@ -261,6 +263,30 @@ def test_like_commands_config_file():
 
     parsed_config = ParseConfig(config_file=pyproject_config_file).parse()
     assert parsed_config == {"ignore_init": True, "include_star_import": True}
+
+
+@pytest.mark.parametrize(
+    "jobs, permission, expected_jobs",
+    [
+        (1, False, 1),
+        (4, False, 4),
+        (4, True, 1),
+        (0, True, 1),
+    ],
+)
+def test_config_jobs(jobs: int, permission: bool, expected_jobs: int):
+    assert Config(jobs=jobs, permission=permission).jobs == expected_jobs
+
+
+def test_config_jobs_zero_uses_all_cpus(monkeypatch):
+    monkeypatch.setattr("os.cpu_count", lambda: 8)
+
+    assert Config(jobs=0).jobs == 8
+
+
+def test_config_jobs_negative():
+    with pytest.raises(ValueError):
+        Config(jobs=-1)
 
 
 @pytest.mark.parametrize("config_file", ["pyproject.toml", "setup.cfg"])

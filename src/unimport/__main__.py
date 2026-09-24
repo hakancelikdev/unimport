@@ -4,7 +4,7 @@ def main():
     from unimport.main import Main
 
     main = Main.run()
-    if not main.is_unused_imports and main.config.check:
+    if not main.is_unused_imports and main.config.check and not main.is_json:
         print(
             paint(
                 f"{Emoji.STAR} Congratulations there is no unused import in your project. {Emoji.STAR}",

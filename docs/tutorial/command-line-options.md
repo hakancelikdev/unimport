@@ -1,8 +1,8 @@
 You can list many options by running unimport --help
 
 ```bash
-usage: unimport [-h] [--color {auto,always,never}] [--check] [-c PATH] [--disable-auto-discovery-config] [--include include] [--exclude exclude] [--gitignore] [--ignore-init]
-                [--include-star-import] [-d] [-r | -p] [-v]
+usage: unimport [-h] [--color {auto,always,never}] [--check] [--format {text,json}] [-c PATH] [--disable-auto-discovery-config] [--include include] [--exclude exclude] [--gitignore] [--ignore-init]
+                [--include-star-import] [-d] [-j N] [-r | -p] [-v]
                 [sources ...]
 
 A linter, formatter for finding and removing unused import statements.
@@ -15,6 +15,7 @@ options:
   --color {auto,always,never}
                         Select whether to use color in the output. Defaults to `auto`.
   --check               Prints which file the unused imports are in.
+  --format {text,json}  Output format. `json` prints one JSON document for tools and implies --check. Defaults to `text`.
   -c PATH, --config PATH
                         Read configuration from PATH.
   --disable-auto-discovery-config
@@ -26,6 +27,7 @@ options:
   --include-star-import
                         Include star imports during scanning and refactor.
   -d, --diff            Prints a diff of all the changes unimport would make to a file.
+  -j N, --jobs N        Number of processes to analyze files in parallel; 0 uses all CPUs. Defaults to `1`.
   -r, --remove          Remove unused imports automatically.
   -p, --permission      Refactor permission after see diff.
   -v, --version         Prints version of unimport
@@ -59,6 +61,38 @@ You can give as many file or directory paths as you want.
 - `$ unimport --check`
 - `$ unimport --check --diff`
 - `$ unimport --check --remove`
+
+---
+
+## Format
+
+> (optional: default `text`) choices: (text, json)
+
+`json` prints one JSON document instead of text lines, for editors, CI annotations and
+other tools. It implies `--check` and can't be combined with `--diff`, `--remove` or
+`--permission`.
+
+```json
+{
+  "unused_imports": [
+    {
+      "path": "src/app.py",
+      "line": 1,
+      "name": "os",
+      "package": "os",
+      "star": false,
+      "suggestions": []
+    }
+  ],
+  "errors": [
+    { "path": "src/broken.py", "message": "invalid syntax (<unknown>, line 1)" }
+  ]
+}
+```
+
+**Usage**
+
+- `$ unimport --format json`
 
 ---
 
@@ -156,6 +190,24 @@ Ignore the **init**.py file.
 
 - `$ unimport -d`
 - `$ unimport --diff`
+
+---
+
+## Jobs
+
+> (optional: default `1`) Number of processes used to analyze files in parallel.
+
+Unimport's work is CPU-bound, so on large projects running several processes makes it
+noticeably faster. `0` uses one process per CPU. Output is printed in the same order as
+a sequential run, and files are changed by the main process only.
+
+`--permission` asks for confirmation file by file, so it always runs with a single
+process. For a handful of files, starting processes can cost more than it saves.
+
+**Usage**
+
+- `$ unimport -j 4`
+- `$ unimport --jobs 0`
 
 ---
 
