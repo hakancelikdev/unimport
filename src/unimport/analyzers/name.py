@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import ast
 import contextlib
 
 from unimport import constants as C
 from unimport import typing as T
 from unimport.analyzers.decarators import generic_visit
-from unimport.analyzers.utils import first_parent_match, set_tree_parents
+from unimport.analyzers.utils import get_parents, set_tree_parents
 from unimport.statement import Name, Scope
 
 __all__ = ("NameAnalyzer",)
@@ -32,15 +34,70 @@ class NameAnalyzer(ast.NodeVisitor):
 
     @generic_visit
     def visit_Constant(self, node: ast.Constant) -> None:
-        if isinstance(node.value, str):
-            if (first_annassign_or_arg := first_parent_match(node, (ast.AnnAssign, ast.arg))) and isinstance(
-                first_annassign_or_arg.annotation, ast.Constant
-            ):
-                self.join_visit(node.value, node)
-            elif (
-                first_func_parent := first_parent_match(node, *C.AST_FUNCTION_TUPLE)
-            ) and first_func_parent.returns is node:
-                self.join_visit(node.value, node)
+        if isinstance(node.value, str) and not self._is_typing_subscript_slice(node) and self._is_type_expression(node):
+            self.join_visit(node.value, node)
+
+    @staticmethod
+    def _subscript_name(node: ast.Subscript) -> str | None:
+        if isinstance(node.value, ast.Name):
+            return node.value.id
+        if isinstance(node.value, ast.Attribute):
+            return node.value.attr
+        return None
+
+    @classmethod
+    def _is_typing_subscript_slice(cls, node: ast.Constant) -> bool:
+        """Strings that visit_Subscript already parses."""
+        parent = node.parent  # type: ignore
+        if isinstance(parent, ast.Tuple):
+            parent = parent.parent  # type: ignore
+        return isinstance(parent, ast.Subscript) and (
+            (
+                isinstance(parent.value, ast.Attribute)
+                and isinstance(parent.value.value, ast.Name)
+                and parent.value.value.id == "typing"
+            )
+            or (isinstance(parent.value, ast.Name) and parent.value.id in C.SUBSCRIPT_TYPE_VARIABLE)
+        )
+
+    @classmethod
+    def _is_type_expression(cls, node: ast.AST) -> bool:
+        """Whether a string constant is written where a type is expected.
+
+        That is inside an annotation, a return annotation, the value of
+        an ``X: TypeAlias = ...`` or a string that was itself parsed as a
+        type. ``Literal[...]`` values and ``Annotated[...]`` metadata are
+        not types.
+        """
+        child = node
+        for parent in get_parents(node):
+            if isinstance(parent, ast.Subscript) and child is parent.slice:
+                name = cls._subscript_name(parent)
+                if name == "Literal":
+                    return False
+            elif isinstance(parent, ast.Tuple) and isinstance(parent.parent, ast.Subscript):  # type: ignore
+                if cls._subscript_name(parent.parent) == "Annotated" and child is not parent.elts[0]:  # type: ignore
+                    return False
+            elif isinstance(parent, (ast.Expression, ast.FunctionType)):  # a string parsed by join_visit
+                return True
+            elif isinstance(parent, ast.arg):
+                return child is parent.annotation
+            elif isinstance(parent, ast.AnnAssign):
+                if child is parent.annotation:
+                    return True
+                return child is parent.value and cls._is_type_alias_annotation(parent.annotation)
+            elif isinstance(parent, C.AST_FUNCTION_TUPLE):
+                return child is parent.returns
+            elif isinstance(parent, (ast.stmt, ast.Lambda)):
+                return False
+            child = parent
+        return False
+
+    @staticmethod
+    def _is_type_alias_annotation(annotation: ast.expr) -> bool:
+        return (isinstance(annotation, ast.Name) and annotation.id == "TypeAlias") or (
+            isinstance(annotation, ast.Attribute) and annotation.attr == "TypeAlias"
+        )
 
     @generic_visit
     def visit_Name(self, node: ast.Name) -> None:
@@ -103,6 +160,13 @@ class NameAnalyzer(ast.NodeVisitor):
         ):
             if isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str):
                 self.join_visit(node.args[0].value, node.args[0])
+        elif (isinstance(node.func, ast.Name) and node.func.id == "TypeVar") or (
+            isinstance(node.func, ast.Attribute) and node.func.attr == "TypeVar"
+        ):
+            # TypeVar("T", "A", "B", bound="C"): constraints and bound are types, the first argument is the name.
+            for arg in [*node.args[1:], *(keyword.value for keyword in node.keywords if keyword.arg == "bound")]:
+                if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+                    self.join_visit(arg.value, arg)
 
     def join_visit(self, value: str, node: ast.AST, *, mode: str = "eval") -> None:
         """A function that parses the value, copies locations from the node and
