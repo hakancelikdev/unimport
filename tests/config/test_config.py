@@ -287,3 +287,44 @@ def test_config_jobs_zero_uses_all_cpus(monkeypatch):
 def test_config_jobs_negative():
     with pytest.raises(ValueError):
         Config(jobs=-1)
+
+
+@pytest.mark.parametrize("config_file", ["pyproject.toml", "setup.cfg"])
+def test_per_file_ignores_config(config_file: str):
+    config_context = ParseConfig(TEST_DIR / "per-file-ignores" / config_file).parse()
+    config = Config.build(config_context=config_context)
+
+    assert config.per_file_ignores == {
+        "__init__.py": ["*"],
+        "tests/conftest.py": ["pytest_plugins", "fixtures.*"],
+    }
+
+
+@pytest.mark.parametrize(
+    "path, import_name, expected",
+    [
+        ("__init__.py", "os", True),
+        ("pkg/sub/__init__.py", "anything.at.all", True),
+        ("pkg/module.py", "os", False),
+        ("tests/conftest.py", "pytest_plugins", True),
+        ("tests/conftest.py", "fixtures.db", True),
+        ("tests/conftest.py", "json", False),
+        ("other/tests/conftest.py", "pytest_plugins", False),  # a pattern with "/" matches the whole path
+    ],
+)
+def test_is_ignored_import(path: str, import_name: str, expected: bool):
+    config = Config(
+        per_file_ignores={"__init__.py": ["*"], "tests/conftest.py": ["pytest_plugins", "fixtures.*"]},
+    )
+
+    assert config.is_ignored_import(Path(path), import_name) is expected
+
+
+def test_per_file_ignores_accepts_comma_separated_string():
+    assert Config(per_file_ignores={"a.py": "os, sys"}).per_file_ignores == {"a.py": ["os", "sys"]}
+
+
+@pytest.mark.parametrize("value", [["os"], {"a.py": [1]}])
+def test_per_file_ignores_invalid(value):
+    with pytest.raises(ValueError):
+        Config(per_file_ignores=value)

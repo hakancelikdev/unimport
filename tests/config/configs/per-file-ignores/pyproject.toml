@@ -1,0 +1,2 @@
+[tool.unimport]
+per-file-ignores = { "__init__.py" = ["*"], "tests/conftest.py" = ["pytest_plugins", "fixtures.*"] }

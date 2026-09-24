@@ -42,6 +42,29 @@ ignore_init = true
 jobs = 4
 ```
 
+## Per-file ignores
+
+Keep specific imports in specific files, while the rest of each file is still checked.
+Keys are file patterns: a pattern without `/` matches the file name in any directory
+(`__init__.py`), otherwise the whole path (`src/*/conftest.py`). Values are import-name
+patterns (`fnmatch`); matching imports are never reported or removed.
+
+**pyproject.toml**
+
+```toml
+[tool.unimport]
+per-file-ignores = { "__init__.py" = ["*"], "tests/conftest.py" = ["pytest_plugins", "fixtures.*"] }
+```
+
+**setup.cfg**
+
+```ini
+[unimport]
+per-file-ignores =
+    __init__.py: *
+    tests/conftest.py: pytest_plugins, fixtures.*
+```
+
 ## Manage like CLI in configuration
 
 ```ini

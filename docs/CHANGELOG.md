@@ -12,6 +12,9 @@ All notable changes to this project will be documented in this file.
 - `--format json` (and `format` config key) prints unused imports and errors as one JSON
   document for editors, CI and other tools
   [#342](https://github.com/hakancelikdev/unimport/issues/342)
+- `per-file-ignores` configuration to keep matching imports in matching files (e.g.
+  re-exports in `__init__.py`) while still checking the rest
+  [#343](https://github.com/hakancelikdev/unimport/issues/343)
 
 ### Changed
 

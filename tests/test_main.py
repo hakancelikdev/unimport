@@ -249,3 +249,32 @@ def test_json_format_with_jobs_and_unreadable_file(tmp_path: Path, capsys):
     assert [imp["name"] for imp in report["unused_imports"]] == ["os"]
     assert [error["path"] for error in report["errors"]] == [(tmp_path / "b.py").as_posix()]
     assert main.exit_code() == 1
+
+
+def test_per_file_ignores(tmp_path: Path, capsys):
+    (tmp_path / "pkg").mkdir()
+    (tmp_path / "pkg" / "__init__.py").write_text("from .core import Api\n")
+    (tmp_path / "pkg" / "conftest.py").write_text("import json\nimport fixtures.db\n")
+    config = tmp_path / "pyproject.toml"
+    config.write_text('[tool.unimport]\nper-file-ignores = { "__init__.py" = ["*"], "conftest.py" = ["fixtures.*"] }\n')
+
+    main = Main.run(["--config", config.as_posix(), "--check", "--color", "never", (tmp_path / "pkg").as_posix()])
+    output = capsys.readouterr().out
+
+    assert "json at" in output
+    assert "fixtures.db" not in output
+    assert "Api" not in output
+    assert main.is_unused_imports is True
+
+
+@pytest.mark.parametrize("jobs", ["1", "2"])
+def test_per_file_ignores_are_not_removed(tmp_path: Path, jobs: str):
+    (tmp_path / "__init__.py").write_text("from .core import Api\nimport os\n")
+    (tmp_path / "module.py").write_text("import os\n")
+    config = tmp_path / "pyproject.toml"
+    config.write_text('[tool.unimport]\nper-file-ignores = { "__init__.py" = ["Api"] }\n')
+
+    Main.run(["--config", config.as_posix(), "--remove", "--jobs", jobs, tmp_path.as_posix()])
+
+    assert (tmp_path / "__init__.py").read_text() == "from .core import Api\n"
+    assert "import os" not in (tmp_path / "module.py").read_text()  # not covered by the ignore, so removed

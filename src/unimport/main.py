@@ -31,7 +31,13 @@ class _Result:
     read_error: str | None = None  # the file could not be read; nothing else is set
 
 
-def _analyze_path(path: Path, *, include_star_import: bool, refactor: bool) -> _Result:
+def _analyze_path(
+    path: Path,
+    *,
+    include_star_import: bool,
+    refactor: bool,
+    is_ignored_import: typing.Callable[[Path, str], bool] | None = None,
+) -> _Result:
     """Analyze a single file.
 
     This runs in a worker process when ``--jobs`` is greater than one,
@@ -54,7 +60,12 @@ def _analyze_path(path: Path, *, include_star_import: bool, refactor: bool) -> _
         syntax_error = str(exc)
 
     try:
-        unused_imports = list(Import.get_unused_imports(include_star_import=include_star_import))
+        unused_imports = [
+            imp
+            for imp in Import.get_unused_imports(include_star_import=include_star_import)
+            # per-file-ignores; filtered before refactoring so ignored imports are never removed
+            if not (is_ignored_import and is_ignored_import(path, imp.name))
+        ]
     finally:
         analyzer.clear()
 
@@ -101,6 +112,7 @@ class Main:
             _analyze_path,
             include_star_import=self.config.include_star_import,
             refactor=self.config.diff or self.config.remove,
+            is_ignored_import=self.config.is_ignored_import,
         )
         paths = list(self.config.get_paths())
         jobs = min(self.config.jobs, len(paths))
