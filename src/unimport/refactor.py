@@ -105,12 +105,16 @@ class _RemoveUnusedImportTransformer(cst.CSTTransformer):
 
     def leave_ImportFrom(self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom) -> cst.ImportFrom:
         if isinstance(updated_node.names, cst.ImportStar):
+            if updated_node.relative:
+                # Names of a relative module can't be resolved, so there are no suggestions to replace it with and
+                # removing it could drop names that are used.
+                return original_node
 
             def get_star_imp() -> ImportFrom | None:
                 if isinstance(updated_node.module, cst.Attribute):
                     import_name = self.get_import_name_from_attr(attr_node=updated_node.module)
                 else:
-                    import_name = updated_node.module.value
+                    import_name = cst.ensure_type(updated_node.module, cst.Name).value
                 location = self.get_location(original_node)
                 for imp in self.unused_imports:
                     if isinstance(imp, ImportFrom) and imp.name == import_name and imp.lineno == location.start.line:
