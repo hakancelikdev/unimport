@@ -19,8 +19,7 @@ class ImportAnalyzer(ast.NodeVisitor):
         "include_star_import",
         "defined_names",
         "any_import_error",
-        "if_names",
-        "orelse_names",
+        "if_dispatch_names",
         "_in_type_checking",
     )
 
@@ -36,8 +35,8 @@ class ImportAnalyzer(ast.NodeVisitor):
 
         self.any_import_error = False
 
-        self.if_names: set[str] = set()
-        self.orelse_names: set[str] = set()
+        # Names imported in both the body and the else branch of each enclosing ``if`` (version/platform dispatch).
+        self.if_dispatch_names: list[set[str]] = []
         self._in_type_checking: bool = False
 
     def traverse(self, tree) -> None:
@@ -59,7 +58,7 @@ class ImportAnalyzer(ast.NodeVisitor):
             name = alias.asname or alias.name
             if self.is_explicit_reexport(alias):
                 continue
-            if name in self.IGNORE_IMPORT_NAMES or (name in self.if_names and name in self.orelse_names):
+            if name in self.IGNORE_IMPORT_NAMES or self.is_if_dispatch(name):
                 continue
 
             Import.register(
@@ -84,7 +83,7 @@ class ImportAnalyzer(ast.NodeVisitor):
             name = package if is_star else (alias.asname or alias.name)
             if self.is_explicit_reexport(alias):
                 continue
-            if name in self.IGNORE_IMPORT_NAMES or (name in self.if_names and name in self.orelse_names):
+            if name in self.IGNORE_IMPORT_NAMES or self.is_if_dispatch(name):
                 continue
 
             ImportFrom.register(
@@ -134,14 +133,17 @@ class ImportAnalyzer(ast.NodeVisitor):
                 self.visit(node)
             return
 
-        self.if_names = self._collect_import_names(if_node.body)
+        if_names = self._collect_import_names(if_node.body)
+        orelse_names = self._collect_import_names(if_node.orelse, recursive=False)
 
-        self.orelse_names = self._collect_import_names(if_node.orelse, recursive=False)
+        self.if_dispatch_names.append(if_names & orelse_names)
+        try:
+            self.generic_visit(if_node)
+        finally:
+            self.if_dispatch_names.pop()
 
-        self.generic_visit(if_node)
-
-        self.if_names = set()
-        self.orelse_names = set()
+    def is_if_dispatch(self, name: str) -> bool:
+        return any(name in names for names in self.if_dispatch_names)
 
     def visit_Try(self, node: ast.Try) -> None:
         self.any_import_error = True
@@ -149,6 +151,10 @@ class ImportAnalyzer(ast.NodeVisitor):
         self.generic_visit(node)
 
         self.any_import_error = False
+
+    def visit_TryStar(self, node: ast.AST) -> None:
+        # try / except* (Python 3.11+). ast.TryStar does not exist before 3.11, hence the broad annotation.
+        self.visit_Try(node)  # type: ignore[arg-type]
 
     @classmethod
     def iget_importable_name(cls, package: str) -> typing.Iterator[str]:
