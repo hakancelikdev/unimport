@@ -141,7 +141,9 @@ class ImportAnalyzer(ast.NodeVisitor):
 
         self.any_import_error = False
 
-    visit_TryStar = visit_Try  # try / except* (Python 3.11+)
+    def visit_TryStar(self, node: ast.AST) -> None:
+        # try / except* (Python 3.11+). ast.TryStar does not exist before 3.11, hence the broad annotation.
+        self.visit_Try(node)  # type: ignore[arg-type]
 
     @classmethod
     def iget_importable_name(cls, package: str) -> typing.Iterator[str]:
