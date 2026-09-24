@@ -146,11 +146,15 @@ class ImportAnalyzer(ast.NodeVisitor):
         return any(name in names for names in self.if_dispatch_names)
 
     def visit_Try(self, node: ast.Try) -> None:
-        self.any_import_error = True
-
-        self.generic_visit(node)
-
-        self.any_import_error = False
+        # Imports guarded by an except handler are usually optional-dependency fallbacks, so they are left alone.
+        # try/finally without a handler guards nothing. Restore the previous value so a nested try does not
+        # clear the enclosing one's state.
+        previous = self.any_import_error
+        self.any_import_error = previous or bool(node.handlers)
+        try:
+            self.generic_visit(node)
+        finally:
+            self.any_import_error = previous
 
     def visit_TryStar(self, node: ast.AST) -> None:
         # try / except* (Python 3.11+). ast.TryStar does not exist before 3.11, hence the broad annotation.

@@ -28,6 +28,9 @@ All notable changes to this project will be documented in this file.
   scope, or bound locally in the function that uses it (parameter, assignment, loop
   target, import, …). Assignment targets no longer count as uses
   [#335](https://github.com/hakancelikdev/unimport/issues/335)
+- Imports inside a `try` block without an `except` handler (`try` / `finally`) are
+  checked again, and a nested `try` no longer clears the protection of the enclosing one
+  [#336](https://github.com/hakancelikdev/unimport/issues/336)
 
 ## [1.4.0] - 2026-06-02
 
