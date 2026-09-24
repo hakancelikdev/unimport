@@ -1,3 +1,4 @@
+from pathlib import Path
 from textwrap import dedent
 from unittest import mock
 
@@ -122,4 +123,61 @@ def test_unreadable_files_are_reported(tmp_path, capsys):
     assert "unknown encoding" in output and "bad_encoding.py" in output
     assert "can't decode" in output and "bad_bytes.py" in output
     assert "sys at" in output  # the other files are still checked
+    assert main.exit_code() == 1
+
+
+def _write_sources(directory: Path) -> list[Path]:
+    sources = {
+        "a.py": "import os\nimport sys\n\nprint(sys)\n",
+        "b.py": "import re  # comment\nfrom typing import List, Dict\n\nx: List[int] = []\n",
+        "c.py": "import json\n\njson.dumps({})\n",
+        "d.py": "import ast\ndef broken(:\n",
+    }
+    paths = []
+    for name, source in sources.items():
+        path = directory / name
+        path.write_text(source)
+        paths.append(path)
+    return paths
+
+
+@pytest.mark.parametrize("command", ["--check", "--diff"])
+def test_jobs_output_matches_sequential(tmp_path: Path, capsys, command: str):
+    _write_sources(tmp_path)
+    argv = ["--disable-auto-discovery-config", command, "--color", "never", tmp_path.as_posix()]
+
+    sequential = Main.run([*argv, "--jobs", "1"])
+    sequential_output = capsys.readouterr().out
+
+    parallel = Main.run([*argv, "--jobs", "2"])
+    parallel_output = capsys.readouterr().out
+
+    assert parallel_output == sequential_output
+    assert "os at" in parallel_output or "-import os" in parallel_output
+    assert (parallel.is_unused_imports, parallel.is_syntax_error) == (True, True)
+    assert parallel.exit_code() == sequential.exit_code() == 1
+
+
+def test_jobs_remove(tmp_path: Path):
+    paths = _write_sources(tmp_path)
+
+    main = Main.run(["--disable-auto-discovery-config", "--remove", "--jobs", "2", tmp_path.as_posix()])
+
+    assert main.refactor_applied is True
+    assert paths[0].read_text() == "import sys\n\nprint(sys)\n"
+    assert paths[1].read_text() == "from typing import List\n\nx: List[int] = []\n"
+    assert paths[2].read_text() == "import json\n\njson.dumps({})\n"
+
+
+def test_jobs_report_unreadable_files(tmp_path: Path, capsys):
+    (tmp_path / "bad_bytes.py").write_bytes(b'import os\nx = "\xff"\n')
+    (tmp_path / "good.py").write_text("import sys\n")
+
+    main = Main.run(
+        ["--disable-auto-discovery-config", "--check", "--color", "never", "--jobs", "2", tmp_path.as_posix()]
+    )
+    output = capsys.readouterr().out
+
+    assert "can't decode" in output and "bad_bytes.py" in output
+    assert "sys at" in output
     assert main.exit_code() == 1

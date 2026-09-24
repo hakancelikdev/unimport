@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- `-j/--jobs` option (and `jobs` config key) to analyze files in parallel processes; `0`
+  uses all CPUs. `--permission` always runs with a single process
+  [#293](https://github.com/hakancelikdev/unimport/issues/293)
+
 ### Changed
 
 - Scopes are looked up by identity instead of by comparing fields, which removes a

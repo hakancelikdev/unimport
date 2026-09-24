@@ -5,6 +5,7 @@ import configparser
 import contextlib
 import dataclasses
 import functools
+import os
 import sys
 import typing
 from ast import literal_eval
@@ -39,6 +40,7 @@ CONFIG_ANNOTATIONS_MAPPING = {
     "check": bool,
     "ignore_init": bool,
     "color": str,
+    "jobs": int,
     #
     "include-star-import": bool,
     "ignore-init": bool,
@@ -70,6 +72,7 @@ class Config:
     check: bool = False
     ignore_init: bool = False
     color: ColorSelect = ColorSelect.AUTO
+    jobs: int = 1
 
     @classmethod
     @functools.cache
@@ -87,6 +90,7 @@ class Config:
         self.diff = self.diff or self.permission
         self.remove = self.remove or not any((self.diff, self.check))
         self.use_color = self.is_use_color(self.color)
+        self.jobs = self.get_jobs(self.jobs, permission=self.permission)
 
         if self.gitignore:
             self.gitignore_patterns = utils.get_exclude_list_from_gitignore()
@@ -102,6 +106,16 @@ class Config:
                 exclude=self.exclude,
                 gitignore_patterns=self.gitignore_patterns,
             )
+
+    @staticmethod
+    def get_jobs(jobs: int, *, permission: bool = False) -> int:
+        if jobs < 0:
+            raise ValueError(f"jobs must be 0 or a positive number, got {jobs}")
+        if permission:  # asks for confirmation file by file
+            return 1
+        if jobs == 0:
+            return os.cpu_count() or 1
+        return jobs
 
     @classmethod
     def get_color_choices(cls) -> list[str]:
@@ -173,6 +187,8 @@ class ParseConfig:
                     cfg_context[key] = parser.getboolean(self.config_section, key)
                 elif key_type == str:
                     cfg_context[key] = value  # type: ignore
+                elif key_type == int:
+                    cfg_context[key] = parser.getint(self.config_section, key)
                 elif key_type == list[Path]:
                     cfg_context[key] = [Path(p) for p in get_config_as_list(key)]  # type: ignore
 
