@@ -34,6 +34,9 @@ All notable changes to this project will be documented in this file.
 - `# noqa` comments for other codes (e.g. `# noqa: E501`) no longer skip the import; a
   bare `# noqa` and `# noqa: F401` still do
   [#337](https://github.com/hakancelikdev/unimport/issues/337)
+- On Python 3.12+ the output showed `Emoji.STAR`, `Emoji.PARTYING_FACE` and
+  `ColorSelect.AUTO` instead of their values; `--help` also listed the `--color` choices
+  in upper case [#338](https://github.com/hakancelikdev/unimport/issues/338)
 
 ## [1.4.0] - 2026-06-02
 
