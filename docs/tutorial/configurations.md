@@ -23,6 +23,7 @@ check = true
 diff = true
 include_star_import = true
 ignore_init = true
+jobs = 4
 ```
 
 **setup.cfg**
@@ -38,6 +39,7 @@ check = true
 diff = true
 include_star_import = true
 ignore_init = true
+jobs = 4
 ```
 
 ## Manage like CLI in configuration

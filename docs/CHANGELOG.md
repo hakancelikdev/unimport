@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- `-j/--jobs` option (and `jobs` config key) to analyze files in parallel processes; `0`
+  uses all CPUs. `--permission` always runs with a single process
+  [#293](https://github.com/hakancelikdev/unimport/issues/293)
+
 ## [1.4.0] - 2026-06-02
 
 ### Added
@@ -12,8 +20,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Raised libcst upper pin from `<=1.8.2` to `<=1.8.6` so the refactor pipeline
-  can parse and round-trip files using PEP 758 syntax
+- Raised libcst upper pin from `<=1.8.2` to `<=1.8.6` so the refactor pipeline can parse
+  and round-trip files using PEP 758 syntax
 
 ## [1.3.1] - 2026-02-18
 
