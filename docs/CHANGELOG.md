@@ -20,6 +20,10 @@ All notable changes to this project will be documented in this file.
   [#332](https://github.com/hakancelikdev/unimport/issues/332)
 - Explicit re-exports (`import X as X`, `from m import X as X`, PEP 484) are no longer
   reported or removed [#333](https://github.com/hakancelikdev/unimport/issues/333)
+- `from . import *` and `from . import x` no longer report the package as `.None`, and
+  refactoring with `--include-star-import` no longer crashes on `from . import *`;
+  relative star imports are left unchanged since their names can't be resolved
+  [#334](https://github.com/hakancelikdev/unimport/issues/334)
 
 ## [1.4.0] - 2026-06-02
 

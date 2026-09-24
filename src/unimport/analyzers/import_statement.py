@@ -76,7 +76,7 @@ class ImportAnalyzer(ast.NodeVisitor):
         is_star = node.names[0].name == "*"
 
         for column, alias in enumerate(node.names):
-            package = node.module if not node.level else "." * node.level + str(node.module) or ""
+            package = "." * node.level + (node.module or "")  # `from . import x` has no module
             if (package in self.IGNORE_MODULES_IMPORTS) or (is_star and not self.include_star_import):
                 return
 
