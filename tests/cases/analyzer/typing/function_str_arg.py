@@ -8,7 +8,6 @@ __all__ = ["NAMES", "IMPORTS", "UNUSED_IMPORTS"]
 NAMES: list[Name] = [
     Name(lineno=4, name="Dict", is_all=False),
     Name(lineno=4, name="Literal", is_all=False),
-    Name(lineno=4, name="Dict", is_all=False),
 ]
 IMPORTS: list[Union[Import, ImportFrom]] = [
     ImportFrom(
