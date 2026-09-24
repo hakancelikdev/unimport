@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from textwrap import dedent
 from unittest import mock
@@ -180,4 +181,71 @@ def test_jobs_report_unreadable_files(tmp_path: Path, capsys):
 
     assert "can't decode" in output and "bad_bytes.py" in output
     assert "sys at" in output
+    assert main.exit_code() == 1
+
+
+def test_json_format(tmp_path: Path, capsys):
+    (tmp_path / "a.py").write_text("import os\nfrom typing import List, Dict\n\nx: List[int] = []\n")
+    (tmp_path / "b.py").write_text("def broken(:\n")
+    (tmp_path / "c.py").write_text("import sys\n\nprint(sys)\n")
+
+    main = Main.run(["--disable-auto-discovery-config", "--format", "json", tmp_path.as_posix()])
+    report = json.loads(capsys.readouterr().out)
+
+    assert report["unused_imports"] == [
+        {
+            "path": (tmp_path / "a.py").as_posix(),
+            "line": 1,
+            "name": "os",
+            "package": "os",
+            "star": False,
+            "suggestions": [],
+        },
+        {
+            "path": (tmp_path / "a.py").as_posix(),
+            "line": 2,
+            "name": "Dict",
+            "package": "typing",
+            "star": False,
+            "suggestions": [],
+        },
+    ]
+    assert [error["path"] for error in report["errors"]] == [(tmp_path / "b.py").as_posix()]
+    assert main.exit_code() == 1
+
+
+def test_json_format_clean_project_prints_only_json(tmp_path: Path, capsys):
+    (tmp_path / "a.py").write_text("import sys\n\nprint(sys)\n")
+
+    from unimport.__main__ import main
+
+    with pytest.raises(SystemExit) as exit_info:
+        with mock.patch(
+            "sys.argv", ["unimport", "--disable-auto-discovery-config", "--format", "json", tmp_path.as_posix()]
+        ):
+            main()
+
+    assert exit_info.value.code == 0
+    assert json.loads(capsys.readouterr().out) == {"unused_imports": [], "errors": []}
+
+
+@pytest.mark.parametrize("option", ["--diff", "--remove", "--permission"])
+def test_json_format_rejects_commands_that_print(option: str, capsys):
+    with pytest.raises(SystemExit) as exit_info:
+        Main(["--disable-auto-discovery-config", "--format", "json", option])
+
+    assert exit_info.value.code == 2
+    assert "--format json" in capsys.readouterr().err
+
+
+def test_json_format_with_jobs_and_unreadable_file(tmp_path: Path, capsys):
+    (tmp_path / "a.py").write_text("import os\n")
+    (tmp_path / "b.py").write_bytes(b'x = "\xff"\n')
+    (tmp_path / "c.py").write_text("import sys\n\nprint(sys)\n")
+
+    main = Main.run(["--disable-auto-discovery-config", "--format", "json", "--jobs", "2", tmp_path.as_posix()])
+    report = json.loads(capsys.readouterr().out)
+
+    assert [imp["name"] for imp in report["unused_imports"]] == ["os"]
+    assert [error["path"] for error in report["errors"]] == [(tmp_path / "b.py").as_posix()]
     assert main.exit_code() == 1

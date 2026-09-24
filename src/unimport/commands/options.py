@@ -19,6 +19,7 @@ __all__ = (
     "add_permission_option",
     "add_version_option",
     "add_jobs_option",
+    "add_format_option",
 )
 
 from unimport.enums import ColorSelect
@@ -171,6 +172,17 @@ def add_jobs_option(parser: argparse.ArgumentParser) -> None:
         type=int,
         metavar="N",
         help="Number of processes to analyze files in parallel; 0 uses all CPUs. Defaults to `%(default)s`.",
+    )
+
+
+def add_format_option(parser: argparse.ArgumentParser) -> None:
+    from unimport import constants as C
+
+    parser.add_argument(
+        "--format",
+        default=Config.format,
+        choices=C.OUTPUT_FORMATS,
+        help="Output format. `json` prints one JSON document for tools and implies --check. Defaults to `%(default)s`.",
     )
 
 

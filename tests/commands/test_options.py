@@ -100,3 +100,12 @@ def test_add_jobs_option(parser: argparse.ArgumentParser):
     assert vars(parser.parse_args([])) == dict(jobs=1)
     assert vars(parser.parse_args(["-j", "4"])) == dict(jobs=4)
     assert vars(parser.parse_args(["--jobs", "0"])) == dict(jobs=0)
+
+
+def test_add_format_option(parser: argparse.ArgumentParser):
+    options.add_format_option(parser)
+
+    assert vars(parser.parse_args([])) == dict(format="text")
+    assert vars(parser.parse_args(["--format", "json"])) == dict(format="json")
+    with pytest.raises(SystemExit):
+        parser.parse_args(["--format", "xml"])

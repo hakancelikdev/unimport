@@ -32,6 +32,7 @@ def test_generate_parser_empty_parse_args(parser: argparse.ArgumentParser):
         diff=False,
         disable_auto_discovery_config=True,
         exclude="^$",
+        format="text",
         gitignore=False,
         ignore_init=False,
         include="\\.(py)$",

@@ -9,6 +9,9 @@ All notable changes to this project will be documented in this file.
 - `-j/--jobs` option (and `jobs` config key) to analyze files in parallel processes; `0`
   uses all CPUs. `--permission` always runs with a single process
   [#293](https://github.com/hakancelikdev/unimport/issues/293)
+- `--format json` (and `format` config key) prints unused imports and errors as one JSON
+  document for editors, CI and other tools
+  [#342](https://github.com/hakancelikdev/unimport/issues/342)
 
 ### Changed
 

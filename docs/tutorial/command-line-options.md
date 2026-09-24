@@ -1,7 +1,7 @@
 You can list many options by running unimport --help
 
 ```bash
-usage: unimport [-h] [--color {auto,always,never}] [--check] [-c PATH] [--disable-auto-discovery-config] [--include include] [--exclude exclude] [--gitignore] [--ignore-init]
+usage: unimport [-h] [--color {auto,always,never}] [--check] [--format {text,json}] [-c PATH] [--disable-auto-discovery-config] [--include include] [--exclude exclude] [--gitignore] [--ignore-init]
                 [--include-star-import] [-d] [-j N] [-r | -p] [-v]
                 [sources ...]
 
@@ -15,6 +15,7 @@ options:
   --color {auto,always,never}
                         Select whether to use color in the output. Defaults to `auto`.
   --check               Prints which file the unused imports are in.
+  --format {text,json}  Output format. `json` prints one JSON document for tools and implies --check. Defaults to `text`.
   -c PATH, --config PATH
                         Read configuration from PATH.
   --disable-auto-discovery-config
@@ -60,6 +61,38 @@ You can give as many file or directory paths as you want.
 - `$ unimport --check`
 - `$ unimport --check --diff`
 - `$ unimport --check --remove`
+
+---
+
+## Format
+
+> (optional: default `text`) choices: (text, json)
+
+`json` prints one JSON document instead of text lines, for editors, CI annotations and
+other tools. It implies `--check` and can't be combined with `--diff`, `--remove` or
+`--permission`.
+
+```json
+{
+  "unused_imports": [
+    {
+      "path": "src/app.py",
+      "line": 1,
+      "name": "os",
+      "package": "os",
+      "star": false,
+      "suggestions": []
+    }
+  ],
+  "errors": [
+    { "path": "src/broken.py", "message": "invalid syntax (<unknown>, line 1)" }
+  ]
+}
+```
+
+**Usage**
+
+- `$ unimport --format json`
 
 ---
 

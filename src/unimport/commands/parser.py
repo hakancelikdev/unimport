@@ -18,6 +18,7 @@ def generate_parser() -> argparse.ArgumentParser:
     options.add_color_option(parser)
     options.add_sources_option(parser)
     options.add_check_option(parser)
+    options.add_format_option(parser)
     options.add_config_option(parser)
     options.add_disable_auto_discovery_config_option(parser)
     options.add_include_option(parser)
