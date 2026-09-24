@@ -15,6 +15,9 @@ All notable changes to this project will be documented in this file.
 - Imports inside `try` / `except*` blocks are treated like `try` / `except`, so optional
   import fallbacks are no longer removed
   [#331](https://github.com/hakancelikdev/unimport/issues/331)
+- A nested `if` no longer resets the `if`/`else` import dispatch of the enclosing `if`,
+  so imports after it are no longer removed
+  [#332](https://github.com/hakancelikdev/unimport/issues/332)
 
 ## [1.4.0] - 2026-06-02
 
