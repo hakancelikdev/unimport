@@ -1,7 +1,8 @@
 ## Skip Import
 
-Leave '# unimport: skip' or '# noqa' at the end of the line to skip imports **for
-example:**
+Leave '# unimport: skip' or '# noqa' at the end of the line to skip imports. A `# noqa`
+with codes only skips the import when the codes include `F401` (the flake8 / ruff code
+for unused imports), so `# noqa: E501` does not hide an unused import. **For example:**
 
 ```python
 import x # unimport:skip

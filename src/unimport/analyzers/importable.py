@@ -26,8 +26,24 @@ class ImportableNameAnalyzer(ast.NodeVisitor):
 
     @generic_visit
     def visit_Assign(self, node: ast.Assign) -> None:
-        if getattr(node.targets[0], "id", None) == "__all__" and isinstance(node.value, (ast.List, ast.Tuple, ast.Set)):
-            for item in node.value.elts:
+        if getattr(node.targets[0], "id", None) == "__all__":
+            self._add_items(node.value)
+
+    @generic_visit
+    def visit_AugAssign(self, node: ast.AugAssign) -> None:
+        # __all__ += [...]
+        if getattr(node.target, "id", None) == "__all__" and isinstance(node.op, ast.Add):
+            self._add_items(node.value)
+
+    @generic_visit
+    def visit_AnnAssign(self, node: ast.AnnAssign) -> None:
+        # __all__: list[str] = [...]
+        if getattr(node.target, "id", None) == "__all__" and node.value is not None:
+            self._add_items(node.value)
+
+    def _add_items(self, value: ast.expr) -> None:
+        if isinstance(value, (ast.List, ast.Tuple, ast.Set)):
+            for item in value.elts:
                 if isinstance(item, ast.Constant) and isinstance(item.value, str):
                     self.importable_nodes.append(item)
 
