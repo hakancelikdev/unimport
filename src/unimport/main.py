@@ -2,19 +2,18 @@ from __future__ import annotations
 
 import contextlib
 import dataclasses
+import json
 import typing
 from pathlib import Path
 
-from unimport import commands, utils
+from unimport import commands
+from unimport import constants as C
+from unimport import utils
 from unimport.analyzers import MainAnalyzer
 from unimport.color import paint
 from unimport.config import Config
 from unimport.enums import Color
-from unimport.statement import Import
-
-if typing.TYPE_CHECKING:
-    from unimport.statement import ImportFrom
-
+from unimport.statement import Import, ImportFrom
 
 __all__ = ("Main",)
 
@@ -34,6 +33,9 @@ class Main:
 
     config: Config = dataclasses.field(init=False)
     is_syntax_error: bool = dataclasses.field(init=False, default=False)
+    json_report: dict = dataclasses.field(
+        init=False, repr=False, default_factory=lambda: {"unused_imports": [], "errors": []}
+    )
     is_unused_imports: bool = dataclasses.field(init=False, default=False)
     refactor_applied: bool = dataclasses.field(init=False, default=False)
 
@@ -45,9 +47,12 @@ class Main:
 
         from unimport.config import ParseConfig
 
-        return ParseConfig.parse_args(
-            commands.generate_parser().parse_args(self.argv if self.argv is not None else sys.argv[1:])
-        )
+        parser = commands.generate_parser()
+        args = parser.parse_args(self.argv if self.argv is not None else sys.argv[1:])
+        try:
+            return ParseConfig.parse_args(args)
+        except ValueError as exc:  # invalid option combination or value
+            parser.error(str(exc))
 
     @contextlib.contextmanager
     def analysis(self, source: str, path: Path) -> typing.Iterator:
@@ -59,11 +64,14 @@ class Main:
         try:
             analyzer.traverse()
         except SyntaxError as exc:
-            print(
-                paint(str(exc), Color.RED, self.config.use_color)
-                + " at "
-                + paint(path.as_posix(), Color.GREEN, self.config.use_color)
-            )
+            if self.is_json:
+                self.json_report["errors"].append({"path": path.as_posix(), "message": str(exc)})
+            else:
+                print(
+                    paint(str(exc), Color.RED, self.config.use_color)
+                    + " at "
+                    + paint(path.as_posix(), Color.GREEN, self.config.use_color)
+                )
             self.is_syntax_error = True
 
         try:
@@ -82,8 +90,26 @@ class Main:
 
                 yield _Result(unused_imports, path, source, encoding, newline)
 
+    @property
+    def is_json(self) -> bool:
+        return self.config.format == C.OUTPUT_FORMAT_JSON
+
     def check(self, result: _Result) -> None:
-        commands.check(result.path, result.unused_imports, self.config.use_color)
+        if self.is_json:
+            self.json_report["unused_imports"].extend(
+                {
+                    "path": result.path.as_posix(),
+                    "line": imp.lineno,
+                    "name": imp.name,
+                    "package": imp.package,
+                    "star": isinstance(imp, ImportFrom) and imp.star,
+                    "suggestions": imp.suggestions if isinstance(imp, ImportFrom) else [],
+                }
+                # sorted by line: unused imports are collected bottom-up
+                for imp in sorted(result.unused_imports, key=lambda imp: (imp.lineno, imp.column))
+            )
+        else:
+            commands.check(result.path, result.unused_imports, self.config.use_color)
 
     def remove(self, result: _Result, refactor_result):
         commands.remove(
@@ -118,6 +144,8 @@ class Main:
                         self.config.remove = self.permission(result)
                 if self.config.remove and result.source != refactor_result:
                     self.remove(result, refactor_result)
+        if self.is_json:
+            print(json.dumps(self.json_report, indent=2, ensure_ascii=False))
         return self
 
     def exit_code(self):

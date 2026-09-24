@@ -39,6 +39,7 @@ CONFIG_ANNOTATIONS_MAPPING = {
     "check": bool,
     "ignore_init": bool,
     "color": str,
+    "format": str,
     #
     "include-star-import": bool,
     "ignore-init": bool,
@@ -70,6 +71,7 @@ class Config:
     check: bool = False
     ignore_init: bool = False
     color: ColorSelect = ColorSelect.AUTO
+    format: str = C.OUTPUT_FORMAT_TEXT
 
     @classmethod
     @functools.cache
@@ -83,6 +85,15 @@ class Config:
     def __post_init__(self):
         if self.sources is None:
             self.sources = self.default_sources
+
+        if self.format not in C.OUTPUT_FORMATS:
+            raise ValueError(f"format must be one of {', '.join(C.OUTPUT_FORMATS)}, got {self.format!r}")
+        if self.format == C.OUTPUT_FORMAT_JSON:
+            if any((self.diff, self.remove, self.permission)):
+                raise ValueError(
+                    "--format json only reports unused imports; it can't be combined with --diff, --remove or --permission"
+                )
+            self.check = True
 
         self.diff = self.diff or self.permission
         self.remove = self.remove or not any((self.diff, self.check))
