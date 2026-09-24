@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+
+- Imports inside `try` / `except*` blocks are treated like `try` / `except`, so optional
+  import fallbacks are no longer removed
+  [#331](https://github.com/hakancelikdev/unimport/issues/331)
+
 ## [1.4.0] - 2026-06-02
 
 ### Added
@@ -12,8 +20,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Raised libcst upper pin from `<=1.8.2` to `<=1.8.6` so the refactor pipeline
-  can parse and round-trip files using PEP 758 syntax
+- Raised libcst upper pin from `<=1.8.2` to `<=1.8.6` so the refactor pipeline can parse
+  and round-trip files using PEP 758 syntax
 
 ## [1.3.1] - 2026-02-18
 

@@ -141,6 +141,8 @@ class ImportAnalyzer(ast.NodeVisitor):
 
         self.any_import_error = False
 
+    visit_TryStar = visit_Try  # try / except* (Python 3.11+)
+
     @classmethod
     def iget_importable_name(cls, package: str) -> typing.Iterator[str]:
         if utils.is_std(package):
