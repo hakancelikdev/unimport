@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+
+- Files that can't be read or decoded (bad encoding declaration, invalid bytes,
+  permission errors) are reported and make the exit code 1, instead of being skipped
+  silently or crashing the whole run
+  [#340](https://github.com/hakancelikdev/unimport/issues/340)
+
 ## [1.4.0] - 2026-06-02
 
 ### Added
@@ -12,8 +21,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Raised libcst upper pin from `<=1.8.2` to `<=1.8.6` so the refactor pipeline
-  can parse and round-trip files using PEP 758 syntax
+- Raised libcst upper pin from `<=1.8.2` to `<=1.8.6` so the refactor pipeline can parse
+  and round-trip files using PEP 758 syntax
 
 ## [1.3.1] - 2026-02-18
 
