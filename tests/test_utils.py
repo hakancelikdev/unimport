@@ -54,7 +54,8 @@ def test_bad_encoding():
     bad_encoding = "\ufeff\n# -*- coding: utf-32 -*-\nbad encoding"
 
     with reopenable_temp_file(bad_encoding) as tmp_path:
-        assert refactor(tmp_path) == ""
+        with pytest.raises(SyntaxError, match="encoding problem"):
+            utils.read(tmp_path)
 
 
 def test_refactor_file():
@@ -150,3 +151,24 @@ def test_action_to_bool():
 
     for n in no:
         assert action_to_bool(n) is False
+
+
+@pytest.mark.parametrize(
+    "content, error",
+    [
+        (b"# -*- coding: not-a-real-encoding -*-\nimport os\n", SyntaxError),
+        (b'import os\nx = "\xff\xfe"\n', UnicodeDecodeError),
+    ],
+)
+def test_read_errors(tmp_path, content: bytes, error: type):
+    path = tmp_path / "bad.py"
+    path.write_bytes(content)
+
+    with pytest.raises(error):
+        utils.read(path)
+    assert issubclass(error, utils.READ_ERRORS)
+
+
+def test_read_missing_file(tmp_path):
+    with pytest.raises(OSError):
+        utils.read(tmp_path / "missing.py")

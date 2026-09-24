@@ -29,6 +29,7 @@ class _Result:
     newline: str | None = None
     refactor_result: str | None = dataclasses.field(default=None, repr=False)
     syntax_error: str | None = None
+    read_error: str | None = None  # the file could not be read; nothing else is set
 
 
 def _analyze_path(path: Path, *, include_star_import: bool, refactor: bool) -> _Result:
@@ -41,7 +42,11 @@ def _analyze_path(path: Path, *, include_star_import: bool, refactor: bool) -> _
     """
     from unimport.refactor import refactor_string
 
-    source, encoding, newline = utils.read(path)
+    try:
+        source, encoding, newline = utils.read(path)
+    except utils.READ_ERRORS as exc:
+        return _Result([], path, "", "utf-8", read_error=str(exc))
+
     analyzer = MainAnalyzer(source=source, path=path, include_star_import=include_star_import)
     syntax_error = None
     try:
@@ -102,15 +107,22 @@ class Main:
         with ProcessPoolExecutor(max_workers=jobs) as executor:
             yield from executor.map(analyze, paths, chunksize=max(1, len(paths) // (jobs * 4)))
 
+    def report_error(self, message: str, path: Path) -> None:
+        """Print an error for a file that can't be read or parsed; the exit code becomes 1."""
+        print(
+            paint(message, Color.RED, self.config.use_color)
+            + " at "
+            + paint(path.as_posix(), Color.GREEN, self.config.use_color)
+        )
+        self.is_syntax_error = True
+
     def get_results(self) -> typing.Iterator[_Result]:
         for result in self._analyze_paths():
+            if result.read_error is not None:
+                self.report_error(result.read_error, result.path)
+                continue
             if result.syntax_error is not None:
-                print(
-                    paint(result.syntax_error, Color.RED, self.config.use_color)
-                    + " at "
-                    + paint(result.path.as_posix(), Color.GREEN, self.config.use_color)
-                )
-                self.is_syntax_error = True
+                self.report_error(result.syntax_error, result.path)
 
             if self.is_unused_imports is False:
                 self.is_unused_imports = result.unused_imports != []
@@ -133,9 +145,8 @@ class Main:
     def diff(self, result, refactor_result):
         return commands.diff(result.path, result.source, refactor_result, self.config.use_color)
 
-    @staticmethod
-    def permission(result) -> bool:
-        return commands.permission(result.path, result.encoding)
+    def permission(self, result: _Result) -> bool:
+        return commands.permission(result.path, self.config.use_color)
 
     @classmethod
     def run(cls, argv: typing.Sequence[str] | None = None) -> Main:

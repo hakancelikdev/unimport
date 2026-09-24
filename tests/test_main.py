@@ -96,6 +96,36 @@ def test_commands_in_run(mock_permission):
     assert main.config.permission is True
 
 
+@pytest.mark.parametrize("color, use_color", [("never", False), ("always", True)])
+def test_permission_prompt_uses_color_setting(color, use_color, monkeypatch):
+    calls = []
+
+    def fake_permission(path, use_color):
+        calls.append(use_color)
+        return False
+
+    monkeypatch.setattr("unimport.commands.permission", fake_permission)
+
+    with reopenable_temp_file("import os\n") as temp_file:
+        Main.run(["--disable-auto-discovery-config", "--permission", "--color", color, temp_file.as_posix()])
+
+    assert calls == [use_color]
+
+
+def test_unreadable_files_are_reported(tmp_path, capsys):
+    (tmp_path / "bad_encoding.py").write_bytes(b"# -*- coding: not-a-real-encoding -*-\nimport os\n")
+    (tmp_path / "bad_bytes.py").write_bytes(b'import os\nx = "\xff"\n')
+    (tmp_path / "good.py").write_text("import sys\n")
+
+    main = Main.run(["--disable-auto-discovery-config", "--check", "--color", "never", tmp_path.as_posix()])
+    output = capsys.readouterr().out
+
+    assert "unknown encoding" in output and "bad_encoding.py" in output
+    assert "can't decode" in output and "bad_bytes.py" in output
+    assert "sys at" in output  # the other files are still checked
+    assert main.exit_code() == 1
+
+
 def _write_sources(directory: Path) -> list[Path]:
     sources = {
         "a.py": "import os\nimport sys\n\nprint(sys)\n",
@@ -137,3 +167,17 @@ def test_jobs_remove(tmp_path: Path):
     assert paths[0].read_text() == "import sys\n\nprint(sys)\n"
     assert paths[1].read_text() == "from typing import List\n\nx: List[int] = []\n"
     assert paths[2].read_text() == "import json\n\njson.dumps({})\n"
+
+
+def test_jobs_report_unreadable_files(tmp_path: Path, capsys):
+    (tmp_path / "bad_bytes.py").write_bytes(b'import os\nx = "\xff"\n')
+    (tmp_path / "good.py").write_text("import sys\n")
+
+    main = Main.run(
+        ["--disable-auto-discovery-config", "--check", "--color", "never", "--jobs", "2", tmp_path.as_posix()]
+    )
+    output = capsys.readouterr().out
+
+    assert "can't decode" in output and "bad_bytes.py" in output
+    assert "sys at" in output
+    assert main.exit_code() == 1

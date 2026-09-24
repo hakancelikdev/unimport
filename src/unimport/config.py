@@ -119,7 +119,7 @@ class Config:
 
     @classmethod
     def get_color_choices(cls) -> list[str]:
-        return list(ColorSelect._member_map_.keys())
+        return [color.value for color in ColorSelect]
 
     @classmethod
     def is_use_color(cls, color: ColorSelect) -> bool:

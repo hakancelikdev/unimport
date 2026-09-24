@@ -10,6 +10,53 @@ All notable changes to this project will be documented in this file.
   uses all CPUs. `--permission` always runs with a single process
   [#293](https://github.com/hakancelikdev/unimport/issues/293)
 
+### Changed
+
+- Scopes are looked up by identity instead of by comparing fields, which removes a
+  quadratic scan and makes analysis about a third faster on large code bases
+  [#341](https://github.com/hakancelikdev/unimport/issues/341)
+
+### Fixed
+
+- String type expressions in builtin generics (`list["X"]`), `Annotated`, `TypeAlias`
+  values and `TypeVar` bounds/constraints are now resolved, so the imports they use are
+  no longer removed [#329](https://github.com/hakancelikdev/unimport/issues/329)
+- Names added with `__all__ += [...]` or listed in an annotated
+  `__all__: list[str] = [...]` now count as re-exports, so their imports are no longer
+  removed [#330](https://github.com/hakancelikdev/unimport/issues/330)
+- Imports inside `try` / `except*` blocks are treated like `try` / `except`, so optional
+  import fallbacks are no longer removed
+  [#331](https://github.com/hakancelikdev/unimport/issues/331)
+- A nested `if` no longer resets the `if`/`else` import dispatch of the enclosing `if`,
+  so imports after it are no longer removed
+  [#332](https://github.com/hakancelikdev/unimport/issues/332)
+- Explicit re-exports (`import X as X`, `from m import X as X`, PEP 484) are no longer
+  reported or removed [#333](https://github.com/hakancelikdev/unimport/issues/333)
+- `from . import *` and `from . import x` no longer report the package as `.None`, and
+  refactoring with `--include-star-import` no longer crashes on `from . import *`;
+  relative star imports are left unchanged since their names can't be resolved
+  [#334](https://github.com/hakancelikdev/unimport/issues/334)
+- Unused imports are no longer missed when the name is reassigned before use in the same
+  scope, or bound locally in the function that uses it (parameter, assignment, loop
+  target, import, …). Assignment targets no longer count as uses
+  [#335](https://github.com/hakancelikdev/unimport/issues/335)
+- Imports inside a `try` block without an `except` handler (`try` / `finally`) are
+  checked again, and a nested `try` no longer clears the protection of the enclosing one
+  [#336](https://github.com/hakancelikdev/unimport/issues/336)
+- `# noqa` comments for other codes (e.g. `# noqa: E501`) no longer skip the import; a
+  bare `# noqa` and `# noqa: F401` still do
+  [#337](https://github.com/hakancelikdev/unimport/issues/337)
+- On Python 3.12+ the output showed `Emoji.STAR`, `Emoji.PARTYING_FACE` and
+  `ColorSelect.AUTO` instead of their values; `--help` also listed the `--color` choices
+  in upper case [#338](https://github.com/hakancelikdev/unimport/issues/338)
+- The `--permission` prompt honours `--color`; it received the file encoding instead of
+  the color setting and was always colored
+  [#339](https://github.com/hakancelikdev/unimport/issues/339)
+- Files that can't be read or decoded (bad encoding declaration, invalid bytes,
+  permission errors) are reported and make the exit code 1, instead of being skipped
+  silently or crashing the whole run
+  [#340](https://github.com/hakancelikdev/unimport/issues/340)
+
 ## [1.4.0] - 2026-06-02
 
 ### Added
