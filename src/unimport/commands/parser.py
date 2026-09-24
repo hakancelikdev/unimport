@@ -27,6 +27,7 @@ def generate_parser() -> argparse.ArgumentParser:
     options.add_ignore_init_option(parser)
     options.add_include_star_import_option(parser)
     options.add_diff_option(parser)
+    options.add_jobs_option(parser)
     options.add_remove_option(exclusive_group)
     options.add_permission_option(exclusive_group)
     options.add_version_option(parser)

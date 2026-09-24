@@ -13,6 +13,7 @@ __all__ = (
     "OUTPUT_FORMAT_TEXT",
     "PY39_PLUS",
     "PY310_PLUS",
+    "PY311_PLUS",
     "PY312_PLUS",
     "PY313_PLUS",
     "PY314_PLUS",
@@ -38,6 +39,7 @@ AST_FUNCTION_TUPLE = (ast.FunctionDef, ast.AsyncFunctionDef)
 # CONF
 PY39_PLUS = sys.version_info >= (3, 9)
 PY310_PLUS = sys.version_info >= (3, 10)
+PY311_PLUS = sys.version_info >= (3, 11)
 PY312_PLUS = sys.version_info >= (3, 12)
 PY313_PLUS = sys.version_info >= (3, 13)
 PY314_PLUS = sys.version_info >= (3, 14)

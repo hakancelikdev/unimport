@@ -37,6 +37,7 @@ def test_generate_parser_empty_parse_args(parser: argparse.ArgumentParser):
         ignore_init=False,
         include="\\.(py)$",
         include_star_import=False,
+        jobs=1,
         permission=False,
         remove=False,
         sources=[Path(".")],

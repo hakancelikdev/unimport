@@ -14,6 +14,7 @@ from pathspec.patterns import GitWildMatchPattern
 import unimport.constants as C
 
 __all__ = (
+    "READ_ERRORS",
     "get_module_dir",
     "get_source",
     "get_spec",
@@ -99,7 +100,10 @@ def get_exclude_list_from_gitignore(path=Path(".gitignore")) -> list[GitWildMatc
         return []
 
     gitignore_patterns: list[GitWildMatchPattern] = []
-    source, _, _ = read(path)
+    try:
+        source, _, _ = read(path)
+    except READ_ERRORS:
+        return []
     for line in source.splitlines():
         regex, include = GitWildMatchPattern.pattern_to_regex(line)
         if regex:
@@ -109,14 +113,19 @@ def get_exclude_list_from_gitignore(path=Path(".gitignore")) -> list[GitWildMatc
     return gitignore_patterns
 
 
+READ_ERRORS = (OSError, SyntaxError, UnicodeDecodeError)
+
+
 def read(path: Path) -> tuple[str, str, str | None]:
-    try:
-        with tokenize.open(path) as stream:
-            source = stream.read()
-            encoding = stream.encoding
-            newline = stream.newlines
-    except (OSError, SyntaxError):
-        return "", "utf-8", None
+    """Read a Python source file with its declared encoding.
+
+    Raises one of READ_ERRORS when the file can't be opened, has an
+    invalid encoding declaration (SyntaxError) or can't be decoded.
+    """
+    with tokenize.open(path) as stream:
+        source = stream.read()
+        encoding = stream.encoding
+        newline = stream.newlines
 
     # If mixed or unknown newlines, fall back to the platform default
     if not isinstance(newline, str):

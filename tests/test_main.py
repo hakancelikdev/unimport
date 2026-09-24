@@ -1,3 +1,5 @@
+
+
 import json
 from pathlib import Path
 from textwrap import dedent
@@ -97,6 +99,93 @@ def test_commands_in_run(mock_permission):
     assert main.config.permission is True
 
 
+@pytest.mark.parametrize("color, use_color", [("never", False), ("always", True)])
+def test_permission_prompt_uses_color_setting(color, use_color, monkeypatch):
+    calls = []
+
+    def fake_permission(path, use_color):
+        calls.append(use_color)
+        return False
+
+    monkeypatch.setattr("unimport.commands.permission", fake_permission)
+
+    with reopenable_temp_file("import os\n") as temp_file:
+        Main.run(["--disable-auto-discovery-config", "--permission", "--color", color, temp_file.as_posix()])
+
+    assert calls == [use_color]
+
+
+def test_unreadable_files_are_reported(tmp_path, capsys):
+    (tmp_path / "bad_encoding.py").write_bytes(b"# -*- coding: not-a-real-encoding -*-\nimport os\n")
+    (tmp_path / "bad_bytes.py").write_bytes(b'import os\nx = "\xff"\n')
+    (tmp_path / "good.py").write_text("import sys\n")
+
+    main = Main.run(["--disable-auto-discovery-config", "--check", "--color", "never", tmp_path.as_posix()])
+    output = capsys.readouterr().out
+
+    assert "unknown encoding" in output and "bad_encoding.py" in output
+    assert "can't decode" in output and "bad_bytes.py" in output
+    assert "sys at" in output  # the other files are still checked
+    assert main.exit_code() == 1
+
+
+def _write_sources(directory: Path) -> list[Path]:
+    sources = {
+        "a.py": "import os\nimport sys\n\nprint(sys)\n",
+        "b.py": "import re  # comment\nfrom typing import List, Dict\n\nx: List[int] = []\n",
+        "c.py": "import json\n\njson.dumps({})\n",
+        "d.py": "import ast\ndef broken(:\n",
+    }
+    paths = []
+    for name, source in sources.items():
+        path = directory / name
+        path.write_text(source)
+        paths.append(path)
+    return paths
+
+
+@pytest.mark.parametrize("command", ["--check", "--diff"])
+def test_jobs_output_matches_sequential(tmp_path: Path, capsys, command: str):
+    _write_sources(tmp_path)
+    argv = ["--disable-auto-discovery-config", command, "--color", "never", tmp_path.as_posix()]
+
+    sequential = Main.run([*argv, "--jobs", "1"])
+    sequential_output = capsys.readouterr().out
+
+    parallel = Main.run([*argv, "--jobs", "2"])
+    parallel_output = capsys.readouterr().out
+
+    assert parallel_output == sequential_output
+    assert "os at" in parallel_output or "-import os" in parallel_output
+    assert (parallel.is_unused_imports, parallel.is_syntax_error) == (True, True)
+    assert parallel.exit_code() == sequential.exit_code() == 1
+
+
+def test_jobs_remove(tmp_path: Path):
+    paths = _write_sources(tmp_path)
+
+    main = Main.run(["--disable-auto-discovery-config", "--remove", "--jobs", "2", tmp_path.as_posix()])
+
+    assert main.refactor_applied is True
+    assert paths[0].read_text() == "import sys\n\nprint(sys)\n"
+    assert paths[1].read_text() == "from typing import List\n\nx: List[int] = []\n"
+    assert paths[2].read_text() == "import json\n\njson.dumps({})\n"
+
+
+def test_jobs_report_unreadable_files(tmp_path: Path, capsys):
+    (tmp_path / "bad_bytes.py").write_bytes(b'import os\nx = "\xff"\n')
+    (tmp_path / "good.py").write_text("import sys\n")
+
+    main = Main.run(
+        ["--disable-auto-discovery-config", "--check", "--color", "never", "--jobs", "2", tmp_path.as_posix()]
+    )
+    output = capsys.readouterr().out
+
+    assert "can't decode" in output and "bad_bytes.py" in output
+    assert "sys at" in output
+    assert main.exit_code() == 1
+
+
 def test_json_format(tmp_path: Path, capsys):
     (tmp_path / "a.py").write_text("import os\nfrom typing import List, Dict\n\nx: List[int] = []\n")
     (tmp_path / "b.py").write_text("def broken(:\n")
@@ -149,3 +238,16 @@ def test_json_format_rejects_commands_that_print(option: str, capsys):
 
     assert exit_info.value.code == 2
     assert "--format json" in capsys.readouterr().err
+
+
+def test_json_format_with_jobs_and_unreadable_file(tmp_path: Path, capsys):
+    (tmp_path / "a.py").write_text("import os\n")
+    (tmp_path / "b.py").write_bytes(b'x = "\xff"\n')
+    (tmp_path / "c.py").write_text("import sys\n\nprint(sys)\n")
+
+    main = Main.run(["--disable-auto-discovery-config", "--format", "json", "--jobs", "2", tmp_path.as_posix()])
+    report = json.loads(capsys.readouterr().out)
+
+    assert [imp["name"] for imp in report["unused_imports"]] == ["os"]
+    assert [error["path"] for error in report["errors"]] == [(tmp_path / "b.py").as_posix()]
+    assert main.exit_code() == 1
