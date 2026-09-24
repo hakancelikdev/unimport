@@ -87,12 +87,11 @@ class MainAnalyzer(ast.NodeVisitor):
         names_to_remove = [
             name for name in Name.names if name.name == "TYPE_CHECKING" or name.name.endswith(".TYPE_CHECKING")
         ]
-        for name in names_to_remove:
-            Name.names.remove(name)
-            for scope in Scope.scopes:
-                if name in scope.current_nodes:
-                    scope.current_nodes.remove(name)
-                    break
+        # Remove by identity: equal-looking Name objects (same line and name) must not be confused.
+        removed = {id(name) for name in names_to_remove}
+        Name.names[:] = [name for name in Name.names if id(name) not in removed]
+        for scope in Scope.scopes:
+            scope.current_nodes[:] = [node for node in scope.current_nodes if id(node) not in removed]
 
     @staticmethod
     def clear():
