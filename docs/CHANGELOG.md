@@ -12,6 +12,9 @@ All notable changes to this project will be documented in this file.
 - Names added with `__all__ += [...]` or listed in an annotated
   `__all__: list[str] = [...]` now count as re-exports, so their imports are no longer
   removed [#330](https://github.com/hakancelikdev/unimport/issues/330)
+- Imports inside `try` / `except*` blocks are treated like `try` / `except`, so optional
+  import fallbacks are no longer removed
+  [#331](https://github.com/hakancelikdev/unimport/issues/331)
 
 ## [1.4.0] - 2026-06-02
 
