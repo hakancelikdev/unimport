@@ -6,6 +6,28 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- String type expressions in builtin generics (`list["X"]`), `Annotated`, `TypeAlias`
+  values and `TypeVar` bounds/constraints are now resolved, so the imports they use are
+  no longer removed [#329](https://github.com/hakancelikdev/unimport/issues/329)
+- Names added with `__all__ += [...]` or listed in an annotated
+  `__all__: list[str] = [...]` now count as re-exports, so their imports are no longer
+  removed [#330](https://github.com/hakancelikdev/unimport/issues/330)
+- Imports inside `try` / `except*` blocks are treated like `try` / `except`, so optional
+  import fallbacks are no longer removed
+  [#331](https://github.com/hakancelikdev/unimport/issues/331)
+- A nested `if` no longer resets the `if`/`else` import dispatch of the enclosing `if`,
+  so imports after it are no longer removed
+  [#332](https://github.com/hakancelikdev/unimport/issues/332)
+- Explicit re-exports (`import X as X`, `from m import X as X`, PEP 484) are no longer
+  reported or removed [#333](https://github.com/hakancelikdev/unimport/issues/333)
+- `from . import *` and `from . import x` no longer report the package as `.None`, and
+  refactoring with `--include-star-import` no longer crashes on `from . import *`;
+  relative star imports are left unchanged since their names can't be resolved
+  [#334](https://github.com/hakancelikdev/unimport/issues/334)
+- Unused imports are no longer missed when the name is reassigned before use in the same
+  scope, or bound locally in the function that uses it (parameter, assignment, loop
+  target, import, …). Assignment targets no longer count as uses
+  [#335](https://github.com/hakancelikdev/unimport/issues/335)
 - Imports inside a `try` block without an `except` handler (`try` / `finally`) are
   checked again, and a nested `try` no longer clears the protection of the enclosing one
   [#336](https://github.com/hakancelikdev/unimport/issues/336)
