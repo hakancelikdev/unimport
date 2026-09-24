@@ -95,6 +95,22 @@ def test_commands_in_run(mock_permission):
     assert main.config.permission is True
 
 
+@pytest.mark.parametrize("color, use_color", [("never", False), ("always", True)])
+def test_permission_prompt_uses_color_setting(color, use_color, monkeypatch):
+    calls = []
+
+    def fake_permission(path, use_color):
+        calls.append(use_color)
+        return False
+
+    monkeypatch.setattr("unimport.commands.permission", fake_permission)
+
+    with reopenable_temp_file("import os\n") as temp_file:
+        Main.run(["--disable-auto-discovery-config", "--permission", "--color", color, temp_file.as_posix()])
+
+    assert calls == [use_color]
+
+
 def test_unreadable_files_are_reported(tmp_path, capsys):
     (tmp_path / "bad_encoding.py").write_bytes(b"# -*- coding: not-a-real-encoding -*-\nimport os\n")
     (tmp_path / "bad_bytes.py").write_bytes(b'import os\nx = "\xff"\n')

@@ -106,9 +106,8 @@ class Main:
     def diff(self, result, refactor_result):
         return commands.diff(result.path, result.source, refactor_result, self.config.use_color)
 
-    @staticmethod
-    def permission(result) -> bool:
-        return commands.permission(result.path, result.encoding)
+    def permission(self, result: _Result) -> bool:
+        return commands.permission(result.path, self.config.use_color)
 
     @classmethod
     def run(cls, argv: typing.Sequence[str] | None = None) -> Main:
