@@ -56,6 +56,8 @@ class ImportAnalyzer(ast.NodeVisitor):
     def visit_Import(self, node: ast.Import) -> None:
         for column, alias in enumerate(node.names):
             name = alias.asname or alias.name
+            if self.is_explicit_reexport(alias):
+                continue
             if name in self.IGNORE_IMPORT_NAMES or self.is_if_dispatch(name):
                 continue
 
@@ -79,6 +81,8 @@ class ImportAnalyzer(ast.NodeVisitor):
                 return
 
             name = package if is_star else (alias.asname or alias.name)
+            if self.is_explicit_reexport(alias):
+                continue
             if name in self.IGNORE_IMPORT_NAMES or self.is_if_dispatch(name):
                 continue
 
@@ -92,6 +96,11 @@ class ImportAnalyzer(ast.NodeVisitor):
                 node=node,
                 is_type_checking=self._in_type_checking,
             )
+
+    @staticmethod
+    def is_explicit_reexport(alias: ast.alias) -> bool:
+        """``import X as X`` and ``from m import X as X`` mark an explicit re-export (PEP 484)."""
+        return alias.asname is not None and alias.asname == alias.name
 
     @staticmethod
     def _is_type_checking_block(if_node: ast.If) -> bool:

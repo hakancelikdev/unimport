@@ -18,6 +18,8 @@ All notable changes to this project will be documented in this file.
 - A nested `if` no longer resets the `if`/`else` import dispatch of the enclosing `if`,
   so imports after it are no longer removed
   [#332](https://github.com/hakancelikdev/unimport/issues/332)
+- Explicit re-exports (`import X as X`, `from m import X as X`, PEP 484) are no longer
+  reported or removed [#333](https://github.com/hakancelikdev/unimport/issues/333)
 
 ## [1.4.0] - 2026-06-02
 
