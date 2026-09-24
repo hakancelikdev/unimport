@@ -55,9 +55,11 @@ def _analyze_path(path: Path, *, include_star_import: bool, refactor: bool) -> _
         analyzer.clear()
 
     for imp in unused_imports:
-        # The AST node links to the whole parsed tree; it is not needed after analysis and would make the result
-        # expensive (or impossible, for deeply nested trees) to send back from a worker process.
+        # The AST node (and the scope, which holds one) links to the whole parsed tree. Neither is needed after
+        # analysis, and they would make the result expensive (or impossible, for deeply nested trees) to send back
+        # from a worker process.
         vars(imp).pop("node", None)
+        vars(imp).pop("_scope", None)
 
     refactor_result = refactor_string(source=source, unused_imports=unused_imports) if refactor else None
     return _Result(unused_imports, path, source, encoding, newline, refactor_result, syntax_error)
