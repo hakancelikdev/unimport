@@ -31,6 +31,9 @@ All notable changes to this project will be documented in this file.
 - Imports inside a `try` block without an `except` handler (`try` / `finally`) are
   checked again, and a nested `try` no longer clears the protection of the enclosing one
   [#336](https://github.com/hakancelikdev/unimport/issues/336)
+- `# noqa` comments for other codes (e.g. `# noqa: E501`) no longer skip the import; a
+  bare `# noqa` and `# noqa: F401` still do
+  [#337](https://github.com/hakancelikdev/unimport/issues/337)
 
 ## [1.4.0] - 2026-06-02
 
