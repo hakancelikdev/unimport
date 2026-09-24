@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+
+- `from . import *` and `from . import x` no longer report the package as `.None`, and
+  refactoring with `--include-star-import` no longer crashes on `from . import *`;
+  relative star imports are left unchanged since their names can't be resolved
+  [#334](https://github.com/hakancelikdev/unimport/issues/334)
+
 ## [1.4.0] - 2026-06-02
 
 ### Added
@@ -12,8 +21,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Raised libcst upper pin from `<=1.8.2` to `<=1.8.6` so the refactor pipeline
-  can parse and round-trip files using PEP 758 syntax
+- Raised libcst upper pin from `<=1.8.2` to `<=1.8.6` so the refactor pipeline can parse
+  and round-trip files using PEP 758 syntax
 
 ## [1.3.1] - 2026-02-18
 
