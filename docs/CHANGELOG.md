@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Scopes are looked up by identity instead of by comparing fields, which removes a
+  quadratic scan and makes analysis about a third faster on large code bases
+  [#341](https://github.com/hakancelikdev/unimport/issues/341)
+
 ### Fixed
 
 - String type expressions in builtin generics (`list["X"]`), `Annotated`, `TypeAlias`
