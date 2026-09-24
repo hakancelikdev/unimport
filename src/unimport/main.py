@@ -76,7 +76,11 @@ class Main:
             source, encoding, newline = utils.read(path)
 
             with self.analysis(source, path):
-                unused_imports = list(Import.get_unused_imports(include_star_import=self.config.include_star_import))
+                unused_imports = [
+                    imp
+                    for imp in Import.get_unused_imports(include_star_import=self.config.include_star_import)
+                    if not self.config.is_ignored_import(path, imp.name)
+                ]
                 if self.is_unused_imports is False:
                     self.is_unused_imports = unused_imports != []
 

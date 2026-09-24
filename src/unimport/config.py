@@ -4,6 +4,7 @@ import argparse
 import configparser
 import contextlib
 import dataclasses
+import fnmatch
 import functools
 import sys
 import typing
@@ -39,14 +40,17 @@ CONFIG_ANNOTATIONS_MAPPING = {
     "check": bool,
     "ignore_init": bool,
     "color": str,
+    "per_file_ignores": dict,
     #
     "include-star-import": bool,
     "ignore-init": bool,
+    "per-file-ignores": dict,
 }
 
 CONFIG_LIKE_COMMANDS_MAPPING = {
     "include-star-import": "include_star_import",
     "ignore-init": "ignore_init",
+    "per-file-ignores": "per_file_ignores",
 }
 
 
@@ -70,6 +74,7 @@ class Config:
     check: bool = False
     ignore_init: bool = False
     color: ColorSelect = ColorSelect.AUTO
+    per_file_ignores: dict[str, list[str]] | None = None  # file glob -> import name patterns
 
     @classmethod
     @functools.cache
@@ -87,6 +92,7 @@ class Config:
         self.diff = self.diff or self.permission
         self.remove = self.remove or not any((self.diff, self.check))
         self.use_color = self.is_use_color(self.color)
+        self.per_file_ignores = self.normalize_per_file_ignores(self.per_file_ignores)
 
         if self.gitignore:
             self.gitignore_patterns = utils.get_exclude_list_from_gitignore()
@@ -102,6 +108,36 @@ class Config:
                 exclude=self.exclude,
                 gitignore_patterns=self.gitignore_patterns,
             )
+
+    @staticmethod
+    def normalize_per_file_ignores(value: dict | None) -> dict[str, list[str]]:
+        if value is None:
+            return {}
+        if not isinstance(value, dict):
+            raise ValueError(f"per-file-ignores must be a table of file pattern -> import names, got {value!r}")
+        normalized: dict[str, list[str]] = {}
+        for file_pattern, names in value.items():
+            if isinstance(names, str):
+                names = names.split(",")
+            if not isinstance(names, list) or not all(isinstance(name, str) for name in names):
+                raise ValueError(f"per-file-ignores[{file_pattern!r}] must be a list of import names, got {names!r}")
+            normalized[str(file_pattern)] = [name.strip() for name in names if name.strip()]
+        return normalized
+
+    def is_ignored_import(self, path: Path, import_name: str) -> bool:
+        """Whether per-file-ignores keeps import_name in the file at path.
+
+        A file pattern matches the whole path (``src/*/conftest.py``) or,
+        without a slash, the file name in any directory (``__init__.py``).
+        """
+        posix_path = path.as_posix()
+        for file_pattern, name_patterns in self.per_file_ignores.items():  # type: ignore[union-attr]
+            file_matches = fnmatch.fnmatch(posix_path, file_pattern) or (
+                "/" not in file_pattern and fnmatch.fnmatch(path.name, file_pattern)
+            )
+            if file_matches and any(fnmatch.fnmatch(import_name, pattern) for pattern in name_patterns):
+                return True
+        return False
 
     @classmethod
     def get_color_choices(cls) -> list[str]:
@@ -175,6 +211,14 @@ class ParseConfig:
                     cfg_context[key] = value  # type: ignore
                 elif key_type == list[Path]:
                     cfg_context[key] = [Path(p) for p in get_config_as_list(key)]  # type: ignore
+                elif key_type == dict:
+                    # One "file pattern: name, name" entry per line, like flake8's per-file-ignores.
+                    cfg_context[key] = {
+                        file_pattern.strip(): names
+                        for file_pattern, _, names in (
+                            line.partition(":") for line in value.splitlines() if line.strip()  # type: ignore
+                        )
+                    }
 
                 expected_key = CONFIG_LIKE_COMMANDS_MAPPING.get(key, None)
                 if expected_key is not None:
