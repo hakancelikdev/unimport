@@ -1,6 +1,8 @@
 import pytest
 
+from unimport.analyzers import MainAnalyzer
 from unimport.analyzers.decarators import is_skip_comment
+from unimport.statement import Import
 
 
 @pytest.mark.parametrize(
@@ -26,3 +28,10 @@ from unimport.analyzers.decarators import is_skip_comment
 )
 def test_is_skip_comment(source: str, expected: bool):
     assert is_skip_comment(source) is expected
+
+
+@pytest.mark.parametrize("separator", ["\f", "\v", "\x1c", "\x85", " "])
+def test_skip_comment_line_after_other_line_separators(separator: str):
+    source = f'x = "a{separator}b"\nimport os  # noqa\nimport sys\n'
+    with MainAnalyzer(source=source):
+        assert [imp.name for imp in Import.get_unused_imports()] == ["sys"]
