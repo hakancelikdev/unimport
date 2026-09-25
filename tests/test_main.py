@@ -278,3 +278,13 @@ def test_per_file_ignores_are_not_removed(tmp_path: Path, jobs: str):
 
     assert (tmp_path / "__init__.py").read_text() == "from .core import Api\n"
     assert "import os" not in (tmp_path / "module.py").read_text()  # not covered by the ignore, so removed
+
+
+def test_null_bytes_reported_as_syntax_error(tmp_path: Path, capsys):
+    (tmp_path / "a.py").write_bytes(b"import os\x00\n")
+
+    main = Main.run(["--disable-auto-discovery-config", "--check", "--color", "never", tmp_path.as_posix()])
+
+    assert "null bytes" in capsys.readouterr().out
+    assert main.is_syntax_error is True
+    assert main.exit_code() == 1

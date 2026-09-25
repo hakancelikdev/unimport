@@ -30,7 +30,10 @@ class MainAnalyzer(ast.NodeVisitor):
         if self.skip_file():
             return None
 
-        tree = ast.parse(self.source, type_comments=True)
+        try:
+            tree = ast.parse(self.source, type_comments=True)
+        except ValueError as exc:  # null bytes, before Python 3.12 raised them as SyntaxError
+            raise SyntaxError(str(exc)) from exc
 
         set_tree_parents(tree)  # set parents to tree
 
