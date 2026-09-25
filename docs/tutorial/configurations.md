@@ -46,8 +46,9 @@ jobs = 4
 
 Keep specific imports in specific files, while the rest of each file is still checked.
 Keys are file patterns: a pattern without `/` matches the file name in any directory
-(`__init__.py`), otherwise the whole path (`src/*/conftest.py`). Values are import-name
-patterns (`fnmatch`); matching imports are never reported or removed.
+(`__init__.py`), otherwise the path relative to the directory unimport runs in
+(`src/*/conftest.py`), also when the file is passed as an absolute path. Values are
+import-name patterns (`fnmatch`); matching imports are never reported or removed.
 
 **pyproject.toml**
 

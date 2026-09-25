@@ -328,3 +328,13 @@ def test_per_file_ignores_accepts_comma_separated_string():
 def test_per_file_ignores_invalid(value):
     with pytest.raises(ValueError):
         Config(per_file_ignores=value)
+
+
+@pytest.mark.parametrize("path", ["tests/conftest.py", "./tests/conftest.py", "tests/../tests/conftest.py"])
+def test_is_ignored_import_absolute_or_unnormalized_path(tmp_path: Path, monkeypatch, path: str):
+    monkeypatch.chdir(tmp_path)
+    config = Config(per_file_ignores={"tests/conftest.py": ["pytest_plugins"]})
+
+    assert config.is_ignored_import(Path(path), "pytest_plugins") is True
+    assert config.is_ignored_import(tmp_path / path, "pytest_plugins") is True  # e.g. passed by an IDE or pre-commit
+    assert config.is_ignored_import(tmp_path / "other" / path, "pytest_plugins") is False

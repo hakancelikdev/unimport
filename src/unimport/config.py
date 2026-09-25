@@ -57,6 +57,15 @@ CONFIG_LIKE_COMMANDS_MAPPING = {
 }
 
 
+def _relative_posix_path(path: Path) -> str:
+    """The path relative to the working directory when it is inside it, normalized (no ``./`` or ``..``)."""
+    absolute = Path(os.path.abspath(path))
+    try:
+        return absolute.relative_to(Path.cwd()).as_posix()
+    except ValueError:
+        return absolute.as_posix()
+
+
 @dataclasses.dataclass
 class Config:
     default_sources: typing.ClassVar[list[Path]] = [Path(".")]  # Not init attribute
@@ -152,12 +161,13 @@ class Config:
     def is_ignored_import(self, path: Path, import_name: str) -> bool:
         """Whether per-file-ignores keeps import_name in the file at path.
 
-        A file pattern matches the whole path (``src/*/conftest.py``) or,
-        without a slash, the file name in any directory (``__init__.py``).
+        A file pattern matches the path relative to the working directory
+        (``src/*/conftest.py``), even when the path was given as absolute,
+        or, without a slash, the file name in any directory (``__init__.py``).
         """
-        posix_path = path.as_posix()
+        posix_paths = {path.as_posix(), _relative_posix_path(path)}
         for file_pattern, name_patterns in self.per_file_ignores.items():  # type: ignore[union-attr]
-            file_matches = fnmatch.fnmatch(posix_path, file_pattern) or (
+            file_matches = any(fnmatch.fnmatch(posix_path, file_pattern) for posix_path in posix_paths) or (
                 "/" not in file_pattern and fnmatch.fnmatch(path.name, file_pattern)
             )
             if file_matches and any(fnmatch.fnmatch(import_name, pattern) for pattern in name_patterns):
