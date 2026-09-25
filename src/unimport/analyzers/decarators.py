@@ -38,10 +38,16 @@ def is_skip_comment(source_segment: str) -> bool:
     return False
 
 
+_LINE_ENDING = re.compile(r"\r\n|\r|\n")
+
+
 def skip_import(func: T.FunctionT) -> T.FunctionT:
     @functools.wraps(func)
     def wrapper(self, node, *args, **kwargs):
-        source_segment = "\n".join(self.source.splitlines()[node.lineno - 1 : node.end_lineno])
+        # Split on line endings only, like the parser: str.splitlines() also splits on \f, \v, \x1c, ... which
+        # appear inside string literals and would shift line numbers.
+        lines = _LINE_ENDING.split(self.source)
+        source_segment = "\n".join(lines[node.lineno - 1 : node.end_lineno])
         skip_comment = is_skip_comment(source_segment)
         if not any((skip_comment, self.any_import_error)):
             func(self, node, *args, **kwargs)
