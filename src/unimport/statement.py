@@ -75,6 +75,8 @@ class Import:
     @classmethod
     def get_unused_imports(cls, *, include_star_import: bool = False) -> typing.Iterator[Import | ImportFrom]:
         for imp in reversed(Import.imports):
+            if isinstance(imp, ImportFrom) and imp.star and imp.package.startswith("."):
+                continue  # names of a relative module can't be resolved, so it can't be checked or removed
             if include_star_import and isinstance(imp, ImportFrom) and imp.star:
                 yield imp
             elif not imp.is_used():
