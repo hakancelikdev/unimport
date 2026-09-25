@@ -16,10 +16,12 @@ from unimport.statement import Name, Scope
 
 
 class ImportableNameAnalyzer(ast.NodeVisitor):
-    __slots__ = ("importable_nodes",)
+    __slots__ = ("importable_nodes", "is_dynamic")
 
     def __init__(self) -> None:
         self.importable_nodes: list[ast.Constant] = []  # nodes on the __all__ list
+        # Part of __all__ can't be read statically (``list(core.__all__)``, ``+ other``), so the nodes are incomplete.
+        self.is_dynamic = False
 
     def traverse(self, tree):
         self.visit(tree)
@@ -32,8 +34,11 @@ class ImportableNameAnalyzer(ast.NodeVisitor):
     @generic_visit
     def visit_AugAssign(self, node: ast.AugAssign) -> None:
         # __all__ += [...]
-        if getattr(node.target, "id", None) == "__all__" and isinstance(node.op, ast.Add):
-            self._add_items(node.value)
+        if getattr(node.target, "id", None) == "__all__":
+            if isinstance(node.op, ast.Add):
+                self._add_items(node.value)
+            else:
+                self.is_dynamic = True
 
     @generic_visit
     def visit_AnnAssign(self, node: ast.AnnAssign) -> None:
@@ -42,10 +47,14 @@ class ImportableNameAnalyzer(ast.NodeVisitor):
             self._add_items(node.value)
 
     def _add_items(self, value: ast.expr) -> None:
-        if isinstance(value, (ast.List, ast.Tuple, ast.Set)):
-            for item in value.elts:
-                if isinstance(item, ast.Constant) and isinstance(item.value, str):
-                    self.importable_nodes.append(item)
+        if not isinstance(value, (ast.List, ast.Tuple, ast.Set)):
+            self.is_dynamic = True
+            return
+        for item in value.elts:
+            if isinstance(item, ast.Constant) and isinstance(item.value, str):
+                self.importable_nodes.append(item)
+            else:
+                self.is_dynamic = True
 
     @generic_visit
     def visit_Expr(self, node: ast.Expr) -> None:
@@ -59,13 +68,14 @@ class ImportableNameAnalyzer(ast.NodeVisitor):
                 for arg in node.value.args:
                     if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
                         self.importable_nodes.append(arg)
+                    else:
+                        self.is_dynamic = True
 
             elif node.value.func.attr == "extend":
                 for arg in node.value.args:
-                    if isinstance(arg, ast.List):
-                        for item in arg.elts:
-                            if isinstance(item, ast.Constant) and isinstance(item.value, str):
-                                self.importable_nodes.append(item)
+                    self._add_items(arg)
+            else:
+                self.is_dynamic = True  # remove(), insert(), ...
 
 
 class SuggestionNameAnalyzer(ast.NodeVisitor):
