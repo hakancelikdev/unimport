@@ -192,11 +192,11 @@ class ImportAnalyzer(ast.NodeVisitor):
             else:
                 importable_name_analyzer = ImportableNameAnalyzer()
                 importable_name_analyzer.traverse(tree)
-                if importable_name_analyzer.importable_nodes:
-                    for node in importable_name_analyzer.importable_nodes:
-                        if isinstance(node.value, str):
-                            yield node.value
-                else:
+                for node in importable_name_analyzer.importable_nodes:
+                    if isinstance(node.value, str):
+                        yield node.value
+                # Without a fully static __all__, fall back to the names the module binds.
+                if not importable_name_analyzer.importable_nodes or importable_name_analyzer.is_dynamic:
                     suggestion_name_analyzer = SuggestionNameAnalyzer()
                     set_tree_parents(tree)
                     suggestion_name_analyzer.traverse(tree)

@@ -6,6 +6,7 @@ from unittest import mock
 import pytest
 
 from tests.utils import reopenable_temp_file
+from unimport import utils
 from unimport.config import Config
 from unimport.main import Main
 
@@ -288,3 +289,22 @@ def test_null_bytes_reported_as_syntax_error(tmp_path: Path, capsys):
     assert "null bytes" in capsys.readouterr().out
     assert main.is_syntax_error is True
     assert main.exit_code() == 1
+
+
+def test_star_import_suggestions_with_partly_dynamic_all(tmp_path: Path, monkeypatch):
+    (tmp_path / "partial_all_core.py").write_text('__all__ = ["alpha"]\nalpha = 1\n')
+    (tmp_path / "partial_all_lib.py").write_text(
+        "import partial_all_core\n"
+        "from partial_all_core import alpha\n\n"
+        "__all__ = list(partial_all_core.__all__)\n"
+        '__all__ += ["beta"]\n'
+        "beta = 2\n"
+    )
+    user = tmp_path / "user.py"
+    user.write_text("from partial_all_lib import *\n\nprint(alpha, beta)\n")
+    monkeypatch.syspath_prepend(str(tmp_path))
+    utils.get_spec.cache_clear()
+
+    Main.run(["--disable-auto-discovery-config", "--include-star-import", "--remove", user.as_posix()])
+
+    assert user.read_text() == "from partial_all_lib import alpha, beta\n\nprint(alpha, beta)\n"
