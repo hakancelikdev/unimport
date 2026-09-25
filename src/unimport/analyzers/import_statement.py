@@ -123,6 +123,20 @@ class ImportAnalyzer(ast.NodeVisitor):
                 names |= ImportAnalyzer._collect_import_names(node.orelse)
         return names
 
+    @staticmethod
+    def _collect_assigned_names(nodes: list[ast.stmt]) -> set[str]:
+        """Names assigned directly in a branch (``x = None``), following an ``elif`` chain."""
+        names: set[str] = set()
+        for node in nodes:
+            if isinstance(node, ast.Assign):
+                names.update(target.id for target in node.targets if isinstance(target, ast.Name))
+            elif isinstance(node, ast.AnnAssign) and node.value is not None and isinstance(node.target, ast.Name):
+                names.add(node.target.id)
+        if len(nodes) == 1 and isinstance(nodes[0], ast.If):  # elif
+            names |= ImportAnalyzer._collect_assigned_names(nodes[0].body)
+            names |= ImportAnalyzer._collect_assigned_names(nodes[0].orelse)
+        return names
+
     def visit_If(self, if_node: ast.If) -> None:
         if self._is_type_checking_block(if_node):
             self._in_type_checking = True
@@ -135,8 +149,13 @@ class ImportAnalyzer(ast.NodeVisitor):
 
         if_names = self._collect_import_names(if_node.body)
         orelse_names = self._collect_import_names(if_node.orelse, recursive=False)
+        # ``if ...: import tomllib`` / ``else: tomllib = None``: a fallback binding, not a reassignment.
+        if_assigned = self._collect_assigned_names(if_node.body)
+        orelse_assigned = self._collect_assigned_names(if_node.orelse)
 
-        self.if_dispatch_names.append(if_names & orelse_names)
+        self.if_dispatch_names.append(
+            (if_names & orelse_names) | (if_names & orelse_assigned) | (if_assigned & orelse_names)
+        )
         try:
             self.generic_visit(if_node)
         finally:
