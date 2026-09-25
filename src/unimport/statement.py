@@ -153,11 +153,15 @@ class Name:
             and not isinstance(getattr(node, "parent", None), ast.AugAssign)
         )
 
-    def _is_unconditional_assignment(self) -> bool:
-        """``x = ...`` / ``x: T = ...`` written directly in the body of its scope."""
+    def _statement(self) -> ast.stmt:
         statement = self.node
         while not isinstance(statement, ast.stmt):
             statement = statement.parent  # type: ignore
+        return statement
+
+    def _is_unconditional_assignment(self) -> bool:
+        """``x = ...`` / ``x: T = ...`` written directly in the body of its scope."""
+        statement = self._statement()
         if isinstance(statement, ast.AnnAssign) and statement.value is None:
             return False
         parent = getattr(statement, "parent", None)
@@ -168,6 +172,11 @@ class Name:
             and statement in parent.body
         )
 
+    def _ends_before(self, node: ast.AST) -> bool:
+        """The whole statement binding this name ends before ``node``; a multi-line ``x = f(x)`` still reads the old ``x``."""
+        statement = self._statement()
+        return (statement.end_lineno, statement.end_col_offset) <= (node.lineno, node.col_offset)  # type: ignore
+
     def _is_rebound(self, imp: Import | ImportFrom) -> bool:
         """The import is reassigned, unconditionally and in the same scope, between the import and this use."""
         scope = self.scope
@@ -176,7 +185,8 @@ class Name:
         return any(
             other.is_store
             and other.name == self.name
-            and imp.lineno < other.lineno < self.lineno
+            and imp.lineno < other.lineno
+            and other._ends_before(self.node)
             and other.scope == scope
             and other._is_unconditional_assignment()
             for other in Name.names
@@ -429,11 +439,11 @@ def _collect_local_bindings(function: ast.FunctionDef | ast.AsyncFunctionDef) ->
             continue
         if isinstance(node, (ast.Global, ast.Nonlocal)):
             declared.update(node.names)
-        elif isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
-            if not isinstance(
-                getattr(node, "parent", None), ast.comprehension
-            ):  # comprehension variables are local to it
-                names.add(node.id)
+        if isinstance(node, ast.comprehension):
+            nodes.extend([node.iter, *node.ifs])  # its targets are local to the comprehension
+            continue
+        if isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
+            names.add(node.id)
         elif isinstance(node, (ast.Import, ast.ImportFrom)):
             names.update((alias.asname or alias.name).split(".")[0] for alias in node.names if alias.name != "*")
         elif isinstance(node, ast.ExceptHandler) and node.name:
