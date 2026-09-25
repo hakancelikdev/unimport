@@ -155,20 +155,31 @@ class Name:
             and not isinstance(getattr(node, "parent", None), ast.AugAssign)
         )
 
-    def _statement(self) -> ast.stmt:
+    def _statement(self) -> ast.stmt | None:
         statement = self.node
         while not isinstance(statement, ast.stmt):
-            statement = statement.parent  # type: ignore
+            statement = getattr(statement, "parent", None)  # type: ignore
+            if statement is None:  # e.g. parsed from a type comment
+                return None
         return statement
 
     def _is_unconditional_assignment(self) -> bool:
-        """``x = ...`` / ``x: T = ...`` written directly in the body of its scope."""
+        """``x = ...`` / ``x: T = ...`` written directly in the body of its scope, with this name as a target."""
         statement = self._statement()
-        if isinstance(statement, ast.AnnAssign) and statement.value is None:
+        if statement is None or (isinstance(statement, ast.AnnAssign) and statement.value is None):
             return False
+        # A target of the statement itself, possibly unpacked; not a comprehension variable or a walrus in a lambda.
+        target: ast.AST = self.node
+        while isinstance(getattr(target, "parent", None), (ast.Tuple, ast.List, ast.Starred)):
+            target = target.parent  # type: ignore
+        if isinstance(statement, ast.Assign):
+            is_target = any(target is node for node in statement.targets)
+        else:
+            is_target = target is getattr(statement, "target", None)
         parent = getattr(statement, "parent", None)
         return (
-            isinstance(statement, (ast.Assign, ast.AnnAssign))
+            is_target
+            and isinstance(statement, (ast.Assign, ast.AnnAssign))
             # Directly in a module, function or class body; not inside if/for/while/try/with/match.
             and isinstance(parent, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
             and statement in parent.body
@@ -177,6 +188,8 @@ class Name:
     def _ends_before(self, node: ast.AST) -> bool:
         """The whole statement binding this name ends before ``node``; a multi-line ``x = f(x)`` still reads the old ``x``."""
         statement = self._statement()
+        if statement is None:
+            return False
         return (statement.end_lineno, statement.end_col_offset) <= (node.lineno, node.col_offset)  # type: ignore
 
     def _is_rebound(self, imp: Import | ImportFrom) -> bool:
@@ -200,12 +213,13 @@ class Name:
         imp_scope = imp.scope
         scope = self.scope
         while scope is not None and scope != imp_scope:
-            if (
-                isinstance(scope.node, (ast.FunctionDef, ast.AsyncFunctionDef))
-                and _is_in_body(self.node, scope.node)
-                and name in _local_bindings(scope.node)
-            ):
-                return True
+            node = scope.node
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and _is_in_body(self.node, node):
+                local_names, global_names = _declarations(node)
+                if name in global_names:
+                    return False  # ``global name``: the use refers to the module-level binding from here on
+                if not isinstance(node, ast.ClassDef) and name in local_names:
+                    return True  # class bodies are not enclosing scopes for the functions in them
             scope = scope.parent
         return False
 
@@ -390,7 +404,7 @@ _MATCH_CAPTURE_NODES = tuple(getattr(ast, name) for name in ("MatchAs", "MatchSt
 _MATCH_MAPPING_NODES = tuple(getattr(ast, name) for name in ("MatchMapping",) if hasattr(ast, name))
 
 
-def _is_in_body(node: ast.AST, function: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
+def _is_in_body(node: ast.AST, function: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef) -> bool:
     """Whether node is in the function body.
 
     Defaults, decorators and annotations are evaluated in the enclosing
@@ -403,34 +417,41 @@ def _is_in_body(node: ast.AST, function: ast.FunctionDef | ast.AsyncFunctionDef)
     return parent is function and child in function.body
 
 
-def _local_bindings(function: ast.FunctionDef | ast.AsyncFunctionDef) -> frozenset[str]:
-    cached = getattr(function, "_unimport_local_bindings", None)
+def _declarations(
+    scope: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef,
+) -> tuple[frozenset[str], frozenset[str]]:
+    cached = getattr(scope, "_unimport_declarations", None)
     if cached is None:
-        cached = function._unimport_local_bindings = _collect_local_bindings(function)  # type: ignore[union-attr]
+        cached = scope._unimport_declarations = _collect_declarations(scope)  # type: ignore[union-attr]
     return cached
 
 
-def _collect_local_bindings(function: ast.FunctionDef | ast.AsyncFunctionDef) -> frozenset[str]:
-    """Names that are local to a function.
+def _collect_declarations(
+    scope: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef,
+) -> tuple[frozenset[str], frozenset[str]]:
+    """Names local to a function or class body, and names it declares ``global``.
 
-    Python makes a name local to a function when it is bound anywhere in
-    the function body (assignment, ``for``/``with``/``except`` target,
-    ``del``, import, nested ``def``/``class``, ``match`` capture) or is
-    a parameter, unless it is declared ``global`` or ``nonlocal``.
+    Python makes a name local when it is bound anywhere in the body
+    (assignment, ``for``/``with``/``except`` target, ``del``, import,
+    nested ``def``/``class``, ``match`` capture) or is a parameter,
+    unless it is declared ``global`` or ``nonlocal``.
     """
-    arguments = function.args
-    names = {
-        arg.arg
-        for arg in [
-            *arguments.posonlyargs,
-            *arguments.args,
-            *arguments.kwonlyargs,
-            *filter(None, [arguments.vararg, arguments.kwarg]),
-        ]
-    }
+    names: set[str] = set()
+    if not isinstance(scope, ast.ClassDef):
+        arguments = scope.args
+        names.update(
+            arg.arg
+            for arg in [
+                *arguments.posonlyargs,
+                *arguments.args,
+                *arguments.kwonlyargs,
+                *filter(None, [arguments.vararg, arguments.kwarg]),
+            ]
+        )
     declared: set[str] = set()
+    global_names: set[str] = set()
 
-    nodes: list[ast.AST] = list(function.body)
+    nodes: list[ast.AST] = list(scope.body)
     while nodes:
         node = nodes.pop()
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
@@ -441,6 +462,8 @@ def _collect_local_bindings(function: ast.FunctionDef | ast.AsyncFunctionDef) ->
             continue
         if isinstance(node, (ast.Global, ast.Nonlocal)):
             declared.update(node.names)
+            if isinstance(node, ast.Global):
+                global_names.update(node.names)
         if isinstance(node, ast.comprehension):
             nodes.extend([node.iter, *node.ifs])  # its targets are local to the comprehension
             continue
@@ -456,4 +479,4 @@ def _collect_local_bindings(function: ast.FunctionDef | ast.AsyncFunctionDef) ->
             names.add(node.rest)  # type: ignore[attr-defined]
         nodes.extend(ast.iter_child_nodes(node))
 
-    return frozenset(names - declared)
+    return frozenset(names - declared), frozenset(global_names)
