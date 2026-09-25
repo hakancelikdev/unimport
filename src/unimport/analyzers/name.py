@@ -11,6 +11,11 @@ from unimport.statement import Name, Scope
 
 __all__ = ("NameAnalyzer",)
 
+_TYPE_VAR_FACTORIES = frozenset({"TypeVar", "ParamSpec", "TypeVarTuple"})
+# PEP 695 nodes exist from Python 3.12.
+_TYPE_ALIAS = tuple(getattr(ast, name) for name in ("TypeAlias",) if hasattr(ast, name))
+_TYPE_PARAMS = tuple(getattr(ast, name) for name in ("TypeVar", "ParamSpec", "TypeVarTuple") if hasattr(ast, name))
+
 
 class NameAnalyzer(ast.NodeVisitor):
     def visit_ClassDef(self, node) -> None:
@@ -88,10 +93,22 @@ class NameAnalyzer(ast.NodeVisitor):
                 return child is parent.value and cls._is_type_alias_annotation(parent.annotation)
             elif isinstance(parent, C.AST_FUNCTION_TUPLE):
                 return child is parent.returns
+            elif isinstance(parent, _TYPE_ALIAS):  # type X = "Y" (PEP 695)
+                return child is parent.value  # type: ignore[attr-defined]
+            elif isinstance(parent, _TYPE_PARAMS):  # def f[T: "Y" = "Z"]() (PEP 695 / 696)
+                return child is getattr(parent, "bound", None) or child is getattr(parent, "default_value", None)
             elif isinstance(parent, (ast.stmt, ast.Lambda)):
                 return False
             child = parent
         return False
+
+    @staticmethod
+    def _call_name(node: ast.Call) -> str | None:
+        if isinstance(node.func, ast.Name):
+            return node.func.id
+        if isinstance(node.func, ast.Attribute):
+            return node.func.attr
+        return None
 
     @staticmethod
     def _is_type_alias_annotation(annotation: ast.expr) -> bool:
@@ -138,8 +155,13 @@ class NameAnalyzer(ast.NodeVisitor):
             else:
                 _slice = node.slice.value  # type: ignore
 
+            name = self._subscript_name(node)
+            if name == "Literal":  # Literal["os"] holds values, not types
+                return
             if isinstance(_slice, ast.Tuple):  # type: ignore
-                for elt in _slice.elts:  # type: ignore
+                # Annotated[T, "metadata", ...]: only the first element is a type.
+                elts = _slice.elts[:1] if name == "Annotated" else _slice.elts  # type: ignore
+                for elt in elts:
                     if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
                         self.join_visit(elt.value, elt)
             else:
@@ -160,11 +182,12 @@ class NameAnalyzer(ast.NodeVisitor):
         ):
             if isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str):
                 self.join_visit(node.args[0].value, node.args[0])
-        elif (isinstance(node.func, ast.Name) and node.func.id == "TypeVar") or (
-            isinstance(node.func, ast.Attribute) and node.func.attr == "TypeVar"
-        ):
-            # TypeVar("T", "A", "B", bound="C"): constraints and bound are types, the first argument is the name.
-            for arg in [*node.args[1:], *(keyword.value for keyword in node.keywords if keyword.arg == "bound")]:
+        elif (factory := self._call_name(node)) in _TYPE_VAR_FACTORIES:
+            # TypeVar("T", "A", "B", bound="C", default="D"): constraints, bound and default (PEP 696) are types;
+            # the first argument is the name. ParamSpec and TypeVarTuple only take a default.
+            constraints = node.args[1:] if factory == "TypeVar" else []
+            keywords = [keyword.value for keyword in node.keywords if keyword.arg in ("bound", "default")]
+            for arg in [*constraints, *keywords]:
                 if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
                     self.join_visit(arg.value, arg)
 
