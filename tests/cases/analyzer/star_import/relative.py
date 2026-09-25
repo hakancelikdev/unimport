@@ -17,7 +17,5 @@ IMPORTS: list[Union[Import, ImportFrom]] = [
     ImportFrom(lineno=4, column=1, name=".models", package=".models", star=True, suggestions=[]),
 ]
 UNUSED_IMPORTS: list[Union[Import, ImportFrom]] = [
-    ImportFrom(lineno=4, column=1, name=".models", package=".models", star=True, suggestions=[]),
     ImportFrom(lineno=2, column=2, name="unused", package="..", star=False, suggestions=[]),
-    ImportFrom(lineno=1, column=1, name=".", package=".", star=True, suggestions=[]),
 ]

@@ -40,8 +40,8 @@ All notable changes to this project will be documented in this file.
   reported or removed [#333](https://github.com/hakancelikdev/unimport/issues/333)
 - `from . import *` and `from . import x` no longer report the package as `.None`, and
   refactoring with `--include-star-import` no longer crashes on `from . import *`;
-  relative star imports are left unchanged since their names can't be resolved
-  [#334](https://github.com/hakancelikdev/unimport/issues/334)
+  relative star imports are neither reported nor changed since their names can't be
+  resolved [#334](https://github.com/hakancelikdev/unimport/issues/334)
 - Unused imports are no longer missed when the name is reassigned before use in the same
   scope, or bound locally in the function that uses it (parameter, assignment, loop
   target, import, …). Assignment targets no longer count as uses
