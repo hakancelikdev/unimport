@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [1.5.0] - 2026-10-02
 
 ### Added
 
@@ -62,6 +62,14 @@ All notable changes to this project will be documented in this file.
   permission errors) are reported and make the exit code 1, instead of being skipped
   silently or crashing the whole run
   [#340](https://github.com/hakancelikdev/unimport/issues/340)
+- Files containing null bytes are reported as syntax errors instead of crashing the run
+  on Python 3.9–3.11
+- A `# noqa` comment is found on the right line when a string literal earlier in the
+  file contains a form feed or another character that `str.splitlines()` treats as a
+  line break
+- String forward references in PEP 695/696 positions (`type X = "Y"`, type parameter
+  bounds and defaults) and in `TypeVar`/`ParamSpec`/`TypeVarTuple` `default=` are
+  resolved; `Literal[...]` values and `Annotated[...]` metadata no longer count as uses
 
 ## [1.4.0] - 2026-06-02
 

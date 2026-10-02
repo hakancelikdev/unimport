@@ -2,7 +2,7 @@
 
 [build-system]
 requires = [
-    "setuptools>=45",
+    "setuptools>=77",
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
@@ -14,14 +14,14 @@ name = "unimport"
 dynamic = ["version"]
 description = "The ultimate linter and formatter for removing unused import statements in your code."
 readme = "README.md"
-license = {text = "MIT"}
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
     {name = "Hakan Çelik", email = "hakancelikdev@gmail.com"}
 ]
 keywords = ["unused", "import"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
